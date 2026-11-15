@@ -1,0 +1,29 @@
+{
+  "id": "rs-cg6-callouts",
+  "type": "restyle",
+  "category": "org-chart",
+  "deck": {
+    "path": "repos/apache-poi/test-data/slideshow/customGeo.pptx",
+    "sha256": "9baa7f4554cbaddfcebcc431432268ea34f20c02787172bb0a7d12d640e7e84f",
+    "licence": "Apache-2.0 (Apache POI test data)"
+  },
+  "slide": "/ppt/slides/slide6.xml",
+  "instruction": "Fill the three blue callout bubbles with accent 2.",
+  "targets": [
+    "s19",
+    "s20",
+    "s23"
+  ],
+  "checks": [
+    {
+      "type": "fill",
+      "targets": [
+        "s19",
+        "s20",
+        "s23"
+      ],
+      "scheme": "accent2"
+    }
+  ],
+  "max_new": 0
+}

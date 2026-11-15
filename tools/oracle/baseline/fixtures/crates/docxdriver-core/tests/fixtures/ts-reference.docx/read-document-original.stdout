@@ -1,0 +1,64 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "comments": [
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "at": "2F9E9269",
+              "end": 16,
+              "occurrence": 1,
+              "select": "Second paragraph",
+              "start": 0
+            }
+          ]
+        },
+        "durableId": "B5DA4467",
+        "id": "0",
+        "replies": [],
+        "root": {
+          "author": "Rev",
+          "date": "2026-07-05T02:35:50.205Z",
+          "paraId": "00000000",
+          "text": "Check this"
+        },
+        "status": "open"
+      }
+    ],
+    "content_type": "text/html",
+    "idRepairsNeeded": 2,
+    "kind": "document",
+    "markup": "<section data-docx-section=\"1\">\n<p id=\"22234853\">Hello world</p>\n<p id=\"2F9E9269\">Second paragraph</p>\n</section>",
+    "projection_version": 4,
+    "sections": [
+      {
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "implicit": true,
+        "index": 1,
+        "paragraph_end": 2,
+        "paragraph_start": 0
+      }
+    ],
+    "selection_space": {
+      "offset_unit": "unicode_scalar",
+      "view": "final"
+    },
+    "selections": {
+      "paragraphs": [
+        {
+          "at": "22234853",
+          "selectable_text": " brave world"
+        }
+      ]
+    },
+    "source": "sha256:b14bd56270fc3f86fb7e236b29dedfc6b8ceac5b972408d4085d1cc0207461b1",
+    "styles": {},
+    "tables": [],
+    "view": "original"
+  },
+  "source": "sha256:b14bd56270fc3f86fb7e236b29dedfc6b8ceac5b972408d4085d1cc0207461b1"
+}

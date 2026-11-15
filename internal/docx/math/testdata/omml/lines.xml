@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Line-break cases: the OMML bodies of the repro documents of the documentdriver
+     equation line-break investigation (eqnl/mk.py), plus whitespace in m:t. -->
+<doc xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<!-- multi_omath.docx -->
+<m:oMathPara><m:oMath><m:r><m:t>a=b</m:t></m:r></m:oMath><m:oMath><m:r><m:t>c=d</m:t></m:r></m:oMath></m:oMathPara>
+<!-- wbr_in_math.docx -->
+<m:oMathPara><m:oMath><m:r><m:t>a=b</m:t><w:br/><m:t>c=d</m:t></m:r></m:oMath></m:oMathPara>
+<!-- mbrk.docx -->
+<m:oMathPara><m:oMath><m:r><m:t>a</m:t></m:r><m:r><m:rPr><m:brk m:alnAt="1"/></m:rPr><m:t>=b+c</m:t></m:r><m:r><m:rPr><m:brk/></m:rPr><m:t>=d</m:t></m:r></m:oMath></m:oMathPara>
+<!-- eqarr.docx -->
+<m:oMathPara><m:oMath><m:eqArr><m:e><m:r><m:t>a&amp;=b</m:t></m:r></m:e><m:e><m:r><m:t>c&amp;=d</m:t></m:r></m:e></m:eqArr></m:oMath></m:oMathPara>
+<!-- wt_in_math.docx -->
+<m:oMath><m:r><w:t>z</w:t></m:r></m:oMath>
+<!-- two_paras_one_p.docx -->
+<m:oMathPara><m:oMath><m:r><m:t>a</m:t></m:r></m:oMath></m:oMathPara><m:oMathPara><m:oMath><m:r><m:t>b</m:t></m:r></m:oMath></m:oMathPara>
+<!-- whitespace in m:t: tab, LF, CR, spaces -->
+<m:oMath><m:r><m:t xml:space="preserve">a	b
+c&#13;d  e </m:t></m:r></m:oMath>
+</doc>

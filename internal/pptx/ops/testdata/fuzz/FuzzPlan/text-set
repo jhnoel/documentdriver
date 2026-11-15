@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"slide\": \"slide1\", \"operations\": [{\"op\": \"text.set\", \"target\": \"s2\", \"html\": \"<p style=\\\"text-align:center\\\"><b>A</b>PI</p>\"}]}")

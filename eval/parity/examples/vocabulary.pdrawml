@@ -1,0 +1,16 @@
+<document>
+  <!-- every positioned element and option pdraw has that the upstream examples do not use -->
+  <slide size="letter" orientation="portrait">
+    <rect id="outer" x="72" y="100" width="300" height="220" dashed="true"><text valign="bottom" align="start" bold="true">Container 100</text></rect>
+    <rect id="inner" x="108" y="130" width="110" height="60"><text bold="true">Inner 102</text></rect>
+    <ellipse id="cloud" x="250" y="130" width="90" height="60"><text>Cloud 104</text></ellipse>
+    <rect id="below" x="108" y="230" width="110" height="50" dashed="true"><text valign="top">Below 106</text></rect>
+    <connector id="down" from="#inner:bottom" to="#below:top" route="straight" start-arrow="triangle" end-arrow="triangle"/>
+    <connector id="across" from="#inner:right" to="#cloud:left" route="elbow" end-arrow="triangle"/>
+    <connector id="bend" from="#cloud:bottom" to="#below:right" route="elbow" start-arrow="triangle"/>
+    <polyline id="leader" points="400,120 440,120 440,200 480,200" start-arrow="triangle" end-arrow="triangle"/>
+    <polyline id="plain" points="400,260 480,260"/>
+    <text id="note" x="400" y="320" bold="true">Note 108</text>
+    <text id="cap" x="306" y="700" align="center" bold="true">FIG. 3</text>
+  </slide>
+</document>

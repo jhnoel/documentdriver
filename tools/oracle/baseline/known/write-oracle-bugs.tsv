@@ -1,0 +1,89 @@
+# docxdriver 0.5.2 bugs found recording the write baseline (2026-11-13, oracle 1ffb0d7). Reproduce a case with
+# `go run ./tools/oracle write show -plan <case> -ops <op>` (outputs under results/oracle/write-show/). The Go side
+# fixes them; the entries below make compare count those cases as intended, never as expected Go behaviour.
+# "track vs direct": the oracle breaks its own change-mode law for an Exact op (direct, accepted == track, accepted).
+#
+# W1 comment_set_status on a document without commentsIds/commentsExtensible parts adds their relationships and
+#    content-type overrides but not the parts; its own gate refuses: "[Content_Types].xml: integrity: content type
+#    Override names a missing part; ... relationship commentsIds targets a missing part". The op cannot succeed there.
+# W2 comment_reply on tdf153804, tdf153526_commentInNumbering and the dirty fixtures: the reply has no range or
+#    reference and its paraIdParent names nothing; gate: "w:comment has no commentReference; commentEx paraIdParent
+#    names no commentEx".
+# W3 direct replace_text / revise_text (and text.insert's equivalent) drop the replaced text's run properties; track
+#    keeps them. write:mixed bold "gamma" -> "gamma INSERTED": track+accept <b>gamma INSERTED</b>, direct plain.
+#    tdf163894_from_top (24pt paragraph): direct writes REPLACED at 12pt, track at 24pt.
+# W4 replace_paragraph: track gives the new text the first replaced run's properties, direct none
+#    (tdf123054 table cell: track+accept <b>Cell text</b>, direct Cell text).
+# W5 replace_paragraph keeps an equation its HTML leaves out, after the new text in track and before it in direct
+#    (write:mixed 1000000A). The contract (section 7) refuses the omission unless `delete` lists the equation.
+# W6 B8 (README item 10): breaks count as no characters; direct replace_text across a w:br deletes it, track keeps it
+#    (write:mixed 1000000C select "oneline": track+accept "Line X<br> two", direct "Line X two").
+# W7 revision_settle panics on rich-bare-text.docx (segments.rs:80), as read item 1: see write-engine.tsv.
+# W8 read --kind comments lists "ranges":[] for a comment crossing paragraphs (write:mixed comment 1) while the
+#    document read lists both ranges; affects both sides' comments projections equally, so no entry here.
+# W9 through TOML, an unknown or missing field in ops[1] is reported at ops[0].<field> (parse_plan_toml hard-codes
+#    index 0) and other decode errors at "ops".
+# W10 an op that needs a malformed part reports it under the wrong name and code: set_list on malformed.docx (its
+#    numbering.xml is not well-formed) fails with "document.xml parse failed" (operation_failed); the contract
+#    refuses at that op with unreadable_target (section 10).
+# W11 delete_paragraphs on a paragraph holding the plan author's own pending insertion nests a w:del inside that
+#    w:ins instead of removing it (Word removes your own pending insertion when you delete it); direct mode then
+#    accepts the w:del and leaves an empty w:ins pending. write:mixed 10000004 ("Own pending: " + Oracle's w:ins
+#    "my insertion" + " then a tail."), direct: docxdriver's read --kind revisions lists {kind ins, text "",
+#    locator p4:0-0} and the document read lists 10000005 among the selections; Go removes the insertion, so the
+#    revision and the selection entry are gone. Track: docxdriver's w:ins holds a w:del, Go has no w:ins.
+# W12 delete_paragraphs wraps only runs, hyperlinks, smart tags and bidi wrappers, so a paragraph-level equation (and
+#    a field or custom XML wrapper's runs) stays live and joins the next paragraph. write:mixed, direct, at
+#    ["1000000A"] ("Inline math " m:oMath x^2 " between words."): docxdriver's output has 5 m:oMath as the input, the
+#    x^2 now first in 1000000B; Go's has 4. No recorded case deletes such a paragraph, so no entry below.
+# W13 comment_add anchors at the paragraph's children (anchor_comment_at, paragraph_child_anchor), so a selection inside
+#    a hyperlink or a revision wrapper widens to the whole wrapper. write:mixed 10000004 select "insertion" inside the
+#    w:ins "my insertion": docxdriver's comments read gives locator p4:13-25 ("my insertion"), Go's p4:16-25
+#    ("insertion"), its markers inside the w:ins (CT_RunTrackChange is now tabulated, P4 2026-11-13).
+# Not bugs: new paragraph ids derive from the canonical plan, which includes change_mode, so inserted paragraphs get
+# different ids in track and direct mode; repaired_ids order in reports changes per run (P4c).
+#
+# plan id	mode	field	reason
+comment_set_status/positive/write:mixed/*	*	*	W1: docxdriver's set_status references comment parts it does not write and refuses itself
+comment_set_status/*/fixtures:test-docs.test_comments2/*	*	*	W1
+comment_set_status/*/fixtures:crates.docxdriver-core.tests.fixtures.ts-reference/*	*	*	W1
+comment_set_status/*/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/*	*	*	W1
+comment_set_status/*/write:dirty/*	*	*	W1
+comment_reply/*/corpus-lo:ooxmlexport.tdf153804/reply	*	*	W2: docxdriver's reply is unanchored and refused by its own gate
+comment_reply/*/corpus-lo:ooxmlexport.tdf153526_commentInNumbering/reply	*	*	W2
+comment_reply/*/write:dirty/reply	*	*	W2
+comment_reply/*/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/reply	*	*	W2
+replace_text/positive/write:mixed/b8-a-selection-across-a-line-break-docxdriver-counts-the-bre	*	*	W6 (B8): Go counts the break as \n, so the selection does not match
+replace_text/positive/write:mixed/b8-a-selection-across-an-inline-equation	*	*	W6 (B8): Go counts the equation as U+FFFC
+replace_paragraph/*/write:mixed/equation-*	*	*	W5: docxdriver keeps an omitted equation; the contract needs `delete`
+replace_paragraph/negative/write:mixed/equation-left-out-without-delete	*	*	W5
+replace_text/dirty/corpus-lo:ooxmlexport.tdf131203/unique-word	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/dirty/corpus-lo:ooxmlexport.tdf57589_hashColor/second-occurrence	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/dirty/corpus-lo:ooxmlexport.tdf57589_hashColor/unique-word	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/dirty/corpus-lo:ooxmlexport.tdf92157/second-occurrence	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/dirty/corpus-lo:ooxmlexport.tdf92157/unique-word	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/dirty/corpus-lo:ooxmlexport.tdf97090/unique-word	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/positive/corpus-lo:ooxmlexport.tableCurrupt/unique-word	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/positive/corpus-lo:ooxmlexport.tdf123054/second-occurrence	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/positive/corpus-lo:ooxmlexport.tdf123054/unique-word	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/positive/corpus-lo:ooxmlexport.tdf159032/unique-word	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/positive/corpus-lo:ooxmlexport.tdf163894_from_top/second-occurrence	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_text/positive/corpus-lo:ooxmlexport.tdf163894_from_top/unique-word	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/dirty/corpus-lo:ooxmlexport.tdf131203/two-edits-in-one-paragraph	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/dirty/corpus-lo:ooxmlexport.tdf57589_hashColor/body-scope-replace-all	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/dirty/corpus-lo:ooxmlexport.tdf57589_hashColor/two-edits-in-one-paragraph	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/dirty/corpus-lo:ooxmlexport.tdf92157/two-edits-in-one-paragraph	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/dirty/corpus-lo:ooxmlexport.tdf97090/body-scope-replace-all	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/dirty/corpus-lo:ooxmlexport.tdf97090/two-edits-in-one-paragraph	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/positive/corpus-lo:ooxmlexport.tableCurrupt/body-scope-replace-all	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/positive/corpus-lo:ooxmlexport.tableCurrupt/two-edits-in-one-paragraph	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/positive/corpus-lo:ooxmlexport.tdf163894_from_top/two-edits-in-one-paragraph	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+revise_text/positive/corpus-lo:ooxmlexport.tdf32363/body-scope-replace-all	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+text.insert/positive/write:mixed/after-a-word	direct	proj:*	W3: docxdriver direct replacement drops the replaced run properties (track keeps them)
+replace_paragraph/dirty/corpus-lo:ooxmlexport.tdf57589_hashColor/in-a-table-cell	direct	proj:*	W4: docxdriver direct replace_paragraph drops the first run properties (track keeps them)
+replace_paragraph/dirty/corpus-lo:ooxmlexport.tdf97090/in-a-table-cell	direct	proj:*	W4: docxdriver direct replace_paragraph drops the first run properties (track keeps them)
+replace_paragraph/positive/corpus-lo:ooxmlexport.tdf123054/in-a-table-cell	direct	proj:*	W4: docxdriver direct replace_paragraph drops the first run properties (track keeps them)
+replace_paragraph/positive/corpus-lo:ooxmlexport.tdf159032/in-a-table-cell	direct	proj:*	W4: docxdriver direct replace_paragraph drops the first run properties (track keeps them)
+set_list/*/write:malformed/*	*	code	W10: the op's own target (numbering.xml) is malformed: unreadable_target; docxdriver says operation_failed naming document.xml
+delete_paragraphs/positive/write:mixed/own-inserted-text-paragraph	*	proj:*	W11: docxdriver nests a deletion in the author's own pending insertion and leaves it empty and pending in direct mode; Go removes it
+comment_add/positive/write:mixed/in-an-own-insertion	*	proj:*	W13: docxdriver widens the comment to the whole w:ins; Go anchors exactly the selection inside it

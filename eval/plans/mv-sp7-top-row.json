@@ -1,0 +1,6 @@
+{"units": "emu", "ops": [
+  {"op": "object.move", "at": "slide7/s71", "dx": 0, "dy": -3682},
+  {"op": "object.move", "at": "slide7/s58", "dx": 0, "dy": -44898},
+  {"op": "object.set", "at": "slide7/s72", "to": [3843949, 1050856]},
+  {"op": "object.set", "at": "slide7/s66", "from": [4923949, 1050856]}
+]}

@@ -1,0 +1,29 @@
+{
+  "id": "in-ow-webhooks",
+  "type": "insert",
+  "category": "architecture",
+  "deck": {
+    "path": "web/openwhisk-architecture.pptx",
+    "sha256": "ec2fcddd611d85061cf3028ca6f87c047e4fd05b77cdceb778ea87636f1e96b5",
+    "licence": "Apache-2.0"
+  },
+  "slide": "/ppt/slides/slide1.xml",
+  "instruction": "Add a fifth event source: a box labelled 'Webhooks' below the bottom antenna, joined to the central box by an elbow connector glued to the box and to the central box's left side, like the other four sources.",
+  "max_new": 4,
+  "checks": [
+    {
+      "type": "new_shape",
+      "text": "Webhooks",
+      "alias": "w"
+    },
+    {
+      "type": "connector",
+      "from": "$w",
+      "to": "s216",
+      "to_side": "left",
+      "geoms": [
+        "bentConnector*"
+      ]
+    }
+  ]
+}

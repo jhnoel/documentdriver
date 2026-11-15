@@ -1,0 +1,7 @@
+{"ops": [
+  {"op": "object.set", "at": "slide33/s45", "fill": {"scheme": "accent4"}},
+  {"op": "object.set", "at": "slide33/s46", "fill": {"scheme": "accent4"}},
+  {"op": "object.set", "at": "slide33/s51", "fill": {"scheme": "accent4"}},
+  {"op": "object.set", "at": "slide33/s52", "fill": {"scheme": "accent4"}},
+  {"op": "object.set", "at": "slide33/s53", "fill": {"scheme": "accent4"}}
+]}

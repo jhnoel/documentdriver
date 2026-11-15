@@ -1,0 +1,5 @@
+{"ops": [
+  {"op": "object.add", "at": "slide7", "as": "tm", "kind": "shape", "name": "Twin model", "geom": "rect", "box": [163.45, 219.92, 55, 22], "fill": {"scheme": "bg1"}, "line": {"w": 1.5, "color": {"scheme": "tx1"}, "dash": "solid", "cap": "flat"}, "html": "<p style=\"text-align:center\"><span style=\"font-size:10pt\">Twin model</span></p>"},
+  {"op": "object.set", "at": "slide7/s7", "geom": "straightConnector1", "from_glue": "$tm:3", "from": [218.45, 230.92]},
+  {"op": "object.add", "at": "slide7", "as": "up", "kind": "connector", "name": "Digital twin to Twin model", "geom": "straightConnector1", "from": [190.95, 197.48], "to": [190.95, 219.92], "from_glue": "s3:2", "to_glue": "$tm:0", "line": {"w": 0.75, "color": {"scheme": "dk1", "mods": [{"shade": 95000}, {"satMod": 105000}]}, "dash": "solid", "cap": "flat"}}
+]}

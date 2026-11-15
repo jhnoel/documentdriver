@@ -1,0 +1,5 @@
+go test fuzz v1
+string("'S:':S!A")
+byte('Å')
+uint16(102)
+byte('\u0081')

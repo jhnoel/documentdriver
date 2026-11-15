@@ -1,0 +1,110 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "bookmarks": [
+      {
+        "end": "660FA680",
+        "hidden": false,
+        "id": "0",
+        "name": "HEADING_NOTICE_OF_PRE_AIA_OR_AIA_STATUS_",
+        "part": "word/document.xml",
+        "start": "521EA745",
+        "text": "DETAILED ACTION\nThe current office action is in response to the communication filed on 3/7/24.\nThe applicant amended claims 1-14 in the Preliminary Amendment received on 3/7/24.\nClaims 1-14 are pendin…"
+      },
+      {
+        "end": "521EA745",
+        "hidden": false,
+        "id": "1",
+        "name": "heading_general_oa_heading",
+        "part": "word/document.xml",
+        "start": "521EA745",
+        "text": ""
+      },
+      {
+        "end": "794765AE",
+        "hidden": true,
+        "id": "2",
+        "name": "_Hlk96936099",
+        "part": "word/document.xml",
+        "start": "794765AE",
+        "text": "The Examiner recommends filing a written authorization for Internet communication in response to the present action. Doing so permits the USPTO to communicate with Applicant using Internet email to sc…"
+      },
+      {
+        "end": "794765AE",
+        "hidden": true,
+        "id": "3",
+        "name": "_Hlk156901639",
+        "part": "word/document.xml",
+        "start": "794765AE",
+        "text": "Examiner recommends filing a written authorization for Internet communication in response to the present action. Doing so permits the USPTO to communicate with Applicant using Internet email to schedu…"
+      },
+      {
+        "end": "56B48567",
+        "hidden": false,
+        "id": "4",
+        "name": "FP_07_03_AIA",
+        "part": "word/document.xml",
+        "start": "660FA680",
+        "text": "The present application, filed on or after March 16, 2013, is being examined under the first inventor to file provisions of the AIA.\nPaper Submitted\nIt is hereby acknowledged that the following papers…"
+      },
+      {
+        "end": "19F3A521",
+        "hidden": false,
+        "id": "5",
+        "name": "FP_07_43_03",
+        "part": "word/document.xml",
+        "start": "0DA878D9",
+        "text": "would be allowable if the Objections to the Title, Objections to the Specification and Claim Objections listed in the paragraph(s) below are corrected.\nAs allowable subject matter has been indicated, …"
+      },
+      {
+        "end": "0CBD9616",
+        "hidden": false,
+        "id": "6",
+        "name": "prev_fp_insert_point",
+        "part": "word/document.xml",
+        "start": "0CBD9616",
+        "text": ""
+      },
+      {
+        "end": "4D6D43B5",
+        "hidden": false,
+        "id": "7",
+        "name": "FP_07_34_07",
+        "part": "word/document.xml",
+        "start": "0CBD9616",
+        "text": "replete with antecedent basis, grammatical and idiomatic errors. The examiner suggests the following amendments to claims 1-14 in order to place the application in condition for allowance:\nReplace all…"
+      },
+      {
+        "end": "4D6D43B5",
+        "hidden": true,
+        "id": "8",
+        "name": "_Hlk178842033",
+        "part": "word/document.xml",
+        "start": "4D6D43B5",
+        "text": ""
+      },
+      {
+        "end": "4D6D43B5",
+        "hidden": false,
+        "id": "9",
+        "name": "FP_CFP618725",
+        "part": "word/document.xml",
+        "start": "4D6D43B5",
+        "text": ""
+      },
+      {
+        "end": "7AE9EB8F",
+        "hidden": false,
+        "id": "10",
+        "name": "FP_OACSCLOSE",
+        "part": "word/document.xml",
+        "start": "56B48567",
+        "text": "Any inquiry concerning this communication or earlier communications from the examiner should be directed to Johnny B Aguiar whose telephone number is (571)272-3563. The examiner can normally be reache…"
+      }
+    ],
+    "kind": "bookmarks",
+    "source": "sha256:b72f1a1ecd882fc6db690bdeabac81d295e20c0d19f2b199c53556e164393a26"
+  },
+  "source": "sha256:b72f1a1ecd882fc6db690bdeabac81d295e20c0d19f2b199c53556e164393a26"
+}

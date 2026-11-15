@@ -1,0 +1,4 @@
+{"units": "emu", "ops": [
+  {"op": "object.move", "at": "slide2/s127", "dx": -81906, "dy": 0},
+  {"op": "object.set", "at": "slide2/s128", "from": [11326492, 4917832], "to": [11326492, 3672835]}
+]}

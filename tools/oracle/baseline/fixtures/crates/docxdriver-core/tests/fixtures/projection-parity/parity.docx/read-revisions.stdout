@@ -1,0 +1,83 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "kind": "revisions",
+    "revisions": [
+      {
+        "author": "Format Editor",
+        "date": "",
+        "id": "31",
+        "kind": "rPrChange",
+        "locator": "p2:0-0",
+        "paragraphIndex": 2,
+        "text": ""
+      },
+      {
+        "author": "Format Editor",
+        "date": "",
+        "id": "32",
+        "kind": "rPrChange",
+        "locator": "p2:0-0",
+        "paragraphIndex": 2,
+        "text": ""
+      },
+      {
+        "author": "Insert Editor",
+        "date": "",
+        "id": "21",
+        "kind": "ins",
+        "locator": "p6:7-15",
+        "paragraphIndex": 6,
+        "text": "inserted"
+      },
+      {
+        "author": "Delete Editor",
+        "date": "",
+        "id": "22",
+        "kind": "del",
+        "locator": "p6:15-22",
+        "paragraphIndex": 6,
+        "text": "deleted"
+      },
+      {
+        "author": "Delete Editor",
+        "date": "",
+        "id": "24",
+        "kind": "del",
+        "locator": "p6:0-0",
+        "paragraphIndex": 6,
+        "text": ""
+      },
+      {
+        "author": "Insert Editor",
+        "date": "",
+        "id": "25",
+        "kind": "ins",
+        "locator": "p6:0-0",
+        "paragraphIndex": 6,
+        "text": ""
+      },
+      {
+        "author": "Break Editor",
+        "date": "",
+        "id": "23",
+        "kind": "del",
+        "locator": "p9:12-12",
+        "paragraphIndex": 9,
+        "text": ""
+      },
+      {
+        "author": "Break Editor",
+        "date": "",
+        "id": "26",
+        "kind": "ins",
+        "locator": "p11:20-20",
+        "paragraphIndex": 11,
+        "text": ""
+      }
+    ],
+    "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+  },
+  "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+}

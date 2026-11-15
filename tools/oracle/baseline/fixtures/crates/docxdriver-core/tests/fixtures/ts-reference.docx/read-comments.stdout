@@ -1,0 +1,37 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "comments": [
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "locator": "p2:0-16"
+            }
+          ]
+        },
+        "createdAt": "2026-07-05T02:35:50.205Z",
+        "durableId": "B5DA4467",
+        "id": "0",
+        "ooxmlId": "0",
+        "replies": [],
+        "root": {
+          "author": "Rev",
+          "date": "2026-07-05T02:35:50.205Z",
+          "durableId": "B5DA4467",
+          "id": "0",
+          "ooxmlCommentId": "0",
+          "paraId": "00000000",
+          "parentId": null,
+          "text": "Check this",
+          "threadId": "0"
+        },
+        "status": "open"
+      }
+    ],
+    "kind": "comments",
+    "source": "sha256:b14bd56270fc3f86fb7e236b29dedfc6b8ceac5b972408d4085d1cc0207461b1"
+  },
+  "source": "sha256:b14bd56270fc3f86fb7e236b29dedfc6b8ceac5b972408d4085d1cc0207461b1"
+}

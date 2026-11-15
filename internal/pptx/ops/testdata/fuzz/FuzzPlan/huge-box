@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"slide\": \"slide1\", \"operations\": [{\"op\": \"object.set\", \"target\": \"s2\", \"box\": [1e300, -1e300, 1e300, 1e300], \"rot\": 1e300}]}")

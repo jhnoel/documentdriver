@@ -1,0 +1,3 @@
+{"ops": [
+  {"op": "object.add", "at": "slide7", "as": "bubble", "kind": "shape", "name": "Core concept callout", "geom": "custom", "box": [40, 199.5, 160, 100.5], "path": "M 8 50.5 L 65 50.5 L 110 0 L 90 50.5 L 152 50.5 C 156.42 50.5 160 54.08 160 58.5 L 160 92.5 C 160 96.92 156.42 100.5 152 100.5 L 8 100.5 C 3.58 100.5 0 96.92 0 92.5 L 0 58.5 C 0 54.08 3.58 50.5 8 50.5 Z", "custom": {"cxn": [[270, 110, 0], [90, 80, 100.5]], "rect": [0, 50.5, 160, 100.5]}, "fill": {"scheme": "bg1"}, "line": {"w": 1.5, "color": {"scheme": "tx1"}}, "html": "<p style=\"text-align:center\"><span style=\"font-size:12pt\">Core concept</span></p>", "text": {"anchor": "ctr"}}
+]}

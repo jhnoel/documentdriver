@@ -1,0 +1,9 @@
+name	kind	url	commit	path	licence	licence_file	files	bytes	notes
+libreoffice-core	git	https://github.com/LibreOffice/core	83d264f2f0a6f2944d524c9a55cb2a0764d12255	sc/qa	MPL-2.0	COPYING	410	8490657	Calc import and export tests; same pin as fetch.sh
+apache-poi	git	https://github.com/apache/poi	1243387d7ffbac84d361323673f1b75a5b3c26f3	test-data/spreadsheet	Apache-2.0	LICENSE	368	21194388	XSSF test files; same pin as fetch.sh
+open-xml-sdk	git	https://github.com/dotnet/Open-XML-SDK	431ab05cf160248cc3885a4a766026d4f8243792	.	MIT	LICENSE	155	8842650	SDK test assets; same pin as fetch.sh
+apache-tika	git	https://github.com/apache/tika	eedcbd14a72f536f8bc1ef3d669037540a2cc196	.	Apache-2.0	LICENSE.txt	39	14155811	parser test documents; same pin as fetch.sh
+closedxml	git	https://github.com/ClosedXML/ClosedXML	057f5976c788d97e8eac86d1a528bd5411d9386e	.	MIT	LICENSE	385	8852095	ClosedXML tests and examples
+excelize	git	https://github.com/qax-os/excelize	701f64c81ef9f83211fbcc2cb7d94bbe297ed782	.	BSD-3-Clause	LICENSE	9	84883	excelize test data
+calamine	git	https://github.com/tafia/calamine	27b2458771a8fab6c6f7e70e891d4d1dada9dd80	.	MIT	LICENSE-MIT.md	82	1254693	calamine test files (reader edge cases)
+openpyxl	heptapod	https://foss.heptapod.net/openpyxl/openpyxl	52c77fdee169dceefc11aceef956aa0367e9759a	.	MIT	LICENCE.rst	40	1277045	Mercurial on Heptapod (project 322); fetched file by file through the GitLab API at the commit of branch/default

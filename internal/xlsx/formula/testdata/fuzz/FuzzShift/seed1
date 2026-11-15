@@ -1,0 +1,5 @@
+go test fuzz v1
+string("SUM(A1:B2)")
+byte('\x01')
+uint16(3)
+uint8(2)

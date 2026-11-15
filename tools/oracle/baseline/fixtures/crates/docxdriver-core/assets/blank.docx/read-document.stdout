@@ -1,0 +1,50 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "content_type": "text/html",
+    "default_style": "Normal",
+    "idRepairsNeeded": 0,
+    "kind": "document",
+    "markup": "<section data-docx-section=\"1\" data-docx-page-width-twips=\"12240\" data-docx-page-height-twips=\"15840\" data-docx-column-spacing-twips=\"720\">\n<p id=\"2C078E63\" style=\"font-size:unset;\"></p>\n</section>",
+    "other_styles": [
+      "DefaultParagraphFont",
+      "NoList",
+      "TableNormal"
+    ],
+    "projection_version": 4,
+    "sections": [
+      {
+        "columns": {
+          "space": "720"
+        },
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "index": 1,
+        "margins": {
+          "bottom": "1440",
+          "footer": "720",
+          "gutter": "0",
+          "header": "720",
+          "left": "1440",
+          "right": "1440",
+          "top": "1440"
+        },
+        "page_size": {
+          "h": "15840",
+          "w": "12240"
+        },
+        "paragraph_end": 1,
+        "paragraph_start": 0
+      }
+    ],
+    "source": "sha256:4d6a71f9c876c76d7c890745ecbbdbec6fdfb495fea91fa01cda83761e5b933d",
+    "styles": {
+      "Normal": "font-size:12pt;line-height:1.1625;margin-bottom:8pt;"
+    },
+    "tables": [],
+    "view": "markup"
+  },
+  "source": "sha256:4d6a71f9c876c76d7c890745ecbbdbec6fdfb495fea91fa01cda83761e5b933d"
+}

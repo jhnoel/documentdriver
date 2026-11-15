@@ -1,0 +1,2 @@
+go test fuzz v1
+string("M1e308 0 l1e308 0")

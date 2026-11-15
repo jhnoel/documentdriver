@@ -1,0 +1,333 @@
+# Invalid-plan parity (P4 close-out, 2026-11-13): the negative, rule and schema kinds of all 42 operations.
+# Every entry is a path or code the contract fixes (docs/contract.md section 2: the path names the value at fault;
+# docxdriver guessed it from its message text) or a listed class; outcomes agree except set_section_layout/rule/1.
+# plan id	mode	field	reason
+bookmark_add/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+bookmark_add/negative/write:badroot/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+bookmark_add/negative/write:dirty/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+bookmark_add/negative/write:dupname/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+bookmark_add/negative/write:malformed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+bookmark_add/negative/write:mixed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+bookmark_add/negative/write:sections/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+bookmark_add/negative/write:lazy/undefined-alias	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+bookmark_add/negative/write:lazy/undefined-alias	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+bookmark_add/rule/3	*	path	the op table rule names occurrence (the field set without select); docxdriver names select
+bookmark_add/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+bookmark_add/schema/*/missing-required-field-name	*	path	contract §2: decoding names the field at fault, ops[i].name; docxdriver serde says "ops"
+bookmark_add/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+bookmark_delete/schema/*/missing-required-field-name	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+bookmark_move/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].to; docxdriver serde says "ops"
+bookmark_move/negative/write:badroot/undefined-alias	*	path	contract §2: not_found names the address, ops[i].to; docxdriver gives no path
+bookmark_move/negative/write:dirty/undefined-alias	*	path	contract §2: not_found names the address, ops[i].to; docxdriver gives no path
+bookmark_move/negative/write:dupname/undefined-alias	*	path	contract §2: not_found names the address, ops[i].to; docxdriver gives no path
+bookmark_move/negative/write:malformed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].to; docxdriver gives no path
+bookmark_move/negative/write:mixed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].to; docxdriver gives no path
+bookmark_move/negative/write:sections/undefined-alias	*	path	contract §2: not_found names the address, ops[i].to; docxdriver gives no path
+bookmark_move/negative/write:lazy/undefined-alias	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].to
+bookmark_move/negative/write:lazy/undefined-alias	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].to
+bookmark_move/rule/3	*	path	the op table rule names occurrence (the field set without select); docxdriver names select
+bookmark_move/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].to; docxdriver serde says "ops"
+bookmark_move/schema/*/missing-required-field-name	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+bookmark_rename/schema/*/missing-required-field-name	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+bookmark_rename/schema/*/missing-required-field-new-name	*	path	contract §2: decoding names the field at fault, ops[i].name; docxdriver serde says "ops"
+comment_delete/schema/*/missing-required-field-comment-id	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+comment_reply/schema/*/missing-required-field-comment-id	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+comment_reply/schema/*/missing-required-field-text	*	path	contract §2: decoding names the field at fault, ops[i].text; docxdriver serde says "ops"
+comment_set_status/schema/*/missing-required-field-comment-id	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+comment_set_status/schema/*/missing-required-field-status	*	path	contract §2: decoding names the field at fault, ops[i].status; docxdriver serde says "ops"
+convert_revisions_to_formatting/rule/0	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+delete_equation/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+delete_equation/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+delete_equation/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+edit_table/rule/0	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+edit_table/rule/1	*	path	contract field name: the rule names as (docxdriver alias)
+edit_table/rule/2	*	path	contract §2: the rule names the field it checks, ops[i].count; docxdriver names only the op
+edit_table/schema/*/missing-required-field-action	*	path	contract §2: decoding names the field at fault, ops[i].op; docxdriver serde says "ops"
+edit_table/schema/*/missing-required-field-at	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+edit_table/schema/*/wrong-type-for-at	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+format_cell/rule/0	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+format_cell/rule/1	*	path	contract §2: the rule names the field it checks, ops[i].format.padding.top; docxdriver names only the op
+format_cell/rule/10	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.left.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_cell/rule/11	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.left.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_cell/rule/12	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.left.width; docxdriver names only the op
+format_cell/rule/13	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.bottom.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_cell/rule/14	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.bottom.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_cell/rule/15	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.bottom.width; docxdriver names only the op
+format_cell/rule/16	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.right.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_cell/rule/17	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.right.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_cell/rule/18	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.right.width; docxdriver names only the op
+format_cell/rule/19	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.inside_horizontal.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_cell/rule/2	*	path	contract §2: the rule names the field it checks, ops[i].format.padding.right; docxdriver names only the op
+format_cell/rule/20	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.inside_horizontal.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_cell/rule/21	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.inside_horizontal.width; docxdriver names only the op
+format_cell/rule/22	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.inside_vertical.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_cell/rule/23	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.inside_vertical.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_cell/rule/24	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.inside_vertical.width; docxdriver names only the op
+format_cell/rule/25	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.clear[i]; docxdriver gives ops[i].clear (it guesses the field from the message, or drops the containing object)
+format_cell/rule/26	*	path	contract §2: the rule names the field it checks, ops[i].format.fill; docxdriver names only the op
+format_cell/rule/27	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.vertical_alignment; docxdriver gives ops[i].alignment (it guesses the field from the message, or drops the containing object)
+format_cell/rule/28	*	path	contract §2: the rule names the field it checks, ops[i].format; docxdriver names only the op
+format_cell/rule/3	*	path	contract §2: the rule names the field it checks, ops[i].format.padding.bottom; docxdriver names only the op
+format_cell/rule/4	*	path	contract §2: the rule names the field it checks, ops[i].format.padding.left; docxdriver names only the op
+format_cell/rule/5	*	path	contract §2: the rule names the field it checks, ops[i].format.width.value; docxdriver names only the op
+format_cell/rule/6	*	path	contract §2: the rule names the field it checks, ops[i].format.width.value; docxdriver names only the op
+format_cell/rule/7	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.top.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_cell/rule/8	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.top.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_cell/rule/9	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.top.width; docxdriver names only the op
+format_cell/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_cell/schema/*/missing-required-field-format	*	path	contract §2: decoding names the field at fault, ops[i].format; docxdriver serde says "ops"
+format_cell/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_paragraph/negative/fixtures:crates.docxdriver-cli.tests.fixtures.sample/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:crates.docxdriver-cli.tests.fixtures.sample/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:crates.docxdriver-core.tests.fixtures.ts-reference/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:crates.docxdriver-core.tests.fixtures.ts-reference/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:test-docs.ctnf-18690238-data-stream/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:test-docs.ctnf-18690238-data-stream/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:test-docs.test_comments/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:test-docs.test_comments/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:test-docs.test_comments2/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/fixtures:test-docs.test_comments2/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:badroot/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:badroot/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:dirty/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:dirty/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:dupname/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:dupname/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:malformed/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:malformed/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:mixed/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:mixed/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:sections/unknown-style	*	code	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/write:sections/unknown-style	*	path	an undeclared style is not_found at ops[0].style, as paragraph.format refuses it; docxdriver: operation_failed at ops[0]
+format_paragraph/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_paragraph/negative/write:badroot/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_paragraph/negative/write:dirty/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_paragraph/negative/write:dupname/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_paragraph/negative/write:malformed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_paragraph/negative/write:mixed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_paragraph/negative/write:sections/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_paragraph/negative/write:lazy/undefined-alias	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+format_paragraph/negative/write:lazy/undefined-alias	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+format_paragraph/negative/write:lazy/unknown-style	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].style
+format_paragraph/negative/write:lazy/unknown-style	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].style
+format_paragraph/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_paragraph/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_row/rule/0	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+format_row/rule/1	*	path	contract §2: the rule names the field it checks, ops[i].format.height; docxdriver names only the op
+format_row/rule/2	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.clear[i]; docxdriver gives ops[i].clear (it guesses the field from the message, or drops the containing object)
+format_row/rule/3	*	path	contract §2: the rule names the field it checks, ops[i].format.height_rule; docxdriver names only the op
+format_row/rule/4	*	path	contract §2: the rule names the field it checks, ops[i].format; docxdriver names only the op
+format_row/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_row/schema/*/missing-required-field-format	*	path	contract §2: decoding names the field at fault, ops[i].format; docxdriver serde says "ops"
+format_row/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_table/rule/0	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+format_table/rule/1	*	path	contract §2: the rule names the field it checks, ops[i].format.padding.top; docxdriver names only the op
+format_table/rule/10	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.top.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_table/rule/11	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.top.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_table/rule/12	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.top.width; docxdriver names only the op
+format_table/rule/13	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.left.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_table/rule/14	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.left.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_table/rule/15	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.left.width; docxdriver names only the op
+format_table/rule/16	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.bottom.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_table/rule/17	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.bottom.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_table/rule/18	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.bottom.width; docxdriver names only the op
+format_table/rule/19	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.right.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_table/rule/2	*	path	contract §2: the rule names the field it checks, ops[i].format.padding.right; docxdriver names only the op
+format_table/rule/20	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.right.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_table/rule/21	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.right.width; docxdriver names only the op
+format_table/rule/22	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.inside_horizontal.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_table/rule/23	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.inside_horizontal.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_table/rule/24	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.inside_horizontal.width; docxdriver names only the op
+format_table/rule/25	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.inside_vertical.style; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+format_table/rule/26	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.borders.inside_vertical.color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+format_table/rule/27	*	path	contract §2: the rule names the field it checks, ops[i].format.borders.inside_vertical.width; docxdriver names only the op
+format_table/rule/28	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.clear[i]; docxdriver gives ops[i].clear (it guesses the field from the message, or drops the containing object)
+format_table/rule/29	*	path	contract §2: the rule names the field it checks, ops[i].format.layout; docxdriver names only the op
+format_table/rule/3	*	path	contract §2: the rule names the field it checks, ops[i].format.padding.bottom; docxdriver names only the op
+format_table/rule/30	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.alignment; docxdriver gives ops[i].alignment (it guesses the field from the message, or drops the containing object)
+format_table/rule/31	*	path	contract §2: the rule names the field it checks, ops[i].format.column_widths; docxdriver names only the op
+format_table/rule/32	*	path	contract §2: the rule names the field it checks, ops[i].format; docxdriver names only the op
+format_table/rule/4	*	path	contract §2: the rule names the field it checks, ops[i].format.padding.left; docxdriver names only the op
+format_table/rule/5	*	path	contract §2: the rule names the field it checks, ops[i].format.cell_spacing; docxdriver names only the op
+format_table/rule/6	*	path	contract §2: the rule names the field it checks, ops[i].format.column_widths[i]; docxdriver names only the op
+format_table/rule/7	*	path	contract §2: the path is the full path to the value at fault, ops[i].format.clear[i]; docxdriver gives ops[i].clear (it guesses the field from the message, or drops the containing object)
+format_table/rule/8	*	path	contract §2: the rule names the field it checks, ops[i].format.width.value; docxdriver names only the op
+format_table/rule/9	*	path	contract §2: the rule names the field it checks, ops[i].format.width.value; docxdriver names only the op
+format_table/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_table/schema/*/missing-required-field-format	*	path	contract §2: decoding names the field at fault, ops[i].format; docxdriver serde says "ops"
+format_table/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_text/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_text/negative/write:badroot/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_text/negative/write:dirty/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_text/negative/write:dupname/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_text/negative/write:malformed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_text/negative/write:mixed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_text/negative/write:sections/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+format_text/negative/write:lazy/undefined-alias	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+format_text/negative/write:lazy/undefined-alias	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+format_text/rule/5	*	path	contract §2: the path is the full path to the value at fault, ops[i].clear[i]; docxdriver gives ops[i].clear (it guesses the field from the message, or drops the containing object)
+format_text/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+format_text/schema/*/missing-required-field-select	*	path	contract §2: decoding names the field at fault, ops[i].select; docxdriver serde says "ops"
+format_text/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+insert_table/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+insert_table/negative/write:badroot/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+insert_table/negative/write:dirty/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+insert_table/negative/write:dupname/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+insert_table/negative/write:malformed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+insert_table/negative/write:mixed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+insert_table/negative/write:sections/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+insert_table/negative/write:lazy/undefined-alias	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+insert_table/negative/write:lazy/undefined-alias	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+insert_table/rule/0	*	path	contract §2: the rule names the field it checks, ops[i].rows; docxdriver names only the op
+insert_table/rule/1	*	path	contract field name: the rule names as (docxdriver alias)
+insert_table/rule/2	*	path	contract §2: the rule names the field it checks, ops[i].cells; docxdriver names only the op
+insert_table/rule/3	*	path	contract §2: the rule names the field it checks, ops[i].cells[i]; docxdriver names only the op
+insert_table/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+insert_table/schema/*/missing-required-field-columns	*	path	contract §2: decoding names the field at fault, ops[i].columns; docxdriver serde says "ops"
+insert_table/schema/*/missing-required-field-position	*	path	contract §2: decoding names the field at fault, ops[i].position; docxdriver serde says "ops"
+insert_table/schema/*/missing-required-field-rows	*	path	contract §2: decoding names the field at fault, ops[i].rows; docxdriver serde says "ops"
+insert_table/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_equation/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_equation/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_equation/schema/*/missing-required-field-latex	*	path	contract §2: decoding names the field at fault, ops[i].latex; docxdriver serde says "ops"
+replace_equation/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_paragraph/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_paragraph/negative/write:badroot/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_paragraph/negative/write:dirty/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_paragraph/negative/write:dupname/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_paragraph/negative/write:malformed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_paragraph/negative/write:mixed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_paragraph/negative/write:sections/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_paragraph/negative/write:lazy/undefined-alias	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+replace_paragraph/negative/write:lazy/undefined-alias	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+replace_paragraph/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_paragraph/schema/*/missing-required-field-with	*	path	contract §2: decoding names the field at fault, ops[i].html; docxdriver serde says "ops"
+replace_paragraph/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_text/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_text/negative/write:badroot/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_text/negative/write:dirty/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_text/negative/write:dupname/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_text/negative/write:malformed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_text/negative/write:mixed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_text/negative/write:sections/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+replace_text/negative/write:lazy/undefined-alias	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+replace_text/negative/write:lazy/undefined-alias	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+replace_text/schema/*/bad-change-mode	*	path	contract §2: decoding names the field at fault, change_mode; docxdriver serde says "ops"
+replace_text/schema/*/malformed-base	*	path	contract §2: decoding names the field at fault, base; docxdriver serde says "ops"
+replace_text/schema/*/malformed-paragraph-address	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_text/schema/*/missing-field-in-ops-1	*	path	contract §2: decoding names the field at fault, ops[i].select; docxdriver serde says "ops"
+replace_text/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+replace_text/schema/*/missing-required-field-select	*	path	contract §2: decoding names the field at fault, ops[i].select; docxdriver serde says "ops"
+replace_text/schema/*/missing-required-field-with	*	path	contract §2: decoding names the field at fault, ops[i].with; docxdriver serde says "ops"
+replace_text/schema/*/unknown-field-in-ops-1	*	path	contract §2: the unknown field is in the second operation, ops[1].bogus; docxdriver guesses ops[0] from its message
+replace_text/schema/*/unknown-op	*	path	contract §2: decoding names the field at fault, ops[i].op; docxdriver serde says "ops"
+replace_text/schema/*/unknown-top-level-field	*	path	contract §2: an unknown top-level field is named as it is, "extra"; docxdriver guesses ops[0].extra from its message (plan.md P4b: Rust guesses the field from the message text)
+replace_text/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+revise_text/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+revise_text/rule/2	*	path	contract §2: the path is the full path to the value at fault, ops[i].occurrence; docxdriver gives ops[i].within (it guesses the field from the message, or drops the containing object)
+revise_text/rule/4	*	path	contract §2: the path is the full path to the value at fault, ops[i].edits[i]; docxdriver gives ops[i].edits (it guesses the field from the message, or drops the containing object)
+revise_text/schema/*/missing-required-field-edits	*	path	contract §2: decoding names the field at fault, ops[i].edits; docxdriver serde says "ops"
+revise_text/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+revision_settle/negative/fixtures:crates.docxdriver-cli.tests.fixtures.sample/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/fixtures:crates.docxdriver-core.tests.fixtures.ts-reference/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/fixtures:test-docs.ctnf-18690238-data-stream/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/fixtures:test-docs.test_comments/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/fixtures:test-docs.test_comments2/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/write:badroot/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/write:dirty/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/write:dupname/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/write:malformed/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/write:mixed/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/write:sections/no-such-revision	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+revision_settle/negative/write:lazy/no-such-revision	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+revision_settle/negative/write:lazy/no-such-revision	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+revision_settle/schema/*/missing-required-field-action	*	path	contract §2: decoding names the field at fault, ops[i].op; docxdriver serde says "ops"
+revision_settle/schema/*/missing-required-field-target	*	code	revision-selection (ops.DifferenceClasses): the contract makes at and all optional with a rule requiring one, so a plan with neither is invalid_operation at ops[0].at; docxdriver: missing field target (invalid_plan at ops)
+revision_settle/schema/*/missing-required-field-target	*	path	revision-selection (ops.DifferenceClasses): the contract makes at and all optional with a rule requiring one, so a plan with neither is invalid_operation at ops[0].at; docxdriver: missing field target (invalid_plan at ops)
+revision_settle/schema/*/wrong-type-for-target	*	path	contract §2: the rule names the field it checks, ops[i].at; docxdriver names only the op
+set_even_and_odd_headers/schema/*/missing-required-field-even-and-odd	*	path	contract §2: decoding names the field at fault, ops[i].even_and_odd; docxdriver serde says "ops"
+set_even_and_odd_headers/schema/*/wrong-type-for-even-and-odd	*	path	contract §2: decoding names the field at fault, ops[i].even_and_odd; docxdriver serde says "ops"
+set_first_page_mode/schema/*/missing-required-field-enabled	*	path	contract §2: decoding names the field at fault, ops[i].enabled; docxdriver serde says "ops"
+set_first_page_mode/schema/*/wrong-type-for-enabled	*	path	contract §2: decoding names the field at fault, ops[i].enabled; docxdriver serde says "ops"
+set_footer/schema/*/missing-required-field-with	*	path	contract §2: decoding names the field at fault, ops[i].html; docxdriver serde says "ops"
+set_footer/schema/*/wrong-type-for-with	*	path	contract §2: decoding names the field at fault, ops[i].html; docxdriver serde says "ops"
+set_header/schema/*/missing-required-field-with	*	path	contract §2: decoding names the field at fault, ops[i].html; docxdriver serde says "ops"
+set_header/schema/*/wrong-type-for-with	*	path	contract §2: decoding names the field at fault, ops[i].html; docxdriver serde says "ops"
+set_list/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at[i]; docxdriver serde says "ops"
+set_list/negative/write:badroot/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at[i]; docxdriver gives no path
+set_list/negative/write:dirty/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at[i]; docxdriver gives no path
+set_list/negative/write:dupname/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at[i]; docxdriver gives no path
+set_list/negative/write:malformed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at[i]; docxdriver gives no path
+set_list/negative/write:mixed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at[i]; docxdriver gives no path
+set_list/negative/write:sections/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at[i]; docxdriver gives no path
+set_list/negative/write:lazy/undefined-alias	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at[0]
+set_list/negative/write:lazy/undefined-alias	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at[0]
+set_list/rule/0	*	path	contract §2: the path is the full path to the value at fault, ops[i].levels; docxdriver gives ops[i].select (it guesses the field from the message, or drops the containing object)
+set_list/rule/1	*	path	contract §2: the path is the full path to the value at fault, ops[i].levels[i].marker_color; docxdriver gives ops[i].color (it guesses the field from the message, or drops the containing object)
+set_list/rule/2	*	path	contract §2: the rule names the field it checks, ops[i].num_id; docxdriver names only the op
+set_list/rule/3	*	path	contract §2: the rule names the field it checks, ops[i].remove; docxdriver names only the op
+set_list/rule/4	*	path	contract §2: the rule names the field it checks, ops[i].format; docxdriver names only the op
+set_list/rule/5	*	path	contract §2: the path is the full path to the value at fault, ops[i].format; docxdriver gives ops[i].style (it guesses the field from the message, or drops the containing object)
+set_list/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+set_list/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+set_page_margins/rule/1	*	path	the rule is about the whole op (it needs a property), so the path is the op, ops[i]; docxdriver guesses ops[i].top from its message
+set_page_margins/schema/*/wrong-type-for-top	*	path	contract §2: decoding names the field at fault, ops[i].top; docxdriver serde says "ops"
+set_section_boundary/negative/*/no-such-paragraph	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+set_section_boundary/negative/write:badroot/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+set_section_boundary/negative/write:dirty/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+set_section_boundary/negative/write:dupname/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+set_section_boundary/negative/write:malformed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+set_section_boundary/negative/write:mixed/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+set_section_boundary/negative/write:sections/undefined-alias	*	path	contract §2: not_found names the address, ops[i].at; docxdriver gives no path
+set_section_boundary/negative/write:lazy/undefined-alias	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+set_section_boundary/negative/write:lazy/undefined-alias	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: not_found at ops[0].at
+set_section_boundary/rule/0	*	path	contract §2: the rule names the field it checks, ops[i].break_type; docxdriver names only the op
+set_section_boundary/rule/1	*	path	contract §2: the path is the full path to the value at fault, ops[i].break_type; docxdriver gives ops[i].section (it guesses the field from the message, or drops the containing object)
+set_section_boundary/schema/*/missing-required-field-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+set_section_boundary/schema/*/wrong-type-for-at	*	path	contract §2: decoding names the field at fault, ops[i].at; docxdriver serde says "ops"
+set_section_layout/negative/fixtures:crates.docxdriver-cli.tests.fixtures.sample/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:crates.docxdriver-cli.tests.fixtures.sample/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:crates.docxdriver-core.tests.fixtures.ts-reference/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:crates.docxdriver-core.tests.fixtures.ts-reference/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:test-docs.ctnf-18690238-data-stream/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:test-docs.ctnf-18690238-data-stream/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:test-docs.test_comments/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:test-docs.test_comments/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:test-docs.test_comments2/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/fixtures:test-docs.test_comments2/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:badroot/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:badroot/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:dirty/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:dirty/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:dupname/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:dupname/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:malformed/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:malformed/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:mixed/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:mixed/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:sections/no-such-section-handle	*	code	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:sections/no-such-section-handle	*	path	contract §6: section:DEADBEEF is a well-formed section paraId that names no section: not_found at ops[0].at; docxdriver gives the path as ops[0]
+set_section_layout/negative/write:lazy/no-such-section-handle	*	code	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: section:DEADBEEF names no section, not_found at ops[0].at
+set_section_layout/negative/write:lazy/no-such-section-handle	*	path	P4a lazy open: docxdriver refuses lazy.docx as a whole (invalid_document) for a corrupt member nothing reads; Go opens it and refuses the op itself: section:DEADBEEF names no section, not_found at ops[0].at
+set_section_layout/rule/1	*	*	contract §6: "1" is not a section address in the contract grammar (section:N, section:final, section:$name), so the rule refuses it at ops[0].at; docxdriver read it as a section_handle (FromOracle cannot express a handle)
+set_section_layout/rule/10	*	path	contract §2: the rule names the field it checks, ops[i].column_widths[i]; docxdriver names only the op
+set_section_layout/rule/11	*	path	contract §2: the rule names the field it checks, ops[i].columns; docxdriver names only the op
+set_section_layout/rule/12	*	path	contract §2: the path is the full path to the value at fault, ops[i].break_type; docxdriver gives ops[i].at (it guesses the field from the message, or drops the containing object)
+set_section_layout/rule/13	*	path	contract §2: the rule names the field it checks, ops[i].page_number_format; docxdriver names only the op
+set_section_layout/rule/14	*	path	contract §2: the rule names the field it checks, ops[i].page_number_continue; docxdriver names only the op
+set_section_layout/rule/15	*	path	contract §2: the rule names the field it checks, ops[i].page_number_start; docxdriver names only the op
+set_section_layout/rule/16	*	path	contract §2: the rule names the field it checks, ops[i].page_number_start; docxdriver names only the op
+set_section_layout/rule/17	*	path	the rule is about the whole op (it needs a property), so the path is the op, ops[i]; docxdriver guesses ops[i].at from its message
+set_section_layout/rule/3	*	path	contract §2: the rule names the field it checks, ops[i].page_size; docxdriver names only the op
+set_section_layout/rule/4	*	path	contract §2: the rule names the field it checks, ops[i].page_size; docxdriver names only the op
+set_section_layout/rule/5	*	path	contract §2: the rule names the field it checks, ops[i].height; docxdriver names only the op
+set_section_layout/rule/6	*	path	contract §2: the rule names the field it checks, ops[i].height; docxdriver names only the op
+set_section_layout/rule/7	*	path	contract §2: the rule names the field it checks, ops[i].orientation; docxdriver names only the op
+set_section_layout/rule/8	*	path	contract §2: the rule names the field it checks, ops[i].columns; docxdriver names only the op
+set_section_layout/rule/9	*	path	contract §2: the rule names the field it checks, ops[i].column_spacing; docxdriver names only the op
+set_section_layout/schema/*/wrong-type-for-orientation	*	path	contract §2: decoding names the field at fault, ops[i].orientation; docxdriver serde says "ops"

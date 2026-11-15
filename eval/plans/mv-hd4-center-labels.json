@@ -1,0 +1,9 @@
+{"units": "emu", "ops": [
+  {"op": "object.move", "at": "slide4/s5", "dx": -123444, "dy": 0},
+  {"op": "object.move", "at": "slide4/s8", "dx": -123444, "dy": 0},
+  {"op": "object.move", "at": "slide4/s11", "dx": -123444, "dy": 0},
+  {"op": "object.move", "at": "slide4/s14", "dx": -123444, "dy": 0},
+  {"op": "object.move", "at": "slide4/s17", "dx": -123444, "dy": 0},
+  {"op": "object.move", "at": "slide4/s20", "dx": -123444, "dy": 0},
+  {"op": "object.move", "at": "slide4/s23", "dx": -123444, "dy": 0}
+]}

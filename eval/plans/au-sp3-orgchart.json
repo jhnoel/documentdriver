@@ -1,0 +1,8 @@
+{"ops": [
+  {"op": "object.add", "at": "slide3", "as": "c", "kind": "shape", "name": "Coordinator", "geom": "rect", "box": [70, 220, 90, 36], "fill": {"scheme": "accent1"}, "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:11pt;color:#FFFFFF\">Coordinator</span></b></p>"},
+  {"op": "object.add", "at": "slide3", "as": "p", "kind": "shape", "name": "Partners", "geom": "rect", "box": [20, 300, 85, 36], "fill": {"scheme": "accent2"}, "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:11pt;color:#FFFFFF\">Partners</span></b></p>"},
+  {"op": "object.add", "at": "slide3", "as": "u", "kind": "shape", "name": "Users", "geom": "rect", "box": [125, 300, 85, 36], "fill": {"scheme": "accent2"}, "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:11pt;color:#FFFFFF\">Users</span></b></p>"},
+  {"op": "object.add", "at": "slide3", "as": "cp", "kind": "connector", "name": "Coordinator to Partners", "geom": "bentConnector3", "from": [115, 256], "to": [62.5, 300], "first": "v", "from_glue": "$c:2", "to_glue": "$p:0", "line": {"w": 1.25, "color": {"scheme": "tx1"}}},
+  {"op": "object.add", "at": "slide3", "as": "cu", "kind": "connector", "name": "Coordinator to Users", "geom": "bentConnector3", "from": [115, 256], "to": [167.5, 300], "first": "v", "from_glue": "$c:2", "to_glue": "$u:0", "line": {"w": 1.25, "color": {"scheme": "tx1"}}},
+  {"op": "group.create", "at": ["$c", "$p", "$u", "$cp", "$cu"], "as": "chart", "name": "Org chart"}
+]}

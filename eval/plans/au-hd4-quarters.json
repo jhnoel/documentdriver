@@ -1,0 +1,12 @@
+{"ops": [
+  {"op": "object.add", "at": "slide4", "as": "axis", "kind": "connector", "name": "Timeline", "geom": "straightConnector1", "from": [86.4, 430], "to": [867.6, 430], "line": {"w": 1.5, "color": {"hex": "#5E6A72"}}},
+  {"op": "object.add", "at": "slide4", "as": "q1", "kind": "shape", "name": "Q1 dot", "geom": "ellipse", "box": [178.05, 424, 12, 12], "fill": {"hex": "#1D5B8F"}, "line": "none"},
+  {"op": "object.add", "at": "slide4", "as": "q2", "kind": "shape", "name": "Q2 dot", "geom": "ellipse", "box": [373.35, 424, 12, 12], "fill": {"hex": "#1C7A7A"}, "line": "none"},
+  {"op": "object.add", "at": "slide4", "as": "q3", "kind": "shape", "name": "Q3 dot", "geom": "ellipse", "box": [568.65, 424, 12, 12], "fill": {"hex": "#1C7A7A"}, "line": "none"},
+  {"op": "object.add", "at": "slide4", "as": "q4", "kind": "shape", "name": "Q4 dot", "geom": "ellipse", "box": [763.95, 424, 12, 12], "fill": {"hex": "#614B94"}, "line": "none"},
+  {"op": "object.add", "at": "slide4", "as": "l1", "kind": "shape", "name": "Q1 label", "geom": "rect", "box": [164.05, 440, 40, 18], "fill": "none", "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:11pt;color:#1F2933\">Q1</span></b></p>"},
+  {"op": "object.add", "at": "slide4", "as": "l2", "kind": "shape", "name": "Q2 label", "geom": "rect", "box": [359.35, 440, 40, 18], "fill": "none", "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:11pt;color:#1F2933\">Q2</span></b></p>"},
+  {"op": "object.add", "at": "slide4", "as": "l3", "kind": "shape", "name": "Q3 label", "geom": "rect", "box": [554.65, 440, 40, 18], "fill": "none", "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:11pt;color:#1F2933\">Q3</span></b></p>"},
+  {"op": "object.add", "at": "slide4", "as": "l4", "kind": "shape", "name": "Q4 label", "geom": "rect", "box": [749.95, 440, 40, 18], "fill": "none", "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:11pt;color:#1F2933\">Q4</span></b></p>"},
+  {"op": "group.create", "at": ["$axis", "$q1", "$q2", "$q3", "$q4", "$l1", "$l2", "$l3", "$l4"], "as": "timeline", "name": "Quarterly timeline"}
+]}

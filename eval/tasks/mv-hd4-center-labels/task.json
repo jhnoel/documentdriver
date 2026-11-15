@@ -1,0 +1,95 @@
+{
+  "id": "mv-hd4-center-labels",
+  "type": "move",
+  "category": "process",
+  "deck": {
+    "path": "web/healthdcat-workflow.pptx",
+    "sha256": "cc66b147c9e13fef31a96a13cbca4cbb6769f5f81a5232dc98e2d6e27e66d4e4",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide4.xml",
+  "instruction": "Centre each step's label horizontally under its numbered square. Do not change the labels' height, size or vertical position.",
+  "targets": [
+    "s5",
+    "s8",
+    "s11",
+    "s14",
+    "s17",
+    "s20",
+    "s23"
+  ],
+  "checks": [
+    {
+      "type": "box",
+      "target": "s5",
+      "x": 34.92,
+      "keep": [
+        "y",
+        "w",
+        "h"
+      ]
+    },
+    {
+      "type": "box",
+      "target": "s8",
+      "x": 153.72,
+      "keep": [
+        "y",
+        "w",
+        "h"
+      ]
+    },
+    {
+      "type": "box",
+      "target": "s11",
+      "x": 272.52,
+      "keep": [
+        "y",
+        "w",
+        "h"
+      ]
+    },
+    {
+      "type": "box",
+      "target": "s14",
+      "x": 391.32,
+      "keep": [
+        "y",
+        "w",
+        "h"
+      ]
+    },
+    {
+      "type": "box",
+      "target": "s17",
+      "x": 510.12,
+      "keep": [
+        "y",
+        "w",
+        "h"
+      ]
+    },
+    {
+      "type": "box",
+      "target": "s20",
+      "x": 628.92,
+      "keep": [
+        "y",
+        "w",
+        "h"
+      ]
+    },
+    {
+      "type": "box",
+      "target": "s23",
+      "x": 747.72,
+      "keep": [
+        "y",
+        "w",
+        "h"
+      ]
+    }
+  ],
+  "notes": "Squares are 30.24 wide at x 64.8 + 118.8i; labels are 90 wide.",
+  "max_new": 0
+}

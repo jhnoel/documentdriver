@@ -1,0 +1,25 @@
+{
+  "id": "cn-lc1-square-circle",
+  "type": "connect",
+  "category": "connectors",
+  "deck": {
+    "path": "repos/libreoffice-core/sd/qa/unit/data/pptx/connectors.pptx",
+    "sha256": "113236364c265d5d60097391154f5fc1e6b692bfef7db0111971fa2ad5841611",
+    "licence": "MPL-2.0 (LibreOffice test data)"
+  },
+  "slide": "/ppt/slides/slide1.xml",
+  "instruction": "Connect the square to the circle with an elbow connector that leaves the bottom of the square and enters the top of the circle, glued at both ends.",
+  "max_new": 1,
+  "checks": [
+    {
+      "type": "connector",
+      "from": "s2",
+      "from_side": "bottom",
+      "to": "s28",
+      "to_side": "top",
+      "geoms": [
+        "bentConnector*"
+      ]
+    }
+  ]
+}

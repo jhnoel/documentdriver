@@ -1,0 +1,29 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "bookmarks": [
+      {
+        "end": "01DB86EE",
+        "hidden": false,
+        "id": "10",
+        "name": "service-agreement",
+        "part": "word/document.xml",
+        "start": "19FA2AE0",
+        "text": "Service Agreement\nPayment is due within thirty days of invoice.\nFees\nThe kickoff fee is 5000."
+      },
+      {
+        "end": "01DB86EE",
+        "hidden": false,
+        "id": "9",
+        "name": "fees",
+        "part": "word/document.xml",
+        "start": "4E9D2B67",
+        "text": "Fees\nThe kickoff fee is 5000."
+      }
+    ],
+    "kind": "bookmarks",
+    "source": "sha256:08318fde05a9daf434821e0b84ea729305dca56bd1967b6ccc1de3be4052f327"
+  },
+  "source": "sha256:08318fde05a9daf434821e0b84ea729305dca56bd1967b6ccc1de3be4052f327"
+}

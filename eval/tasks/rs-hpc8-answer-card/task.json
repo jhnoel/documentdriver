@@ -1,0 +1,23 @@
+{
+  "id": "rs-hpc8-answer-card",
+  "type": "restyle",
+  "category": "process",
+  "deck": {
+    "path": "web/hpc-assistant-flow.pptx",
+    "sha256": "b8a8e03e5fbd9d350800173681f6a8a443a253cb0c90c2ead7b0c008278e1a5b",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide8.xml",
+  "instruction": "Make the 'Answer' card the same purple as the other four step cards.",
+  "targets": [
+    "s21"
+  ],
+  "checks": [
+    {
+      "type": "fill",
+      "target": "s21",
+      "hex": "2E2585"
+    }
+  ],
+  "max_new": 0
+}

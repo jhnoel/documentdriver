@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Office Math cases written for the documentdriver port of docxdriver's math converters,
+     one per branch of omml_mathml.rs and omml_latex.rs. Each m:oMath is one equation. -->
+<doc xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<!-- runs and styles -->
+<m:oMath><m:r><m:t>x</m:t></m:r><m:r><m:t>12.5</m:t></m:r><m:r><m:t>3x+y</m:t></m:r><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>sin</m:t></m:r><m:r><m:rPr><m:sty m:val="b"/></m:rPr><m:t>abc</m:t></m:r><m:r><m:rPr><m:sty m:val="bi"/></m:rPr><m:t>Ab</m:t></m:r><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>q</m:t></m:r><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>two words</m:t></m:r><m:r><m:rPr><m:nor/></m:rPr><m:t>plain</m:t></m:r><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t></m:t></m:r><m:r><m:t>lim</m:t></m:r><m:r><m:t>α−β ⁻ x</m:t></m:r></m:oMath>
+<!-- deleted and empty runs -->
+<m:oMath><m:r><m:delText>gone</m:delText></m:r><m:r><m:t>a</m:t><m:delText>b</m:delText></m:r><m:r/><m:r><m:rPr/></m:r></m:oMath>
+<!-- escapes and references -->
+<m:oMath><m:r><m:t>a&lt;b&amp;c&gt;d&#x3B1;&#946;&quot;</m:t></m:r><m:r><m:t><![CDATA[<x>&]]></m:t></m:r><m:r><m:t>p<!-- note -->q</m:t></m:r></m:oMath>
+<!-- spaces -->
+<m:oMath><m:r><m:t xml:space="preserve"> </m:t></m:r><m:r><m:t xml:space="preserve">   </m:t></m:r><m:r><m:t xml:space="preserve">      </m:t></m:r><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t xml:space="preserve">  </m:t></m:r><m:r><m:t>a b​c️d</m:t></m:r></m:oMath>
+<!-- latex specials -->
+<m:oMath><m:r><m:t>\$%#_{}</m:t></m:r><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>if x_1 {y}</m:t></m:r><m:r><m:t>×÷·⋅±∓≤≥≠≈≡∈∉⊂⊃⊆⊇∪∩∅∂∇∞∑∏∫→←⇒⇐⇔…⋯ℓℏ</m:t></m:r></m:oMath>
+<!-- fractions -->
+<m:oMath><m:f><m:num><m:r><m:t>a</m:t></m:r></m:num><m:den><m:r><m:t>b </m:t></m:r></m:den></m:f><m:f><m:fPr><m:type m:val="noBar"/></m:fPr><m:num><m:r><m:t>n</m:t></m:r></m:num><m:den><m:r><m:t>k</m:t></m:r></m:den></m:f><m:f><m:fPr><m:type m:val="skw"/></m:fPr><m:num><m:r><m:t>1</m:t></m:r></m:num><m:den><m:r><m:t>2</m:t></m:r></m:den></m:f><m:f><m:fPr><m:type m:val="lin"/></m:fPr><m:num><m:r><m:t>x</m:t></m:r></m:num></m:f></m:oMath>
+<!-- radicals -->
+<m:oMath><m:rad><m:radPr><m:degHide m:val="1"/></m:radPr><m:deg/><m:e><m:r><m:t>x</m:t></m:r></m:e></m:rad><m:rad><m:deg><m:r><m:t>3</m:t></m:r></m:deg><m:e><m:r><m:t>y</m:t></m:r></m:e></m:rad><m:rad><m:radPr><m:degHide m:val="0"/></m:radPr><m:deg><m:r><m:t>n</m:t></m:r></m:deg><m:e><m:r><m:t>z</m:t></m:r></m:e></m:rad><m:rad><m:radPr><m:degHide m:val="true"/></m:radPr><m:deg><m:r><m:t>4</m:t></m:r></m:deg><m:e><m:r><m:t>w</m:t></m:r></m:e></m:rad><m:rad><m:deg> </m:deg><m:e><m:r><m:t>v</m:t></m:r></m:e></m:rad><m:rad><m:e><m:r><m:t>u</m:t></m:r></m:e></m:rad></m:oMath>
+<!-- scripts -->
+<m:oMath><m:sSup><m:e><m:r><m:t>x</m:t></m:r></m:e><m:sup><m:r><m:t>2</m:t></m:r></m:sup></m:sSup><m:sSub><m:e><m:r><m:t>ab</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub><m:sSubSup><m:e><m:r><m:t>α</m:t></m:r></m:e><m:sub><m:r><m:t>0</m:t></m:r></m:sub><m:sup><m:r><m:t>n</m:t></m:r></m:sup></m:sSubSup><m:sPre><m:sub><m:r><m:t>1</m:t></m:r></m:sub><m:sup><m:r><m:t>2</m:t></m:r></m:sup><m:e><m:r><m:t>X</m:t></m:r></m:e></m:sPre><m:sSup><m:e><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>sin</m:t></m:r></m:e><m:sup><m:r><m:t>2</m:t></m:r></m:sup></m:sSup></m:oMath>
+<!-- n-ary -->
+<m:oMath><m:nary><m:naryPr><m:chr m:val="∑"/><m:limLoc m:val="undOvr"/></m:naryPr><m:sub><m:r><m:t>i=1</m:t></m:r></m:sub><m:sup><m:r><m:t>n</m:t></m:r></m:sup><m:e><m:r><m:t>i</m:t></m:r></m:e></m:nary><m:nary><m:naryPr><m:subHide m:val="1"/><m:supHide m:val="on"/></m:naryPr><m:sub><m:r><m:t>a</m:t></m:r></m:sub><m:sup><m:r><m:t>b</m:t></m:r></m:sup><m:e><m:r><m:t>f</m:t></m:r></m:e></m:nary><m:nary><m:naryPr><m:chr m:val="∏"/><m:limLoc m:val="subSup"/><m:supHide m:val="0"/></m:naryPr><m:sub><m:r><m:t>k</m:t></m:r></m:sub><m:sup/><m:e><m:r><m:t>k</m:t></m:r></m:e></m:nary><m:nary><m:naryPr><m:chr m:val="∮"/><m:limLoc/></m:naryPr><m:sub/><m:sup><m:r><m:t>C</m:t></m:r></m:sup><m:e></m:e></m:nary><m:nary><m:naryPr><m:chr m:val="⋃"/><m:ctrlPr><w:rPr><w:b/><w:i w:val="0"/></w:rPr></m:ctrlPr></m:naryPr><m:sub><m:r><m:t>i</m:t></m:r></m:sub><m:sup/><m:e><m:r><m:t>A</m:t></m:r></m:e></m:nary><m:nary><m:naryPr><m:chr m:val="⋀"/><m:ctrlPr><w:rPr><w:b w:val="off"/><w:i/></w:rPr></m:ctrlPr></m:naryPr><m:e><m:r><m:t>p</m:t></m:r></m:e></m:nary><m:nary><m:naryPr><m:chr m:val="∬"/><m:ctrlPr><w:rPr/></m:ctrlPr></m:naryPr><m:sub><m:r><m:t>D</m:t></m:r></m:sub><m:e><m:r><m:t>g</m:t></m:r></m:e></m:nary><m:nary><m:naryPr><m:chr m:val="★"/></m:naryPr><m:sub><m:r><m:t>s</m:t></m:r></m:sub><m:sup><m:r><m:t>t</m:t></m:r></m:sup><m:e><m:r><m:t>h</m:t></m:r></m:e></m:nary><m:nary><m:naryPr><m:chr m:val="∐"/><m:ctrlPr><w:rPr><w:b/><w:i/></w:rPr></m:ctrlPr></m:naryPr><m:e></m:e></m:nary><m:nary><m:naryPr><m:chr m:val="⋁"/><m:ctrlPr><m:rPr/></m:ctrlPr></m:naryPr><m:e><m:r><m:t>v</m:t></m:r></m:e></m:nary></m:oMath>
+<!-- limits and functions -->
+<m:oMath><m:limLow><m:e><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>lim</m:t></m:r></m:e><m:lim><m:r><m:t>n→∞</m:t></m:r></m:lim></m:limLow><m:limLow><m:e><m:r><m:t>lim</m:t></m:r></m:e><m:lim><m:r><m:t>x</m:t></m:r></m:lim></m:limLow><m:limUpp><m:e><m:r><m:t>A</m:t></m:r></m:e><m:lim><m:r><m:t>def</m:t></m:r></m:lim></m:limUpp><m:limLow><m:e><m:r><m:t>X</m:t></m:r></m:e><m:lim><m:r><m:t>y</m:t></m:r></m:lim></m:limLow><m:limUpp><m:e><m:groupChr><m:e><m:r><m:t>a+b</m:t></m:r></m:e></m:groupChr></m:e><m:lim><m:r><m:t>n</m:t></m:r></m:lim></m:limUpp><m:func><m:fName><m:r><m:t>sin</m:t></m:r></m:fName><m:e><m:r><m:t>x</m:t></m:r></m:e></m:func><m:func><m:fName><m:r><m:t>foo</m:t></m:r></m:fName><m:e></m:e></m:func><m:func><m:fName><m:limLow><m:e><m:r><m:t>max</m:t></m:r></m:e><m:lim><m:r><m:t>i</m:t></m:r></m:lim></m:limLow></m:fName><m:e><m:r><m:t>a</m:t></m:r></m:e></m:func></m:oMath>
+<!-- accents and bars -->
+<m:oMath><m:acc><m:e><m:r><m:t>x</m:t></m:r></m:e></m:acc><m:acc><m:accPr><m:chr m:val="̇"/></m:accPr><m:e><m:r><m:t>y</m:t></m:r></m:e></m:acc><m:acc><m:accPr><m:chr m:val="⃗"/></m:accPr><m:e><m:r><m:t>v</m:t></m:r></m:e></m:acc><m:acc><m:accPr><m:chr m:val="~"/></m:accPr><m:e><m:r><m:t>t</m:t></m:r></m:e></m:acc><m:acc><m:accPr><m:chr m:val="?"/></m:accPr><m:e><m:r><m:t>q</m:t></m:r></m:e></m:acc><m:acc><m:accPr><m:chr m:val="&lt;&amp;"/></m:accPr><m:e><m:r><m:t>z</m:t></m:r></m:e></m:acc><m:bar><m:e><m:r><m:t>a</m:t></m:r></m:e></m:bar><m:bar><m:barPr><m:pos m:val="bot"/></m:barPr><m:e><m:r><m:t>b</m:t></m:r></m:e></m:bar><m:bar><m:barPr><m:pos m:val="top"/></m:barPr><m:e><m:r><m:t>c</m:t></m:r></m:e></m:bar><m:groupChr><m:e><m:r><m:t>d</m:t></m:r></m:e></m:groupChr><m:groupChr><m:groupChrPr><m:pos m:val="bot"/></m:groupChrPr><m:e><m:r><m:t>e</m:t></m:r></m:e></m:groupChr><m:groupChr><m:groupChrPr><m:chr m:val="⏜"/><m:pos m:val="top"/></m:groupChrPr><m:e><m:r><m:t>f</m:t></m:r></m:e></m:groupChr><m:groupChr><m:groupChrPr><m:chr m:val="→"/><m:pos m:val="bot"/></m:groupChrPr><m:e><m:r><m:t>g</m:t></m:r></m:e></m:groupChr></m:oMath>
+<!-- delimiters -->
+<m:oMath><m:d><m:e><m:r><m:t>x</m:t></m:r></m:e></m:d><m:d><m:dPr><m:begChr m:val="["/><m:endChr m:val="}"/><m:sepChr m:val=";"/></m:dPr><m:e><m:r><m:t>a</m:t></m:r></m:e><m:e><m:r><m:t>b</m:t></m:r></m:e><m:e><m:r><m:t>c</m:t></m:r></m:e></m:d><m:d><m:dPr><m:begChr m:val=""/><m:endChr m:val="|"/></m:dPr><m:e><m:r><m:t>y</m:t></m:r></m:e></m:d><m:d><m:dPr><m:begChr m:val="‖"/><m:endChr m:val="{"/></m:dPr><m:e><m:r><m:t>n</m:t></m:r></m:e></m:d><m:d><m:e><m:f><m:fPr><m:type m:val="noBar"/></m:fPr><m:num><m:r><m:t>n</m:t></m:r></m:num><m:den><m:r><m:t>k</m:t></m:r></m:den></m:f></m:e></m:d><m:d><m:e><m:f><m:fPr><m:type m:val="noBar"/></m:fPr><m:num><m:r><m:t>n</m:t></m:r></m:num><m:den><m:r><m:t>k</m:t></m:r></m:den></m:f><m:r><m:t>x</m:t></m:r></m:e></m:d><m:d><m:dPr><m:begChr m:val="&lt;"/><m:endChr m:val="&gt;"/></m:dPr><m:e><m:r><m:t>&amp;</m:t></m:r></m:e></m:d></m:oMath>
+<!-- matrices -->
+<m:oMath><m:m><m:mr><m:e><m:r><m:t>1</m:t></m:r></m:e><m:e><m:r><m:t>0</m:t></m:r></m:e></m:mr><m:mr><m:e><m:r><m:t>0</m:t></m:r></m:e><m:e><m:r><m:t>1</m:t></m:r></m:e></m:mr></m:m><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:m><m:mr><m:e><m:r><m:t>a</m:t></m:r></m:e><m:e><m:r><m:t>b</m:t></m:r></m:e></m:mr></m:m></m:e></m:d><m:d><m:dPr><m:begChr m:val="["/><m:endChr m:val="]"/></m:dPr><m:e><m:m><m:mr><m:e><m:r><m:t>a</m:t></m:r></m:e><m:e><m:r><m:t>b</m:t></m:r></m:e></m:mr></m:m></m:e></m:d><m:d><m:dPr><m:begChr m:val="{"/><m:endChr m:val="}"/></m:dPr><m:e><m:m><m:mr><m:e><m:r><m:t>a</m:t></m:r></m:e><m:e><m:r><m:t>b</m:t></m:r></m:e></m:mr></m:m></m:e></m:d><m:d><m:dPr><m:begChr m:val="|"/><m:endChr m:val="|"/></m:dPr><m:e><m:m><m:mr><m:e><m:r><m:t>a</m:t></m:r></m:e><m:e><m:r><m:t>b</m:t></m:r></m:e></m:mr></m:m></m:e></m:d><m:d><m:dPr><m:begChr m:val="‖"/><m:endChr m:val="‖"/></m:dPr><m:e><m:m><m:mr><m:e><m:r><m:t>a</m:t></m:r></m:e><m:e><m:r><m:t>b</m:t></m:r></m:e></m:mr></m:m></m:e></m:d><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val="]"/></m:dPr><m:e><m:m><m:mr><m:e><m:r><m:t>a</m:t></m:r></m:e><m:e><m:r><m:t>b</m:t></m:r></m:e></m:mr></m:m></m:e></m:d><m:eqArr><m:e><m:r><m:t>x=1</m:t></m:r></m:e><m:e><m:r><m:t>y=2</m:t></m:r></m:e></m:eqArr></m:oMath>
+<!-- boxes and unknown elements -->
+<m:oMath><m:box><m:e><m:r><m:t>b</m:t></m:r></m:e></m:box><m:borderBox><m:e><m:r><m:t>c</m:t></m:r></m:e></m:borderBox><m:phant><m:e><m:r><m:t>p</m:t></m:r></m:e></m:phant><m:phant><m:phantPr><m:show m:val="0"/></m:phantPr></m:phant><m:unknown><m:r><m:t>u</m:t></m:r><m:r><m:t>v</m:t></m:r></m:unknown><m:sSup/><m:f/><m:d/><m:m/><m:nary/><m:acc/><m:rad/><m:limLow/><m:func/><m:sPre/><m:groupChr/><m:bar/><m:eqArr/><w:r><w:t>wordrun</w:t></w:r><w:r><w:commentReference w:id="0"/></w:r></m:oMath>
+<!-- display equations: a paragraph of two, one empty, and one with only properties -->
+<m:oMathPara><m:oMathParaPr><m:jc m:val="left"/></m:oMathParaPr><m:oMath><m:r><m:t>a</m:t></m:r></m:oMath><m:oMath><m:r><m:t>b</m:t></m:r></m:oMath></m:oMathPara>
+<m:oMathPara/>
+<m:oMathPara><m:r><m:t>bare</m:t></m:r></m:oMathPara>
+<m:oMath/>
+<!-- an equation inside an equation is part of the outer one -->
+<m:oMath><m:r><m:t>o</m:t></m:r><m:oMath><m:r><m:t>i</m:t></m:r></m:oMath></m:oMath>
+<!-- pretty-printed: whitespace between elements, CRLF line ends -->
+<m:oMath>
+  <m:rad>
+    <m:deg>
+    </m:deg>
+    <m:e><m:r><m:t>x
+y</m:t></m:r></m:e>
+  </m:rad>
+  <m:nary>
+    <m:sub>
+    </m:sub>
+    <m:e/>
+  </m:nary>
+</m:oMath>
+<!-- a default namespace and other prefixes -->
+<oMath xmlns="http://schemas.openxmlformats.org/officeDocument/2006/math"><r><t>d</t></r><nary><naryPr><ctrlPr><rPr xmlns="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><b/></rPr></ctrlPr></naryPr><e/></nary></oMath>
+<x:oMath xmlns:x="urn:other"><x:f><x:num><x:r><x:t>1</x:t></x:r></x:num><x:den><x:r><x:t>2</x:t></x:r></x:den></x:f><x:nary><x:naryPr><x:ctrlPr><x:rPr><x:b/></x:rPr></x:ctrlPr></x:naryPr></x:nary></x:oMath>
+</doc>

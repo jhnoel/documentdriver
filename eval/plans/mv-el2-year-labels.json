@@ -1,0 +1,11 @@
+{"units": "emu", "ops": [
+  {"op": "object.move", "at": "slide2/s60", "dx": 23523, "dy": -7610},
+  {"op": "object.move", "at": "slide2/s61", "dx": 3988, "dy": 0},
+  {"op": "object.move", "at": "slide2/s62", "dx": 39326, "dy": 0},
+  {"op": "object.move", "at": "slide2/s63", "dx": -6748, "dy": 10},
+  {"op": "object.move", "at": "slide2/s64", "dx": 21472, "dy": -7065},
+  {"op": "object.move", "at": "slide2/s65", "dx": 49693, "dy": -7065},
+  {"op": "object.move", "at": "slide2/s66", "dx": 77914, "dy": -7065},
+  {"op": "object.move", "at": "slide2/s69", "dx": 38957, "dy": -7065},
+  {"op": "object.move", "at": "slide2/s70", "dx": 0, "dy": 10}
+]}

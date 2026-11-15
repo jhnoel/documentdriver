@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A small flat-ODP diagram: two boxes joined by a connector, an ellipse,
+     and a group holding a diamond and a text box. Converted to
+     diagram.pptx by make.sh. -->
+<office:document
+    xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+    xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+    xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+    xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+    xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+    xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0"
+    office:version="1.3"
+    office:mimetype="application/vnd.oasis.opendocument.presentation">
+  <office:styles>
+    <style:style style:name="box" style:family="graphic">
+      <style:graphic-properties draw:fill="solid" draw:fill-color="#4472c4"
+          svg:stroke-color="#2f528f" draw:textarea-vertical-align="middle"/>
+      <style:text-properties fo:color="#ffffff" fo:font-size="18pt"/>
+    </style:style>
+    <style:style style:name="arrow" style:family="graphic">
+      <style:graphic-properties svg:stroke-color="#000000" svg:stroke-width="0.05cm"
+          draw:marker-end="Arrow" draw:marker-end-width="0.3cm"/>
+    </style:style>
+  </office:styles>
+  <office:automatic-styles>
+    <style:page-layout style:name="PM1">
+      <style:page-layout-properties fo:page-width="33.867cm" fo:page-height="19.05cm"
+          style:print-orientation="landscape"/>
+    </style:page-layout>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page style:name="Default" style:page-layout-name="PM1"/>
+  </office:master-styles>
+  <office:body>
+    <office:presentation>
+      <draw:page draw:name="Diagram" draw:master-page-name="Default">
+        <draw:custom-shape draw:id="api" draw:name="API" draw:style-name="box"
+            svg:x="2cm" svg:y="4cm" svg:width="6cm" svg:height="3cm">
+          <text:p>API Gateway</text:p>
+          <draw:enhanced-geometry draw:type="rectangle"
+              svg:viewBox="0 0 21600 21600" draw:enhanced-path="M 0 0 L 21600 0 21600 21600 0 21600 0 0 Z N"/>
+        </draw:custom-shape>
+        <draw:custom-shape draw:id="db" draw:name="Database" draw:style-name="box"
+            svg:x="20cm" svg:y="4cm" svg:width="6cm" svg:height="3cm">
+          <text:p>Database &amp; Cache</text:p>
+          <draw:enhanced-geometry draw:type="round-rectangle"
+              svg:viewBox="0 0 21600 21600" draw:modifiers="3600"/>
+        </draw:custom-shape>
+        <draw:connector draw:name="Link" draw:style-name="arrow" draw:type="standard"
+            draw:start-shape="api" draw:start-glue-point="1"
+            draw:end-shape="db" draw:end-glue-point="3"
+            svg:x1="8cm" svg:y1="5.5cm" svg:x2="20cm" svg:y2="5.5cm"/>
+        <draw:custom-shape draw:name="Note" draw:style-name="box"
+            svg:x="10cm" svg:y="12cm" svg:width="5cm" svg:height="3cm">
+          <text:p>Ellipse</text:p>
+          <draw:enhanced-geometry draw:type="ellipse" svg:viewBox="0 0 21600 21600"/>
+        </draw:custom-shape>
+        <draw:g draw:name="Group">
+          <draw:custom-shape draw:name="Decision" draw:style-name="box"
+              svg:x="18cm" svg:y="11cm" svg:width="4cm" svg:height="4cm">
+            <text:p>Yes?</text:p>
+            <draw:enhanced-geometry draw:type="diamond" svg:viewBox="0 0 21600 21600"/>
+          </draw:custom-shape>
+          <draw:frame draw:name="Label" svg:x="23cm" svg:y="12cm" svg:width="6cm" svg:height="2cm">
+            <draw:text-box>
+              <text:p>Grouped <text:span>label</text:span></text:p>
+            </draw:text-box>
+          </draw:frame>
+        </draw:g>
+      </draw:page>
+    </office:presentation>
+  </office:body>
+</office:document>

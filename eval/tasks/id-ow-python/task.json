@@ -1,0 +1,19 @@
+{
+  "id": "id-ow-python",
+  "type": "identify",
+  "category": "icon-grid",
+  "deck": {
+    "path": "web/openwhisk-architecture.pptx",
+    "sha256": "ec2fcddd611d85061cf3028ca6f87c047e4fd05b77cdceb778ea87636f1e96b5",
+    "licence": "Apache-2.0"
+  },
+  "slide": "/ppt/slides/slide1.xml",
+  "instruction": "Which picture is the Python logo among the runtime gears?",
+  "answer": {
+    "ids": [
+      "s129"
+    ]
+  },
+  "notes": "s129 Picture 128 -> media/image19.png (Python). Java is s512, Docker s644.",
+  "max_new": 0
+}

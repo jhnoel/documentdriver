@@ -1,0 +1,34 @@
+{
+  "id": "in-aa33-mentoring",
+  "type": "insert",
+  "category": "hub",
+  "deck": {
+    "path": "repos/apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
+    "sha256": "5df09eff2c5fbb2bea72971421dc5507d68cab10ce3af8791969fdee35e76991",
+    "licence": "Apache-2.0 (Apache POI test data)"
+  },
+  "slide": "/ppt/slides/slide33.xml",
+  "instruction": "Add a new oval labelled 'Mentoring Programs' and link it to the 'Community' circle with a straight connector glued at both ends, styled like the other links (2 pt, the same blue).",
+  "max_new": 3,
+  "checks": [
+    {
+      "type": "new_shape",
+      "text": "Mentoring Programs",
+      "geoms": [
+        "ellipse"
+      ],
+      "alias": "m"
+    },
+    {
+      "type": "connector",
+      "from": "s38",
+      "to": "$m",
+      "geoms": [
+        "straightConnector1",
+        "line"
+      ],
+      "width_pt": 2,
+      "hex": "4A7EBB"
+    }
+  ]
+}

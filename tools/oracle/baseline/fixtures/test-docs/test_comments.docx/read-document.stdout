@@ -1,0 +1,124 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "comments": [
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "at": "10000002",
+              "end": 75,
+              "occurrence": 1,
+              "select": "January 15, 2026",
+              "start": 59
+            }
+          ]
+        },
+        "durableId": "0E493A22",
+        "id": "0",
+        "replies": [],
+        "root": {
+          "author": "Legal Reviewer",
+          "date": "2000-01-01T00:00:00Z",
+          "paraId": "10000006",
+          "text": "Please confirm the effective date and verify the exact registered legal names of both parties."
+        },
+        "status": "open"
+      },
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "at": "10000003",
+              "end": 218,
+              "occurrence": 1,
+              "select": "whether orally or in writing",
+              "start": 190
+            }
+          ]
+        },
+        "durableId": "227BE7CA",
+        "id": "1",
+        "replies": [],
+        "root": {
+          "author": "Legal Reviewer",
+          "date": "2000-01-01T00:00:00Z",
+          "paraId": "10000007",
+          "text": "Consider requiring oral disclosures to be summarized in writing within 30 days to qualify as Confidential Information."
+        },
+        "status": "open"
+      },
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "at": "10000004",
+              "end": 134,
+              "occurrence": 1,
+              "select": "five (5) years",
+              "start": 120
+            }
+          ]
+        },
+        "durableId": "5760A6F9",
+        "id": "2",
+        "replies": [],
+        "root": {
+          "author": "Legal Reviewer",
+          "date": "2000-01-01T00:00:00Z",
+          "paraId": "10000008",
+          "text": "Five years is acceptable for general business information, but trade secrets should remain protected for so long as they qualify as trade secrets under applicable law."
+        },
+        "status": "open"
+      },
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "at": "10000005",
+              "end": 172,
+              "occurrence": 1,
+              "select": "3. Governing Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws principles.",
+              "start": 0
+            }
+          ]
+        },
+        "durableId": "4917ED84",
+        "id": "3",
+        "replies": [],
+        "root": {
+          "author": "Legal Reviewer",
+          "date": "2000-01-01T00:00:00Z",
+          "paraId": "10000009",
+          "text": "Confirm whether the parties also want an exclusive venue and jurisdiction clause in Delaware."
+        },
+        "status": "open"
+      }
+    ],
+    "content_type": "text/html",
+    "idRepairsNeeded": 0,
+    "kind": "document",
+    "markup": "<section data-docx-section=\"1\">\n<p id=\"10000001\">MUTUAL NON-DISCLOSURE AGREEMENT</p>\n<p id=\"10000002\">This Mutual Non-Disclosure Agreement is entered into as of <span data-docx-comment-start=\"0\" hidden></span>January 15, 2026<span data-docx-comment-end=\"0\" hidden></span>, by and between Acme Corp. and Beta Industries LLC.</p>\n<p id=\"10000003\">1. Confidential Information. For purposes of this Agreement, Confidential Information means any non-public technical, financial, or business information disclosed by one party to the other, <span data-docx-comment-start=\"1\" hidden></span>whether orally or in writing<span data-docx-comment-end=\"1\" hidden></span>.</p>\n<p id=\"10000004\">2. Term and Termination. The obligations of confidentiality under this Agreement shall remain in effect for a period of <span data-docx-comment-start=\"2\" hidden></span>five (5) years<span data-docx-comment-end=\"2\" hidden></span> from the date of disclosure. Either party may terminate this Agreement upon thirty (30) days prior written notice.</p>\n<p id=\"10000005\"><span data-docx-comment-start=\"3\" hidden></span>3. Governing Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws principles.<span data-docx-comment-end=\"3\" hidden></span></p>\n</section>",
+    "projection_version": 4,
+    "sections": [
+      {
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "index": 1,
+        "paragraph_end": 5,
+        "paragraph_start": 0
+      }
+    ],
+    "selection_space": {
+      "offset_unit": "unicode_scalar",
+      "view": "final"
+    },
+    "source": "sha256:66c8625053ef3039774835a1cfb32c17a14623bd17e4bbe93c118cd01bef8d10",
+    "styles": {},
+    "tables": [],
+    "view": "markup"
+  },
+  "source": "sha256:66c8625053ef3039774835a1cfb32c17a14623bd17e4bbe93c118cd01bef8d10"
+}

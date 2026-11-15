@@ -1,0 +1,8 @@
+{"ops": [
+  {"op": "object.set", "at": "slide7/s6", "fill": {"scheme": "accent2"}},
+  {"op": "object.set", "at": "slide7/s50", "fill": {"scheme": "accent2"}},
+  {"op": "object.set", "at": "slide7/s51", "fill": {"scheme": "accent2"}},
+  {"op": "object.set", "at": "slide7/s58", "fill": {"scheme": "accent2"}},
+  {"op": "object.set", "at": "slide7/s69", "fill": {"scheme": "accent2"}},
+  {"op": "object.set", "at": "slide7/s71", "fill": {"scheme": "accent2"}}
+]}

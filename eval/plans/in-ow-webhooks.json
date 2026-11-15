@@ -1,0 +1,5 @@
+{"ops": [
+  {"op": "object.add", "at": "slide1", "as": "wh", "kind": "shape", "name": "Webhooks", "geom": "roundRect", "box": [269, 386, 80, 24], "fill": {"scheme": "accent6", "mods": [{"lumMod": 20000}, {"lumOff": 80000}]}, "line": {"w": 1, "color": {"scheme": "accent3", "mods": [{"lumMod": 75000}]}}, "html": "<p style=\"text-align:center\">Webhooks</p>"},
+  {"op": "object.duplicate", "at": "slide1/s284", "as": "link"},
+  {"op": "object.set", "at": "$link", "from_glue": "$wh:3", "from": [349, 398]}
+]}

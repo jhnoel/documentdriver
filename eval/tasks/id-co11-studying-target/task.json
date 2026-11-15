@@ -1,0 +1,19 @@
+{
+  "id": "id-co11-studying-target",
+  "type": "identify",
+  "category": "flowchart",
+  "deck": {
+    "path": "repos/apache-poi/test-data/slideshow/aascu.org_hbcu_leadershipsummit_cooper_.pptx",
+    "sha256": "0089e34825a40c63c3001b866a0f769fceaae7f0748a8f444db513305d9baa70",
+    "licence": "Apache-2.0 (Apache POI test data)"
+  },
+  "slide": "/ppt/slides/slide11.xml",
+  "instruction": "Which box does the arrow leaving 'Too little studying' point to?",
+  "answer": {
+    "ids": [
+      "s16"
+    ]
+  },
+  "notes": "s33 glued s15:2 -> s16:0 'Poor grades'. Four boxes share the name 'Content Placeholder 6', so only the id answers it.",
+  "max_new": 0
+}

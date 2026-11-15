@@ -1,0 +1,27 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "matches": [
+      {
+        "id": "10000003",
+        "index": 3,
+        "selectable_text": "1. Confidential Information. For purposes of this Agreement, Confidential Information means any non-public technical, financial, or business information disclosed by one party to the other, whether orally or in writing.",
+        "text": "1. Confidential Information. For purposes of this Agreement, Confidential Information means any non-public technical, financial, or business information disclosed by one party to the other, whether orally or in writing."
+      },
+      {
+        "id": "10000004",
+        "index": 4,
+        "selectable_text": "2. Term and Termination. The obligations of confidentiality under this Agreement shall remain in effect for a period of five (5) years from the date of disclosure. Either party may terminate this Agreement upon thirty (30) days prior written notice.",
+        "text": "2. Term and Termination. The obligations of confidentiality under this Agreement shall remain in effect for a period of five (5) years from the date of disclosure. Either party may terminate this Agreement upon thirty (30) days prior written notice."
+      },
+      {
+        "id": "10000005",
+        "index": 5,
+        "selectable_text": "3. Governing Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws principles.",
+        "text": "3. Governing Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws principles."
+      }
+    ]
+  },
+  "source": "sha256:66c8625053ef3039774835a1cfb32c17a14623bd17e4bbe93c118cd01bef8d10"
+}

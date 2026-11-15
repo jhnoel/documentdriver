@@ -1,0 +1,20 @@
+{
+  "id": "id-aa33-teachers-links",
+  "type": "identify",
+  "category": "hub",
+  "deck": {
+    "path": "repos/apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
+    "sha256": "5df09eff2c5fbb2bea72971421dc5507d68cab10ce3af8791969fdee35e76991",
+    "licence": "Apache-2.0 (Apache POI test data)"
+  },
+  "slide": "/ppt/slides/slide33.xml",
+  "instruction": "Which ovals are linked to the 'Teachers' circle by connectors?",
+  "answer": {
+    "ids": [
+      "s43",
+      "s44"
+    ]
+  },
+  "notes": "s32 s5:7->s44:3, s37 s5:5->s43:1.",
+  "max_new": 0
+}

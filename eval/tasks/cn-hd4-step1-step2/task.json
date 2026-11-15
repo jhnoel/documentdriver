@@ -1,0 +1,30 @@
+{
+  "id": "cn-hd4-step1-step2",
+  "type": "connect",
+  "category": "process",
+  "deck": {
+    "path": "web/healthdcat-workflow.pptx",
+    "sha256": "cc66b147c9e13fef31a96a13cbca4cbb6769f5f81a5232dc98e2d6e27e66d4e4",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide4.xml",
+  "instruction": "Replace the loose arrow between square 1 and square 2 with a connector glued to the right side of square 1 and the left side of square 2, with the arrowhead at square 2.",
+  "targets": [
+    "s6"
+  ],
+  "max_new": 1,
+  "checks": [
+    {
+      "type": "deleted",
+      "target": "s6"
+    },
+    {
+      "type": "connector",
+      "from": "s4",
+      "from_side": "right",
+      "to": "s7",
+      "to_side": "left",
+      "arrow_at": "to"
+    }
+  ]
+}

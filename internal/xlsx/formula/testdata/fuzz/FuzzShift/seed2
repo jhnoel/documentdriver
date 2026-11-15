@@ -1,0 +1,5 @@
+go test fuzz v1
+string("'It''s'!$A$1:B2+Jan:Mar!C3")
+byte('\x02')
+uint16(6)
+uint8(3)

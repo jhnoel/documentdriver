@@ -1,0 +1,32 @@
+# file	case	exit	stdout	stderr (SHA-256, first 16 hex digits; - when empty)
+# oracle: docxdriver 0.5.2 (docxdriver 1ffb0d7)
+rich-bare-text.docx	read-document	-1	-	64b9dcdc55f2ea11
+rich-bare-text.docx	read-document-final	-1	-	997710e82bf524c8
+rich-bare-text.docx	read-document-original	-1	-	15019c1bd0338564
+rich-bare-text.docx	read-document-ui	0	b667c1d1f73d7aff	-
+rich-bare-text.docx	read-document-ui-final	-1	-	c73d86f5aa191bd2
+rich-bare-text.docx	read-document-ui-original	-1	-	5441e1a5eb93fd5a
+rich-bare-text.docx	read-styles	0	28b4f81a606aa658	-
+rich-bare-text.docx	read-comments	0	df900a14116fd870	-
+rich-bare-text.docx	read-revisions	-1	-	4c293f0596da6b68
+rich-bare-text.docx	read-bookmarks	0	c621045a26b782e0	-
+rich-bare-text.docx	read-assets	0	871641289d1d14f2	-
+rich-bare-text.docx	find	0	1dd479055cfa8604	-
+rich-bare-text.docx	find-final	0	17730c91f6980800	-
+rich-bare-text.docx	find-original	0	9160a7117515b737	-
+rich-bare-text.docx	find-ignore-case	0	53bf92175f319a9c	-
+rich.docx	read-document	0	16aff59a8ffb4766	-
+rich.docx	read-document-final	0	7806e905b9908b0c	-
+rich.docx	read-document-original	0	ea446b3a87f6db03	-
+rich.docx	read-document-ui	0	164bbe1c02f2d87c	-
+rich.docx	read-document-ui-final	0	96aa3a8d91d26dfd	-
+rich.docx	read-document-ui-original	0	e5bbe64d2fe821eb	-
+rich.docx	read-styles	0	2bb38d58ea276bbe	-
+rich.docx	read-comments	0	099acaded39f1119	-
+rich.docx	read-revisions	0	d6bd719cc28c85d4	-
+rich.docx	read-bookmarks	0	cf8f83c637d86d31	-
+rich.docx	read-assets	0	abe2c5b081ed17ef	-
+rich.docx	find	0	3a8412ee3c7f797e	-
+rich.docx	find-final	0	6c17e135b222725a	-
+rich.docx	find-original	0	cb4d0b296b2bdb11	-
+rich.docx	find-ignore-case	0	13528d0e051789d4	-

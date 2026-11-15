@@ -1,0 +1,53 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "kind": "styles",
+    "source": "sha256:8cbb2b4937f5f1cc4b9f6fcff8caca85c0a77cf2a8bc8c47b21e809480f9962b",
+    "styles": [
+      {
+        "default": true,
+        "name": "Normal",
+        "styleId": "Normal",
+        "type": "paragraph"
+      },
+      {
+        "default": true,
+        "name": "Default Paragraph Font",
+        "styleId": "DefaultParagraphFont",
+        "type": "character"
+      },
+      {
+        "default": true,
+        "name": "Normal Table",
+        "styleId": "TableNormal",
+        "type": "table"
+      },
+      {
+        "default": true,
+        "name": "No List",
+        "styleId": "NoList",
+        "type": "numbering"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "annotation text",
+        "styleId": "CommentText",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Comment Text Char",
+        "styleId": "CommentTextChar",
+        "type": "character"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "annotation reference",
+        "styleId": "CommentReference",
+        "type": "character"
+      }
+    ]
+  },
+  "source": "sha256:8cbb2b4937f5f1cc4b9f6fcff8caca85c0a77cf2a8bc8c47b21e809480f9962b"
+}

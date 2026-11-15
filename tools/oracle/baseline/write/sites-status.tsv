@@ -1,0 +1,267 @@
+# refusal site	status	enclosing function	reason or first recorded run (statuses: recorded, open, shadowed, unreachable, dead, not-a-refusal)
+bookmarks.rs:58	shadowed	validate_new_name	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+bookmarks.rs:78	shadowed	validate_new_name	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+bookmarks.rs:83	shadowed	validate_new_name	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+bookmarks.rs:94	shadowed	validate_existing_name	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+bookmarks.rs:251	recorded	unknown_name	bookmark_rename/negative/write:badroot/no-such-bookmark track
+bookmarks.rs:269	recorded	ensure_unused	bookmark_add/negative/write:badroot/the-same-name-twice track
+bookmarks.rs:283	open	find_body_start	reachable only with a malformed or unusual package; needs a dirty-family fixture
+bookmarks.rs:305	recorded	find_body_start	bookmark_rename/negative/authored:rich/site-bookmarks-rs-305-bookmark-in-a-header track
+bookmarks.rs:394	shadowed	place	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+bookmarks.rs:409	recorded	place	bookmark_add/negative/write:mixed/site-bookmarks-rs-409-select-with-markup track
+bookmarks.rs:416	open	place	reachable; no recorded case reaches it yet
+bookmarks.rs:426	open	place	reachable; no recorded case reaches it yet
+bookmarks.rs:476	shadowed	resolve_body_paragraph	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+bookmarks.rs:534	not-a-refusal	rename	a label or success summary the scanner picked up, not a refusal message
+comments.rs:64	recorded	parse_part	comment_add/negative/write:malformed/site-comments-rs-407-malformed-commentsextended-xml track
+comments.rs:80	open	register_part	reachable only with a malformed or unusual package; needs a dirty-family fixture
+comments.rs:112	open	register_part	reachable only with a malformed or unusual package; needs a dirty-family fixture
+comments.rs:365	open	append_comment_record	reachable only with a malformed or unusual package; needs a dirty-family fixture
+comments.rs:407	open	append_comment_record	reachable only with a malformed or unusual package; needs a dirty-family fixture
+comments.rs:429	open	append_comment_record	reachable only with a malformed or unusual package; needs a dirty-family fixture
+comments.rs:441	open	append_comment_record	reachable only with a malformed or unusual package; needs a dirty-family fixture
+comments.rs:757	recorded	reply_comment_typed	comment_reply/negative/write:badroot/no-such-comment track
+comments.rs:789	recorded	resolve_comment_typed	comment_reply/negative/write:badroot/no-such-comment track
+comments.rs:797	open	resolve_comment_typed	reachable only with a malformed or unusual package; needs a dirty-family fixture
+comments.rs:841	recorded	delete_comment_typed	comment_reply/negative/write:badroot/no-such-comment track
+equations.rs:80	recorded	replace	replace_equation/negative/write:badroot/paragraph-without-an-equation track
+equations.rs:81	recorded	replace	replace_equation/negative/write:mixed/site-equations-rs-81-several-equations-no-index track
+equations.rs:82	recorded	replace	replace_equation/negative/write:mixed/equation-index-out-of-range track
+equations.rs:86	recorded	replace	replace_equation/negative/write:mixed/site-equations-rs-86-equation-inside-a-revision track
+equations.rs:142	recorded	delete	replace_equation/negative/write:badroot/paragraph-without-an-equation track
+equations.rs:143	recorded	delete	replace_equation/negative/write:mixed/site-equations-rs-81-several-equations-no-index track
+equations.rs:144	recorded	delete	replace_equation/negative/write:mixed/equation-index-out-of-range track
+equations.rs:148	recorded	delete	delete_equation/negative/write:mixed/site-equations-rs-148-equation-inside-a-revision track
+headers.rs:51	open	ensure_content_type	reachable only with a malformed or unusual package; needs a dirty-family fixture
+headers.rs:81	open	ensure_document_rel	reachable only with a malformed or unusual package; needs a dirty-family fixture
+headers.rs:119	open	ensure_r_ns	reachable only with a malformed or unusual package; needs a dirty-family fixture
+headers.rs:214	shadowed	set_chrome_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+headers.rs:223	recorded	set_chrome_typed	set_header/positive/write:sections/even-header-while-even-odd-is-off track
+headers.rs:248	open	set_chrome_typed	reachable only with a malformed or unusual package; needs a dirty-family fixture
+headers.rs:251	open	set_chrome_typed	reachable only with a malformed or unusual package; needs a dirty-family fixture
+headers.rs:361	open	tracked_story	reachable only with a malformed or unusual package; needs a dirty-family fixture
+headers.rs:364	recorded	tracked_story	set_header/positive/corpus-lo:ooxmlexport.tableCurrupt/default-header track
+headers.rs:378	open	tracked_story	reachable; no recorded case reaches it yet
+headers.rs:388	open	tracked_story	reachable; no recorded case reaches it yet
+headers.rs:389	open	tracked_story	reachable; no recorded case reaches it yet
+headers.rs:407	open	tracked_story	reachable; no recorded case reaches it yet
+headers.rs:547	shadowed	clear_chrome_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+headers.rs:554	recorded	clear_chrome_typed	clear_header/negative/write:badroot/clear-a-first-header-that-is-not-there track
+headers.rs:564	recorded	clear_chrome_typed	clear_header/positive/write:sections/section-3-default-after-section-1 track
+headers.rs:569	open	clear_chrome_typed	reachable only with a malformed or unusual package; needs a dirty-family fixture
+headers.rs:643	open	set_even_and_odd_headers_typed	reachable only with a malformed or unusual package; needs a dirty-family fixture
+layout.rs:19	open	ensure_sect_pr	reachable only with a malformed or unusual package; needs a dirty-family fixture
+layout.rs:25	recorded	ensure_sect_pr	set_page_margins/negative/write:badroot/section-out-of-range track
+layout.rs:70	shadowed	set_page_margins_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+layout.rs:76	shadowed	set_page_margins_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+layout.rs:447	recorded	snapshot_section_properties	set_page_margins/negative/write:sections/site-layout-rs-447-pending-sectprchange-by-another-author track
+layout.rs:471	recorded	set_first_page_mode	set_section_layout/positive/write:sections/portrait-letter track
+layout.rs:494	recorded	set_section_layout	set_section_layout/positive/write:sections/portrait-letter track
+layout.rs:524	recorded	set_section_layout	set_section_layout/negative/write:mixed/site-layout-rs-524-columns-do-not-fit-the-text-area track
+layout.rs:526	recorded	set_section_layout	set_section_layout/dirty/write:badroot/explicit-column-widths track
+layout.rs:528	recorded	set_section_layout	set_section_layout/dirty/write:badroot/explicit-column-widths track
+lists.rs:83	open	new	reachable only with a malformed or unusual package; needs a dirty-family fixture
+lists.rs:93	open	new	reachable only with a malformed or unusual package; needs a dirty-family fixture
+lists.rs:95	open	new	reachable only with a malformed or unusual package; needs a dirty-family fixture
+lists.rs:105	open	new	reachable only with a malformed or unusual package; needs a dirty-family fixture
+lists.rs:133	recorded	new	set_list/dirty/authored:rich/join-an-existing-list-one-level-down track
+lists.rs:138	open	new	reachable only with a malformed or unusual package; needs a dirty-family fixture
+lists.rs:247	open	set_list_cached	reachable; no recorded case reaches it yet
+lists.rs:259	open	set_list_cached	reachable; no recorded case reaches it yet
+lists.rs:267	open	set_list_cached	reachable; no recorded case reaches it yet
+lists.rs:270	recorded	set_list_cached	set_list/negative/write:mixed/site-lists-rs-270-duplicate-paragraph track
+lists.rs:277	recorded	set_list_cached	set_list/positive/corpus-lo:ooxmlimport.bnc821804/new-decimal-list track
+lists.rs:301	unreachable	set_list_cached	needs id spaces or table sizes beyond plan limits, or is an internal assertion
+lists.rs:307	recorded	set_list_cached	set_list/negative/write:badroot/no-such-list track
+lists.rs:327	recorded	set_list_cached	set_list/negative/write:mixed/site-lists-rs-327-level-the-list-does-not-define track
+lists.rs:379	unreachable	set_list_cached	needs id spaces or table sizes beyond plan limits, or is an internal assertion
+mod.rs:188	recorded	run_typed_edit	edit_table/negative/write:badroot/table-out-of-range track
+mod.rs:189	recorded	run_typed_edit	edit_table/negative/write:sections/delete-then-format-the-table direct
+mod.rs:255	open	run_typed_edit_inner	reachable; no recorded case reaches it yet
+mod.rs:539	recorded	run_typed_edit_inner	set_even_and_odd_headers/dirty/write:badroot/on track
+readonly.rs:119	unreachable	find_text	read-side command (read, find, inventory); apply never calls it
+readonly.rs:162	unreachable	list_styles	read-side command (read, find, inventory); apply never calls it
+readonly.rs:238	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:242	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:248	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:254	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:259	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:263	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:267	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:479	recorded	build_package	set_even_and_odd_headers/negative/write:malformed/site-headers-rs-643-malformed-settings-xml direct
+readonly.rs:480	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:512	recorded	build_package	set_even_and_odd_headers/dirty/authored:rich/on direct
+readonly.rs:513	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:526	recorded	build_package	comment_set_status/dirty/write:dirty/resolve track
+readonly.rs:527	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:535	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:536	unreachable	build_package	read-side command (read, find, inventory); apply never calls it
+readonly.rs:575	unreachable	address_created_part	read-side command (read, find, inventory); apply never calls it
+revisions.rs:646	recorded	accept_reject_one_inner	revision_settle/positive/corpus-lo:ooxmlexport.n830205/settle-by-first-paragraph-reject track
+sections.rs:46	open	ensure_final	reachable only with a malformed or unusual package; needs a dirty-family fixture
+sections.rs:60	shadowed	select	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+sections.rs:73	recorded	select	set_section_layout/negative/write:mixed/site-sections-rs-73-handle-names-no-boundary track
+sections.rs:85	recorded	boundary	set_section_boundary/dirty/write:badroot/new-boundary-after-a-paragraph track
+sections.rs:90	recorded	boundary	set_section_boundary/negative/write:mixed/site-sections-rs-90-boundary-in-a-table-cell direct
+sections.rs:96	recorded	boundary	set_section_boundary/positive/corpus-lo:ooxmlimport.bnc821804/new-boundary-after-a-paragraph direct
+sections.rs:112	open	boundary	reachable only with a malformed or unusual package; needs a dirty-family fixture
+sections.rs:115	recorded	boundary	set_section_boundary/positive/write:sections/new-boundary-in-section-3 direct
+sections.rs:120	recorded	boundary	set_section_boundary/negative/write:badroot/remove-a-boundary-that-is-not-one direct
+sections.rs:126	open	boundary	reachable; no recorded case reaches it yet
+sections.rs:129	recorded	boundary	set_section_boundary/positive/write:sections/remove-the-section-2-boundary-no-paraid direct
+sections.rs:167	recorded	boundary	set_section_boundary/positive/write:sections/change-a-boundary-s-break-type direct
+table_structure.rs:20	shadowed	validate	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+table_structure.rs:33	shadowed	validate	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+table_structure.rs:60	shadowed	validate	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+table_structure.rs:79	open	guarded	reachable; no recorded case reaches it yet
+table_structure.rs:112	recorded	guarded	edit_table/positive/write:mixed/delete-a-foreign-tracked-inserted-row direct
+table_structure.rs:140	recorded	regular	edit_table/negative/write:sections/site-table-structure-rs-386-remove-every-row track
+table_structure.rs:212	recorded	grid	edit_table/dirty/corpus-lo:ooxmlexport.tdf131203/insert-a-column direct
+table_structure.rs:225	open	check_range	reachable; no recorded case reaches it yet
+table_structure.rs:228	unreachable	check_range	needs id spaces or table sizes beyond plan limits, or is an internal assertion
+table_structure.rs:230	open	check_range	reachable; no recorded case reaches it yet
+table_structure.rs:322	recorded	edit	edit_table/positive/write:mixed/split-a-horizontally-merged-cell track
+table_structure.rs:352	open	edit	reachable; no recorded case reaches it yet
+table_structure.rs:354	unreachable	edit	needs id spaces or table sizes beyond plan limits, or is an internal assertion
+table_structure.rs:386	open	edit	reachable; no recorded case reaches it yet
+table_structure.rs:405	open	edit	reachable only with a malformed or unusual package; needs a dirty-family fixture
+table_structure.rs:408	unreachable	edit	needs id spaces or table sizes beyond plan limits, or is an internal assertion
+table_structure.rs:439	open	edit	reachable; no recorded case reaches it yet
+table_structure.rs:444	open	edit	reachable only with a malformed or unusual package; needs a dirty-family fixture
+table_structure.rs:517	open	edit	reachable; no recorded case reaches it yet
+table_structure.rs:520	open	edit	reachable; no recorded case reaches it yet
+table_structure.rs:524	open	edit	reachable only with a malformed or unusual package; needs a dirty-family fixture
+table_structure.rs:529	recorded	edit	edit_table/negative/write:sections/site-table-structure-rs-529-split-a-vertical-continuation direct
+table_structure.rs:543	open	edit	reachable only with a malformed or unusual package; needs a dirty-family fixture
+table_structure.rs:552	recorded	edit	edit_table/negative/write:sections/site-table-structure-rs-552-split-an-unmerged-cell direct
+table_structure.rs:585	recorded	guarded_tracked	edit_table/positive/write:mixed/delete-a-foreign-tracked-inserted-row track
+table_structure.rs:590	open	guarded_tracked	reachable; no recorded case reaches it yet
+table_structure.rs:601	recorded	guarded_tracked	edit_table/positive/write:mixed/delete-a-foreign-tracked-inserted-row direct
+table_structure.rs:625	recorded	insert	insert_table/negative/write:sections/site-table-structure-rs-625-table-at-a-section-boundary-para track
+table_structure.rs:631	open	insert	reachable only with a malformed or unusual package; needs a dirty-family fixture
+table_structure.rs:634	open	insert	reachable; no recorded case reaches it yet
+table_structure.rs:676	not-a-refusal	insert	a label or success summary the scanner picked up, not a refusal message
+table_structure.rs:700	recorded	insert	insert_table/negative/write:mixed/site-table-structure-rs-700-last-block-of-a-table-cell-track track
+tables.rs:118	shadowed	number	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:124	shadowed	address	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:161	open	resolve	reachable; no recorded case reaches it yet
+tables.rs:165	open	resolve	reachable; no recorded case reaches it yet
+tables.rs:170	open	resolve	reachable; no recorded case reaches it yet
+tables.rs:176	recorded	resolve	format_cell/negative/write:mixed/site-tables-rs-176-a-vertical-merge-continuation track
+tables.rs:184	open	resolve	reachable only with a malformed or unusual package; needs a dirty-family fixture
+tables.rs:192	shadowed	dimension_valid	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:210	shadowed	width_valid	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:249	shadowed	borders_valid	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:252	shadowed	borders_valid	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:258	shadowed	borders_valid	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:267	shadowed	clear_valid	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:283	shadowed	validate_table	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:304	shadowed	validate_table	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:310	shadowed	validate_table	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:316	shadowed	validate_table	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:319	shadowed	validate_table	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:333	shadowed	validate_cell	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:339	shadowed	validate_cell	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:342	shadowed	validate_cell	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:359	shadowed	validate_row	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:362	shadowed	validate_row	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+tables.rs:395	open	snapshot	reachable; no recorded case reaches it yet
+tables.rs:402	recorded	snapshot	format_row/positive/write:mixed/a-tracked-row track
+tables.rs:495	recorded	format_table	format_table/dirty/corpus-lo:ooxmlexport.tdf131203/padding-spacing-style-clear track
+tables.rs:502	recorded	format_table	format_table/dirty/authored:rich/padding-spacing-style-clear track
+tables.rs:508	open	format_table	reachable only with a malformed or unusual package; needs a dirty-family fixture
+tables.rs:516	recorded	format_table	format_table/negative/write:mixed/site-tables-rs-516-column-widths-count-differs-from-the-grid track
+tables.rs:533	open	format_table	reachable; no recorded case reaches it yet
+tables.rs:923	open	logical_cells	reachable only with a malformed or unusual package; needs a dirty-family fixture
+tables.rs:927	open	logical_cells	reachable only with a malformed or unusual package; needs a dirty-family fixture
+tables.rs:955	open	logical_cells	reachable only with a malformed or unusual package; needs a dirty-family fixture
+typed.rs:77	recorded	select_in_paragraph	replace_text/negative/write:badroot/select-not-found track
+typed.rs:84	recorded	select_in_paragraph	replace_text/negative/write:badroot/occurrence-out-of-range track
+typed.rs:90	recorded	select_in_paragraph	replace_text/negative/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/ambiguous-select track
+typed.rs:208	recorded	missing_paragraph	delete_paragraphs/negative/write:badroot/delete-then-format-the-paragraph direct
+typed.rs:218	recorded	note_link	replace_paragraph/dirty/write:badroot/inline-html track
+typed.rs:227	recorded	note_link	replace_paragraph/negative/write:mixed/site-typed-rs-227-mixed-hyperlink-targets-in-with track
+typed.rs:232	recorded	note_link	replace_paragraph/dirty/write:badroot/inline-html track
+typed.rs:249	recorded	parse_with	replace_paragraph/negative/write:badroot/unsupported-html-element track
+typed.rs:260	recorded	parse_with	replace_paragraph/negative/write:mixed/site-typed-rs-271-table-structure-in-with track
+typed.rs:271	open	parse_with	reachable; no recorded case reaches it yet
+typed.rs:280	recorded	parse_with	replace_paragraph/negative/write:mixed/site-typed-rs-280-revision-tags-in-with track
+typed.rs:285	recorded	parse_with	replace_paragraph/negative/write:mixed/site-typed-rs-285-a-field-in-with track
+typed.rs:298	recorded	parse_with	replace_paragraph/negative/write:mixed/site-typed-rs-298-a-pending-format-tag-in-with track
+typed.rs:326	recorded	parse_with	replace_paragraph/negative/write:mixed/site-typed-rs-326-a-footnote-in-with track
+typed.rs:331	open	parse_with	reachable; no recorded case reaches it yet
+typed.rs:336	recorded	parse_with	replace_paragraph/negative/write:mixed/site-typed-rs-336-a-comment-milestone-in-with track
+typed.rs:494	recorded	replace_text_typed	replace_text/negative/write:mixed/site-typed-rs-494-select-with-markup track
+typed.rs:570	open	word_diff	reachable; no recorded case reaches it yet
+typed.rs:675	open	replace_range_diff	reachable; no recorded case reaches it yet
+typed.rs:686	recorded	replace_range_diff	replace_text/negative/write:mixed/site-typed-rs-850-selection-crosses-a-field track
+typed.rs:818	recorded	replace_range	replace_text/positive/write:mixed/inside-the-author-s-own-pending-insertion direct
+typed.rs:827	recorded	replace_range	replace_text/dirty/write:malformed/unique-word direct
+typed.rs:840	open	replace_range	reachable; no recorded case reaches it yet
+typed.rs:850	recorded	replace_range	replace_text/negative/write:mixed/site-typed-rs-850-selection-crosses-a-field direct
+typed.rs:1006	recorded	revise_text_typed	revise_text/negative/write:mixed/site-typed-rs-1006-edit-select-with-markup track
+typed.rs:1010	open	revise_text_typed	reachable; no recorded case reaches it yet
+typed.rs:1043	recorded	revise_text_typed	revise_text/negative/write:badroot/within-not-found track
+typed.rs:1050	recorded	revise_text_typed	revise_text/negative/write:mixed/site-typed-rs-1050-within-occurrence-out-of-range track
+typed.rs:1061	recorded	revise_text_typed	revise_text/negative/write:mixed/site-typed-rs-1061-within-ambiguous-in-the-body track
+typed.rs:1109	recorded	revise_text_typed	revise_text/dirty/write:badroot/body-scope-replace-all track
+typed.rs:1119	recorded	revise_text_typed	revise_text/negative/write:mixed/site-typed-rs-1119-edit-occurrence-out-of-range track
+typed.rs:1126	recorded	revise_text_typed	revise_text/negative/write:badroot/body-scope-ambiguous track
+typed.rs:1140	recorded	revise_text_typed	revise_text/negative/write:badroot/overlapping-edits track
+typed.rs:1219	recorded	replace_paragraph_typed	replace_paragraph/positive/write:mixed/paragraph-holding-a-comment-range track
+typed.rs:1297	not-a-refusal	replace_paragraph_typed	a label or success summary the scanner picked up, not a refusal message
+typed.rs:1354	recorded	remove_range_direct	replace_text/negative/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/selector-drift-after-an-earlier-edit direct
+typed.rs:1593	unreachable	insert_plain_pieces	needs id spaces or table sizes beyond plan limits, or is an internal assertion
+typed.rs:1641	dead	opt_bool	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1650	dead	optional_string	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1661	dead	optional_twips	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1663	dead	optional_twips	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1667	dead	optional_twips	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1712	dead	parse_char_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1721	dead	parse_char_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1726	dead	parse_char_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1734	dead	parse_char_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1740	dead	parse_char_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1751	dead	parse_char_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1754	dead	parse_char_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1764	dead	parse_char_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1779	dead	parse_char_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:1932	open	apply_char_format	reachable; no recorded case reaches it yet
+typed.rs:1945	open	apply_char_format	reachable; no recorded case reaches it yet
+typed.rs:1955	recorded	apply_char_format	format_text/positive/write:mixed/run-with-a-foreign-rprchange track
+typed.rs:2017	shadowed	format_text_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+typed.rs:2024	recorded	format_text_typed	replace_text/negative/write:mixed/site-typed-rs-494-select-with-markup track
+typed.rs:2030	shadowed	format_text_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+typed.rs:2057	open	format_text_typed	reachable; no recorded case reaches it yet
+typed.rs:2159	dead	parse_para_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:2163	dead	parse_para_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:2176	dead	parse_para_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:2188	dead	parse_para_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:2192	dead	parse_para_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:2202	dead	parse_para_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:2217	dead	parse_para_format	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:2443	shadowed	format_paragraph_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+typed.rs:2462	recorded	format_paragraph_typed	format_paragraph/negative/write:badroot/unknown-style track
+typed.rs:2476	recorded	format_paragraph_typed	format_paragraph/positive/write:mixed/paragraph-with-a-foreign-pprchange track
+typed.rs:2710	shadowed	insert_paragraph_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+typed.rs:2720	recorded	insert_paragraph_typed	insert_paragraph/negative/write:badroot/table-anchor-out-of-range track
+typed.rs:2728	open	insert_paragraph_typed	reachable; no recorded case reaches it yet
+typed.rs:2739	recorded	insert_paragraph_typed	insert_paragraph/negative/write:badroot/unknown-style track
+typed.rs:2752	not-a-refusal	insert_paragraph_typed	a label or success summary the scanner picked up, not a refusal message
+typed.rs:2816	dead	insert_paragraph	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:3017	recorded	wrap_live_content_in_del	delete_paragraphs/negative/write:mixed/site-typed-rs-3017-paragraph-holding-a-content-control track
+typed.rs:3065	shadowed	delete_paragraphs_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+typed.rs:3074	shadowed	delete_paragraphs_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+typed.rs:3081	recorded	delete_paragraphs_typed	delete_paragraphs/positive/write:mixed/paragraph-in-a-table-cell track
+typed.rs:3189	dead	delete_paragraphs	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:3194	dead	delete_paragraphs	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:3243	shadowed	comment_add_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+typed.rs:3252	recorded	comment_add_typed	replace_text/negative/write:mixed/site-typed-rs-494-select-with-markup track
+typed.rs:3268	open	comment_add_typed	reachable; no recorded case reaches it yet
+typed.rs:3281	open	comment_add_typed	reachable; no recorded case reaches it yet
+typed.rs:3291	recorded	comment_add_typed	comment_add/negative/write:mixed/site-typed-rs-3291-selection-crosses-a-field track
+typed.rs:3301	shadowed	comment_add_typed	plan decoding or validate_plan (api.rs) refuses the same input first; the rule and schema cases record it there
+typed.rs:3313	not-a-refusal	comment_add_typed	a label or success summary the scanner picked up, not a refusal message
+typed.rs:3343	dead	comment_add	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:3348	dead	comment_add	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions
+typed.rs:3349	dead	comment_add	parser of the JSON-value command surface; commands/mod.rs dispatches only the *_typed functions

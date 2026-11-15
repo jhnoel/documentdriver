@@ -1,0 +1,1729 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "assets": [
+      {
+        "mime": "image/png",
+        "parts": [
+          "word/media/image.png"
+        ],
+        "size": 68,
+        "url": "assets/9650eb2ef8b938a5e48e539632fc0cd31216d1f910d85f3855ccb9570c7d97e8.png"
+      }
+    ],
+    "blocks": [
+      {
+        "html_end": 708,
+        "html_start": 386,
+        "paragraphs": [
+          "11111111"
+        ]
+      },
+      {
+        "html_end": 1260,
+        "html_start": 709,
+        "paragraphs": [
+          "22222222"
+        ]
+      },
+      {
+        "html_end": 1709,
+        "html_start": 1261,
+        "paragraphs": [
+          "33333333",
+          "33333334",
+          "33333335"
+        ]
+      },
+      {
+        "html_end": 2507,
+        "html_start": 1710,
+        "paragraphs": [
+          "44444444"
+        ]
+      },
+      {
+        "html_end": 2952,
+        "html_start": 2508,
+        "paragraphs": [
+          "55555555"
+        ]
+      },
+      {
+        "html_end": 3146,
+        "html_start": 2953,
+        "paragraphs": [
+          "66666666"
+        ]
+      },
+      {
+        "html_end": 3289,
+        "html_start": 3147,
+        "paragraphs": [
+          "77777777"
+        ]
+      },
+      {
+        "html_end": 3343,
+        "html_start": 3290,
+        "paragraphs": [
+          "1EDE45A3"
+        ]
+      },
+      {
+        "html_end": 3429,
+        "html_start": 3344,
+        "paragraphs": [
+          "4B101413"
+        ]
+      },
+      {
+        "html_end": 3491,
+        "html_start": 3430,
+        "paragraphs": [
+          "11543C1E"
+        ]
+      },
+      {
+        "html_end": 4183,
+        "html_start": 3492,
+        "paragraphs": [
+          "07B86923",
+          "5B82D4E5",
+          "0BA5B732",
+          "78B6F0A2"
+        ]
+      },
+      {
+        "html_end": 4400,
+        "html_start": 4184,
+        "paragraphs": [
+          "28B506BC"
+        ]
+      },
+      {
+        "html_end": 4578,
+        "html_start": 4401,
+        "paragraphs": [
+          "4835B59D"
+        ]
+      },
+      {
+        "html_end": 4756,
+        "html_start": 4579,
+        "paragraphs": [
+          "6C6C0863"
+        ]
+      },
+      {
+        "html_end": 4966,
+        "html_start": 4757,
+        "paragraphs": [
+          "237FFCFB"
+        ]
+      },
+      {
+        "html_end": 5245,
+        "html_start": 4967,
+        "paragraphs": [
+          "58ED22F7"
+        ]
+      },
+      {
+        "html_end": 5430,
+        "html_start": 5246,
+        "paragraphs": [
+          "65B5C986"
+        ]
+      },
+      {
+        "html_end": 5630,
+        "html_start": 5431,
+        "paragraphs": [
+          "35502A25"
+        ]
+      },
+      {
+        "html_end": 5827,
+        "html_start": 5631,
+        "paragraphs": [
+          "284EFEE5"
+        ]
+      },
+      {
+        "html_end": 5985,
+        "html_start": 5828,
+        "paragraphs": [
+          "024A5EFD"
+        ]
+      },
+      {
+        "html_end": 6166,
+        "html_start": 5986,
+        "paragraphs": [
+          "65CA14EF"
+        ]
+      },
+      {
+        "html_end": 6372,
+        "html_start": 6167,
+        "paragraphs": [
+          "2D543CA1"
+        ]
+      },
+      {
+        "html_end": 6600,
+        "html_start": 6373,
+        "paragraphs": [
+          "1B187524"
+        ]
+      },
+      {
+        "html_end": 6821,
+        "html_start": 6601,
+        "paragraphs": [
+          "78F991DC"
+        ]
+      },
+      {
+        "html_end": 7039,
+        "html_start": 6822,
+        "paragraphs": [
+          "3DBA0A7D"
+        ]
+      },
+      {
+        "html_end": 7241,
+        "html_start": 7040,
+        "paragraphs": [
+          "246470C3"
+        ]
+      },
+      {
+        "html_end": 7439,
+        "html_start": 7242,
+        "paragraphs": [
+          "5BF24182"
+        ]
+      },
+      {
+        "html_end": 7649,
+        "html_start": 7440,
+        "paragraphs": [
+          "746C05B4"
+        ]
+      },
+      {
+        "html_end": 7858,
+        "html_start": 7650,
+        "paragraphs": [
+          "6B7986B8"
+        ]
+      },
+      {
+        "html_end": 8071,
+        "html_start": 7859,
+        "paragraphs": [
+          "7853450D"
+        ]
+      },
+      {
+        "html_end": 8347,
+        "html_start": 8072,
+        "paragraphs": [
+          "3F5148AB"
+        ]
+      },
+      {
+        "html_end": 8592,
+        "html_start": 8348,
+        "paragraphs": [
+          "6B642974"
+        ]
+      },
+      {
+        "html_end": 8843,
+        "html_start": 8593,
+        "paragraphs": [
+          "36E8ADAF"
+        ]
+      },
+      {
+        "html_end": 8972,
+        "html_start": 8844,
+        "paragraphs": [
+          "57CDF34A"
+        ]
+      },
+      {
+        "html_end": 9156,
+        "html_start": 8973,
+        "paragraphs": [
+          "0E232A17"
+        ]
+      },
+      {
+        "html_end": 9323,
+        "html_start": 9157,
+        "paragraphs": [
+          "12F2B191"
+        ]
+      },
+      {
+        "html_end": 9473,
+        "html_start": 9324,
+        "paragraphs": [
+          "0A504981"
+        ]
+      },
+      {
+        "html_end": 9659,
+        "html_start": 9474,
+        "paragraphs": [
+          "307A9CF5"
+        ]
+      },
+      {
+        "html_end": 9842,
+        "html_start": 9660,
+        "paragraphs": [
+          "5B954590"
+        ]
+      },
+      {
+        "html_end": 9898,
+        "html_start": 9843,
+        "paragraphs": [
+          "0BBD43EC"
+        ]
+      },
+      {
+        "html_end": 10356,
+        "html_start": 10268,
+        "paragraphs": [
+          "19E0C67D"
+        ]
+      }
+    ],
+    "content_type": "text/html",
+    "css": ".docxdriver { font-family: Calibri, Arial, sans-serif; line-height: 1.2; color: #111; }\n.docxdriver p, .docxdriver h1, .docxdriver h2, .docxdriver h3, .docxdriver h4, .docxdriver h5, .docxdriver h6 { white-space: pre-wrap; tab-size: 4; min-height: 1em; }\n.docxdriver p { margin: 0 0 .6em; }\n.docxdriver table { border-collapse: collapse; max-width: 100%; }\n.docxdriver td, .docxdriver th { border: 1px solid #aaa; padding: .3em .5em; vertical-align: top; }\n.docxdriver img { max-width: 100%; }\n.docxdriver ins { color: #067a35; text-decoration: underline; }\n.docxdriver del { color: #b32323; text-decoration: line-through; }\n.docxdriver [data-docx-format-change] { background: #fff1b8; }\n.docxdriver [data-docx-field] { background: #f2f4f7; }\n.docxdriver ol, .docxdriver ul { padding-left: 2em; }\n.docxdriver li > p { margin-bottom: .25em; }\n.docxdriver [data-docx-marker]::marker { content: attr(data-docx-marker) \" \"; }\n.docxdriver aside { border-top: 1px solid #ddd; margin-top: 1em; font-size: .9em; }\n.docxdriver [data-docx-break=\"page\"] { break-after: page; }\n.docxdriver [data-docx-break=\"column\"] { break-after: column; }\n.docxdriver header, .docxdriver footer { color: #555; }\n",
+    "equations": [
+      {
+        "at": "28B506BC",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>α</mi><mtext> </mtext><mo>+</mo><mtext> </mtext><mi>β</mi><mo mathvariant=\"normal\">sin</mo></math>"
+      },
+      {
+        "at": "4835B59D",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup></math>"
+      },
+      {
+        "at": "6C6C0863",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msub><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow></msub></math>"
+      },
+      {
+        "at": "237FFCFB",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msubsup><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow><mrow><mn>2</mn></mrow></msubsup></math>"
+      },
+      {
+        "at": "58ED22F7",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mmultiscripts><mrow><mi>X</mi></mrow><mrow></mrow><mrow></mrow><mprescripts></mprescripts><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mmultiscripts></math>"
+      },
+      {
+        "at": "65B5C986",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math>"
+      },
+      {
+        "at": "35502A25",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac linethickness=\"0\"><mrow><mi>n</mi></mrow><mrow><mi>k</mi></mrow></mfrac></math>"
+      },
+      {
+        "at": "284EFEE5",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac bevelled=\"true\"><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math>"
+      },
+      {
+        "at": "024A5EFD",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msqrt><mrow><mi>x</mi></mrow></msqrt></math>"
+      },
+      {
+        "at": "65CA14EF",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mroot><mrow><mi>x</mi></mrow><mrow><mn>3</mn></mrow></mroot></math>"
+      },
+      {
+        "at": "2D543CA1",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mover><mo>∑</mo><mrow><mi>N</mi></mrow></mover><mrow><mi>x</mi></mrow></mrow></math>"
+      },
+      {
+        "at": "1B187524",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"false\"><mrow><mo mathvariant=\"normal\">lim</mo></mrow><mrow><mn>0</mn></mrow></munder></math>"
+      },
+      {
+        "at": "78F991DC",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"false\"><mrow><mo mathvariant=\"normal\">max</mo></mrow><mrow><mi>N</mi></mrow></mover></math>"
+      },
+      {
+        "at": "3DBA0A7D",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mrow><mo mathvariant=\"normal\">sin</mo></mrow><mo>⁡</mo><mrow><mi>x</mi></mrow></mrow></math>"
+      },
+      {
+        "at": "246470C3",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>v</mi></mrow><mo stretchy=\"true\">→</mo></mover></math>"
+      },
+      {
+        "at": "5BF24182",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">¯</mo></mover></math>"
+      },
+      {
+        "at": "746C05B4",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"true\"><mrow><mi>y</mi></mrow><mo stretchy=\"true\">¯</mo></munder></math>"
+      },
+      {
+        "at": "6B7986B8",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏞</mo></mover></math>"
+      },
+      {
+        "at": "7853450D",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏟</mo></munder></math>"
+      },
+      {
+        "at": "3F5148AB",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mo stretchy=\"true\" form=\"prefix\">[</mo><mrow><mi>a</mi></mrow><mo>;</mo><mrow><mi>b</mi></mrow><mo stretchy=\"true\" form=\"postfix\">]</mo></mrow></math>"
+      },
+      {
+        "at": "6B642974",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtable><mtr><mtd><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mi>d</mi></mtd></mtr></mtable></math>"
+      },
+      {
+        "at": "36E8ADAF",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtable><mtr><mtd><mi>a</mi><mo>=</mo><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi><mo>=</mo><mi>d</mi></mtd></mtr></mtable></math>"
+      },
+      {
+        "at": "57CDF34A",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>x</mi></math>"
+      },
+      {
+        "at": "0E232A17",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><menclose notation=\"box\"><mrow><mi>y</mi></mrow></menclose></math>"
+      },
+      {
+        "at": "12F2B191",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mphantom><mrow><mi>z</mi></mrow></mphantom></math>"
+      },
+      {
+        "at": "0A504981",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtext>Old math</mtext></math>"
+      },
+      {
+        "at": "307A9CF5",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtext data-docx-unsupported=\"unknown\">Retained unknown</mtext></math>"
+      },
+      {
+        "at": "5B954590",
+        "display": true,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><mi>d</mi><mi>i</mi><mi>s</mi><mi>p</mi><mi>l</mi><mi>a</mi><mi>y</mi></math>"
+      }
+    ],
+    "html": "<section data-docx-section=\"1\" data-docx-first-page=\"true\">\n<header>\n<p>header default</p>\n</header>\n<header data-docx-kind=\"first\">\n<p>header first</p>\n</header>\n<header data-docx-kind=\"even\">\n<p>header even</p>\n</header>\n<footer>\n<p>footer default</p>\n</footer>\n<footer data-docx-kind=\"first\">\n<p>footer first</p>\n</footer>\n<footer data-docx-kind=\"even\">\n<p>footer even</p>\n</footer>\n<p id=\"11111111\" data-docx-ord=\"1\" data-docx-style=\"CustomStyle\"><b>Bold</b><i> italic</i><u> underline</u><s> strike</s><sup> super</sup><sub> sub</sub><a href=\"https://example.com/?a=1&amp;b=2\">Safe link</a><a href=\"#\" data-docx-href=\"custom-scheme:opaque-target\">Opaque link</a><a href=\"#bookmark\">Internal link</a></p>\n<p id=\"22222222\" data-docx-ord=\"2\"><span data-docx-field=\"AUTHOR\" contenteditable=\"false\">Author result</span><span data-docx-field=\"REF source\" contenteditable=\"false\">Complex result</span><span data-docx-comment-start=\"0\" hidden></span>Commented<span data-docx-comment-end=\"0\" hidden></span><b data-docx-format-change=\"true\" data-docx-revision=\"31\" data-docx-author=\"Format Editor\"> changed-format</b><span style=\"font-weight:normal;\" data-docx-format-change=\"true\" data-docx-revision=\"32\" data-docx-author=\"Format Editor\"> neutral-format</span></p>\n<ol data-docx-list=\"42\" data-docx-level=\"0\" start=\"3\" type=\"I\"><li data-docx-marker=\"III.\"><p id=\"33333333\" data-docx-ord=\"3\" data-docx-number=\"III.\">Roman item</p><ol data-docx-list=\"42\" data-docx-level=\"1\" start=\"1\" type=\"a\"><li data-docx-marker=\"a)\"><p id=\"33333334\" data-docx-ord=\"4\" data-docx-number=\"a)\">Nested item</p></li></ol></li><li data-docx-marker=\"IV.\"><p id=\"33333335\" data-docx-ord=\"5\" data-docx-number=\"IV.\">Next item</p></li></ol>\n<p id=\"44444444\" data-docx-ord=\"6\">Common <ins data-docx-revision=\"21\" data-docx-author=\"Insert Editor\">inserted</ins><del data-docx-revision=\"22\" data-docx-author=\"Delete Editor\">deleted</del><sup data-docx-note=\"footnote\" data-docx-note-id=\"7\"><a href=\"#docx-c4c25d2dcc6c68c00c51b70d-footnote-7\">1</a></sup><sup data-docx-note=\"endnote\" data-docx-note-id=\"9\"><a href=\"#docx-c4c25d2dcc6c68c00c51b70d-endnote-9\">1</a></sup><del data-docx-revision=\"24\" data-docx-author=\"Delete Editor\"><sup data-docx-note=\"footnote\" data-docx-note-id=\"10\"><a href=\"#docx-c4c25d2dcc6c68c00c51b70d-footnote-10\">2</a></sup></del><ins data-docx-revision=\"25\" data-docx-author=\"Insert Editor\"><sup data-docx-note=\"endnote\" data-docx-note-id=\"11\"><a href=\"#docx-c4c25d2dcc6c68c00c51b70d-endnote-11\">2</a></sup></ins></p>\n<p id=\"55555555\" data-docx-ord=\"7\"><img src=\"assets/9650eb2ef8b938a5e48e539632fc0cd31216d1f910d85f3855ccb9570c7d97e8.png\" data-docx-image-part=\"word/media/image.png\" width=\"32\" height=\"24\" alt=\"Available picture\"><span data-docx-image-unavailable=\"true\" data-docx-image-rid=\"opaque\" data-docx-image-part=\"word/media/image.emf\" data-docx-image-width=\"48\" data-docx-image-height=\"36\" data-docx-image-alt=\"Opaque picture\">Opaque picture</span></p>\n<p id=\"66666666\" data-docx-ord=\"8\">Unicode 😀 nonbreaking space literal\ttab<span data-docx-tab=\"true\">\t</span><br><br data-docx-break=\"page\"><br data-docx-break=\"column\">Fallback content</p>\n<p id=\"77777777\" data-docx-ord=\"9\" data-docx-break-del=\"23\"><span data-docx-field=\"REF joined\" contenteditable=\"false\">Joined first</span></p>\n<p id=\"1EDE45A3\" data-docx-ord=\"10\">Joined second</p>\n<p id=\"4B101413\" data-docx-ord=\"11\" data-docx-break-ins=\"26\">Inserted break first</p>\n<p id=\"11543C1E\" data-docx-ord=\"12\">Inserted break second</p>\n<table data-docx-table=\"1\" data-docx-handle=\"table:1\"><tbody>\n<tr data-docx-handle=\"table:1/row:1\">\n<td data-docx-handle=\"table:1/row:1/cell:1\" colspan=\"2\" rowspan=\"2\">\n<p id=\"07B86923\" data-docx-ord=\"13\">Merged cell</p>\n</td>\n<td data-docx-handle=\"table:1/row:1/cell:2\">\n<p id=\"5B82D4E5\" data-docx-ord=\"14\">Top cell</p>\n</td>\n</tr>\n<tr data-docx-handle=\"table:1/row:2\">\n<td data-docx-handle=\"table:1/row:2/cell:2\">\n<table data-docx-handle=\"table:2\"><tbody>\n<tr data-docx-handle=\"table:2/row:1\">\n<td data-docx-handle=\"table:2/row:1/cell:1\">\n<p id=\"0BA5B732\" data-docx-ord=\"16\">Nested cell</p>\n</td>\n</tr>\n</tbody></table>\n<p id=\"78B6F0A2\" data-docx-ord=\"17\"></p>\n</td>\n</tr>\n</tbody></table>\n<p id=\"28B506BC\" data-docx-ord=\"18\">runs: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>α</mi><mtext> </mtext><mo>+</mo><mtext> </mtext><mi>β</mi><mo mathvariant=\"normal\">sin</mo></math></p>\n<p id=\"4835B59D\" data-docx-ord=\"19\">sup: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup></math></p>\n<p id=\"6C6C0863\" data-docx-ord=\"20\">sub: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msub><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow></msub></math></p>\n<p id=\"237FFCFB\" data-docx-ord=\"21\">subsup: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msubsup><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow><mrow><mn>2</mn></mrow></msubsup></math></p>\n<p id=\"58ED22F7\" data-docx-ord=\"22\">prescripts: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mmultiscripts><mrow><mi>X</mi></mrow><mrow></mrow><mrow></mrow><mprescripts></mprescripts><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mmultiscripts></math></p>\n<p id=\"65B5C986\" data-docx-ord=\"23\">fraction: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math></p>\n<p id=\"35502A25\" data-docx-ord=\"24\">nobar: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac linethickness=\"0\"><mrow><mi>n</mi></mrow><mrow><mi>k</mi></mrow></mfrac></math></p>\n<p id=\"284EFEE5\" data-docx-ord=\"25\">skew: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac bevelled=\"true\"><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math></p>\n<p id=\"024A5EFD\" data-docx-ord=\"26\">sqrt: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msqrt><mrow><mi>x</mi></mrow></msqrt></math></p>\n<p id=\"65CA14EF\" data-docx-ord=\"27\">root: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mroot><mrow><mi>x</mi></mrow><mrow><mn>3</mn></mrow></mroot></math></p>\n<p id=\"2D543CA1\" data-docx-ord=\"28\">nary: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mover><mo>∑</mo><mrow><mi>N</mi></mrow></mover><mrow><mi>x</mi></mrow></mrow></math></p>\n<p id=\"1B187524\" data-docx-ord=\"29\">limlow: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"false\"><mrow><mo mathvariant=\"normal\">lim</mo></mrow><mrow><mn>0</mn></mrow></munder></math></p>\n<p id=\"78F991DC\" data-docx-ord=\"30\">limupp: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"false\"><mrow><mo mathvariant=\"normal\">max</mo></mrow><mrow><mi>N</mi></mrow></mover></math></p>\n<p id=\"3DBA0A7D\" data-docx-ord=\"31\">function: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mrow><mo mathvariant=\"normal\">sin</mo></mrow><mo>⁡</mo><mrow><mi>x</mi></mrow></mrow></math></p>\n<p id=\"246470C3\" data-docx-ord=\"32\">accent: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>v</mi></mrow><mo stretchy=\"true\">→</mo></mover></math></p>\n<p id=\"5BF24182\" data-docx-ord=\"33\">bar: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">¯</mo></mover></math></p>\n<p id=\"746C05B4\" data-docx-ord=\"34\">underbar: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"true\"><mrow><mi>y</mi></mrow><mo stretchy=\"true\">¯</mo></munder></math></p>\n<p id=\"6B7986B8\" data-docx-ord=\"35\">group-default: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏞</mo></mover></math></p>\n<p id=\"7853450D\" data-docx-ord=\"36\">underbrace: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏟</mo></munder></math></p>\n<p id=\"3F5148AB\" data-docx-ord=\"37\">delimiters: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mo stretchy=\"true\" form=\"prefix\">[</mo><mrow><mi>a</mi></mrow><mo>;</mo><mrow><mi>b</mi></mrow><mo stretchy=\"true\" form=\"postfix\">]</mo></mrow></math></p>\n<p id=\"6B642974\" data-docx-ord=\"38\">matrix: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtable><mtr><mtd><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mi>d</mi></mtd></mtr></mtable></math></p>\n<p id=\"36E8ADAF\" data-docx-ord=\"39\">equation-array: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtable><mtr><mtd><mi>a</mi><mo>=</mo><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi><mo>=</mo><mi>d</mi></mtd></mtr></mtable></math></p>\n<p id=\"57CDF34A\" data-docx-ord=\"40\">box: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>x</mi></math></p>\n<p id=\"0E232A17\" data-docx-ord=\"41\">borderbox: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><menclose notation=\"box\"><mrow><mi>y</mi></mrow></menclose></math></p>\n<p id=\"12F2B191\" data-docx-ord=\"42\">phantom: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mphantom><mrow><mi>z</mi></mrow></mphantom></math></p>\n<p id=\"0A504981\" data-docx-ord=\"43\">deleted-run: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtext>Old math</mtext></math></p>\n<p id=\"307A9CF5\" data-docx-ord=\"44\">unknown: <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtext data-docx-unsupported=\"unknown\">Retained unknown</mtext></math></p>\n<p id=\"5B954590\" data-docx-ord=\"45\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><mi>d</mi><mi>i</mi><mi>s</mi><mi>p</mi><mi>l</mi><mi>a</mi><mi>y</mi></math></p>\n<p id=\"0BBD43EC\" data-docx-ord=\"46\">Section one end</p>\n</section>\n<section data-docx-section=\"2\">\n<header>\n<p>header default</p>\n</header>\n<header data-docx-kind=\"first\">\n<p>header first</p>\n</header>\n<header data-docx-kind=\"even\">\n<p>header even</p>\n</header>\n<footer>\n<p>footer default</p>\n</footer>\n<footer data-docx-kind=\"first\">\n<p>footer first</p>\n</footer>\n<footer data-docx-kind=\"even\">\n<p>footer even</p>\n</footer>\n<h2 id=\"19E0C67D\" data-docx-ord=\"47\" data-docx-style=\"Heading2\">Section two heading</h2>\n</section>\n<aside data-docx-notes=\"footnote\"><div id=\"docx-c4c25d2dcc6c68c00c51b70d-footnote-7\" data-docx-note-body=\"footnote\" data-docx-note-id=\"7\"><p><b>Footnote body</b></p>\n<table><tbody>\n<tr>\n<td>\n<p>Footnote table</p>\n</td>\n</tr>\n</tbody></table></div><div id=\"docx-c4c25d2dcc6c68c00c51b70d-footnote-10\" data-docx-note-body=\"footnote\" data-docx-note-id=\"10\"><p>Deleted footnote body</p></div></aside>\n<aside data-docx-notes=\"endnote\"><div id=\"docx-c4c25d2dcc6c68c00c51b70d-endnote-9\" data-docx-note-body=\"endnote\" data-docx-note-id=\"9\"><p><i>Endnote body</i></p></div><div id=\"docx-c4c25d2dcc6c68c00c51b70d-endnote-11\" data-docx-note-body=\"endnote\" data-docx-note-id=\"11\"><p>Inserted endnote body</p></div></aside>",
+    "idRepairsNeeded": 38,
+    "kind": "document",
+    "paragraphs": [
+      {
+        "id": "11111111",
+        "index": 1,
+        "selectable_text": "Bold italic underline strike super subSafe linkOpaque linkInternal link",
+        "style": "CustomStyle",
+        "text": "Bold italic underline strike super subSafe linkOpaque linkInternal link"
+      },
+      {
+        "id": "22222222",
+        "index": 2,
+        "selectable_text": "Author resultComplex resultCommented changed-format neutral-format",
+        "text": "Author resultComplex resultCommented changed-format neutral-format"
+      },
+      {
+        "id": "33333333",
+        "index": 3,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "upperRoman",
+          "level": 0,
+          "num_id": "42",
+          "start": 3,
+          "value": 3
+        },
+        "number": "III.",
+        "selectable_text": "Roman item",
+        "text": "Roman item"
+      },
+      {
+        "id": "33333334",
+        "index": 4,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "lowerLetter",
+          "level": 1,
+          "num_id": "42",
+          "start": 1,
+          "value": 1
+        },
+        "number": "a)",
+        "selectable_text": "Nested item",
+        "text": "Nested item"
+      },
+      {
+        "id": "33333335",
+        "index": 5,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "upperRoman",
+          "level": 0,
+          "num_id": "42",
+          "start": 3,
+          "value": 4
+        },
+        "number": "IV.",
+        "selectable_text": "Next item",
+        "text": "Next item"
+      },
+      {
+        "id": "44444444",
+        "index": 6,
+        "selectable_text": "Common inserted",
+        "text": "Common inserted"
+      },
+      {
+        "id": "55555555",
+        "index": 7,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "66666666",
+        "index": 8,
+        "selectable_text": "Unicode 😀 nonbreaking space literal\ttabFallback content",
+        "text": "Unicode 😀 nonbreaking space literal\ttabFallback content"
+      },
+      {
+        "id": "77777777",
+        "index": 9,
+        "selectable_text": "Joined first",
+        "text": "Joined first"
+      },
+      {
+        "id": "1EDE45A3",
+        "index": 10,
+        "selectable_text": "Joined second",
+        "text": "Joined second"
+      },
+      {
+        "id": "4B101413",
+        "index": 11,
+        "selectable_text": "Inserted break first",
+        "text": "Inserted break first"
+      },
+      {
+        "id": "11543C1E",
+        "index": 12,
+        "selectable_text": "Inserted break second",
+        "text": "Inserted break second"
+      },
+      {
+        "id": "07B86923",
+        "index": 13,
+        "selectable_text": "Merged cell",
+        "text": "Merged cell"
+      },
+      {
+        "id": "5B82D4E5",
+        "index": 14,
+        "selectable_text": "Top cell",
+        "text": "Top cell"
+      },
+      {
+        "id": "446F0B1E",
+        "index": 15,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "0BA5B732",
+        "index": 16,
+        "selectable_text": "Nested cell",
+        "text": "Nested cell"
+      },
+      {
+        "id": "78B6F0A2",
+        "index": 17,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>α</mi><mtext> </mtext><mo>+</mo><mtext> </mtext><mi>β</mi><mo mathvariant=\"normal\">sin</mo></math>"
+          }
+        ],
+        "id": "28B506BC",
+        "index": 18,
+        "selectable_text": "runs: ",
+        "text": "runs: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup></math>"
+          }
+        ],
+        "id": "4835B59D",
+        "index": 19,
+        "selectable_text": "sup: ",
+        "text": "sup: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msub><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow></msub></math>"
+          }
+        ],
+        "id": "6C6C0863",
+        "index": 20,
+        "selectable_text": "sub: ",
+        "text": "sub: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msubsup><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow><mrow><mn>2</mn></mrow></msubsup></math>"
+          }
+        ],
+        "id": "237FFCFB",
+        "index": 21,
+        "selectable_text": "subsup: ",
+        "text": "subsup: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mmultiscripts><mrow><mi>X</mi></mrow><mrow></mrow><mrow></mrow><mprescripts></mprescripts><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mmultiscripts></math>"
+          }
+        ],
+        "id": "58ED22F7",
+        "index": 22,
+        "selectable_text": "prescripts: ",
+        "text": "prescripts: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math>"
+          }
+        ],
+        "id": "65B5C986",
+        "index": 23,
+        "selectable_text": "fraction: ",
+        "text": "fraction: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac linethickness=\"0\"><mrow><mi>n</mi></mrow><mrow><mi>k</mi></mrow></mfrac></math>"
+          }
+        ],
+        "id": "35502A25",
+        "index": 24,
+        "selectable_text": "nobar: ",
+        "text": "nobar: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac bevelled=\"true\"><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math>"
+          }
+        ],
+        "id": "284EFEE5",
+        "index": 25,
+        "selectable_text": "skew: ",
+        "text": "skew: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msqrt><mrow><mi>x</mi></mrow></msqrt></math>"
+          }
+        ],
+        "id": "024A5EFD",
+        "index": 26,
+        "selectable_text": "sqrt: ",
+        "text": "sqrt: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mroot><mrow><mi>x</mi></mrow><mrow><mn>3</mn></mrow></mroot></math>"
+          }
+        ],
+        "id": "65CA14EF",
+        "index": 27,
+        "selectable_text": "root: ",
+        "text": "root: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mover><mo>∑</mo><mrow><mi>N</mi></mrow></mover><mrow><mi>x</mi></mrow></mrow></math>"
+          }
+        ],
+        "id": "2D543CA1",
+        "index": 28,
+        "selectable_text": "nary: ",
+        "text": "nary: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"false\"><mrow><mo mathvariant=\"normal\">lim</mo></mrow><mrow><mn>0</mn></mrow></munder></math>"
+          }
+        ],
+        "id": "1B187524",
+        "index": 29,
+        "selectable_text": "limlow: ",
+        "text": "limlow: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"false\"><mrow><mo mathvariant=\"normal\">max</mo></mrow><mrow><mi>N</mi></mrow></mover></math>"
+          }
+        ],
+        "id": "78F991DC",
+        "index": 30,
+        "selectable_text": "limupp: ",
+        "text": "limupp: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mrow><mo mathvariant=\"normal\">sin</mo></mrow><mo>⁡</mo><mrow><mi>x</mi></mrow></mrow></math>"
+          }
+        ],
+        "id": "3DBA0A7D",
+        "index": 31,
+        "selectable_text": "function: ",
+        "text": "function: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>v</mi></mrow><mo stretchy=\"true\">→</mo></mover></math>"
+          }
+        ],
+        "id": "246470C3",
+        "index": 32,
+        "selectable_text": "accent: ",
+        "text": "accent: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">¯</mo></mover></math>"
+          }
+        ],
+        "id": "5BF24182",
+        "index": 33,
+        "selectable_text": "bar: ",
+        "text": "bar: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"true\"><mrow><mi>y</mi></mrow><mo stretchy=\"true\">¯</mo></munder></math>"
+          }
+        ],
+        "id": "746C05B4",
+        "index": 34,
+        "selectable_text": "underbar: ",
+        "text": "underbar: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏞</mo></mover></math>"
+          }
+        ],
+        "id": "6B7986B8",
+        "index": 35,
+        "selectable_text": "group-default: ",
+        "text": "group-default: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏟</mo></munder></math>"
+          }
+        ],
+        "id": "7853450D",
+        "index": 36,
+        "selectable_text": "underbrace: ",
+        "text": "underbrace: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mo stretchy=\"true\" form=\"prefix\">[</mo><mrow><mi>a</mi></mrow><mo>;</mo><mrow><mi>b</mi></mrow><mo stretchy=\"true\" form=\"postfix\">]</mo></mrow></math>"
+          }
+        ],
+        "id": "3F5148AB",
+        "index": 37,
+        "selectable_text": "delimiters: ",
+        "text": "delimiters: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtable><mtr><mtd><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mi>d</mi></mtd></mtr></mtable></math>"
+          }
+        ],
+        "id": "6B642974",
+        "index": 38,
+        "selectable_text": "matrix: ",
+        "text": "matrix: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtable><mtr><mtd><mi>a</mi><mo>=</mo><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi><mo>=</mo><mi>d</mi></mtd></mtr></mtable></math>"
+          }
+        ],
+        "id": "36E8ADAF",
+        "index": 39,
+        "selectable_text": "equation-array: ",
+        "text": "equation-array: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>x</mi></math>"
+          }
+        ],
+        "id": "57CDF34A",
+        "index": 40,
+        "selectable_text": "box: ",
+        "text": "box: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><menclose notation=\"box\"><mrow><mi>y</mi></mrow></menclose></math>"
+          }
+        ],
+        "id": "0E232A17",
+        "index": 41,
+        "selectable_text": "borderbox: ",
+        "text": "borderbox: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mphantom><mrow><mi>z</mi></mrow></mphantom></math>"
+          }
+        ],
+        "id": "12F2B191",
+        "index": 42,
+        "selectable_text": "phantom: ",
+        "text": "phantom: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtext>Old math</mtext></math>"
+          }
+        ],
+        "id": "0A504981",
+        "index": 43,
+        "selectable_text": "deleted-run: ",
+        "text": "deleted-run: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtext data-docx-unsupported=\"unknown\">Retained unknown</mtext></math>"
+          }
+        ],
+        "id": "307A9CF5",
+        "index": 44,
+        "selectable_text": "unknown: ",
+        "text": "unknown: "
+      },
+      {
+        "equations": [
+          {
+            "display": true,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><mi>d</mi><mi>i</mi><mi>s</mi><mi>p</mi><mi>l</mi><mi>a</mi><mi>y</mi></math>"
+          }
+        ],
+        "id": "5B954590",
+        "index": 45,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "0BBD43EC",
+        "index": 46,
+        "selectable_text": "Section one end",
+        "text": "Section one end"
+      },
+      {
+        "id": "19E0C67D",
+        "index": 47,
+        "selectable_text": "Section two heading",
+        "style": "Heading2",
+        "text": "Section two heading"
+      }
+    ],
+    "projection_version": 4,
+    "sections": [
+      {
+        "boundary_after": "0BBD43EC",
+        "break_type": null,
+        "columns": null,
+        "final": false,
+        "first_page": true,
+        "handle": "section:0BBD43EC",
+        "index": 1,
+        "margins": null,
+        "page_numbering": null,
+        "page_size": null,
+        "paragraph_end": 46,
+        "paragraph_start": 0,
+        "stories": [
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/header-default.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "first",
+            "part": "word/header-first.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "even",
+            "part": "word/header-even.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/footer-default.xml",
+            "scope": "ftr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "first",
+            "part": "word/footer-first.xml",
+            "scope": "ftr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "even",
+            "part": "word/footer-even.xml",
+            "scope": "ftr"
+          }
+        ]
+      },
+      {
+        "boundary_after": null,
+        "break_type": null,
+        "columns": null,
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "index": 2,
+        "margins": null,
+        "page_numbering": null,
+        "page_size": null,
+        "paragraph_end": 47,
+        "paragraph_start": 46,
+        "stories": [
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/header-default.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "first",
+            "part": "word/header-first.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "even",
+            "part": "word/header-even.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/footer-default.xml",
+            "scope": "ftr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "first",
+            "part": "word/footer-first.xml",
+            "scope": "ftr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "even",
+            "part": "word/footer-even.xml",
+            "scope": "ftr"
+          }
+        ]
+      }
+    ],
+    "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7",
+    "source_map": {
+      "html_offset_unit": "utf8_byte",
+      "regions": [
+        {
+          "editable": false,
+          "html_end": 100,
+          "html_start": 60,
+          "paragraphs": [],
+          "part": "word/header-default.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 162,
+          "html_start": 101,
+          "paragraphs": [],
+          "part": "word/header-first.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 222,
+          "html_start": 163,
+          "paragraphs": [],
+          "part": "word/header-even.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 263,
+          "html_start": 223,
+          "paragraphs": [],
+          "part": "word/footer-default.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 325,
+          "html_start": 264,
+          "paragraphs": [],
+          "part": "word/footer-first.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 385,
+          "html_start": 326,
+          "paragraphs": [],
+          "part": "word/footer-even.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 708,
+          "html_start": 386,
+          "paragraphs": [
+            "11111111"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 1260,
+          "html_start": 709,
+          "paragraphs": [
+            "22222222"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 1709,
+          "html_start": 1261,
+          "paragraphs": [
+            "33333333",
+            "33333334",
+            "33333335"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 2507,
+          "html_start": 1710,
+          "paragraphs": [
+            "44444444"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 2952,
+          "html_start": 2508,
+          "paragraphs": [
+            "55555555"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 3146,
+          "html_start": 2953,
+          "paragraphs": [
+            "66666666"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 3289,
+          "html_start": 3147,
+          "paragraphs": [
+            "77777777"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 3343,
+          "html_start": 3290,
+          "paragraphs": [
+            "1EDE45A3"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 3429,
+          "html_start": 3344,
+          "paragraphs": [
+            "4B101413"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 3491,
+          "html_start": 3430,
+          "paragraphs": [
+            "11543C1E"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 4183,
+          "html_start": 3492,
+          "paragraphs": [
+            "07B86923",
+            "5B82D4E5",
+            "0BA5B732",
+            "78B6F0A2"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 4400,
+          "html_start": 4184,
+          "paragraphs": [
+            "28B506BC"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 4578,
+          "html_start": 4401,
+          "paragraphs": [
+            "4835B59D"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 4756,
+          "html_start": 4579,
+          "paragraphs": [
+            "6C6C0863"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 4966,
+          "html_start": 4757,
+          "paragraphs": [
+            "237FFCFB"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 5245,
+          "html_start": 4967,
+          "paragraphs": [
+            "58ED22F7"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 5430,
+          "html_start": 5246,
+          "paragraphs": [
+            "65B5C986"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 5630,
+          "html_start": 5431,
+          "paragraphs": [
+            "35502A25"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 5827,
+          "html_start": 5631,
+          "paragraphs": [
+            "284EFEE5"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 5985,
+          "html_start": 5828,
+          "paragraphs": [
+            "024A5EFD"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 6166,
+          "html_start": 5986,
+          "paragraphs": [
+            "65CA14EF"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 6372,
+          "html_start": 6167,
+          "paragraphs": [
+            "2D543CA1"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 6600,
+          "html_start": 6373,
+          "paragraphs": [
+            "1B187524"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 6821,
+          "html_start": 6601,
+          "paragraphs": [
+            "78F991DC"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 7039,
+          "html_start": 6822,
+          "paragraphs": [
+            "3DBA0A7D"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 7241,
+          "html_start": 7040,
+          "paragraphs": [
+            "246470C3"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 7439,
+          "html_start": 7242,
+          "paragraphs": [
+            "5BF24182"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 7649,
+          "html_start": 7440,
+          "paragraphs": [
+            "746C05B4"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 7858,
+          "html_start": 7650,
+          "paragraphs": [
+            "6B7986B8"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 8071,
+          "html_start": 7859,
+          "paragraphs": [
+            "7853450D"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 8347,
+          "html_start": 8072,
+          "paragraphs": [
+            "3F5148AB"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 8592,
+          "html_start": 8348,
+          "paragraphs": [
+            "6B642974"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 8843,
+          "html_start": 8593,
+          "paragraphs": [
+            "36E8ADAF"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 8972,
+          "html_start": 8844,
+          "paragraphs": [
+            "57CDF34A"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 9156,
+          "html_start": 8973,
+          "paragraphs": [
+            "0E232A17"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 9323,
+          "html_start": 9157,
+          "paragraphs": [
+            "12F2B191"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 9473,
+          "html_start": 9324,
+          "paragraphs": [
+            "0A504981"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 9659,
+          "html_start": 9474,
+          "paragraphs": [
+            "307A9CF5"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 9842,
+          "html_start": 9660,
+          "paragraphs": [
+            "5B954590"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 9898,
+          "html_start": 9843,
+          "paragraphs": [
+            "0BBD43EC"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 9982,
+          "html_start": 9942,
+          "paragraphs": [],
+          "part": "word/header-default.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 10044,
+          "html_start": 9983,
+          "paragraphs": [],
+          "part": "word/header-first.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 10104,
+          "html_start": 10045,
+          "paragraphs": [],
+          "part": "word/header-even.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 10145,
+          "html_start": 10105,
+          "paragraphs": [],
+          "part": "word/footer-default.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 10207,
+          "html_start": 10146,
+          "paragraphs": [],
+          "part": "word/footer-first.xml"
+        },
+        {
+          "editable": false,
+          "html_end": 10267,
+          "html_start": 10208,
+          "paragraphs": [],
+          "part": "word/footer-even.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 10356,
+          "html_start": 10268,
+          "paragraphs": [
+            "19E0C67D"
+          ],
+          "part": "word/document.xml"
+        }
+      ],
+      "text_offset_unit": "unicode_scalar"
+    },
+    "tables": [
+      {
+        "at": "table:1",
+        "grid_twips": [
+          null,
+          null,
+          null
+        ],
+        "properties": {},
+        "rows": [
+          {
+            "at": "table:1/row:1",
+            "cells": [
+              {
+                "at": "table:1/row:1/cell:1",
+                "grid_span": 2,
+                "logical": true,
+                "physical_index": 1,
+                "properties": {
+                  "gridSpan": {
+                    "val": "2"
+                  },
+                  "vMerge": {
+                    "val": "restart"
+                  }
+                },
+                "vertical_merge": "restart"
+              },
+              {
+                "at": "table:1/row:1/cell:2",
+                "grid_span": 1,
+                "logical": true,
+                "physical_index": 2,
+                "properties": {},
+                "vertical_merge": null
+              }
+            ],
+            "properties": {}
+          },
+          {
+            "at": "table:1/row:2",
+            "cells": [
+              {
+                "at": "table:1/row:2/cell:1",
+                "grid_span": 2,
+                "logical": false,
+                "physical_index": 1,
+                "properties": {
+                  "gridSpan": {
+                    "val": "2"
+                  },
+                  "vMerge": {}
+                },
+                "vertical_merge": "continue"
+              },
+              {
+                "at": "table:1/row:2/cell:2",
+                "grid_span": 1,
+                "logical": true,
+                "physical_index": 2,
+                "properties": {},
+                "vertical_merge": null
+              }
+            ],
+            "properties": {}
+          }
+        ]
+      },
+      {
+        "at": "table:2",
+        "grid_twips": [],
+        "properties": {},
+        "rows": [
+          {
+            "at": "table:2/row:1",
+            "cells": [
+              {
+                "at": "table:2/row:1/cell:1",
+                "grid_span": 1,
+                "logical": true,
+                "physical_index": 1,
+                "properties": {},
+                "vertical_merge": null
+              }
+            ],
+            "properties": {}
+          }
+        ]
+      }
+    ],
+    "view": "markup"
+  },
+  "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+}

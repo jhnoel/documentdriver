@@ -1,0 +1,3 @@
+{"ops": [
+  {"op": "object.add", "at": "slide1", "as": "elbow", "kind": "connector", "name": "Connector: Elbow square to circle", "geom": "bentConnector3", "first": "v", "from": [229.59, 201.32], "to": [660.28, 367.03], "from_glue": "s2:2", "to_glue": "s28:0", "line": {"w": 0.5, "color": {"scheme": "accent1"}, "tail": "triangle"}}
+]}

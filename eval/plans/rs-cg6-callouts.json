@@ -1,0 +1,5 @@
+{"ops": [
+  {"op": "object.set", "at": "slide6/s19", "fill": {"scheme": "accent2"}},
+  {"op": "object.set", "at": "slide6/s20", "fill": {"scheme": "accent2"}},
+  {"op": "object.set", "at": "slide6/s23", "fill": {"scheme": "accent2"}}
+]}

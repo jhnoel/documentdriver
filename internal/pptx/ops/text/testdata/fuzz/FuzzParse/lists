@@ -1,0 +1,2 @@
+go test fuzz v1
+string("<ul><li data-char=\"-\" data-level=\"2\">a<br/>b</li></ul><ol><li data-type=\"romanUcPeriod\">c</li></ol>")

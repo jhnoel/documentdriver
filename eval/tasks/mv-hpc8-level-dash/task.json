@@ -1,0 +1,28 @@
+{
+  "id": "mv-hpc8-level-dash",
+  "type": "move",
+  "category": "process",
+  "deck": {
+    "path": "web/hpc-assistant-flow.pptx",
+    "sha256": "b8a8e03e5fbd9d350800173681f6a8a443a253cb0c90c2ead7b0c008278e1a5b",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide8.xml",
+  "instruction": "The little joining line between 'Ollama + RAG' and 'Answer' sits lower than the other three joiners. Move it up to the same height as them without changing its length or horizontal position.",
+  "targets": [
+    "s40"
+  ],
+  "checks": [
+    {
+      "type": "box",
+      "target": "s40",
+      "y": 141.73,
+      "keep": [
+        "x",
+        "w",
+        "h"
+      ]
+    }
+  ],
+  "max_new": 0
+}

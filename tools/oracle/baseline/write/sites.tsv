@@ -1,0 +1,267 @@
+# docxdriver 1ffb0d7 crates/docxdriver-core/src/commands refusal sites: file:line, enclosing function, message template (Rust literal)
+bookmarks.rs:58	validate_new_name	{field} {name:?} starts with \"_\", which marks a hidden or reserved bookmark (_GoBack, _Toc…); choose a name that starts with a letter
+bookmarks.rs:78	validate_new_name	{field} {name:?} is not a valid bookmark name: {hint}; {NAME_RULE}
+bookmarks.rs:83	validate_new_name	{field} {name:?} has {} characters; {NAME_RULE}
+bookmarks.rs:94	validate_existing_name	name must name an existing bookmark; read kind=\"bookmarks\" lists them
+bookmarks.rs:251	unknown_name	no bookmark named {name:?}; {hint} — read kind=\"bookmarks\" lists every bookmark
+bookmarks.rs:269	ensure_unused	bookmark name {name:?} is already used by bookmark {:?}{} — names are unique in the document, ignoring case; choose another name, or bookmark_move / bookmark_rename / bookmark_delete the existing one
+bookmarks.rs:283	find_body_start	document part has no root
+bookmarks.rs:305	find_body_start	bookmark {:?} is in {}; bookmark editing is body-only ({}) — headers, footers and notes are read-only for bookmarks
+bookmarks.rs:394	place	occurrence requires select
+bookmarks.rs:409	place	select must be plain text without HTML markup — select addresses the paragraph's visible text
+bookmarks.rs:416	place	the selection covers no text
+bookmarks.rs:426	place	the selection covers no text
+bookmarks.rs:476	resolve_body_paragraph	at must be a valid w14:paraId (eight hexadecimal digits with 00000000 < value < 80000000): {at:?}
+bookmarks.rs:534	rename	new_name
+comments.rs:64	parse_part	{name}: XML parse failed: {detail}
+comments.rs:80	register_part	malformed [Content_Types].xml
+comments.rs:112	register_part	malformed document.xml.rels
+comments.rs:365	append_comment_record	malformed comments.xml
+comments.rs:407	append_comment_record	malformed commentsExtended.xml
+comments.rs:429	append_comment_record	malformed commentsIds.xml
+comments.rs:441	append_comment_record	malformed commentsExtensible.xml
+comments.rs:757	reply_comment_typed	comment not found: {comment_id}
+comments.rs:789	resolve_comment_typed	comment not found: {comment_id}
+comments.rs:797	resolve_comment_typed	malformed commentsExtended.xml
+comments.rs:841	delete_comment_typed	comment not found: {comment_id}
+equations.rs:80	replace	paragraph {at} has no current equations
+equations.rs:81	replace	paragraph {at} has {n} equations; choose equation (1-based) from the paragraph's equations listing
+equations.rs:82	replace	equation {n} is out of range; paragraph {at} has {len} current equations
+equations.rs:86	replace	equation is inside a revision or structured wrapper; settle its tracked changes or unwrap it before replacing
+equations.rs:142	delete	paragraph {at} has no current equations
+equations.rs:143	delete	paragraph {at} has {n} equations; choose equation (1-based) from the paragraph's equations listing
+equations.rs:144	delete	equation {n} is out of range; paragraph {at} has {len} current equations
+equations.rs:148	delete	equation is inside a revision or structured wrapper; settle its tracked changes or unwrap it before deleting
+headers.rs:51	ensure_content_type	malformed [Content_Types].xml
+headers.rs:81	ensure_document_rel	malformed document.xml.rels
+headers.rs:119	ensure_r_ns	document has no root element
+headers.rs:214	set_chrome_typed	section must be >= 1
+headers.rs:223	set_chrome_typed	{op} kind=even cannot be tracked while even/odd headers are off: turning them on changes a document setting (w:evenAndOddHeaders) that Word records no revision for; run set_even_and_odd_headers in a change_mode=direct plan first
+headers.rs:248	set_chrome_typed	chrome reference is missing r:id
+headers.rs:251	set_chrome_typed	section {section} {kind_str} {scope} reference does not resolve to a package part
+headers.rs:361	tracked_story	{op}: empty story part
+headers.rs:364	tracked_story	{op} cannot be tracked here: the {what} holds a table or content control, and only paragraphs are tracked in a header or footer; use a change_mode=direct plan
+headers.rs:378	tracked_story	current story
+headers.rs:388	tracked_story	{op}: empty content
+headers.rs:389	tracked_story	new content
+headers.rs:407	tracked_story	{op} cannot be tracked here: a paragraph of the current story holds content (a drawing, object or content control outside a run) that a tracked deletion cannot hold; use a change_mode=direct plan
+headers.rs:547	clear_chrome_typed	section must be >= 1
+headers.rs:554	clear_chrome_typed	section {section} has no explicit {kind_str} {scope} to clear
+headers.rs:564	clear_chrome_typed	{op} cannot be tracked in section {section}: removing a later section's {kind_str} {scope} makes it inherit the previous section's, and Word cannot track a header or footer reference; use a change_mode=direct plan
+headers.rs:569	clear_chrome_typed	section {section} {kind_str} {scope} reference does not resolve to a package part
+headers.rs:643	set_even_and_odd_headers_typed	malformed settings.xml
+layout.rs:19	ensure_sect_pr	document has no w:body
+layout.rs:25	ensure_sect_pr	section {section} not found (document has {} sections)
+layout.rs:70	set_page_margins_typed	section must be >= 1
+layout.rs:76	set_page_margins_typed	setPageMargins requires at least one margin field (top/right/bottom/left/header/footer/gutter, twips)
+layout.rs:447	snapshot_section_properties	section already has a pending property change by another author; accept or reject it first
+layout.rs:471	set_first_page_mode	section already has a pending property change; accept or reject it first
+layout.rs:494	set_section_layout	section already has a pending property change; accept or reject it first
+layout.rs:524	set_section_layout	columns do not fit the section text area
+layout.rs:526	set_section_layout	column widths and spacing exceed the section text area
+layout.rs:528	set_section_layout	column widths and spacing exceed the section text area
+lists.rs:83	new	missing relationships root
+lists.rs:93	new	numbering relationship has no target
+lists.rs:95	new	external numbering is unsupported
+lists.rs:105	new	missing numbering root
+lists.rs:133	new	missing content types
+lists.rs:138	new	missing types root
+lists.rs:247	set_list_cached	set_list cannot target a list with explicit continuation paragraphs
+lists.rs:259	set_list_cached	set_list cannot change explicit continuation membership independently; typed membership changes on multi-paragraph lists are unsupported
+lists.rs:267	set_list_cached	set_list cannot change a list with explicit continuation paragraphs; typed membership changes on multi-paragraph lists are unsupported
+lists.rs:270	set_list_cached	set_list contains a duplicate paragraph
+lists.rs:277	set_list_cached	set_list target has a pending paragraph property revision; settle it first
+lists.rs:301	set_list_cached	numbering IDs exhausted
+lists.rs:307	set_list_cached	set_list num_id does not exist
+lists.rs:327	set_list_cached	requested level is not defined by the existing list
+lists.rs:379	set_list_cached	abstract IDs exhausted
+mod.rs:188	run_typed_edit	unknown source-bound table handle {at:?}
+mod.rs:189	run_typed_edit	table handle {at:?} targets a deleted object
+mod.rs:255	run_typed_edit_inner	unresolved alias ${}
+mod.rs:539	run_typed_edit_inner	set_even_and_odd_headers cannot be tracked: it changes a document setting (w:evenAndOddHeaders in settings.xml), which Word records no revision for; run it in a change_mode=direct plan
+readonly.rs:119	find_text	find requires a query
+readonly.rs:162	list_styles	styles.xml parse failed: {error}
+readonly.rs:238	build_package	blank document template: {error}
+readonly.rs:242	build_package	blank document template: {error}
+readonly.rs:248	build_package	create takes paragraphs or html, not both
+readonly.rs:254	build_package	create html: {error}
+readonly.rs:259	build_package	create requires paragraphs or html
+readonly.rs:263	build_package	create paragraphs must be strings
+readonly.rs:267	build_package	create paragraphs must not contain newlines — pass one array entry per paragraph
+readonly.rs:479	build_package	word/settings.xml
+readonly.rs:480	build_package	blank document template is missing word/settings.xml
+readonly.rs:512	build_package	[Content_Types].xml
+readonly.rs:513	build_package	blank document template is missing [Content_Types].xml
+readonly.rs:526	build_package	word/_rels/document.xml.rels
+readonly.rs:527	build_package	blank document template is missing document relationships
+readonly.rs:535	build_package	word/styles.xml
+readonly.rs:536	build_package	blank document template is missing word/styles.xml
+readonly.rs:575	address_created_part	created part missing: {part_name}
+revisions.rs:646	accept_reject_one_inner	revision not found: {revision_id}
+sections.rs:46	ensure_final	document has no body
+sections.rs:60	select	invalid section_handle
+sections.rs:73	select	section_handle no longer identifies a section boundary
+sections.rs:85	boundary	set_section_boundary cannot be tracked: Word records no revision for adding or removing a section break; use a change_mode=direct plan
+sections.rs:90	boundary	section boundaries require a body-level paragraph
+sections.rs:96	boundary	settle paragraph property changes before editing a section boundary
+sections.rs:112	boundary	document has no final section properties
+sections.rs:115	boundary	settle section property changes before boundary edits
+sections.rs:120	boundary	paragraph has no section boundary to remove
+sections.rs:126	boundary	cannot remove final body section
+sections.rs:129	boundary	settle following section property changes before merging
+sections.rs:167	boundary	paragraph already terminates a section
+table_structure.rs:20	validate	edit_table requires a table handle
+table_structure.rs:33	validate	invalid inserted table group alias
+table_structure.rs:60	validate	table edit coordinates/counts must be positive; inserted count <=100
+table_structure.rs:79	guarded	table structural editing inside revision or content-control wrappers is unsupported
+table_structure.rs:112	guarded	table structural edits require settled revisions and no bookmarks, comments, fields or content controls in the target table
+table_structure.rs:140	regular	this grid edit requires a rectangular table without existing merges or omitted cells; split merged cells first
+table_structure.rs:212	grid	table has no explicit grid; author column widths before structural editing
+table_structure.rs:225	check_range	table index must be positive
+table_structure.rs:228	check_range	table range overflow
+table_structure.rs:230	check_range	table edit range is out of bounds
+table_structure.rs:322	edit	edit_table {kind} cannot be tracked: Word tracks inserted and deleted rows, not column or cell-merge changes; use a change_mode=direct plan
+table_structure.rs:352	edit	row is out of bounds
+table_structure.rs:354	edit	table row limit exceeded
+table_structure.rs:386	edit	cannot remove every row; delete the table instead
+table_structure.rs:405	edit	table grid and row widths disagree
+table_structure.rs:408	edit	table column limit exceeded
+table_structure.rs:439	edit	cannot remove every column; delete the table instead
+table_structure.rs:444	edit	table grid and row widths disagree
+table_structure.rs:517	edit	row out of bounds
+table_structure.rs:520	edit	column must address the logical start of a cell
+table_structure.rs:524	edit	legacy hMerge splitting is unsupported
+table_structure.rs:529	edit	split the logical restart cell, not a vertical continuation
+table_structure.rs:543	edit	inconsistent vertical merge widths
+table_structure.rs:552	edit	cell is not merged
+table_structure.rs:585	guarded_tracked	tracked table structural edits require the table to hold no other author's pending revisions; accept or reject them first
+table_structure.rs:590	guarded_tracked	table structural editing inside revision or content-control wrappers is unsupported
+table_structure.rs:601	guarded_tracked	table structural edits require settled revisions and no bookmarks, comments, fields or content controls in the target table
+table_structure.rs:625	insert	table insertion at a section-boundary paragraph is unsupported
+table_structure.rs:631	insert	paragraph has no block container
+table_structure.rs:634	insert	table insertion requires an ordinary body or table-cell paragraph
+table_structure.rs:676	insert	w14:paraId
+table_structure.rs:700	insert	insert_table cannot be tracked as the last block of a table cell: the cell needs a new paragraph after it, which rejecting cannot take away; insert before the paragraph or use a change_mode=direct plan
+tables.rs:118	number	invalid table address component {part:?}
+tables.rs:124	address	expected {} address, got {at:?}
+tables.rs:161	resolve	table address {at:?} is out of range
+tables.rs:165	resolve	row address {at:?} is out of range
+tables.rs:170	resolve	cell address {at:?} is out of range
+tables.rs:176	resolve	{at} is a physical vertical-merge continuation; address its logical restart cell
+tables.rs:184	resolve	{at} uses legacy hMerge; normalize to gridSpan before editing
+tables.rs:192	dimension_valid	table dimensions must be nonnegative and fit signed 32-bit twips
+tables.rs:210	width_valid	table percentage width must be > 0 and <= 100
+tables.rs:249	borders_valid	unsupported table border style
+tables.rs:252	borders_valid	border color must be #RRGGBB
+tables.rs:258	borders_valid	border width must be 0.25..12 points in quarter-point increments
+tables.rs:267	clear_valid	unknown clear property {v:?}
+tables.rs:283	validate_table	column_widths cannot be cleared: the grid must retain its dimensions
+tables.rs:304	validate_table	layout must be autofit or fixed
+tables.rs:310	validate_table	table alignment must be left, center or right
+tables.rs:316	validate_table	column_widths must contain positive point widths
+tables.rs:319	validate_table	format_table requires a property
+tables.rs:333	validate_cell	cell fill must be #RRGGBB
+tables.rs:339	validate_cell	vertical_alignment must be top, center or bottom
+tables.rs:342	validate_cell	format_cell requires a property
+tables.rs:359	validate_row	height_rule must be auto, at_least or exact
+tables.rs:362	validate_row	format_row requires a property
+tables.rs:395	snapshot	{tag} has a pending change; accept or reject it first
+tables.rs:402	snapshot	row has a pending structural revision
+tables.rs:495	format_table	document has no table styles
+tables.rs:502	format_table	table style {style:?} not found
+tables.rs:508	format_table	table has no grid
+tables.rs:516	format_table	column_widths has {} values; table grid has {} columns
+tables.rs:533	format_table	column_widths cannot be cleared: the grid must retain its dimensions
+tables.rs:923	logical_cells	cell has no row
+tables.rs:927	logical_cells	row has no table
+tables.rs:955	logical_cells	vertical merge continuation has a conflicting grid span
+typed.rs:77	select_in_paragraph	select matched nothing (current visible text: {:?}) — hidden deleted text is not selectable; accept or reject the deletion before editing that content
+typed.rs:84	select_in_paragraph	occurrence {n} is out of range: select matched {count} times in this paragraph
+typed.rs:90	select_in_paragraph	select matched {count} times in this paragraph — pass occurrence (1-based) or extend select with more context (current visible text: {:?})
+typed.rs:208	missing_paragraph	no paragraph with this paraId in word/document.xml — paragraph IDs in headers, footers, footnotes, endnotes, and comment bodies are outside the typed mutation surface
+typed.rs:218	note_link	with mixes linked and unlinked content — keep a hyperlink's content whole, or split into separate operations
+typed.rs:227	note_link	with cannot mix different hyperlink targets in one operation — split into separate operations
+typed.rs:232	note_link	with mixes linked and unlinked content — keep a hyperlink's content whole, or split into separate operations
+typed.rs:249	parse_with	with does not parse as safe inline content: {error} — with accepts plain text and safe inline HTML <strong> <em> <u> <s> <sup> <sub> <a href=\"…\"> <br> <span style> <math>
+typed.rs:260	parse_with	with accepts inline HTML only; use insert_paragraph for blocks
+typed.rs:271	parse_with	with contains table structure <{tag}> — only inline content and plain text are allowed
+typed.rs:280	parse_with	with contains revision tags (<ins>/<del>) — the engine authors revisions; with holds only the new content
+typed.rs:285	parse_with	with contains a field — fields are protected through this surface
+typed.rs:298	parse_with	with contains a pending-format tag (<b pending>/<format pending>) — format changes are separate operations
+typed.rs:326	parse_with	with contains a footnote/endnote — only the safe inline set is allowed
+typed.rs:331	parse_with	with contains an image — images are not in the safe inline set
+typed.rs:336	parse_with	with contains a comment milestone — comments are separate operations
+typed.rs:494	replace_text_typed	select must be plain text without HTML markup — select addresses the paragraph's visible text, never markup
+typed.rs:570	word_diff	word-level diff selection is too large; split it into smaller replacements
+typed.rs:675	replace_range_diff	word-level diff selection overlaps existing tracked changes; accept or reject them first
+typed.rs:686	replace_range_diff	word-level diff selection crosses a protected {label}
+typed.rs:818	replace_range	the selection overlaps existing tracked changes — untracked replacement requires accepting or rejecting them first
+typed.rs:827	replace_range	the selection intersects a comment range — untracked replacement requires removing or resolving the comment first
+typed.rs:840	replace_range	the selection covers no text
+typed.rs:850	replace_range	the selection crosses a {label} that cannot be safely preserved — update, resolve, or remove it before editing this content
+typed.rs:1006	revise_text_typed	edits[{index}].select must be plain text without HTML markup — it addresses visible text, never markup
+typed.rs:1010	revise_text_typed	edits[{index}].with: {}
+typed.rs:1043	revise_text_typed	within {within:?} matched nothing in {place}{detail} — hidden deleted text is not selectable
+typed.rs:1050	revise_text_typed	occurrence {n} is out of range: within matched {count} times in {place}
+typed.rs:1061	revise_text_typed	within {within:?} matched {count} times in {place} (paragraphs {}) — lengthen it, pass at, or pass occurrence (1-based)
+typed.rs:1109	revise_text_typed	edits[{index}].select {select:?} matched nothing in {scope}
+typed.rs:1119	revise_text_typed	edits[{index}].occurrence {n} is out of range: select {select:?} matched {count} times in {scope}
+typed.rs:1126	revise_text_typed	edits[{index}].select {select:?} matched {count} times in {scope} — narrow the scope with within, lengthen select, or pass occurrence or all
+typed.rs:1140	revise_text_typed	edits[{}] and edits[{}] select overlapping text; combine them into one edit
+typed.rs:1219	replace_paragraph_typed	the paragraph contains a {label} that cannot be safely preserved — replace_paragraph requires unambiguous content; accept, resolve, or remove it first
+typed.rs:1297	replace_paragraph_typed	replaced paragraph {address} ({})
+typed.rs:1354	remove_range_direct	internal: covered range is not contiguous
+typed.rs:1593	insert_plain_pieces	internal: unsupported piece for untracked insertion
+typed.rs:1641	opt_bool	{name} must be a boolean
+typed.rs:1650	optional_string	{name} must be a non-empty string
+typed.rs:1661	optional_twips	{name} must be an integer (twips)
+typed.rs:1663	optional_twips	{name} must be >= 0
+typed.rs:1667	optional_twips	{name} must be an integer (twips)
+typed.rs:1712	parse_char_format	format_text: superscript and subscript cannot both be enabled
+typed.rs:1721	parse_char_format	format_text: color must be a #RRGGBB hex value, not {s:?}
+typed.rs:1726	parse_char_format	format_text: color must be a string
+typed.rs:1734	parse_char_format	format_text: font_size must be a positive number (points)
+typed.rs:1740	parse_char_format	format_text: font_size must be a number (points)
+typed.rs:1751	parse_char_format	format_text: clear entries must be strings
+typed.rs:1754	parse_char_format	format_text: clear entry {name:?} is not a format_text property (allowed: {})
+typed.rs:1764	parse_char_format	format_text: clear must be an array of property names
+typed.rs:1779	parse_char_format	format_text requires at least one of bold, italic, underline, strike, superscript, subscript, color, font_size, clear
+typed.rs:1932	apply_char_format	format_text selection is empty
+typed.rs:1945	apply_char_format	format_text matched no runs
+typed.rs:1955	apply_char_format	a covered run already has a pending format change (w:rPrChange) — incompatible with a new change; accept or reject it before formatting again
+typed.rs:2017	format_text_typed	at must be a valid w14:paraId (eight hexadecimal digits with 00000000 < value < 80000000): {at:?}
+typed.rs:2024	format_text_typed	select must be plain text without HTML markup — select addresses the paragraph's visible text, never markup
+typed.rs:2030	format_text_typed	superscript and subscript cannot both be enabled
+typed.rs:2057	format_text_typed	paragraph {address} formatting already matches (no change recorded)
+typed.rs:2159	parse_para_format	alignment must be left|center|right|justify, not {other:?}
+typed.rs:2163	parse_para_format	alignment must be a string
+typed.rs:2176	parse_para_format	lineRule must be auto|exact|atLeast, not {other:?}
+typed.rs:2188	parse_para_format	format_paragraph: clear entries must be strings
+typed.rs:2192	parse_para_format	format_paragraph: clear entry {name:?} is not a format_paragraph property (allowed: {})
+typed.rs:2202	parse_para_format	format_paragraph: clear must be an array of property names
+typed.rs:2217	parse_para_format	format_paragraph requires at least one of style, alignment, indent_left, indent_right, space_before, space_after, line_spacing, clear
+typed.rs:2443	format_paragraph_typed	at must be a valid w14:paraId (eight hexadecimal digits with 00000000 < value < 80000000): {at:?}
+typed.rs:2462	format_paragraph_typed	style {style:?} is not a declared paragraph style — format_paragraph requires an existing paragraph style
+typed.rs:2476	format_paragraph_typed	the paragraph already has a pending format change (w:pPrChange) — incompatible with a new change; accept or reject it before formatting again
+typed.rs:2710	insert_paragraph_typed	at must be a valid w14:paraId (eight hexadecimal digits with 00000000 < value < 80000000): {at:?}
+typed.rs:2720	insert_paragraph_typed	no body-level table {n} (document has {})
+typed.rs:2728	insert_paragraph_typed	insert_paragraph requires exactly one paragraph or table anchor
+typed.rs:2739	insert_paragraph_typed	style {style_id:?} is not a declared paragraph style — insert_paragraph requires an existing paragraph style
+typed.rs:2752	insert_paragraph_typed	w14:paraId
+typed.rs:2816	insert_paragraph	with must be a string (may be empty)
+typed.rs:3017	wrap_live_content_in_del	the paragraph contains a structured document tag (w:sdt) — delete_paragraphs requires unambiguous paragraph content; remove the tag first
+typed.rs:3065	delete_paragraphs_typed	delete_paragraphs at must not be empty
+typed.rs:3074	delete_paragraphs_typed	at entries must be valid w14:paraId values: {id:?}
+typed.rs:3081	delete_paragraphs_typed	the paragraph is not a top-level body paragraph in word/document.xml — delete_paragraphs targets top-level body paragraphs; table cells, textboxes, and other embedded scopes are outside the typed mutation surface
+typed.rs:3189	delete_paragraphs	delete_paragraphs requires an at array of paragraph IDs
+typed.rs:3194	delete_paragraphs	delete_paragraphs at entries must be strings
+typed.rs:3243	comment_add_typed	at must be a valid w14:paraId (eight hexadecimal digits with 00000000 < value < 80000000): {at:?}
+typed.rs:3252	comment_add_typed	select must be plain text without HTML markup — select addresses the paragraph's visible text, never markup
+typed.rs:3268	comment_add_typed	the selection covers no text
+typed.rs:3281	comment_add_typed	the selection covers no text
+typed.rs:3291	comment_add_typed	the selection crosses a {label} that cannot be safely preserved — update, resolve, or remove it before commenting on this content
+typed.rs:3301	comment_add_typed	occurrence requires select — a whole-paragraph anchor has nothing to count
+typed.rs:3313	comment_add_typed	comment {comment_id} anchored to occurrence {n} of {matched} in paragraph {address}
+typed.rs:3343	comment_add	text is required
+typed.rs:3348	comment_add	select must be a non-empty string
+typed.rs:3349	comment_add	select must be a string

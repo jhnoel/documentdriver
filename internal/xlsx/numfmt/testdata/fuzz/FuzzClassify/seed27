@@ -1,0 +1,2 @@
+go test fuzz v1
+string("[Red]0.00")

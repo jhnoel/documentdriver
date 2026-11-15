@@ -1,0 +1,136 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "assets": [],
+    "blocks": [
+      {
+        "html_end": 189,
+        "html_start": 32,
+        "paragraphs": [
+          "19FA2AE0"
+        ]
+      },
+      {
+        "html_end": 364,
+        "html_start": 190,
+        "paragraphs": [
+          "2D4D22AD"
+        ]
+      },
+      {
+        "html_end": 508,
+        "html_start": 365,
+        "paragraphs": [
+          "4E9D2B67"
+        ]
+      },
+      {
+        "html_end": 662,
+        "html_start": 509,
+        "paragraphs": [
+          "01DB86EE"
+        ]
+      }
+    ],
+    "content_type": "text/html",
+    "css": ".docxdriver { font-family: Calibri, Arial, sans-serif; line-height: 1.2; color: #111; }\n.docxdriver p, .docxdriver h1, .docxdriver h2, .docxdriver h3, .docxdriver h4, .docxdriver h5, .docxdriver h6 { white-space: pre-wrap; tab-size: 4; min-height: 1em; }\n.docxdriver p { margin: 0 0 .6em; }\n.docxdriver table { border-collapse: collapse; max-width: 100%; }\n.docxdriver td, .docxdriver th { border: 1px solid #aaa; padding: .3em .5em; vertical-align: top; }\n.docxdriver img { max-width: 100%; }\n.docxdriver ins { color: #067a35; text-decoration: underline; }\n.docxdriver del { color: #b32323; text-decoration: line-through; }\n.docxdriver [data-docx-format-change] { background: #fff1b8; }\n.docxdriver [data-docx-field] { background: #f2f4f7; }\n.docxdriver ol, .docxdriver ul { padding-left: 2em; }\n.docxdriver li > p { margin-bottom: .25em; }\n.docxdriver [data-docx-marker]::marker { content: attr(data-docx-marker) \" \"; }\n.docxdriver aside { border-top: 1px solid #ddd; margin-top: 1em; font-size: .9em; }\n.docxdriver [data-docx-break=\"page\"] { break-after: page; }\n.docxdriver [data-docx-break=\"column\"] { break-after: column; }\n.docxdriver header, .docxdriver footer { color: #555; }\n",
+    "html": "<section data-docx-section=\"1\">\n<h1 id=\"19FA2AE0\" data-docx-ord=\"1\" data-docx-style=\"Heading1\" style=\"color:#0F4761;font-size:20pt;margin-bottom:4pt;margin-top:18pt;\">Service Agreement</h1>\n<p id=\"2D4D22AD\" data-docx-ord=\"2\" data-docx-style=\"FirstParagraph\" style=\"font-size:12pt;margin-bottom:9pt;margin-top:9pt;\">Payment is due within thirty days of invoice.</p>\n<h2 id=\"4E9D2B67\" data-docx-ord=\"3\" data-docx-style=\"Heading2\" style=\"color:#0F4761;font-size:16pt;margin-bottom:4pt;margin-top:8pt;\">Fees</h2>\n<p id=\"01DB86EE\" data-docx-ord=\"4\" data-docx-style=\"FirstParagraph\" style=\"font-size:12pt;margin-bottom:9pt;margin-top:9pt;\">The kickoff fee is 5000.</p>\n</section>",
+    "idRepairsNeeded": 4,
+    "kind": "document",
+    "paragraphs": [
+      {
+        "id": "19FA2AE0",
+        "index": 1,
+        "selectable_text": "Service Agreement",
+        "style": "Heading1",
+        "text": "Service Agreement"
+      },
+      {
+        "id": "2D4D22AD",
+        "index": 2,
+        "selectable_text": "Payment is due within thirty days of invoice.",
+        "style": "FirstParagraph",
+        "text": "Payment is due within thirty days of invoice."
+      },
+      {
+        "id": "4E9D2B67",
+        "index": 3,
+        "selectable_text": "Fees",
+        "style": "Heading2",
+        "text": "Fees"
+      },
+      {
+        "id": "01DB86EE",
+        "index": 4,
+        "selectable_text": "The kickoff fee is 5000.",
+        "style": "FirstParagraph",
+        "text": "The kickoff fee is 5000."
+      }
+    ],
+    "projection_version": 4,
+    "sections": [
+      {
+        "boundary_after": null,
+        "break_type": null,
+        "columns": null,
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "index": 1,
+        "margins": null,
+        "page_numbering": null,
+        "page_size": null,
+        "paragraph_end": 4,
+        "paragraph_start": 0,
+        "stories": []
+      }
+    ],
+    "source": "sha256:08318fde05a9daf434821e0b84ea729305dca56bd1967b6ccc1de3be4052f327",
+    "source_map": {
+      "html_offset_unit": "utf8_byte",
+      "regions": [
+        {
+          "editable": true,
+          "html_end": 189,
+          "html_start": 32,
+          "paragraphs": [
+            "19FA2AE0"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 364,
+          "html_start": 190,
+          "paragraphs": [
+            "2D4D22AD"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 508,
+          "html_start": 365,
+          "paragraphs": [
+            "4E9D2B67"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 662,
+          "html_start": 509,
+          "paragraphs": [
+            "01DB86EE"
+          ],
+          "part": "word/document.xml"
+        }
+      ],
+      "text_offset_unit": "unicode_scalar"
+    },
+    "tables": [],
+    "view": "final"
+  },
+  "source": "sha256:08318fde05a9daf434821e0b84ea729305dca56bd1967b6ccc1de3be4052f327"
+}

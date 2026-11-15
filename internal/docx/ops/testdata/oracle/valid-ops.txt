@@ -1,0 +1,90 @@
+# One operation per line (JSON), each wrapped in a plan by the test. These
+# cover every operation and field, and the number, string and
+# normalisation edge cases canonical JSON must reproduce.
+{"op":"replace_equation","at":"0000000A","latex":"\\frac{a}{b}","equation":2,"display":true}
+{"op":"replace_equation","at":"0000000A","mathml":"<math><mi>x</mi></math>","equation":2,"display":true}
+{"op":"delete_equation","at":"$eq","equation":1}
+{"op":"replace_text","at":"7FFFFFFF","select":"a\"b\\c\u0001\u001f\u007f  <>&é😀","with":"x/y\b\f\n\r\t","occurrence":4294967295}
+{"op":"revise_text","edits":[{"select":"a","with":"b","all":true},{"select":"c","with":"","occurrence":2},{"select":"d","with":"e","all":false}]}
+{"op":"revise_text","at":"$p","within":"scope","occurrence":1,"edits":[{"select":"a","with":"b"}]}
+{"op":"replace_paragraph","at":"00000001","with":"<b>bold</b> text"}
+{"op":"edit_table","at":"table:1","action":{"kind":"insert_rows","row":1,"position":"before","count":100,"as":"rows"}}
+{"op":"edit_table","at":"$t","action":{"kind":"delete_rows","row":2,"count":1}}
+{"op":"edit_table","at":"table:3","action":{"kind":"insert_columns","column":1,"position":"after","count":2,"as":"_c"}}
+{"op":"edit_table","at":"table:1","action":{"kind":"delete_columns","column":2,"count":1}}
+{"op":"edit_table","at":"table:1","action":{"kind":"merge_cells","row":1,"column":1,"row_span":2,"column_span":1}}
+{"op":"edit_table","at":"table:1","action":{"kind":"split_cell","row":1,"column":1}}
+{"op":"edit_table","at":"table:1","action":{"kind":"delete"}}
+{"op":"insert_table","at":"0000000A","position":"after","rows":2,"columns":3,"cells":[["a","b"],[],["x"]],"as":"t"}
+{"op":"insert_table","at":"0000000A","position":"before","rows":100,"columns":100}
+{"op":"format_table","at":"table:1","format":{"width":{"unit":"points","value":432.05},"column_widths":[72,144.5,0.05],"layout":"fixed","alignment":"center","borders":{"top":{"style":"single","color":"#FF0000","width":0.5},"left":{"style":"nil"},"bottom":{"style":"double","width":12},"right":{"style":"dotDash","color":"#00AA00"},"inside_horizontal":{"style":"wave","width":0.25},"inside_vertical":{"style":"none"}},"cell_spacing":0,"padding":{"top":1,"right":2.5,"bottom":0.05,"left":107374182.35},"style":"TableGrid","clear":["layout"]}}
+{"op":"format_table","at":"$tbl","format":{"width":{"unit":"percent","value":50}}}
+{"op":"format_table","at":"table:1","format":{"width":{"unit":"percent","value":0.1}}}
+{"op":"format_table","at":"table:1","format":{"width":{"unit":"auto"}}}
+{"op":"format_table","at":"table:1","format":{"clear":["width","borders","padding","style","cell_spacing","alignment","layout"]}}
+{"op":"format_row","at":"table:1/row:2","format":{"height":20.5,"height_rule":"at_least","repeating_header":true,"allow_split":false,"clear":["height"]}}
+{"op":"format_row","at":"$t/row:+1","format":{"clear":["allow_split"]}}
+{"op":"format_cell","at":"table:1/row:1/cell:1","format":{"width":{"unit":"points","value":0},"borders":{"bottom":{"style":"dashed"}},"fill":"#ABCDEF","padding":{"left":5},"vertical_alignment":"bottom","clear":["fill"]}}
+{"op":"format_text","at":"0000000A","select":"x","occurrence":1,"bold":true,"italic":false,"underline":true,"strike":false,"superscript":true,"subscript":false,"color":"#00FF00","highlight":"darkYellow","font_size":10.5,"clear":["color","highlight"]}
+{"op":"format_text","at":"0000000A","select":"x","font_size":1e2}
+{"op":"format_text","at":"0000000A","select":"x","font_size":0.1}
+{"op":"format_text","at":"0000000A","select":"x","font_size":0.15}
+{"op":"format_text","at":"0000000A","select":"x","font_size":1.15}
+{"op":"format_text","at":"0000000A","select":"x","font_size":12.000000000001}
+{"op":"format_text","at":"0000000A","select":"x","font_size":72.0}
+{"op":"format_text","at":"0000000A","select":"x","font_size":-0}
+{"op":"format_text","at":"0000000A","select":"x","font_size":-0.0}
+{"op":"format_text","at":"0000000A","select":"x","font_size":1e15}
+{"op":"format_text","at":"0000000A","select":"x","font_size":1e300}
+{"op":"format_text","at":"0000000A","select":"x","font_size":123456789012345678901234567890}
+{"op":"format_text","at":"0000000A","select":"x","font_size":0.05e1}
+{"op":"format_text","at":"0000000A","select":"x","font_size":5E-2}
+{"op":"format_text","at":"0000000A","select":"x","font_size":0.0500000000000000000000000001}
+{"op":"format_text","at":"0000000A","select":"x","highlight":"none","bold":null,"italic":null}
+{"op":"format_paragraph","at":"0000000A","style":"Heading 1","alignment":"JUSTIFY","indent_left":-36,"indent_right":0,"first_line_indent":-18.25,"space_before":6,"space_after":0.35,"line_spacing":{"mode":"multiple","value":1.15},"clear":["style"]}
+{"op":"format_paragraph","at":"0000000A","alignment":"Center","line_spacing":{"mode":"exact","value":14}}
+{"op":"format_paragraph","at":"0000000A","line_spacing":{"mode":"at_least","value":12.5}}
+{"op":"format_paragraph","at":"0000000A","line_spacing":{"mode":"multiple","value":2}}
+{"op":"format_paragraph","at":"0000000A","line_spacing":{"mode":"multiple","value":-1e-7}}
+{"op":"format_paragraph","at":"0000000A","line_spacing":{"mode":"multiple","value":1e16}}
+{"op":"format_paragraph","at":"0000000A","line_spacing":{"mode":"multiple","value":0.000012345}}
+{"op":"format_paragraph","at":"0000000A","line_spacing":{"mode":"multiple","value":123456789012345.6}}
+{"op":"format_paragraph","at":"0000000A","indent_left":100000,"indent_right":-100000,"first_line_indent":0.05}
+{"op":"format_paragraph","at":"0000000A","first_line_indent":-0.0}
+{"op":"format_paragraph","at":"0000000A","clear":[]}
+{"op":"set_list","at":["0000000A","$b"],"format":"lowerRoman","level":8,"start":2147483647}
+{"op":"set_list","at":["0000000A"],"num_id":5,"level":0}
+{"op":"set_list","at":["0000000A"],"remove":true}
+{"op":"set_list","at":["0000000A"],"level":1,"start":3,"levels":[{"format":"decimal","label":"%1.","start":1},{"format":"lowerLetter","label":"%1.%2)","restart_after":0,"indent_left":36,"indent_right":0,"first_line_indent":-18,"marker_bold":true,"marker_italic":false,"marker_font":"Symbol","marker_color":"ff00aa"}]}
+{"op":"set_list","at":[]}
+{"op":"insert_paragraph","at":"table:007","position":"after"}
+{"op":"insert_paragraph","at":"0000000A","position":"before","with":["A","<i>B</i>",""],"style":"ListBullet","as":"items"}
+{"op":"insert_paragraph","at":"$items","position":"after","with":"x","as":"_x9"}
+{"op":"delete_paragraphs","at":["0000000A","$x","7FFFFFFF"]}
+{"op":"set_page_margins","section":2,"top":72,"right":72.5,"bottom":0,"left":1e1,"header":36,"footer":36.05,"gutter":0}
+{"op":"set_section_boundary","at":"0000000A","break_type":"oddPage"}
+{"op":"set_section_boundary","at":"0000000A","remove":true}
+{"op":"set_section_boundary","at":"0000000A","remove":false}
+{"op":"set_section_layout","section":1,"page_size":"a4","orientation":"landscape","columns":2,"column_spacing":36,"column_widths":[200,200.5],"column_separator":true,"break_type":"continuous","page_number_format":"upperRoman","page_number_start":1}
+{"op":"set_section_layout","section_handle":"section:final","width":612,"height":1584,"page_number_continue":true}
+{"op":"set_first_page_mode","section":1,"enabled":false}
+{"op":"set_even_and_odd_headers","even_and_odd":true}
+{"op":"set_header","section":3,"kind":"first","with":"<p>Head</p>"}
+{"op":"set_footer","kind":"even","with":"<p>Page <page-number/></p>"}
+{"op":"clear_header","kind":"default"}
+{"op":"clear_footer","section":1}
+{"op":"comment_add","at":"0000000A","select":"x","occurrence":3,"text":"Note"}
+{"op":"comment_add","at":"0000000A","text":"Whole"}
+{"op":"comment_reply","comment_id":"0","text":"Reply"}
+{"op":"comment_set_status","comment_id":"12","status":"resolved"}
+{"op":"comment_delete","comment_id":"007"}
+{"op":"bookmark_add","at":"0000000A","name":"Clause_4_2","select":"x","occurrence":1}
+{"op":"bookmark_add","at":"0000000A","name":"Ünïcode_Ж"}
+{"op":"bookmark_rename","name":"_GoBack","new_name":"Back1"}
+{"op":"bookmark_move","name":"Mark","at":"$p","select":"y"}
+{"op":"bookmark_delete","name":"_Toc123"}
+{"op":"revision_settle","target":"all","action":"reject"}
+{"op":"revision_settle","target":"0042","action":"accept"}
+{"op":"convert_revisions_to_formatting","target":"all"}
+{"op":"convert_revisions_to_formatting","target":{"id":"7"},"at":["0000000A"]}
+{"op":"convert_revisions_to_formatting","target":{"author":"Jane Doe"},"at":null}

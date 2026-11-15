@@ -1,0 +1,2 @@
+go test fuzz v1
+string("[1]Sheet1!A1+[1]!Rate")

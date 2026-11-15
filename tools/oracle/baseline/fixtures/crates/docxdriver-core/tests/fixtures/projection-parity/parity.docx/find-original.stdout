@@ -1,0 +1,547 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "matches": [
+      {
+        "id": "11111111",
+        "index": 1,
+        "selectable_text": "Bold italic underline strike super subSafe linkOpaque linkInternal link",
+        "style": "CustomStyle",
+        "text": "Bold italic underline strike super subSafe linkOpaque linkInternal link"
+      },
+      {
+        "id": "22222222",
+        "index": 2,
+        "selectable_text": "Author resultComplex resultCommented changed-format neutral-format",
+        "text": "Author resultComplex resultCommented changed-format neutral-format"
+      },
+      {
+        "id": "33333333",
+        "index": 3,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "upperRoman",
+          "level": 0,
+          "num_id": "42",
+          "start": 3,
+          "value": 3
+        },
+        "number": "III.",
+        "selectable_text": "Roman item",
+        "text": "Roman item"
+      },
+      {
+        "id": "33333334",
+        "index": 4,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "lowerLetter",
+          "level": 1,
+          "num_id": "42",
+          "start": 1,
+          "value": 1
+        },
+        "number": "a)",
+        "selectable_text": "Nested item",
+        "text": "Nested item"
+      },
+      {
+        "id": "33333335",
+        "index": 5,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "upperRoman",
+          "level": 0,
+          "num_id": "42",
+          "start": 3,
+          "value": 4
+        },
+        "number": "IV.",
+        "selectable_text": "Next item",
+        "text": "Next item"
+      },
+      {
+        "id": "44444444",
+        "index": 6,
+        "selectable_text": "Common inserted",
+        "text": "Common deleted"
+      },
+      {
+        "id": "55555555",
+        "index": 7,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "66666666",
+        "index": 8,
+        "selectable_text": "Unicode 😀 nonbreaking space literal\ttabFallback content",
+        "text": "Unicode 😀 nonbreaking space literal\ttabFallback content"
+      },
+      {
+        "id": "77777777",
+        "index": 9,
+        "selectable_text": "Joined first",
+        "text": "Joined first"
+      },
+      {
+        "id": "1EDE45A3",
+        "index": 10,
+        "selectable_text": "Joined second",
+        "text": "Joined second"
+      },
+      {
+        "id": "4B101413",
+        "index": 11,
+        "selectable_text": "Inserted break first",
+        "text": "Inserted break first"
+      },
+      {
+        "id": "11543C1E",
+        "index": 12,
+        "selectable_text": "Inserted break second",
+        "text": "Inserted break second"
+      },
+      {
+        "id": "07B86923",
+        "index": 13,
+        "selectable_text": "Merged cell",
+        "text": "Merged cell"
+      },
+      {
+        "id": "5B82D4E5",
+        "index": 14,
+        "selectable_text": "Top cell",
+        "text": "Top cell"
+      },
+      {
+        "id": "446F0B1E",
+        "index": 15,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "0BA5B732",
+        "index": 16,
+        "selectable_text": "Nested cell",
+        "text": "Nested cell"
+      },
+      {
+        "id": "78B6F0A2",
+        "index": 17,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>α</mi><mtext> </mtext><mo>+</mo><mtext> </mtext><mi>β</mi><mo mathvariant=\"normal\">sin</mo></math>"
+          }
+        ],
+        "id": "28B506BC",
+        "index": 18,
+        "selectable_text": "runs: ",
+        "text": "runs: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup></math>"
+          }
+        ],
+        "id": "4835B59D",
+        "index": 19,
+        "selectable_text": "sup: ",
+        "text": "sup: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msub><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow></msub></math>"
+          }
+        ],
+        "id": "6C6C0863",
+        "index": 20,
+        "selectable_text": "sub: ",
+        "text": "sub: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msubsup><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow><mrow><mn>2</mn></mrow></msubsup></math>"
+          }
+        ],
+        "id": "237FFCFB",
+        "index": 21,
+        "selectable_text": "subsup: ",
+        "text": "subsup: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mmultiscripts><mrow><mi>X</mi></mrow><mrow></mrow><mrow></mrow><mprescripts></mprescripts><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mmultiscripts></math>"
+          }
+        ],
+        "id": "58ED22F7",
+        "index": 22,
+        "selectable_text": "prescripts: ",
+        "text": "prescripts: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math>"
+          }
+        ],
+        "id": "65B5C986",
+        "index": 23,
+        "selectable_text": "fraction: ",
+        "text": "fraction: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac linethickness=\"0\"><mrow><mi>n</mi></mrow><mrow><mi>k</mi></mrow></mfrac></math>"
+          }
+        ],
+        "id": "35502A25",
+        "index": 24,
+        "selectable_text": "nobar: ",
+        "text": "nobar: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac bevelled=\"true\"><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math>"
+          }
+        ],
+        "id": "284EFEE5",
+        "index": 25,
+        "selectable_text": "skew: ",
+        "text": "skew: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><msqrt><mrow><mi>x</mi></mrow></msqrt></math>"
+          }
+        ],
+        "id": "024A5EFD",
+        "index": 26,
+        "selectable_text": "sqrt: ",
+        "text": "sqrt: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mroot><mrow><mi>x</mi></mrow><mrow><mn>3</mn></mrow></mroot></math>"
+          }
+        ],
+        "id": "65CA14EF",
+        "index": 27,
+        "selectable_text": "root: ",
+        "text": "root: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mover><mo>∑</mo><mrow><mi>N</mi></mrow></mover><mrow><mi>x</mi></mrow></mrow></math>"
+          }
+        ],
+        "id": "2D543CA1",
+        "index": 28,
+        "selectable_text": "nary: ",
+        "text": "nary: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"false\"><mrow><mo mathvariant=\"normal\">lim</mo></mrow><mrow><mn>0</mn></mrow></munder></math>"
+          }
+        ],
+        "id": "1B187524",
+        "index": 29,
+        "selectable_text": "limlow: ",
+        "text": "limlow: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"false\"><mrow><mo mathvariant=\"normal\">max</mo></mrow><mrow><mi>N</mi></mrow></mover></math>"
+          }
+        ],
+        "id": "78F991DC",
+        "index": 30,
+        "selectable_text": "limupp: ",
+        "text": "limupp: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mrow><mo mathvariant=\"normal\">sin</mo></mrow><mo>⁡</mo><mrow><mi>x</mi></mrow></mrow></math>"
+          }
+        ],
+        "id": "3DBA0A7D",
+        "index": 31,
+        "selectable_text": "function: ",
+        "text": "function: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>v</mi></mrow><mo stretchy=\"true\">→</mo></mover></math>"
+          }
+        ],
+        "id": "246470C3",
+        "index": 32,
+        "selectable_text": "accent: ",
+        "text": "accent: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">¯</mo></mover></math>"
+          }
+        ],
+        "id": "5BF24182",
+        "index": 33,
+        "selectable_text": "bar: ",
+        "text": "bar: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"true\"><mrow><mi>y</mi></mrow><mo stretchy=\"true\">¯</mo></munder></math>"
+          }
+        ],
+        "id": "746C05B4",
+        "index": 34,
+        "selectable_text": "underbar: ",
+        "text": "underbar: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏞</mo></mover></math>"
+          }
+        ],
+        "id": "6B7986B8",
+        "index": 35,
+        "selectable_text": "group-default: ",
+        "text": "group-default: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><munder accentunder=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏟</mo></munder></math>"
+          }
+        ],
+        "id": "7853450D",
+        "index": 36,
+        "selectable_text": "underbrace: ",
+        "text": "underbrace: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mo stretchy=\"true\" form=\"prefix\">[</mo><mrow><mi>a</mi></mrow><mo>;</mo><mrow><mi>b</mi></mrow><mo stretchy=\"true\" form=\"postfix\">]</mo></mrow></math>"
+          }
+        ],
+        "id": "3F5148AB",
+        "index": 37,
+        "selectable_text": "delimiters: ",
+        "text": "delimiters: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtable><mtr><mtd><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mi>d</mi></mtd></mtr></mtable></math>"
+          }
+        ],
+        "id": "6B642974",
+        "index": 38,
+        "selectable_text": "matrix: ",
+        "text": "matrix: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtable><mtr><mtd><mi>a</mi><mo>=</mo><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi><mo>=</mo><mi>d</mi></mtd></mtr></mtable></math>"
+          }
+        ],
+        "id": "36E8ADAF",
+        "index": 39,
+        "selectable_text": "equation-array: ",
+        "text": "equation-array: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>x</mi></math>"
+          }
+        ],
+        "id": "57CDF34A",
+        "index": 40,
+        "selectable_text": "box: ",
+        "text": "box: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><menclose notation=\"box\"><mrow><mi>y</mi></mrow></menclose></math>"
+          }
+        ],
+        "id": "0E232A17",
+        "index": 41,
+        "selectable_text": "borderbox: ",
+        "text": "borderbox: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mphantom><mrow><mi>z</mi></mrow></mphantom></math>"
+          }
+        ],
+        "id": "12F2B191",
+        "index": 42,
+        "selectable_text": "phantom: ",
+        "text": "phantom: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtext>Old math</mtext></math>"
+          }
+        ],
+        "id": "0A504981",
+        "index": 43,
+        "selectable_text": "deleted-run: ",
+        "text": "deleted-run: "
+      },
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mtext data-docx-unsupported=\"unknown\">Retained unknown</mtext></math>"
+          }
+        ],
+        "id": "307A9CF5",
+        "index": 44,
+        "selectable_text": "unknown: ",
+        "text": "unknown: "
+      },
+      {
+        "equations": [
+          {
+            "display": true,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"block\"><mi>d</mi><mi>i</mi><mi>s</mi><mi>p</mi><mi>l</mi><mi>a</mi><mi>y</mi></math>"
+          }
+        ],
+        "id": "5B954590",
+        "index": 45,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "0BBD43EC",
+        "index": 46,
+        "selectable_text": "Section one end",
+        "text": "Section one end"
+      },
+      {
+        "id": "19E0C67D",
+        "index": 47,
+        "selectable_text": "Section two heading",
+        "style": "Heading2",
+        "text": "Section two heading"
+      }
+    ]
+  },
+  "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "rs-ow-source-links",
+  "type": "restyle",
+  "category": "architecture",
+  "deck": {
+    "path": "web/openwhisk-architecture.pptx",
+    "sha256": "ec2fcddd611d85061cf3028ca6f87c047e4fd05b77cdceb778ea87636f1e96b5",
+    "licence": "Apache-2.0"
+  },
+  "slide": "/ppt/slides/slide1.xml",
+  "instruction": "Make the four connectors that run from the event sources into the central box 2 pt red (FF0000) lines.",
+  "targets": [
+    "s281",
+    "s282",
+    "s283",
+    "s284"
+  ],
+  "checks": [
+    {
+      "type": "line",
+      "targets": [
+        "s281",
+        "s282",
+        "s283",
+        "s284"
+      ],
+      "width_pt": 2,
+      "hex": "FF0000"
+    }
+  ],
+  "max_new": 0
+}

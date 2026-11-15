@@ -1,0 +1,5 @@
+go test fuzz v1
+string("_xlfn._xlws.SORT(_xlfn.ANCHORARRAY(A1))")
+byte('\x02')
+uint16(18)
+uint8(1)

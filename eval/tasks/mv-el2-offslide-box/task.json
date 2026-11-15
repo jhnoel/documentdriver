@@ -1,0 +1,39 @@
+{
+  "id": "mv-el2-offslide-box",
+  "type": "move",
+  "category": "timeline",
+  "deck": {
+    "path": "web/elixir-greece-timeline.pptx",
+    "sha256": "bda1df03531a2ed588a185c2ed67622686efcc6fa201fd57ac60158403cae51c",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide2.xml",
+  "instruction": "The '2nd All-Hands meeting' box runs off the right edge of the slide. Move it left so its right edge is 12 pt inside the slide edge, at the same height, and keep its leader line attached to it and running straight up to the timeline bar.",
+  "targets": [
+    "s127",
+    "s128"
+  ],
+  "checks": [
+    {
+      "type": "box",
+      "target": "s127",
+      "x": 835.7,
+      "keep": [
+        "y",
+        "w",
+        "h"
+      ]
+    },
+    {
+      "type": "connector",
+      "from": "s127",
+      "from_site": 0,
+      "to_point": [
+        891.85,
+        289.2
+      ]
+    }
+  ],
+  "notes": "Slide is 960 pt wide; box w 112.3 -> x 835.7; centre-top 891.85; s128 originally ends at y 289.2.",
+  "max_new": 0
+}

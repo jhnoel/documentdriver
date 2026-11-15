@@ -1,0 +1,27 @@
+{
+  "id": "cn-sp7-physical-digital",
+  "type": "connect",
+  "category": "architecture",
+  "deck": {
+    "path": "web/spade-standards-roadmap.pptx",
+    "sha256": "673b1de7864f150fe61c922ac295672205dd1c98470381700622820120d55266",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide7.xml",
+  "instruction": "Draw a straight arrow from the right side of 'Physical Interface' to the left side of 'Digital Interface', glued at both ends, with the arrowhead at 'Digital Interface'.",
+  "max_new": 1,
+  "checks": [
+    {
+      "type": "connector",
+      "from": "s50",
+      "from_site": 3,
+      "to": "s51",
+      "to_site": 1,
+      "arrow_at": "to",
+      "geoms": [
+        "straightConnector1",
+        "line"
+      ]
+    }
+  ]
+}

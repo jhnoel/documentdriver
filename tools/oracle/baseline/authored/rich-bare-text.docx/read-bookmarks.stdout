@@ -1,0 +1,29 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "bookmarks": [
+      {
+        "end": "3AD8DD8D",
+        "hidden": false,
+        "id": "0",
+        "name": "B",
+        "part": "word/document.xml",
+        "start": "00000001",
+        "text": "ΑΣ one\tin\nbare"
+      },
+      {
+        "end": "ABCDEF01",
+        "hidden": false,
+        "id": "9",
+        "name": "H",
+        "part": "word/header1.xml",
+        "start": "ABCDEF01",
+        "text": "head"
+      }
+    ],
+    "kind": "bookmarks",
+    "source": "sha256:b1b68e8bd82db85068474f9dd7ca07bbfbc17dc603323e1469d8b4aca8afddec"
+  },
+  "source": "sha256:b1b68e8bd82db85068474f9dd7ca07bbfbc17dc603323e1469d8b4aca8afddec"
+}

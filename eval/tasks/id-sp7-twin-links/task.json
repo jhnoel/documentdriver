@@ -1,0 +1,20 @@
+{
+  "id": "id-sp7-twin-links",
+  "type": "identify",
+  "category": "architecture",
+  "deck": {
+    "path": "web/spade-standards-roadmap.pptx",
+    "sha256": "673b1de7864f150fe61c922ac295672205dd1c98470381700622820120d55266",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide7.xml",
+  "instruction": "Which connectors are attached to the green 'Digital twin' box?",
+  "answer": {
+    "ids": [
+      "s7",
+      "s60"
+    ]
+  },
+  "notes": "s7 s3:2->s6:1 (uses), s60 s3:3->s57:1 (twinned with). s67 ends on the diamond s61 above, not on s3.",
+  "max_new": 0
+}

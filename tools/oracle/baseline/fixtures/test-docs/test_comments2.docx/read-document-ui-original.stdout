@@ -1,0 +1,168 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "assets": [],
+    "blocks": [
+      {
+        "html_end": 308,
+        "html_start": 140,
+        "paragraphs": [
+          "10000001"
+        ]
+      },
+      {
+        "html_end": 573,
+        "html_start": 309,
+        "paragraphs": [
+          "10000002"
+        ]
+      },
+      {
+        "html_end": 930,
+        "html_start": 574,
+        "paragraphs": [
+          "10000003"
+        ]
+      },
+      {
+        "html_end": 1317,
+        "html_start": 931,
+        "paragraphs": [
+          "10000004"
+        ]
+      },
+      {
+        "html_end": 1627,
+        "html_start": 1318,
+        "paragraphs": [
+          "10000005"
+        ]
+      }
+    ],
+    "content_type": "text/html",
+    "css": ".docxdriver { font-family: Calibri, Arial, sans-serif; line-height: 1.2; color: #111; }\n.docxdriver p, .docxdriver h1, .docxdriver h2, .docxdriver h3, .docxdriver h4, .docxdriver h5, .docxdriver h6 { white-space: pre-wrap; tab-size: 4; min-height: 1em; }\n.docxdriver p { margin: 0 0 .6em; }\n.docxdriver table { border-collapse: collapse; max-width: 100%; }\n.docxdriver td, .docxdriver th { border: 1px solid #aaa; padding: .3em .5em; vertical-align: top; }\n.docxdriver img { max-width: 100%; }\n.docxdriver ins { color: #067a35; text-decoration: underline; }\n.docxdriver del { color: #b32323; text-decoration: line-through; }\n.docxdriver [data-docx-format-change] { background: #fff1b8; }\n.docxdriver [data-docx-field] { background: #f2f4f7; }\n.docxdriver ol, .docxdriver ul { padding-left: 2em; }\n.docxdriver li > p { margin-bottom: .25em; }\n.docxdriver [data-docx-marker]::marker { content: attr(data-docx-marker) \" \"; }\n.docxdriver aside { border-top: 1px solid #ddd; margin-top: 1em; font-size: .9em; }\n.docxdriver [data-docx-break=\"page\"] { break-after: page; }\n.docxdriver [data-docx-break=\"column\"] { break-after: column; }\n.docxdriver header, .docxdriver footer { color: #555; }\n",
+    "html": "<section data-docx-section=\"1\" data-docx-page-width-twips=\"12240\" data-docx-page-height-twips=\"15840\" data-docx-column-spacing-twips=\"720\">\n<p id=\"10000001\" data-docx-ord=\"1\" data-docx-style=\"Normal\" style=\"font-size:12pt;line-height:1.1583333333333334;margin-bottom:8pt;\">MUTUAL NON-DISCLOSURE AGREEMENT</p>\n<p id=\"10000002\" data-docx-ord=\"2\" data-docx-style=\"Normal\" style=\"font-size:12pt;line-height:1.1583333333333334;margin-bottom:8pt;\">This Mutual Non-Disclosure Agreement is entered into as of January 15, 2026, by and between Acme Corp. and Beta Industries LLC.</p>\n<p id=\"10000003\" data-docx-ord=\"3\" data-docx-style=\"Normal\" style=\"font-size:12pt;line-height:1.1583333333333334;margin-bottom:8pt;\">1. Confidential Information. For purposes of this Agreement, Confidential Information means any non-public technical, financial, or business information disclosed by one party to the other, whether orally or in writing.</p>\n<p id=\"10000004\" data-docx-ord=\"4\" data-docx-style=\"Normal\" style=\"font-size:12pt;line-height:1.1583333333333334;margin-bottom:8pt;\">2. Term and Termination. The obligations of confidentiality under this Agreement shall remain in effect for a period of five (5) years from the date of disclosure. Either party may terminate this Agreement upon thirty (30) days prior written notice.</p>\n<p id=\"10000005\" data-docx-ord=\"5\" data-docx-style=\"Normal\" style=\"font-size:12pt;line-height:1.1583333333333334;margin-bottom:8pt;\">3. Governing Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws principles.</p>\n</section>",
+    "idRepairsNeeded": 0,
+    "kind": "document",
+    "paragraphs": [
+      {
+        "id": "10000001",
+        "index": 1,
+        "selectable_text": "MUTUAL NON-DISCLOSURE AGREEMENT",
+        "text": "MUTUAL NON-DISCLOSURE AGREEMENT"
+      },
+      {
+        "id": "10000002",
+        "index": 2,
+        "selectable_text": "This Mutual Non-Disclosure Agreement is entered into as of January 15, 2026, by and between Acme Corp. and Beta Industries LLC.",
+        "text": "This Mutual Non-Disclosure Agreement is entered into as of January 15, 2026, by and between Acme Corp. and Beta Industries LLC."
+      },
+      {
+        "id": "10000003",
+        "index": 3,
+        "selectable_text": "1. Confidential Information. For purposes of this Agreement, Confidential Information means any non-public technical, financial, or business information disclosed by one party to the other, whether orally or in writing.",
+        "text": "1. Confidential Information. For purposes of this Agreement, Confidential Information means any non-public technical, financial, or business information disclosed by one party to the other, whether orally or in writing."
+      },
+      {
+        "id": "10000004",
+        "index": 4,
+        "selectable_text": "2. Term and Termination. The obligations of confidentiality under this Agreement shall remain in effect for a period of five (5) years from the date of disclosure. Either party may terminate this Agreement upon thirty (30) days prior written notice.",
+        "text": "2. Term and Termination. The obligations of confidentiality under this Agreement shall remain in effect for a period of five (5) years from the date of disclosure. Either party may terminate this Agreement upon thirty (30) days prior written notice."
+      },
+      {
+        "id": "10000005",
+        "index": 5,
+        "selectable_text": "3. Governing Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws principles.",
+        "text": "3. Governing Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws principles."
+      }
+    ],
+    "projection_version": 4,
+    "sections": [
+      {
+        "boundary_after": null,
+        "break_type": null,
+        "columns": {
+          "definitions": [],
+          "space": "720"
+        },
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "index": 1,
+        "margins": {
+          "bottom": "1440",
+          "footer": "720",
+          "gutter": "0",
+          "header": "720",
+          "left": "1440",
+          "right": "1440",
+          "top": "1440"
+        },
+        "page_numbering": null,
+        "page_size": {
+          "h": "15840",
+          "w": "12240"
+        },
+        "paragraph_end": 5,
+        "paragraph_start": 0,
+        "stories": []
+      }
+    ],
+    "source": "sha256:8cbb2b4937f5f1cc4b9f6fcff8caca85c0a77cf2a8bc8c47b21e809480f9962b",
+    "source_map": {
+      "html_offset_unit": "utf8_byte",
+      "regions": [
+        {
+          "editable": true,
+          "html_end": 308,
+          "html_start": 140,
+          "paragraphs": [
+            "10000001"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 573,
+          "html_start": 309,
+          "paragraphs": [
+            "10000002"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 930,
+          "html_start": 574,
+          "paragraphs": [
+            "10000003"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 1317,
+          "html_start": 931,
+          "paragraphs": [
+            "10000004"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 1627,
+          "html_start": 1318,
+          "paragraphs": [
+            "10000005"
+          ],
+          "part": "word/document.xml"
+        }
+      ],
+      "text_offset_unit": "unicode_scalar"
+    },
+    "tables": [],
+    "view": "original"
+  },
+  "source": "sha256:8cbb2b4937f5f1cc4b9f6fcff8caca85c0a77cf2a8bc8c47b21e809480f9962b"
+}

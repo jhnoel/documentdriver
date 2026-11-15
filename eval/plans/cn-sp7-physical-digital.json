@@ -1,0 +1,3 @@
+{"ops": [
+  {"op": "object.add", "at": "slide7", "as": "link", "kind": "connector", "name": "Physical to Digital", "geom": "straightConnector1", "from": [333.47, 327.96], "to": [364.66, 327.96], "from_glue": "s50:3", "to_glue": "s51:1", "line": {"w": 0.75, "color": {"scheme": "dk1", "mods": [{"shade": 95000}, {"satMod": 105000}]}, "dash": "solid", "tail": "triangle"}}
+]}

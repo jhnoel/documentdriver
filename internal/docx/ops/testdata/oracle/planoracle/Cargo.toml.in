@@ -1,0 +1,10 @@
+[package]
+name = "planoracle"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+docxdriver-core = { path = "DOCXDRIVER/crates/docxdriver-core" }
+serde_json = "1"
+
+[workspace]

@@ -1,0 +1,49 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "comments": [
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "locator": "p1:0-11"
+            }
+          ]
+        },
+        "createdAt": "2000-01-01T00:00:00Z",
+        "durableId": "",
+        "id": "0",
+        "ooxmlId": "0",
+        "replies": [
+          {
+            "author": "B",
+            "date": "",
+            "durableId": "",
+            "id": "1",
+            "ooxmlCommentId": "1",
+            "paraId": "10000001",
+            "parentId": "0",
+            "text": "reply",
+            "threadId": "0"
+          }
+        ],
+        "root": {
+          "author": "A",
+          "date": "2000-01-01T00:00:00Z",
+          "durableId": "",
+          "id": "0",
+          "ooxmlCommentId": "0",
+          "paraId": "10000000",
+          "parentId": null,
+          "text": "note",
+          "threadId": "0"
+        },
+        "status": "resolved"
+      }
+    ],
+    "kind": "comments",
+    "source": "sha256:e5fa107faa8a20e14a66bb98100248ce6aa6f161a3263a2f20842f5f521c183b"
+  },
+  "source": "sha256:e5fa107faa8a20e14a66bb98100248ce6aa6f161a3263a2f20842f5f521c183b"
+}

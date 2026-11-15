@@ -1,0 +1,2 @@
+go test fuzz v1
+string("apply\x00book.xlsx\x00-\x00--dry-run\x00-o\x00out.xlsx")

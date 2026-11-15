@@ -1,0 +1,91 @@
+{
+  "id": "mv-el2-year-labels",
+  "type": "move",
+  "category": "timeline",
+  "deck": {
+    "path": "web/elixir-greece-timeline.pptx",
+    "sha256": "bda1df03531a2ed588a185c2ed67622686efcc6fa201fd57ac60158403cae51c",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide2.xml",
+  "instruction": "Space the ten year labels under the timeline evenly from 2011 to 2020: leave the 2011 and 2020 labels where they are, give all ten the same top as the 2011 label, and do not resize them.",
+  "targets": [
+    "s59",
+    "s60",
+    "s61",
+    "s62",
+    "s63",
+    "s64",
+    "s65",
+    "s66",
+    "s69",
+    "s70"
+  ],
+  "checks": [
+    {
+      "type": "box",
+      "targets": [
+        "s59",
+        "s70"
+      ],
+      "keep": [
+        "x",
+        "y"
+      ]
+    },
+    {
+      "type": "align",
+      "targets": [
+        "s59",
+        "s60",
+        "s61",
+        "s62",
+        "s63",
+        "s64",
+        "s65",
+        "s66",
+        "s69",
+        "s70"
+      ],
+      "edge": "top",
+      "value": 295.76,
+      "tol": 0.25
+    },
+    {
+      "type": "distribute",
+      "targets": [
+        "s59",
+        "s60",
+        "s61",
+        "s62",
+        "s63",
+        "s64",
+        "s65",
+        "s66",
+        "s69",
+        "s70"
+      ],
+      "edge": "left"
+    },
+    {
+      "type": "box",
+      "targets": [
+        "s59",
+        "s60",
+        "s61",
+        "s62",
+        "s63",
+        "s64",
+        "s65",
+        "s66",
+        "s69",
+        "s70"
+      ],
+      "keep": [
+        "w",
+        "h"
+      ]
+    }
+  ],
+  "max_new": 0
+}

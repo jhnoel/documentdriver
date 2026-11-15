@@ -1,0 +1,19 @@
+{
+  "id": "id-ow-gateway",
+  "type": "identify",
+  "category": "architecture",
+  "deck": {
+    "path": "web/openwhisk-architecture.pptx",
+    "sha256": "ec2fcddd611d85061cf3028ca6f87c047e4fd05b77cdceb778ea87636f1e96b5",
+    "licence": "Apache-2.0"
+  },
+  "slide": "/ppt/slides/slide1.xml",
+  "instruction": "Which object is the rounded box in the middle that all four event-source connectors run into?",
+  "answer": {
+    "ids": [
+      "s216"
+    ]
+  },
+  "notes": "s216 Rounded Rectangle 215; s281-s284 end at s216:1. The OpenWhisk logo picture inside it is s136 (wrong answer).",
+  "max_new": 0
+}

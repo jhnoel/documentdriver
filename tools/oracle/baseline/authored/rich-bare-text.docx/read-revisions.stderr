@@ -1,0 +1,4 @@
+
+thread 'main' (16890246) panicked at crates/docxdriver-core/src/segments.rs:80:49:
+text element inside a run
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

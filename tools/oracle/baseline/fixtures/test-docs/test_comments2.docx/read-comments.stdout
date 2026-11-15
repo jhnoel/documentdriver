@@ -1,0 +1,115 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "comments": [
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "locator": "p2:59-75"
+            }
+          ]
+        },
+        "createdAt": "2000-01-01T00:00:00Z",
+        "durableId": "10000006",
+        "id": "0",
+        "ooxmlId": "0",
+        "replies": [],
+        "root": {
+          "author": "Legal Reviewer",
+          "date": "2000-01-01T00:00:00Z",
+          "durableId": "10000006",
+          "id": "0",
+          "ooxmlCommentId": "0",
+          "paraId": "10000006",
+          "parentId": null,
+          "text": "Please confirm the effective date and verify the exact registered legal names of both parties.",
+          "threadId": "0"
+        },
+        "status": "open"
+      },
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "locator": "p3:190-218"
+            }
+          ]
+        },
+        "createdAt": "2000-01-01T00:00:00Z",
+        "durableId": "10000007",
+        "id": "1",
+        "ooxmlId": "1",
+        "replies": [],
+        "root": {
+          "author": "Legal Reviewer",
+          "date": "2000-01-01T00:00:00Z",
+          "durableId": "10000007",
+          "id": "1",
+          "ooxmlCommentId": "1",
+          "paraId": "10000007",
+          "parentId": null,
+          "text": "Consider requiring oral disclosures to be summarized in writing within 30 days to qualify as Confidential Information.",
+          "threadId": "1"
+        },
+        "status": "open"
+      },
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "locator": "p4:120-134"
+            }
+          ]
+        },
+        "createdAt": "2000-01-01T00:00:00Z",
+        "durableId": "10000008",
+        "id": "2",
+        "ooxmlId": "2",
+        "replies": [],
+        "root": {
+          "author": "Legal Reviewer",
+          "date": "2000-01-01T00:00:00Z",
+          "durableId": "10000008",
+          "id": "2",
+          "ooxmlCommentId": "2",
+          "paraId": "10000008",
+          "parentId": null,
+          "text": "Five years is acceptable for general business information, but trade secrets should remain protected for so long as they qualify as trade secrets under applicable law.",
+          "threadId": "2"
+        },
+        "status": "open"
+      },
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "locator": "p5:0-172"
+            }
+          ]
+        },
+        "createdAt": "2000-01-01T00:00:00Z",
+        "durableId": "10000009",
+        "id": "3",
+        "ooxmlId": "3",
+        "replies": [],
+        "root": {
+          "author": "Legal Reviewer",
+          "date": "2000-01-01T00:00:00Z",
+          "durableId": "10000009",
+          "id": "3",
+          "ooxmlCommentId": "3",
+          "paraId": "10000009",
+          "parentId": null,
+          "text": "Confirm whether the parties also want an exclusive venue and jurisdiction clause in Delaware.",
+          "threadId": "3"
+        },
+        "status": "open"
+      }
+    ],
+    "kind": "comments",
+    "source": "sha256:8cbb2b4937f5f1cc4b9f6fcff8caca85c0a77cf2a8bc8c47b21e809480f9962b"
+  },
+  "source": "sha256:8cbb2b4937f5f1cc4b9f6fcff8caca85c0a77cf2a8bc8c47b21e809480f9962b"
+}

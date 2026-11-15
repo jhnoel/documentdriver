@@ -1,0 +1,35 @@
+{
+  "id": "rs-sp7-white-boxes",
+  "type": "restyle",
+  "category": "architecture",
+  "deck": {
+    "path": "web/spade-standards-roadmap.pptx",
+    "sha256": "673b1de7864f150fe61c922ac295672205dd1c98470381700622820120d55266",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide7.xml",
+  "instruction": "Fill every white labelled box in the diagram with accent 2. Leave the green boxes, the small triangle and diamond markers and the text labels as they are.",
+  "targets": [
+    "s6",
+    "s50",
+    "s51",
+    "s58",
+    "s69",
+    "s71"
+  ],
+  "checks": [
+    {
+      "type": "fill",
+      "targets": [
+        "s6",
+        "s50",
+        "s51",
+        "s58",
+        "s69",
+        "s71"
+      ],
+      "scheme": "accent2"
+    }
+  ],
+  "max_new": 0
+}

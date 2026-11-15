@@ -1,0 +1,2 @@
+go test fuzz v1
+string("<b><i><span style=\"color:#336699;font-size:10.5pt\">x</span></i></b>")

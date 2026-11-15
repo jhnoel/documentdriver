@@ -1,0 +1,39 @@
+{
+  "id": "in-sp7-sync",
+  "type": "insert",
+  "category": "architecture",
+  "deck": {
+    "path": "web/spade-standards-roadmap.pptx",
+    "sha256": "673b1de7864f150fe61c922ac295672205dd1c98470381700622820120d55266",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide7.xml",
+  "instruction": "Split the 'twinned with' link between 'Digital twin' and 'Target entity' with a small box labelled 'Sync': Digital twin → Sync → Target entity, both connectors glued at both ends, arrowhead at 'Target entity'.",
+  "targets": [
+    "s60"
+  ],
+  "max_new": 3,
+  "checks": [
+    {
+      "type": "new_shape",
+      "text": "Sync",
+      "alias": "s"
+    },
+    {
+      "type": "connector",
+      "from": "s3",
+      "to": "$s"
+    },
+    {
+      "type": "connector",
+      "from": "$s",
+      "to": "s57",
+      "arrow_at": "to"
+    },
+    {
+      "type": "no_connector",
+      "from": "s3",
+      "to": "s57"
+    }
+  ]
+}

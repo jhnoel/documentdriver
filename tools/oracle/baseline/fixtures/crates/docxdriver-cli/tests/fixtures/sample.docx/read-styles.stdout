@@ -1,0 +1,520 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "kind": "styles",
+    "source": "sha256:08318fde05a9daf434821e0b84ea729305dca56bd1967b6ccc1de3be4052f327",
+    "styles": [
+      {
+        "default": true,
+        "name": "Normal",
+        "styleId": "Normal",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Body Text",
+        "styleId": "BodyText",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "BodyText",
+        "name": "First Paragraph",
+        "next": "BodyText",
+        "styleId": "FirstParagraph",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "BodyText",
+        "name": "Compact",
+        "styleId": "Compact",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Title",
+        "next": "BodyText",
+        "styleId": "Title",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Title Char",
+        "styleId": "TitleChar",
+        "type": "character"
+      },
+      {
+        "basedOn": "Title",
+        "name": "Subtitle",
+        "next": "BodyText",
+        "styleId": "Subtitle",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Subtitle Char",
+        "styleId": "SubtitleChar",
+        "type": "character"
+      },
+      {
+        "basedOn": "Title",
+        "name": "Author",
+        "next": "BodyText",
+        "styleId": "Author",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Title",
+        "name": "Date",
+        "next": "BodyText",
+        "styleId": "Date",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Abstract Title",
+        "next": "Abstract",
+        "styleId": "AbstractTitle",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Abstract",
+        "next": "BodyText",
+        "styleId": "Abstract",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Bibliography",
+        "next": "Bibliography",
+        "styleId": "Bibliography",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "heading 1",
+        "next": "BodyText",
+        "styleId": "Heading1",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "heading 2",
+        "next": "BodyText",
+        "styleId": "Heading2",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "heading 3",
+        "next": "BodyText",
+        "styleId": "Heading3",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "heading 4",
+        "next": "BodyText",
+        "styleId": "Heading4",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "heading 5",
+        "next": "BodyText",
+        "styleId": "Heading5",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "heading 6",
+        "next": "BodyText",
+        "styleId": "Heading6",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "heading 7",
+        "next": "BodyText",
+        "styleId": "Heading7",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "heading 8",
+        "next": "BodyText",
+        "styleId": "Heading8",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "heading 9",
+        "next": "BodyText",
+        "styleId": "Heading9",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Heading 1 Char",
+        "styleId": "Heading1Char",
+        "type": "character"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Heading 2 Char",
+        "styleId": "Heading2Char",
+        "type": "character"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Heading 3 Char",
+        "styleId": "Heading3Char",
+        "type": "character"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Heading 4 Char",
+        "styleId": "Heading4Char",
+        "type": "character"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Heading 5 Char",
+        "styleId": "Heading5Char",
+        "type": "character"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Heading 6 Char",
+        "styleId": "Heading6Char",
+        "type": "character"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Heading 7 Char",
+        "styleId": "Heading7Char",
+        "type": "character"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Heading 8 Char",
+        "styleId": "Heading8Char",
+        "type": "character"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Heading 9 Char",
+        "styleId": "Heading9Char",
+        "type": "character"
+      },
+      {
+        "basedOn": "BodyText",
+        "name": "Block Text",
+        "next": "BodyText",
+        "styleId": "BlockText",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Footnote Text",
+        "next": "FootnoteText",
+        "styleId": "FootnoteText",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "FootnoteText",
+        "name": "Footnote Block Text",
+        "next": "FootnoteText",
+        "styleId": "FootnoteBlockText",
+        "type": "paragraph"
+      },
+      {
+        "default": true,
+        "name": "Default Paragraph Font",
+        "styleId": "DefaultParagraphFont",
+        "type": "character"
+      },
+      {
+        "basedOn": "TableNormal",
+        "default": true,
+        "name": "Table",
+        "styleId": "Table",
+        "type": "table"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Definition Term",
+        "next": "Definition",
+        "styleId": "DefinitionTerm",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Definition",
+        "styleId": "Definition",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Caption",
+        "styleId": "Caption",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Caption",
+        "name": "Table Caption",
+        "styleId": "TableCaption",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Caption",
+        "name": "Image Caption",
+        "styleId": "ImageCaption",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Figure",
+        "styleId": "Figure",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Figure",
+        "name": "Captioned Figure",
+        "styleId": "CaptionedFigure",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Body Text Char",
+        "styleId": "BodyTextChar",
+        "type": "character"
+      },
+      {
+        "basedOn": "BodyTextChar",
+        "name": "Verbatim Char",
+        "styleId": "VerbatimChar",
+        "type": "character"
+      },
+      {
+        "basedOn": "BodyTextChar",
+        "name": "Section Number",
+        "styleId": "SectionNumber",
+        "type": "character"
+      },
+      {
+        "basedOn": "BodyTextChar",
+        "name": "Footnote Reference",
+        "styleId": "FootnoteReference",
+        "type": "character"
+      },
+      {
+        "basedOn": "BodyTextChar",
+        "name": "Hyperlink",
+        "styleId": "Hyperlink",
+        "type": "character"
+      },
+      {
+        "basedOn": "Heading1",
+        "name": "TOC Heading",
+        "next": "BodyText",
+        "styleId": "TOCHeading",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "Source Code",
+        "styleId": "SourceCode",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "KeywordTok",
+        "styleId": "KeywordTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "DataTypeTok",
+        "styleId": "DataTypeTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "DecValTok",
+        "styleId": "DecValTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "BaseNTok",
+        "styleId": "BaseNTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "FloatTok",
+        "styleId": "FloatTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "ConstantTok",
+        "styleId": "ConstantTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "CharTok",
+        "styleId": "CharTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "SpecialCharTok",
+        "styleId": "SpecialCharTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "StringTok",
+        "styleId": "StringTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "VerbatimStringTok",
+        "styleId": "VerbatimStringTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "SpecialStringTok",
+        "styleId": "SpecialStringTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "ImportTok",
+        "styleId": "ImportTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "CommentTok",
+        "styleId": "CommentTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "DocumentationTok",
+        "styleId": "DocumentationTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "AnnotationTok",
+        "styleId": "AnnotationTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "CommentVarTok",
+        "styleId": "CommentVarTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "OtherTok",
+        "styleId": "OtherTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "FunctionTok",
+        "styleId": "FunctionTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "VariableTok",
+        "styleId": "VariableTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "ControlFlowTok",
+        "styleId": "ControlFlowTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "OperatorTok",
+        "styleId": "OperatorTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "BuiltInTok",
+        "styleId": "BuiltInTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "ExtensionTok",
+        "styleId": "ExtensionTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "PreprocessorTok",
+        "styleId": "PreprocessorTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "AttributeTok",
+        "styleId": "AttributeTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "RegionMarkerTok",
+        "styleId": "RegionMarkerTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "InformationTok",
+        "styleId": "InformationTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "WarningTok",
+        "styleId": "WarningTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "AlertTok",
+        "styleId": "AlertTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "ErrorTok",
+        "styleId": "ErrorTok",
+        "type": "character"
+      },
+      {
+        "basedOn": "VerbatimChar",
+        "name": "NormalTok",
+        "styleId": "NormalTok",
+        "type": "character"
+      }
+    ]
+  },
+  "source": "sha256:08318fde05a9daf434821e0b84ea729305dca56bd1967b6ccc1de3be4052f327"
+}

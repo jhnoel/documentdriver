@@ -1,0 +1,30 @@
+{
+  "id": "cn-co11-attach-arrow",
+  "type": "connect",
+  "category": "flowchart",
+  "deck": {
+    "path": "repos/apache-poi/test-data/slideshow/aascu.org_hbcu_leadershipsummit_cooper_.pptx",
+    "sha256": "0089e34825a40c63c3001b866a0f769fceaae7f0748a8f444db513305d9baa70",
+    "licence": "Apache-2.0 (Apache POI test data)"
+  },
+  "slide": "/ppt/slides/slide11.xml",
+  "instruction": "The arrow from 'Work/Loan Burden' to 'Stress' is not attached to either box. Attach it so it runs from the right side of 'Work/Loan Burden' to the left side of 'Stress', keeping its arrowhead at 'Stress'.",
+  "targets": [
+    "s19"
+  ],
+  "max_new": 1,
+  "checks": [
+    {
+      "type": "connector",
+      "from": "s5",
+      "from_side": "right",
+      "to": "s8",
+      "to_side": "left",
+      "arrow_at": "to"
+    },
+    {
+      "type": "resolved",
+      "target": "s19"
+    }
+  ]
+}

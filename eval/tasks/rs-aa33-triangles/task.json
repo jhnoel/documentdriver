@@ -1,0 +1,33 @@
+{
+  "id": "rs-aa33-triangles",
+  "type": "restyle",
+  "category": "hub",
+  "deck": {
+    "path": "repos/apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
+    "sha256": "5df09eff2c5fbb2bea72971421dc5507d68cab10ce3af8791969fdee35e76991",
+    "licence": "Apache-2.0 (Apache POI test data)"
+  },
+  "slide": "/ppt/slides/slide33.xml",
+  "instruction": "Fill the five large 'Goals, Strategies, Policies…' triangles inside the big circles with accent 4. Leave the small triangles alone.",
+  "targets": [
+    "s45",
+    "s46",
+    "s51",
+    "s52",
+    "s53"
+  ],
+  "checks": [
+    {
+      "type": "fill",
+      "targets": [
+        "s45",
+        "s46",
+        "s51",
+        "s52",
+        "s53"
+      ],
+      "scheme": "accent4"
+    }
+  ],
+  "max_new": 0
+}

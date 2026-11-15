@@ -1,0 +1,6 @@
+{"ops": [
+  {"op": "object.add", "at": "slide7", "as": "sync", "kind": "shape", "name": "Sync", "geom": "rect", "box": [319, 186, 50, 22], "fill": {"scheme": "bg1"}, "line": {"w": 1.5, "color": {"scheme": "tx1"}, "dash": "solid", "cap": "flat"}, "html": "<p style=\"text-align:center\"><span style=\"font-size:10pt\">Sync</span></p>"},
+  {"op": "object.duplicate", "at": "slide7/s60", "as": "second"},
+  {"op": "object.set", "at": "slide7/s60", "to_glue": "$sync:1", "to": [319, 197], "line": {"tail": "none w=med len=med"}},
+  {"op": "object.set", "at": "$second", "from_glue": "$sync:3", "from": [369, 197]}
+]}

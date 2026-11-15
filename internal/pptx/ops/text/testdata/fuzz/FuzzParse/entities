@@ -1,0 +1,2 @@
+go test fuzz v1
+string("a &amp; b &#x1F600; &lt;c&gt; &#10;")

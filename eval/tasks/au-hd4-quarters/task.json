@@ -1,0 +1,67 @@
+{
+  "id": "au-hd4-quarters",
+  "type": "author",
+  "category": "timeline",
+  "deck": {
+    "path": "web/healthdcat-workflow.pptx",
+    "sha256": "cc66b147c9e13fef31a96a13cbca4cbb6769f5f81a5232dc98e2d6e27e66d4e4",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide4.xml",
+  "instruction": "In the strip between the three panels and the footnote, add a horizontal timeline: one straight line with four evenly spaced circular milestone dots on it, labelled Q1, Q2, Q3 and Q4 from left to right.",
+  "max_new": -1,
+  "rubric": "rubric.md",
+  "checks": [
+    {
+      "type": "new_line",
+      "orient": "h",
+      "min_len": 300,
+      "alias": "axis"
+    },
+    {
+      "type": "new_objects",
+      "geoms": [
+        "ellipse",
+        "flowChartConnector"
+      ],
+      "count": 4,
+      "alias": "dots"
+    },
+    {
+      "type": "align",
+      "targets": [
+        "$dots"
+      ],
+      "edge": "centery",
+      "ref": "$axis",
+      "tol": 1
+    },
+    {
+      "type": "distribute",
+      "targets": [
+        "$dots"
+      ],
+      "edge": "centerx",
+      "tol": 1
+    },
+    {
+      "type": "sequence",
+      "texts": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "axis": "x"
+    },
+    {
+      "type": "region",
+      "region": [
+        40,
+        405,
+        880,
+        72
+      ]
+    }
+  ]
+}

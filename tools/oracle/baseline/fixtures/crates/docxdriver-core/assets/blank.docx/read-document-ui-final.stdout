@@ -1,0 +1,80 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "assets": [],
+    "blocks": [
+      {
+        "html_end": 250,
+        "html_start": 140,
+        "paragraphs": [
+          "2C078E63"
+        ]
+      }
+    ],
+    "content_type": "text/html",
+    "css": ".docxdriver { font-family: Calibri, Arial, sans-serif; line-height: 1.2; color: #111; }\n.docxdriver p, .docxdriver h1, .docxdriver h2, .docxdriver h3, .docxdriver h4, .docxdriver h5, .docxdriver h6 { white-space: pre-wrap; tab-size: 4; min-height: 1em; }\n.docxdriver p { margin: 0 0 .6em; }\n.docxdriver table { border-collapse: collapse; max-width: 100%; }\n.docxdriver td, .docxdriver th { border: 1px solid #aaa; padding: .3em .5em; vertical-align: top; }\n.docxdriver img { max-width: 100%; }\n.docxdriver ins { color: #067a35; text-decoration: underline; }\n.docxdriver del { color: #b32323; text-decoration: line-through; }\n.docxdriver [data-docx-format-change] { background: #fff1b8; }\n.docxdriver [data-docx-field] { background: #f2f4f7; }\n.docxdriver ol, .docxdriver ul { padding-left: 2em; }\n.docxdriver li > p { margin-bottom: .25em; }\n.docxdriver [data-docx-marker]::marker { content: attr(data-docx-marker) \" \"; }\n.docxdriver aside { border-top: 1px solid #ddd; margin-top: 1em; font-size: .9em; }\n.docxdriver [data-docx-break=\"page\"] { break-after: page; }\n.docxdriver [data-docx-break=\"column\"] { break-after: column; }\n.docxdriver header, .docxdriver footer { color: #555; }\n",
+    "html": "<section data-docx-section=\"1\" data-docx-page-width-twips=\"12240\" data-docx-page-height-twips=\"15840\" data-docx-column-spacing-twips=\"720\">\n<p id=\"2C078E63\" data-docx-ord=\"1\" data-docx-style=\"Normal\" style=\"line-height:1.1625;margin-bottom:8pt;\"></p>\n</section>",
+    "idRepairsNeeded": 0,
+    "kind": "document",
+    "paragraphs": [
+      {
+        "id": "2C078E63",
+        "index": 1,
+        "selectable_text": "",
+        "text": ""
+      }
+    ],
+    "projection_version": 4,
+    "sections": [
+      {
+        "boundary_after": null,
+        "break_type": null,
+        "columns": {
+          "definitions": [],
+          "space": "720"
+        },
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "index": 1,
+        "margins": {
+          "bottom": "1440",
+          "footer": "720",
+          "gutter": "0",
+          "header": "720",
+          "left": "1440",
+          "right": "1440",
+          "top": "1440"
+        },
+        "page_numbering": null,
+        "page_size": {
+          "h": "15840",
+          "w": "12240"
+        },
+        "paragraph_end": 1,
+        "paragraph_start": 0,
+        "stories": []
+      }
+    ],
+    "source": "sha256:4d6a71f9c876c76d7c890745ecbbdbec6fdfb495fea91fa01cda83761e5b933d",
+    "source_map": {
+      "html_offset_unit": "utf8_byte",
+      "regions": [
+        {
+          "editable": true,
+          "html_end": 250,
+          "html_start": 140,
+          "paragraphs": [
+            "2C078E63"
+          ],
+          "part": "word/document.xml"
+        }
+      ],
+      "text_offset_unit": "unicode_scalar"
+    },
+    "tables": [],
+    "view": "final"
+  },
+  "source": "sha256:4d6a71f9c876c76d7c890745ecbbdbec6fdfb495fea91fa01cda83761e5b933d"
+}

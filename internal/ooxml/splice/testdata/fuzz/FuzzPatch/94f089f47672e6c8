@@ -1,0 +1,4 @@
+go test fuzz v1
+[]byte("<a>]]<A/>></a>")
+[]byte("0122")
+string("\xf0")

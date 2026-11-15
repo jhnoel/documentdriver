@@ -1,0 +1,19 @@
+{
+  "id": "id-cg6-topics-callout",
+  "type": "identify",
+  "category": "org-chart",
+  "deck": {
+    "path": "repos/apache-poi/test-data/slideshow/customGeo.pptx",
+    "sha256": "9baa7f4554cbaddfcebcc431432268ea34f20c02787172bb0a7d12d640e7e84f",
+    "licence": "Apache-2.0 (Apache POI test data)"
+  },
+  "slide": "/ppt/slides/slide6.xml",
+  "instruction": "Which callout bubble explains the 'Topics' level of the chart?",
+  "answer": {
+    "ids": [
+      "s20"
+    ]
+  },
+  "notes": "s20 'The main focus of the content within each strand.' points at Topics; s23 explains Strands, s19 the statements.",
+  "max_new": 0
+}

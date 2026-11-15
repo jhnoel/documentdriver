@@ -1,0 +1,125 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "assets": [
+      {
+        "asset_url": "assets/0f4636c78f65d3639ece5a064b5ae753e3408614a14fb18ab4d7540d2c248543.png",
+        "mime": "image/png",
+        "parts": [
+          "word/media/a.png",
+          "word/media/b.PNG"
+        ],
+        "size": 4,
+        "url": "assets/i1.png"
+      }
+    ],
+    "comments": [
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "at": "00000001",
+              "end": 8,
+              "marked_text": "ΑΣ oneinout",
+              "occurrence": 1,
+              "select": "ΑΣ onein",
+              "start": 0
+            }
+          ]
+        },
+        "durableId": "",
+        "id": "0",
+        "replies": [
+          {
+            "author": "B",
+            "date": "",
+            "durableId": "",
+            "id": "1",
+            "paraId": "10000001",
+            "text": "reply"
+          }
+        ],
+        "root": {
+          "author": "A",
+          "date": "2000-01-01T00:00:00Z",
+          "paraId": "10000000",
+          "text": "note"
+        },
+        "status": "resolved"
+      }
+    ],
+    "content_type": "text/html",
+    "default_style": "L",
+    "equations": [
+      {
+        "at": "00000001",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      }
+    ],
+    "idRepairsNeeded": 2,
+    "kind": "document",
+    "markup": "<section data-docx-section=\"1\">\n<header>\n<p></p>\n</header>\n<ol data-docx-list=\"1\" data-docx-level=\"1\" start=\"2\" type=\"a\"><li data-docx-marker=\"III.b)\"><p id=\"00000001\">ΑΣ one<span data-docx-tab=\"true\">\t</span>out<math display=\"inline\"><mi>x</mi></math></p></li></ol>\n<p id=\"17D327A5\">barefb</p>\n</section>",
+    "projection_version": 4,
+    "sections": [
+      {
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "index": 1,
+        "paragraph_end": 3,
+        "paragraph_start": 0,
+        "stories": [
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/header1.xml",
+            "scope": "hdr"
+          }
+        ]
+      }
+    ],
+    "selection_space": {
+      "offset_unit": "unicode_scalar",
+      "view": "final"
+    },
+    "selections": {
+      "paragraphs": [
+        {
+          "at": "00000001",
+          "selectable_text": "ΑΣ onein"
+        },
+        {
+          "at": "17D327A5",
+          "selectable_text": "barefb"
+        }
+      ]
+    },
+    "source": "sha256:e5fa107faa8a20e14a66bb98100248ce6aa6f161a3263a2f20842f5f521c183b",
+    "styles": {
+      "L": ""
+    },
+    "tables": [
+      {
+        "at": "table:1",
+        "rows": [
+          {
+            "cells": [
+              {}
+            ],
+            "properties": {
+              "ins": {
+                "id": "4"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "view": "original"
+  },
+  "source": "sha256:e5fa107faa8a20e14a66bb98100248ce6aa6f161a3263a2f20842f5f521c183b"
+}

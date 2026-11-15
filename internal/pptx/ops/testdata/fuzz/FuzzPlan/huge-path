@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"slide\": \"slide1\", \"operations\": [{\"op\": \"object.add\", \"name\": \"\", \"kind\": \"shape\", \"box\": [0, 0, 10, 10], \"path\": \"M1e300 0 L-1e300 1e300 Z\"}]}")

@@ -1,0 +1,125 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: none
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - gosec
+    - revive
+    - ineffassign
+    - unused
+  settings:
+    govet:
+      enable-all: true
+      disable:
+        # fieldalignment rewrites struct layouts for size; AGENTS.md says to
+        # measure before optimising, and it fights readable field grouping.
+        - fieldalignment
+        # shadow flags the idiomatic scoped `if err := f(); err != nil` and
+        # `x, err := ...` in inner blocks (about 60 sites). errcheck and
+        # ineffassign already catch the bugs shadowing causes (a dropped
+        # inner error), so the analyzer adds noise, not safety.
+        - shadow
+    gosec:
+      excludes:
+        # G104 (unhandled errors) duplicates errcheck, whose exclusions below
+        # are scoped by path and reason; running both would make every
+        # errcheck exclusion need a second copy.
+        - G104
+    staticcheck:
+      checks:
+        - all
+        # QF1001 (De Morgan's law) is a style quickfix; the rewritten
+        # conditions are usually harder to read than the guard clauses they
+        # replace.
+        - -QF1001
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+        - name: increment-decrement
+        - name: var-naming
+        - name: var-declaration
+        - name: package-comments
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unexported-return
+        - name: indent-error-flow
+        - name: errorf
+        - name: empty-block
+        - name: superfluous-else
+        - name: unused-parameter
+        - name: unreachable-code
+        - name: redefines-builtin-id
+  exclusions:
+    # Presets and generated-code heuristics stay off: every exclusion below
+    # names its linter, path and reason.
+    generated: lax
+    presets: []
+    rules:
+      - linters: [errcheck]
+        text: 'Error return value of `fmt\.(Fprint|Fprintf|Fprintln)` is not checked'
+        path: '^(cmd|tools|eval)/'
+        # CLI diagnostics and results go to stdout/stderr; a failed write to a
+        # closed pipe is not actionable and the exit status carries the result.
+      - linters: [gosec]
+        text: 'G304:'
+        path: '^(cmd|tools|eval)/'
+        # The CLIs open exactly the paths their caller names (AGENTS.md:
+        # the tool writes only to paths its caller gave it).
+      - linters: [gosec]
+        text: 'G(301|306):'
+        path: '^(cmd|tools|eval)/'
+        # Files and directories the CLIs write are deliverables for the user
+        # (decks, reports, results) and need normal 0644/0755 modes.
+      - linters: [gosec]
+        text: 'G(204|702):'
+        path: '^(cmd|tools|eval)/'
+        # The renderer, oracle and pi launchers run commands named by flags or
+        # fixed in the harness, never taken from a document.
+      - linters: [gosec]
+        text: 'G(204|301|304|306):'
+        path: '_test\.go$'
+        # Tests read fixtures and write under t.TempDir().
+      - linters: [gosec]
+        text: 'G703:'
+        path: '^(cmd|tools|eval)/'
+        # Same as G304: paths come from the CLI's caller, not from a document.
+      - linters: [gosec]
+        text: 'G(115|122|404|703):'
+        path: '_test\.go$'
+        # Tests: seeded math/rand makes the property tests reproducible,
+        # int-to-rune conversions are over small test ranges, and paths are
+        # under t.TempDir() or the repo's testdata.
+      - linters: [errcheck]
+        text: 'Error return value of `(os\.Remove|os\.RemoveAll|syscall\.Kill|fs\.Parse|tw\.Flush|stdout\.Write|[A-Za-z0-9_.]+\.Close)` is not checked'
+        path: '^(cmd|tools|eval)/'
+        # CLIs and harnesses: cleanup after the result is decided, best-effort
+        # process kills, tabwriter and stdout output, flag.FlagSet with
+        # ExitOnError (Parse never returns an error), and Close on handles
+        # opened read-only. Handles a CLI writes through are closed with the
+        # error checked.
+      - linters: [errcheck]
+        text: 'Error return value of `[A-Za-z0-9_.]+\.Close` is not checked'
+        path: '^internal/'
+        # Close on handles opened read-only (zip readers, source files, opc
+        # packages that were not written) cannot lose data. Every Close of a
+        # handle written through (temp files, zip writers, Save) checks its
+        # error.
+      - linters: [errcheck]
+        text: 'Error return value of `(os\.Remove|os\.RemoveAll|[A-Za-z0-9_.]+\.Close)` is not checked'
+        path: '_test\.go$'
+        # Test cleanup and Close on read-only handles.

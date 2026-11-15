@@ -1,0 +1,39 @@
+{
+  "id": "in-sp7-twin-model",
+  "type": "insert",
+  "category": "architecture",
+  "deck": {
+    "path": "web/spade-standards-roadmap.pptx",
+    "sha256": "673b1de7864f150fe61c922ac295672205dd1c98470381700622820120d55266",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide7.xml",
+  "instruction": "Insert a box labelled 'Twin model' on the link from 'Digital twin' to 'Interface', so the path becomes Digital twin → Twin model → Interface. Both connectors must be glued at both ends, with the arrowhead at 'Interface'.",
+  "targets": [
+    "s7"
+  ],
+  "max_new": 3,
+  "checks": [
+    {
+      "type": "new_shape",
+      "text": "Twin model",
+      "alias": "m"
+    },
+    {
+      "type": "connector",
+      "from": "s3",
+      "to": "$m"
+    },
+    {
+      "type": "connector",
+      "from": "$m",
+      "to": "s6",
+      "arrow_at": "to"
+    },
+    {
+      "type": "no_connector",
+      "from": "s3",
+      "to": "s6"
+    }
+  ]
+}

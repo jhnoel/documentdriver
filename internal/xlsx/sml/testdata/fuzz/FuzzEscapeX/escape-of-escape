@@ -1,0 +1,2 @@
+go test fuzz v1
+string("_x005F_x0041_\r\xff")

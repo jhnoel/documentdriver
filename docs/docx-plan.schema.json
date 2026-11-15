@@ -1,0 +1,1831 @@
+{
+  "$defs": {
+    "BookmarkAddress": {
+      "pattern": "^bookmark:.+$",
+      "type": "string"
+    },
+    "CellFormat": {
+      "additionalProperties": false,
+      "properties": {
+        "borders": {
+          "$ref": "#/$defs/TableBorders"
+        },
+        "clear": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "fill": {
+          "type": "string"
+        },
+        "padding": {
+          "$ref": "#/$defs/CellPadding"
+        },
+        "vertical_alignment": {
+          "type": "string"
+        },
+        "width": {
+          "$ref": "#/$defs/TableWidth"
+        }
+      },
+      "type": "object"
+    },
+    "CellPadding": {
+      "additionalProperties": false,
+      "properties": {
+        "bottom": {
+          "$ref": "#/$defs/Points"
+        },
+        "left": {
+          "$ref": "#/$defs/Points"
+        },
+        "right": {
+          "$ref": "#/$defs/Points"
+        },
+        "top": {
+          "$ref": "#/$defs/Points"
+        }
+      },
+      "type": "object"
+    },
+    "ChangeMode": {
+      "enum": [
+        "track",
+        "direct"
+      ],
+      "type": "string"
+    },
+    "ChromeKind": {
+      "enum": [
+        "default",
+        "first",
+        "even"
+      ],
+      "type": "string"
+    },
+    "CommentAddress": {
+      "pattern": "^comment:[0-9]+$",
+      "type": "string"
+    },
+    "CommentStatus": {
+      "enum": [
+        "open",
+        "resolved"
+      ],
+      "type": "string"
+    },
+    "EquationAddress": {
+      "pattern": "^(?:[A-F0-9]{8}(?:~[1-9][0-9]*)?|\\$[A-Za-z_][A-Za-z0-9_]*)(?:/equation:[1-9][0-9]*)?$",
+      "type": "string"
+    },
+    "HighlightColor": {
+      "description": "The exact ECMA-376 ST_HighlightColor palette; None is an explicit off override.",
+      "enum": [
+        "black",
+        "blue",
+        "cyan",
+        "green",
+        "magenta",
+        "red",
+        "yellow",
+        "white",
+        "darkBlue",
+        "darkCyan",
+        "darkGreen",
+        "darkMagenta",
+        "darkRed",
+        "darkYellow",
+        "darkGray",
+        "lightGray",
+        "none"
+      ],
+      "type": "string"
+    },
+    "InsertAnchor": {
+      "pattern": "^(?:[A-F0-9]{8}(?:~[1-9][0-9]*)?|\\$[A-Za-z_][A-Za-z0-9_]*|table:[1-9][0-9]*)$",
+      "type": "string"
+    },
+    "InsertPosition": {
+      "enum": [
+        "before",
+        "after"
+      ],
+      "type": "string"
+    },
+    "LineSpacing": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "multiple"
+              ],
+              "type": "string"
+            },
+            "value": {
+              "format": "double",
+              "type": "number"
+            }
+          },
+          "required": [
+            "mode",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "exact"
+              ],
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/Points"
+            }
+          },
+          "required": [
+            "mode",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "at_least"
+              ],
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/Points"
+            }
+          },
+          "required": [
+            "mode",
+            "value"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ListLevel": {
+      "additionalProperties": false,
+      "description": "One bounded level in a new multilevel list definition. Array position is level (0..8).",
+      "properties": {
+        "first_line_indent": {
+          "$ref": "#/$defs/SignedPoints"
+        },
+        "format": {
+          "type": "string"
+        },
+        "indent_left": {
+          "$ref": "#/$defs/SignedPoints"
+        },
+        "indent_right": {
+          "$ref": "#/$defs/SignedPoints"
+        },
+        "label": {
+          "type": "string"
+        },
+        "marker_bold": {
+          "type": "boolean"
+        },
+        "marker_color": {
+          "type": "string"
+        },
+        "marker_font": {
+          "type": "string"
+        },
+        "marker_italic": {
+          "type": "boolean"
+        },
+        "restart_after": {
+          "description": "Restart after this zero-based ancestor level; omitted uses Word's default.",
+          "format": "uint8",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "start": {
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "label"
+      ],
+      "type": "object"
+    },
+    "ParagraphAddress": {
+      "pattern": "^(?:[A-F0-9]{8}(?:~[1-9][0-9]*)?|\\$[A-Za-z_][A-Za-z0-9_]*)$",
+      "type": "string"
+    },
+    "ParagraphContent": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ],
+      "description": "`paragraph.insert`'s `html`: one paragraph's inline content, or a list of them inserted as consecutive paragraphs in list order."
+    },
+    "Plan": {
+      "additionalProperties": false,
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "base": {
+          "$ref": "#/$defs/SourceHash"
+        },
+        "change_mode": {
+          "$ref": "#/$defs/ChangeMode"
+        },
+        "ops": {
+          "items": {
+            "$ref": "#/$defs/editOp"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "author",
+        "base",
+        "change_mode",
+        "ops"
+      ],
+      "type": "object"
+    },
+    "Points": {
+      "minimum": 0,
+      "multipleOf": 0.05,
+      "type": "number"
+    },
+    "RevisionAuthor": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "RevisionScope": {
+      "oneOf": [
+        {
+          "pattern": "^revision:[0-9]+$",
+          "type": "string"
+        },
+        {
+          "items": {
+            "pattern": "^(?:[A-F0-9]{8}(?:~[1-9][0-9]*)?|\\$[A-Za-z_][A-Za-z0-9_]*)$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "RowFormat": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_split": {
+          "type": "boolean"
+        },
+        "clear": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "height": {
+          "$ref": "#/$defs/Points"
+        },
+        "height_rule": {
+          "type": "string"
+        },
+        "repeating_header": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SectionAddress": {
+      "pattern": "^section:(?:[0-9A-Fa-f]{8}(?:~[1-9][0-9]*)?|[1-9][0-9]*|final|\\$[A-Za-z_][A-Za-z0-9_]*)$",
+      "type": "string"
+    },
+    "SignedPoints": {
+      "maximum": 100000,
+      "minimum": -100000,
+      "multipleOf": 0.05,
+      "type": "number"
+    },
+    "SourceHash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "TableBorder": {
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        },
+        "width": {
+          "$ref": "#/$defs/Points"
+        }
+      },
+      "required": [
+        "style"
+      ],
+      "type": "object"
+    },
+    "TableBorders": {
+      "additionalProperties": false,
+      "properties": {
+        "bottom": {
+          "$ref": "#/$defs/TableBorder"
+        },
+        "inside_horizontal": {
+          "$ref": "#/$defs/TableBorder"
+        },
+        "inside_vertical": {
+          "$ref": "#/$defs/TableBorder"
+        },
+        "left": {
+          "$ref": "#/$defs/TableBorder"
+        },
+        "right": {
+          "$ref": "#/$defs/TableBorder"
+        },
+        "top": {
+          "$ref": "#/$defs/TableBorder"
+        }
+      },
+      "type": "object"
+    },
+    "TableFormat": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment": {
+          "type": "string"
+        },
+        "borders": {
+          "$ref": "#/$defs/TableBorders"
+        },
+        "cell_spacing": {
+          "$ref": "#/$defs/Points"
+        },
+        "clear": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "column_widths": {
+          "items": {
+            "$ref": "#/$defs/Points"
+          },
+          "type": "array"
+        },
+        "layout": {
+          "type": "string"
+        },
+        "padding": {
+          "$ref": "#/$defs/CellPadding"
+        },
+        "style": {
+          "type": "string"
+        },
+        "width": {
+          "$ref": "#/$defs/TableWidth"
+        }
+      },
+      "type": "object"
+    },
+    "TableWidth": {
+      "description": "Table widths use auto, points, or percent (0 < value <= 100 for percent).",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "unit": {
+              "enum": [
+                "auto"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "unit"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "unit": {
+              "enum": [
+                "points"
+              ],
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/Points"
+            }
+          },
+          "required": [
+            "unit",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "unit": {
+              "enum": [
+                "percent"
+              ],
+              "type": "string"
+            },
+            "value": {
+              "format": "double",
+              "type": "number"
+            }
+          },
+          "required": [
+            "unit",
+            "value"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "TextEdit": {
+      "additionalProperties": false,
+      "description": "One replacement inside a `text.revise` scope.",
+      "properties": {
+        "all": {
+          "description": "Replace every match within the scope.",
+          "type": "boolean"
+        },
+        "occurrence": {
+          "description": "1-based match within the scope; omit when `select` is unique there.",
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "select": {
+          "type": "string"
+        },
+        "with": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "select",
+        "with"
+      ],
+      "type": "object"
+    },
+    "editOp": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Tracked: w:del / w:ins (the author's own pending insertion is edited in place). Direct: replaced, no revision.",
+          "properties": {
+            "all": {
+              "description": "Replace every match of `select` in the paragraph. Not with `occurrence`.",
+              "type": "boolean"
+            },
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "occurrence": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "text.replace"
+              ],
+              "type": "string"
+            },
+            "select": {
+              "type": "string"
+            },
+            "with": {
+              "description": "Plain text: a tab is \\t, a line break \\n. An equation or other object in the selection (U+FFFC in select) must stay U+FFFC in `with`; one cannot be made or removed here.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op",
+            "select",
+            "with"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Several exact replacements inside one bounded scope: the paragraph `at`, the unique `within` span (in `at`, or anywhere in the body when `at` is omitted), or the whole body. Every edit resolves against the scope as it stands when this operation starts. Tracked: w:del / w:ins per edit. Direct: replaced, no revision.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "edits": {
+              "items": {
+                "$ref": "#/$defs/TextEdit"
+              },
+              "type": "array"
+            },
+            "occurrence": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "text.revise"
+              ],
+              "type": "string"
+            },
+            "within": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "edits",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert `with` at an insertion point: just before or after the selected text, or at the start (`before`) or end (`after`) of the paragraph when `select` is omitted. Tracked: w:ins. Direct: inserted, no revision.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "occurrence": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "text.insert"
+              ],
+              "type": "string"
+            },
+            "position": {
+              "$ref": "#/$defs/InsertPosition"
+            },
+            "select": {
+              "description": "Insert just before or after this text; omitted, at the start (`before`) or end (`after`) of the paragraph.",
+              "type": "string"
+            },
+            "with": {
+              "description": "Plain text: a tab is \\t, a line break \\n; no U+FFFC.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op",
+            "position",
+            "with"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: w:rPrChange. Direct: applied, no revision.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "bold": {
+              "type": "boolean"
+            },
+            "clear": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "color": {
+              "type": "string"
+            },
+            "font_size": {
+              "$ref": "#/$defs/Points"
+            },
+            "highlight": {
+              "$ref": "#/$defs/HighlightColor"
+            },
+            "italic": {
+              "type": "boolean"
+            },
+            "occurrence": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "text.format"
+              ],
+              "type": "string"
+            },
+            "select": {
+              "type": "string"
+            },
+            "strike": {
+              "type": "boolean"
+            },
+            "subscript": {
+              "type": "boolean"
+            },
+            "superscript": {
+              "type": "boolean"
+            },
+            "underline": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "at",
+            "op",
+            "select"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One paragraph, or with a list `html`, one per item in list order. Each `html` value is one paragraph: either one block element, `<p>` or `<h1>`..`<h6>` as read shows it, whose style (the heading's tag, `data-style` or `class`) and paragraph CSS become the new paragraph's properties (its `id`, list marker and revision attributes, and an equation's `data-ref`, are ignored), or bare inline content, which is the content alone. Two block elements in one value, or a block element inside inline content, are refused: one paragraph per html value; use the list form for several. With `as`, a single paragraph is `$<as>`; for a list, `$<as>` is the group (expanded in paragraph lists, its first or last paragraph as an insert anchor) and item N is `$<as>_N`. Without `style`, a new paragraph takes the paragraph properties of a paragraph anchor (style, numbering, indents, spacing; not its mark's run properties, section properties or pending changes), as Word's Enter does: inserted into a list it is a list item. After a paragraph whose style names a different next style (a heading), it takes that style instead. Tracked: inserted content and paragraph mark; reject-all removes the paragraph. Direct: inserted, no revision.",
+          "properties": {
+            "as": {
+              "type": "string"
+            },
+            "at": {
+              "$ref": "#/$defs/InsertAnchor"
+            },
+            "html": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ParagraphContent"
+                }
+              ],
+              "default": ""
+            },
+            "op": {
+              "enum": [
+                "paragraph.insert"
+              ],
+              "type": "string"
+            },
+            "position": {
+              "$ref": "#/$defs/InsertPosition"
+            },
+            "style": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op",
+            "position"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: old content deleted, new inserted. Direct: replaced, no revision.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "delete": {
+              "default": [],
+              "description": "Addresses of the equations and placeholders of the paragraph that `html` leaves out on purpose.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "html": {
+              "type": "string"
+            },
+            "op": {
+              "enum": [
+                "paragraph.replace"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "html",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: content and paragraph mark deleted; accept-all leaves the following paragraph's id and properties as they were. A paragraph whose mark cannot join forward (the last of the body, one before a table, one ending a section) takes the previous paragraph's mark instead, as Word does: it gets that paragraph's properties (its own in a pPrChange) and keeps its section properties, and accept-all leaves the previous paragraph, with its id, in its place. Where no previous paragraph can join (a table or another author's mark revision before it) it is left empty. Direct: the same edit accepted, no revision.",
+          "properties": {
+            "at": {
+              "items": {
+                "$ref": "#/$defs/ParagraphAddress"
+              },
+              "type": "array"
+            },
+            "op": {
+              "enum": [
+                "paragraph.delete"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: w:pPrChange. Direct: applied, no revision.",
+          "properties": {
+            "alignment": {
+              "type": "string"
+            },
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "clear": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "first_line_indent": {
+              "$ref": "#/$defs/SignedPoints",
+              "description": "Signed first-line offset: negative means hanging; zero explicitly disables it."
+            },
+            "indent_left": {
+              "$ref": "#/$defs/SignedPoints"
+            },
+            "indent_right": {
+              "$ref": "#/$defs/SignedPoints"
+            },
+            "line_spacing": {
+              "$ref": "#/$defs/LineSpacing"
+            },
+            "op": {
+              "enum": [
+                "paragraph.format"
+              ],
+              "type": "string"
+            },
+            "space_after": {
+              "$ref": "#/$defs/Points"
+            },
+            "space_before": {
+              "$ref": "#/$defs/Points"
+            },
+            "style": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Assign selected paragraphs to a new or existing list. `remove` explicitly suppresses inherited numbering. Tracked: w:pPrChange; rejecting it also removes the list definitions it added once nothing refers to them (definitions the input already left unreferenced stay). Direct: applied, no revision.",
+          "properties": {
+            "at": {
+              "items": {
+                "$ref": "#/$defs/ParagraphAddress"
+              },
+              "type": "array"
+            },
+            "format": {
+              "type": "string"
+            },
+            "level": {
+              "default": 0,
+              "format": "uint8",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "levels": {
+              "items": {
+                "$ref": "#/$defs/ListLevel"
+              },
+              "type": "array"
+            },
+            "num_id": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "list.set"
+              ],
+              "type": "string"
+            },
+            "remove": {
+              "default": false,
+              "type": "boolean"
+            },
+            "start": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "at",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Replace one current equation with the LaTeX `latex`, without matching its reconstructed LaTeX. Tracked: the old equation deleted, the new one inserted. Direct: replaced.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/EquationAddress"
+            },
+            "display": {
+              "type": "boolean"
+            },
+            "latex": {
+              "description": "The new equation, in LaTeX.",
+              "type": "string"
+            },
+            "op": {
+              "enum": [
+                "equation.replace"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "latex",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Delete one current equation while preserving the surrounding paragraph. Tracked: a tracked deletion. Direct: removed.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/EquationAddress"
+            },
+            "op": {
+              "enum": [
+                "equation.delete"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A `rows` × `columns` grid of new cells. `cells` fills them row by row with the inline content `paragraph.insert`'s `html` accepts; missing trailing rows and cells stay empty. With `as`, cell row N column M is the paragraph alias `$<as>_rNcM` for later operations. Tracked: an inserted table (every row w:trPr/w:ins, cell content w:ins); refused as the last block of a table cell. Direct: inserted, no revision.",
+          "properties": {
+            "as": {
+              "type": "string"
+            },
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "cells": {
+              "items": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "columns": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "table.insert"
+              ],
+              "type": "string"
+            },
+            "position": {
+              "$ref": "#/$defs/InsertPosition"
+            },
+            "rows": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "at",
+            "columns",
+            "op",
+            "position",
+            "rows"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Delete the table. Tracked: every row a tracked deletion. Direct: removed, no revision.",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "op": {
+              "enum": [
+                "table.delete"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: w:tblPrChange. Direct: applied, no revision.",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "format": {
+              "$ref": "#/$defs/TableFormat"
+            },
+            "op": {
+              "enum": [
+                "table.format"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "format",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert `count` rows before or after the row `at`. With `as`, the rows are the group `$<as>`. Tracked: a row insertion or deletion (w:trPr/w:ins|w:del, deleted cell content; the author's own inserted rows go outright). Direct: applied, no revision.",
+          "properties": {
+            "as": {
+              "type": "string"
+            },
+            "at": {
+              "type": "string"
+            },
+            "count": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "row.insert"
+              ],
+              "type": "string"
+            },
+            "position": {
+              "$ref": "#/$defs/InsertPosition"
+            }
+          },
+          "required": [
+            "at",
+            "count",
+            "op",
+            "position"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Delete `count` rows from the row `at`. Tracked: a row insertion or deletion (w:trPr/w:ins|w:del, deleted cell content; the author's own inserted rows go outright). Direct: applied, no revision.",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "count": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "row.delete"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "count",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: w:trPrChange. Direct: applied, no revision.",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "format": {
+              "$ref": "#/$defs/RowFormat"
+            },
+            "op": {
+              "enum": [
+                "row.format"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "format",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert `count` columns before or after the column `at` (`table:1/column:2`). Refused in track mode: Word does not track it. Direct only.",
+          "properties": {
+            "as": {
+              "type": "string"
+            },
+            "at": {
+              "type": "string"
+            },
+            "count": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "column.insert"
+              ],
+              "type": "string"
+            },
+            "position": {
+              "$ref": "#/$defs/InsertPosition"
+            }
+          },
+          "required": [
+            "at",
+            "count",
+            "op",
+            "position"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Delete `count` columns from the column `at`. Refused in track mode: Word does not track it. Direct only.",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "count": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "column.delete"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "count",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Merge a `row_span` × `column_span` block, counted in grid rows and columns, whose top left cell is `at` (the cell's position in its row, as read shows it). Refused in track mode: Word does not track it. Direct only.",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "column_span": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "cell.merge"
+              ],
+              "type": "string"
+            },
+            "row_span": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "at",
+            "column_span",
+            "op",
+            "row_span"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Split the merged cell `at`. Refused in track mode: Word does not track it. Direct only.",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "op": {
+              "enum": [
+                "cell.split"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: w:tcPrChange. Direct: applied, no revision.",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "format": {
+              "$ref": "#/$defs/CellFormat"
+            },
+            "op": {
+              "enum": [
+                "cell.format"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "format",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: w:sectPrChange. Direct: applied, no revision.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/SectionAddress",
+              "description": "The section: section:<paraId> as read shows it, section:final, section:N (positional) or section:$name; section 1 when omitted."
+            },
+            "bottom": {
+              "$ref": "#/$defs/Points"
+            },
+            "footer": {
+              "$ref": "#/$defs/Points"
+            },
+            "gutter": {
+              "$ref": "#/$defs/Points"
+            },
+            "header": {
+              "$ref": "#/$defs/Points"
+            },
+            "left": {
+              "$ref": "#/$defs/Points"
+            },
+            "op": {
+              "enum": [
+                "section.set_margins"
+              ],
+              "type": "string"
+            },
+            "right": {
+              "$ref": "#/$defs/Points"
+            },
+            "top": {
+              "$ref": "#/$defs/Points"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: w:sectPrChange. Direct: applied, no revision.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/SectionAddress",
+              "description": "The section: section:<paraId> as read shows it, section:final, section:N (positional) or section:$name; section 1 when omitted."
+            },
+            "break_type": {
+              "type": "string"
+            },
+            "column_separator": {
+              "type": "boolean"
+            },
+            "column_spacing": {
+              "$ref": "#/$defs/Points"
+            },
+            "column_widths": {
+              "items": {
+                "$ref": "#/$defs/Points"
+              },
+              "type": "array"
+            },
+            "columns": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "height": {
+              "$ref": "#/$defs/Points"
+            },
+            "op": {
+              "enum": [
+                "section.set_layout"
+              ],
+              "type": "string"
+            },
+            "orientation": {
+              "type": "string"
+            },
+            "page_number_continue": {
+              "type": "boolean"
+            },
+            "page_number_format": {
+              "type": "string"
+            },
+            "page_number_start": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "page_size": {
+              "type": "string"
+            },
+            "width": {
+              "$ref": "#/$defs/Points"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Selective section-property edits. Dimensions are points; omitted fields preserve source. Refused in track mode: Word records no revision for adding or removing a section break. Direct only.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "break_type": {
+              "type": "string"
+            },
+            "op": {
+              "enum": [
+                "section.set_boundary"
+              ],
+              "type": "string"
+            },
+            "remove": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "at",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: w:sectPrChange. Direct: applied, no revision.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/SectionAddress",
+              "description": "The section: section:<paraId> as read shows it, section:final, section:N (positional) or section:$name; section 1 when omitted."
+            },
+            "enabled": {
+              "description": "Whether the section's first page has its own header and footer (w:titlePg).",
+              "type": "boolean"
+            },
+            "op": {
+              "enum": [
+                "section.set_first_page"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Refused in track mode: a document setting (settings.xml) Word records no revision for. Direct only.",
+          "properties": {
+            "even_and_odd": {
+              "description": "Whether even and odd pages have their own headers and footers (w:evenAndOddHeaders in the document settings).",
+              "type": "boolean"
+            },
+            "op": {
+              "enum": [
+                "document.set_even_odd_headers"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "even_and_odd",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: the old content a tracked deletion and the new a tracked insertion (simple fields written as complex field runs); a new header's part and reference cannot be tracked, so reject-all leaves it empty. `kind: first` records titlePg in a w:sectPrChange; `kind: even` is refused while even/odd headers are off. Direct: replaced, no revision.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/SectionAddress"
+            },
+            "delete": {
+              "default": [],
+              "description": "Addresses of the equations and placeholders of the header that `html` leaves out on purpose.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "html": {
+              "type": "string"
+            },
+            "kind": {
+              "$ref": "#/$defs/ChromeKind"
+            },
+            "op": {
+              "enum": [
+                "header.set"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "html",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked: the content becomes a tracked deletion and the (then empty) header stays referenced; refused after section 1, where removing a reference changes inheritance. Direct: the reference is removed.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/SectionAddress"
+            },
+            "kind": {
+              "$ref": "#/$defs/ChromeKind"
+            },
+            "op": {
+              "enum": [
+                "header.delete"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked and direct as `header.set`.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/SectionAddress"
+            },
+            "delete": {
+              "default": [],
+              "description": "Addresses of the equations and placeholders of the footer that `html` leaves out on purpose.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "html": {
+              "type": "string"
+            },
+            "kind": {
+              "$ref": "#/$defs/ChromeKind"
+            },
+            "op": {
+              "enum": [
+                "footer.set"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "html",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Tracked and direct as `header.delete`.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/SectionAddress"
+            },
+            "kind": {
+              "$ref": "#/$defs/ChromeKind"
+            },
+            "op": {
+              "enum": [
+                "footer.delete"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Applied directly in both change modes: Word does not track comments.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "occurrence": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "comment.add"
+              ],
+              "type": "string"
+            },
+            "select": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op",
+            "text"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Applied directly in both change modes: Word does not track comments.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/CommentAddress",
+              "description": "The comment replied to (comment:N)."
+            },
+            "op": {
+              "enum": [
+                "comment.reply"
+              ],
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op",
+            "text"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Applied directly in both change modes: Word does not track comments.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/CommentAddress",
+              "description": "The comment (comment:N)."
+            },
+            "op": {
+              "enum": [
+                "comment.set_status"
+              ],
+              "type": "string"
+            },
+            "status": {
+              "$ref": "#/$defs/CommentStatus"
+            }
+          },
+          "required": [
+            "at",
+            "op",
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Applied directly in both change modes: Word does not track comments.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/CommentAddress",
+              "description": "The comment (comment:N): it goes with every reply in its thread."
+            },
+            "op": {
+              "enum": [
+                "comment.delete"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Bookmark the paragraph `at`: its whole content, or the `select` span. Applied directly in both change modes (Word does not track bookmarks). Body paragraphs only.",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/ParagraphAddress"
+            },
+            "name": {
+              "type": "string"
+            },
+            "occurrence": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "bookmark.add"
+              ],
+              "type": "string"
+            },
+            "select": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "name",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Rename a body bookmark; `name` (the new name) follows the add rules. Applied directly in both change modes (Word does not track bookmarks).",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/BookmarkAddress"
+            },
+            "name": {
+              "description": "The new name.",
+              "type": "string"
+            },
+            "op": {
+              "enum": [
+                "bookmark.rename"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "name",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Re-anchor a body bookmark, keeping its name and `w:id`. Applied directly in both change modes (Word does not track bookmarks).",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/BookmarkAddress"
+            },
+            "occurrence": {
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "op": {
+              "enum": [
+                "bookmark.move"
+              ],
+              "type": "string"
+            },
+            "select": {
+              "type": "string"
+            },
+            "to": {
+              "$ref": "#/$defs/ParagraphAddress",
+              "description": "The paragraph the bookmark moves to."
+            }
+          },
+          "required": [
+            "at",
+            "op",
+            "to"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Remove a body bookmark's start and end markers; the text stays. Applied directly in both change modes (Word does not track bookmarks).",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/BookmarkAddress"
+            },
+            "op": {
+              "enum": [
+                "bookmark.delete"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Accept revisions: one (`at: \"revision:7\"`), all of them (`all`), or those of the listed body paragraphs (`at` a paragraph list: their content, paragraph mark and property changes, their text boxes' included; not row, cell or table changes); `author` narrows `all` or the paragraphs to that author's revisions. Accepting a paragraph mark's revision can join the paragraph with the next one. Settles revisions in both change modes; it writes none.",
+          "properties": {
+            "all": {
+              "description": "Every revision of the document.",
+              "type": "boolean"
+            },
+            "at": {
+              "$ref": "#/$defs/RevisionScope",
+              "description": "One revision (`revision:7`), or the body paragraphs whose revisions are settled. Not with `all`."
+            },
+            "author": {
+              "$ref": "#/$defs/RevisionAuthor",
+              "description": "Only this author's revisions (with all or paragraphs)."
+            },
+            "op": {
+              "enum": [
+                "revision.accept"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Reject revisions: one (`at: \"revision:7\"`), all of them (`all`), or those of the listed body paragraphs (`at` a paragraph list: their content, paragraph mark and property changes, their text boxes' included; not row, cell or table changes); `author` narrows `all` or the paragraphs to that author's revisions. Rejecting a paragraph mark's revision can join the paragraph with the next one. Settles revisions in both change modes; it writes none.",
+          "properties": {
+            "all": {
+              "description": "Every revision of the document.",
+              "type": "boolean"
+            },
+            "at": {
+              "$ref": "#/$defs/RevisionScope",
+              "description": "One revision (`revision:7`), or the body paragraphs whose revisions are settled. Not with `all`."
+            },
+            "author": {
+              "$ref": "#/$defs/RevisionAuthor",
+              "description": "Only this author's revisions (with all or paragraphs)."
+            },
+            "op": {
+              "enum": [
+                "revision.reject"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Turn tracked changes into amendment formatting (37 CFR 1.121): an insertion's text stays, underlined; a deletion's text comes back, struck through; no revision is left. A deleted paragraph mark stays (the paragraph's struck text keeps its own line); an inserted paragraph stays with its text underlined; inserted and deleted table rows stay, their text underlined or struck. Formatting, table and section property changes have no amendment form and are accepted. Moves convert as deletion (source) and insertion (destination). Where struck and underlined text meet with a word character on both sides (a replaced word, whose redline shares one surrounding space), one plain space goes between them: \"~~attached~~ <u>secured</u>\", as in MPEP 714 examples; none is added next to whitespace or untouched punctuation, or for a pure insertion or deletion. Existing underline and strike are kept. `all` converts every revision, `at` one revision (`revision:7`) or those in the listed body paragraphs, `author` those of one author. Settles revisions, so it writes none of its own in either change mode.",
+          "properties": {
+            "all": {
+              "description": "Every revision of the body and of the headers and footers.",
+              "type": "boolean"
+            },
+            "at": {
+              "$ref": "#/$defs/RevisionScope",
+              "description": "One revision (`revision:7`), or the paragraphs whose revisions are converted. Not with `all`."
+            },
+            "author": {
+              "$ref": "#/$defs/RevisionAuthor",
+              "description": "Only this author's revisions (with all or paragraphs)."
+            },
+            "op": {
+              "enum": [
+                "revision.convert_to_formatting"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    {
+      "$ref": "#/$defs/Plan"
+    }
+  ],
+  "description": "A docx plan in the agent contract's grammar (docs/contract.md). Generated from internal/docx/ops by tools/schemagen.",
+  "title": "Plan"
+}

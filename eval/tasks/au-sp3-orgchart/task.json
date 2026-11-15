@@ -1,0 +1,78 @@
+{
+  "id": "au-sp3-orgchart",
+  "type": "author",
+  "category": "org-chart",
+  "deck": {
+    "path": "web/spade-standards-roadmap.pptx",
+    "sha256": "673b1de7864f150fe61c922ac295672205dd1c98470381700622820120d55266",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide3.xml",
+  "instruction": "In the empty space under the SPADE logo, draw a small org chart: a 'Coordinator' box on top and two boxes, 'Partners' and 'Users', side by side beneath it, each joined to the Coordinator by a connector glued from the bottom of the Coordinator to the top of the child.",
+  "max_new": -1,
+  "rubric": "rubric.md",
+  "checks": [
+    {
+      "type": "new_shape",
+      "text": "Coordinator",
+      "alias": "c"
+    },
+    {
+      "type": "new_shape",
+      "text": "Partners",
+      "alias": "p"
+    },
+    {
+      "type": "new_shape",
+      "text": "Users",
+      "alias": "u"
+    },
+    {
+      "type": "connector",
+      "from": "$c",
+      "from_side": "bottom",
+      "to": "$p",
+      "to_side": "top"
+    },
+    {
+      "type": "connector",
+      "from": "$c",
+      "from_side": "bottom",
+      "to": "$u",
+      "to_side": "top"
+    },
+    {
+      "type": "align",
+      "targets": [
+        "$p",
+        "$u"
+      ],
+      "edge": "top"
+    },
+    {
+      "type": "order",
+      "targets": [
+        "$c",
+        "$p"
+      ],
+      "axis": "y"
+    },
+    {
+      "type": "order",
+      "targets": [
+        "$p",
+        "$u"
+      ],
+      "axis": "x"
+    },
+    {
+      "type": "region",
+      "region": [
+        15,
+        205,
+        200,
+        175
+      ]
+    }
+  ]
+}

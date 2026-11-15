@@ -1,0 +1,37 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "matches": [
+      {
+        "id": "19FA2AE0",
+        "index": 1,
+        "selectable_text": "Service Agreement",
+        "style": "Heading1",
+        "text": "Service Agreement"
+      },
+      {
+        "id": "2D4D22AD",
+        "index": 2,
+        "selectable_text": "Payment is due within thirty days of invoice.",
+        "style": "FirstParagraph",
+        "text": "Payment is due within thirty days of invoice."
+      },
+      {
+        "id": "4E9D2B67",
+        "index": 3,
+        "selectable_text": "Fees",
+        "style": "Heading2",
+        "text": "Fees"
+      },
+      {
+        "id": "01DB86EE",
+        "index": 4,
+        "selectable_text": "The kickoff fee is 5000.",
+        "style": "FirstParagraph",
+        "text": "The kickoff fee is 5000."
+      }
+    ]
+  },
+  "source": "sha256:08318fde05a9daf434821e0b84ea729305dca56bd1967b6ccc1de3be4052f327"
+}

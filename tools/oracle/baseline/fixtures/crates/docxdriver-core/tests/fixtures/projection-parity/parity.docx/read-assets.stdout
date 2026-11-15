@@ -1,0 +1,19 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "assets": [
+      {
+        "data_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jV1kAAAAASUVORK5CYII=",
+        "mime": "image/png",
+        "parts": [
+          "word/media/image.png"
+        ],
+        "size": 68,
+        "url": "assets/9650eb2ef8b938a5e48e539632fc0cd31216d1f910d85f3855ccb9570c7d97e8.png"
+      }
+    ],
+    "kind": "assets"
+  },
+  "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+}

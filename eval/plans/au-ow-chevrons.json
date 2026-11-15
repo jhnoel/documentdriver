@@ -1,0 +1,8 @@
+{"ops": [
+  {"op": "object.add", "at": "slide1", "as": "s1", "kind": "shape", "name": "Step 1 Event", "geom": "homePlate", "box": [100, 430, 150, 50], "fill": {"scheme": "accent2"}, "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:14pt;color:#FFFFFF\">Event</span></b></p>"},
+  {"op": "object.add", "at": "slide1", "as": "s2", "kind": "shape", "name": "Step 2 Trigger", "geom": "chevron", "box": [255, 430, 150, 50], "fill": {"scheme": "accent2"}, "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:14pt;color:#FFFFFF\">Trigger</span></b></p>"},
+  {"op": "object.add", "at": "slide1", "as": "s3", "kind": "shape", "name": "Step 3 Rule", "geom": "chevron", "box": [410, 430, 150, 50], "fill": {"scheme": "accent2"}, "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:14pt;color:#FFFFFF\">Rule</span></b></p>"},
+  {"op": "object.add", "at": "slide1", "as": "s4", "kind": "shape", "name": "Step 4 Action", "geom": "chevron", "box": [565, 430, 150, 50], "fill": {"scheme": "accent2"}, "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:14pt;color:#FFFFFF\">Action</span></b></p>"},
+  {"op": "object.add", "at": "slide1", "as": "s5", "kind": "shape", "name": "Step 5 Result", "geom": "chevron", "box": [720, 430, 150, 50], "fill": {"scheme": "accent2"}, "line": "none", "html": "<p style=\"text-align:center\"><b><span style=\"font-size:14pt;color:#FFFFFF\">Result</span></b></p>"},
+  {"op": "group.create", "at": ["$s1", "$s2", "$s3", "$s4", "$s5"], "as": "process", "name": "Event process"}
+]}

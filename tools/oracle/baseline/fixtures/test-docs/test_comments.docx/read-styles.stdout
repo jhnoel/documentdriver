@@ -1,0 +1,10 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "kind": "styles",
+    "source": "sha256:66c8625053ef3039774835a1cfb32c17a14623bd17e4bbe93c118cd01bef8d10",
+    "styles": []
+  },
+  "source": "sha256:66c8625053ef3039774835a1cfb32c17a14623bd17e4bbe93c118cd01bef8d10"
+}

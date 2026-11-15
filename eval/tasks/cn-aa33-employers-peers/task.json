@@ -1,0 +1,28 @@
+{
+  "id": "cn-aa33-employers-peers",
+  "type": "connect",
+  "category": "hub",
+  "deck": {
+    "path": "repos/apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
+    "sha256": "5df09eff2c5fbb2bea72971421dc5507d68cab10ce3af8791969fdee35e76991",
+    "licence": "Apache-2.0 (Apache POI test data)"
+  },
+  "slide": "/ppt/slides/slide33.xml",
+  "instruction": "Link the 'Employers' circle to the 'Peers' circle with a straight line from Employers' right side to Peers' left side, glued at both ends and styled like the other links (2 pt, the same blue).",
+  "max_new": 1,
+  "checks": [
+    {
+      "type": "connector",
+      "from": "s6",
+      "from_side": "right",
+      "to": "s36",
+      "to_side": "left",
+      "geoms": [
+        "straightConnector1",
+        "line"
+      ],
+      "width_pt": 2,
+      "hex": "4A7EBB"
+    }
+  ]
+}

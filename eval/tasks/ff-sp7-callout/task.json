@@ -1,0 +1,36 @@
+{
+  "id": "ff-sp7-callout",
+  "type": "freeform",
+  "category": "architecture",
+  "deck": {
+    "path": "web/spade-standards-roadmap.pptx",
+    "sha256": "673b1de7864f150fe61c922ac295672205dd1c98470381700622820120d55266",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide7.xml",
+  "instruction": "Draw a freeform speech-bubble callout reading 'Core concept' in the empty area below the 'uses' label, with its tail pointing up at the 'Digital twin' box. Make it a single custom shape, not a preset callout.",
+  "max_new": 1,
+  "rubric": "rubric.md",
+  "checks": [
+    {
+      "type": "new_shape",
+      "custom": true,
+      "text": "Core concept",
+      "alias": "f"
+    },
+    {
+      "type": "path",
+      "target": "$f",
+      "min_points": 5
+    },
+    {
+      "type": "region",
+      "region": [
+        10,
+        196,
+        290,
+        184
+      ]
+    }
+  ]
+}

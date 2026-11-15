@@ -1,0 +1,782 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "matches": [
+      {
+        "id": "521EA745",
+        "index": 1,
+        "selectable_text": "DETAILED ACTION",
+        "text": "DETAILED ACTION"
+      },
+      {
+        "id": "7D03D815",
+        "index": 2,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 1
+        },
+        "number": "1.",
+        "selectable_text": "The current office action is in response to the communication filed on 3/7/24.",
+        "text": "The current office action is in response to the communication filed on 3/7/24."
+      },
+      {
+        "id": "398FB059",
+        "index": 3,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 2
+        },
+        "number": "2.",
+        "selectable_text": "The applicant amended claims 1-14 in the Preliminary Amendment received on 3/7/24.",
+        "text": "The applicant amended claims 1-14 in the Preliminary Amendment received on 3/7/24."
+      },
+      {
+        "id": "17858B8D",
+        "index": 4,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 3
+        },
+        "number": "3.",
+        "selectable_text": "Claims 1-14 are pending.",
+        "text": "Claims 1-14 are pending."
+      },
+      {
+        "id": "794765AE",
+        "index": 5,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 4
+        },
+        "number": "4.",
+        "selectable_text": "The Examiner recommends filing a written authorization for Internet communication in response to the present action. Doing so permits the USPTO to communicate with Applicant using Internet email to schedule interviews or discuss other aspects of the application.  Without a written authorization in place, the USPTO cannot respond to Internet correspondence received from Applicant. The preferred method of providing authorization is by filing form PTO/SB/439, available at: https://www.uspto.gov/patent/forms/forms. See MPEP § 502.03 for other methods of providing written authorization.",
+        "style": "ListParagraph",
+        "text": "The Examiner recommends filing a written authorization for Internet communication in response to the present action. Doing so permits the USPTO to communicate with Applicant using Internet email to schedule interviews or discuss other aspects of the application.  Without a written authorization in place, the USPTO cannot respond to Internet correspondence received from Applicant. The preferred method of providing authorization is by filing form PTO/SB/439, available at: https://www.uspto.gov/patent/forms/forms. See MPEP § 502.03 for other methods of providing written authorization."
+      },
+      {
+        "id": "4314ACA9",
+        "index": 6,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "0B30B154",
+        "index": 7,
+        "selectable_text": "Notice of Pre-AIA or AIA Status",
+        "text": "Notice of Pre-AIA or AIA Status"
+      },
+      {
+        "id": "660FA680",
+        "index": 8,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 5
+        },
+        "number": "5.",
+        "selectable_text": "The present application, filed on or after March 16, 2013, is being examined under the first inventor to file provisions of the AIA.",
+        "text": "The present application, filed on or after March 16, 2013, is being examined under the first inventor to file provisions of the AIA."
+      },
+      {
+        "id": "0173652E",
+        "index": 9,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "42FD3FAC",
+        "index": 10,
+        "selectable_text": "Paper Submitted",
+        "text": "Paper Submitted"
+      },
+      {
+        "id": "0880788A",
+        "index": 11,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 6
+        },
+        "number": "6.",
+        "selectable_text": "It is hereby acknowledged that the following papers have been received and placed of record in the file:",
+        "text": "It is hereby acknowledged that the following papers have been received and placed of record in the file:"
+      },
+      {
+        "id": "439CF6E9",
+        "index": 12,
+        "selectable_text": "Information Disclosure Statement(s) as received on 3/7/24 are considered by the Examiner.",
+        "text": "Information Disclosure Statement(s) as received on 3/7/24 are considered by the Examiner."
+      },
+      {
+        "id": "77B92BFF",
+        "index": 13,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "15D9D04C",
+        "index": 14,
+        "selectable_text": "Allowable Subject Matter",
+        "text": "Allowable Subject Matter"
+      },
+      {
+        "id": "0DA878D9",
+        "index": 15,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 7
+        },
+        "number": "7.",
+        "selectable_text": "Claims 1-14 would be allowable if the Objections to the Title, Objections to the Specification and Claim Objections listed in the paragraph(s) below are corrected.",
+        "text": "Claims 1-14 would be allowable if the Objections to the Title, Objections to the Specification and Claim Objections listed in the paragraph(s) below are corrected."
+      },
+      {
+        "id": "6018B46C",
+        "index": 16,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 8
+        },
+        "number": "8.",
+        "selectable_text": "As allowable subject matter has been indicated, applicant's reply must either comply with all formal requirements or specifically traverse each requirement not complied with.  See 37 CFR 1.111(b) and MPEP § 707.07(a).",
+        "text": "As allowable subject matter has been indicated, applicant's reply must either comply with all formal requirements or specifically traverse each requirement not complied with.  See 37 CFR 1.111(b) and MPEP § 707.07(a)."
+      },
+      {
+        "id": "69A809DB",
+        "index": 17,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "70932BE3",
+        "index": 18,
+        "selectable_text": "Specification",
+        "text": "Specification"
+      },
+      {
+        "id": "5907A637",
+        "index": 19,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 9
+        },
+        "number": "9.",
+        "selectable_text": "The title of the invention is not descriptive. A new title is required that is clearly indicative of the invention to which the claims are directed.",
+        "text": "The title of the invention is not descriptive. A new title is required that is clearly indicative of the invention to which the claims are directed."
+      },
+      {
+        "id": "538B16B9",
+        "index": 20,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 10
+        },
+        "number": "10.",
+        "selectable_text": "The disclosure is objected to because of the following informalities:",
+        "style": "ListParagraph",
+        "text": "The disclosure is objected to because of the following informalities:"
+      },
+      {
+        "id": "19F3A521",
+        "index": 21,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 11
+        },
+        "number": "11.",
+        "selectable_text": "Typically abbreviations/acronyms are used after an expansion is provided to the abbreviations/acronyms. However, in the Specification, “IT,” “Tcpdump,” “Mb/sec,” “IP,” “FPGA,” “I/O,” “CPU,” “TCP,” “IPsec,” “GRE,” “L2TP,” “TLS,” “URL,” “RAM,” “NIC,” “EPROM,” “VLAN,” “VxLAN,” “MPLS,” “DNS,” “SSH,” “DHCP,” “UDP,” “HTTP,” “LDAP,” “RDP,” “ID,” “Gbps,” etc. are used before they are expanded. It is suggested to use expansions before using their abbreviations/acronyms. Appropriate correction is required.",
+        "style": "ListParagraph",
+        "text": "Typically abbreviations/acronyms are used after an expansion is provided to the abbreviations/acronyms. However, in the Specification, “IT,” “Tcpdump,” “Mb/sec,” “IP,” “FPGA,” “I/O,” “CPU,” “TCP,” “IPsec,” “GRE,” “L2TP,” “TLS,” “URL,” “RAM,” “NIC,” “EPROM,” “VLAN,” “VxLAN,” “MPLS,” “DNS,” “SSH,” “DHCP,” “UDP,” “HTTP,” “LDAP,” “RDP,” “ID,” “Gbps,” etc. are used before they are expanded. It is suggested to use expansions before using their abbreviations/acronyms. Appropriate correction is required."
+      },
+      {
+        "id": "2ECE71A5",
+        "index": 22,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "40EA9BB0",
+        "index": 23,
+        "selectable_text": "Claim Objections",
+        "text": "Claim Objections"
+      },
+      {
+        "id": "0CBD9616",
+        "index": 24,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 12
+        },
+        "number": "12.",
+        "selectable_text": "Claims 1-14 are objected to because the claim language is replete with antecedent basis, grammatical and idiomatic errors. The examiner suggests the following amendments to claims 1-14 in order to place the application in condition for allowance:",
+        "text": "Claims 1-14 are objected to because the claim language is replete with antecedent basis, grammatical and idiomatic errors. The examiner suggests the following amendments to claims 1-14 in order to place the application in condition for allowance:"
+      },
+      {
+        "id": "6D829064",
+        "index": 25,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 13
+        },
+        "number": "13.",
+        "selectable_text": "Replace all prior versions, and listings, of claims in the application as follows:",
+        "style": "ListParagraph",
+        "text": "Replace all prior versions, and listings, of claims in the application as follows:"
+      },
+      {
+        "id": "57CC88CF",
+        "index": 26,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "686B5CDA",
+        "index": 27,
+        "selectable_text": "1 . A method of processing of a data stream comprising batches of packets, each batch of packets defined by a protocol chain of communication protocols associated with at least one session, comprising:",
+        "text": "1 . A method of processing of a data stream comprising batches of packets, each batch of packets defined by a protocol chain of communication protocols associated with at least one session, comprising:"
+      },
+      {
+        "id": "603D663B",
+        "index": 28,
+        "selectable_text": "receiving a plurality of batches of data packets via a communication channel and storing said plurality of batches of data packets in a temporary memory;",
+        "text": "receiving a plurality of batches of data packets via a communication channel and storing said plurality of batches of data packets in a temporary memory;"
+      },
+      {
+        "id": "66648134",
+        "index": 29,
+        "selectable_text": "performing, for each batch of data packets of the plurality of batches of data packets, a protocol analysis (DAPD) enabling the communication protocols in the protocol chain to be identified, and validating the at least one session associated with the protocol chain based on the identification of the protocol chain being complete;",
+        "text": "performing, for each batch of data packets of the plurality of batches of data packets, a protocol analysis (DAPD) enabling the communication protocols in the protocol chain to be identified, and validating the at least one session associated with the protocol chain based on the identification of the protocol chain being complete;"
+      },
+      {
+        "id": "0D544475",
+        "index": 30,
+        "selectable_text": "determining at least one digital session fingerprint (HS) associated with the identified protocol chain (PID) of the at least one session validated during the validation step,",
+        "text": "determining at least one digital session fingerprint (HS) associated with the identified protocol chain (PID) of the at least one session validated during the validation step,"
+      },
+      {
+        "id": "7E7A62BB",
+        "index": 31,
+        "selectable_text": "storing said determined digital session fingerprint(s) (HS) in at least one hash table (TH), and saving a list (LM) of metadata (MPID) associated with the identified communication protocols (PID) of the protocol chain of the at least one validated session in a knowledge database (BDDS);",
+        "text": "storing said determined digital session fingerprint(s) (HS) in at least one hash table (TH), and saving a list (LM) of metadata (MPID) associated with the identified communication protocols (PID) of the protocol chain of the at least one validated session in a knowledge database (BDDS);"
+      },
+      {
+        "id": "04E22F65",
+        "index": 32,
+        "selectable_text": "generating at least one trigger based on the protocol analysis results (DAPD), wherein activation of the at least one trigger is indicative of a match between at least one rule for identifying target metadata (MC) and the metadata (MPID) associated with the identified communication protocols (PID), the list (LM) is saved in the knowledge database (BDDS);",
+        "text": "generating at least one trigger based on the protocol analysis results (DAPD), wherein activation of the at least one trigger is indicative of a match between at least one rule for identifying target metadata (MC) and the metadata (MPID) associated with the identified communication protocols (PID), the list (LM) is saved in the knowledge database (BDDS);"
+      },
+      {
+        "id": "02141B1D",
+        "index": 33,
+        "selectable_text": "analysing the metadata (MPID) associated with the identified communication protocols (PID) of a particular batch of data packets of the at least one validated session, stored in the temporary memory, against the saved list (LM) of metadata (MPID) associated with the identified communication protocols (PID) in the knowledge database (BDDS), and checking whether the metadata (MPID) associated with the identified communication protocols (PID) comply with the at least one trigger’s rule for identifying the target metadata (MC);",
+        "text": "analysing the metadata (MPID) associated with the identified communication protocols (PID) of a particular batch of data packets of the at least one validated session, stored in the temporary memory, against the saved list (LM) of metadata (MPID) associated with the identified communication protocols (PID) in the knowledge database (BDDS), and checking whether the metadata (MPID) associated with the identified communication protocols (PID) comply with the at least one trigger’s rule for identifying the target metadata (MC);"
+      },
+      {
+        "id": "0AFBFC83",
+        "index": 34,
+        "selectable_text": "determining the metadata comply with the at least one trigger’s rule for identifying the target metadata (MC);",
+        "text": "determining the metadata comply with the at least one trigger’s rule for identifying the target metadata (MC);"
+      },
+      {
+        "id": "54FE9910",
+        "index": 35,
+        "selectable_text": "activating the at least one trigger and assigning a save status (SV) to the at least one digital session fingerprint (HS) of the at least one validated session; and",
+        "text": "activating the at least one trigger and assigning a save status (SV) to the at least one digital session fingerprint (HS) of the at least one validated session; and"
+      },
+      {
+        "id": "441638B2",
+        "index": 36,
+        "selectable_text": "emptying the temporary memory of each batch of data packets of the plurality of batches of data packets for which the at least one digital session fingerprint does not have a save status (SV), and saving on a storage memory for subsequent processing all data packets for which the at least one associated digital session fingerprint (HS) has a save status (SV).",
+        "text": "emptying the temporary memory of each batch of data packets of the plurality of batches of data packets for which the at least one digital session fingerprint does not have a save status (SV), and saving on a storage memory for subsequent processing all data packets for which the at least one associated digital session fingerprint (HS) has a save status (SV)."
+      },
+      {
+        "id": "02BDEBB4",
+        "index": 37,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "43758B2F",
+        "index": 38,
+        "selectable_text": "2 . The method according to claim 1, wherein the step of activation of the at least one trigger further comprises updating the at least one hash table (TH) saved following the step of saving the at least one digital session fingerprint (HS), by assigning the save status (SV) to the at least one digital session fingerprint (HS).",
+        "text": "2 . The method according to claim 1, wherein the step of activation of the at least one trigger further comprises updating the at least one hash table (TH) saved following the step of saving the at least one digital session fingerprint (HS), by assigning the save status (SV) to the at least one digital session fingerprint (HS)."
+      },
+      {
+        "id": "2B4241B2",
+        "index": 39,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "0360D849",
+        "index": 40,
+        "selectable_text": "3 . The method according to claim 1, wherein the step of emptying the temporary memory further comprises consulting the at least one hash table (TH) to check whether one of the at least one digital session fingerprint (HS) associated with the particular batch of data packets subject to emptying has the save status (SV).",
+        "text": "3 . The method according to claim 1, wherein the step of emptying the temporary memory further comprises consulting the at least one hash table (TH) to check whether one of the at least one digital session fingerprint (HS) associated with the particular batch of data packets subject to emptying has the save status (SV)."
+      },
+      {
+        "id": "64BD9282",
+        "index": 41,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "40355E2C",
+        "index": 42,
+        "selectable_text": "4 . The method according to claim 1, wherein the step of analysis of the metadata associated with the identified communication protocols (PID) of the particular batch of data packets of the at least one validated session further comprises analysing the metadata associated with attached content (MP) of the protocol chain of the at least one validated session, wherein the analysing the metadata associated with the attached content (MP) is based on the at least one trigger’s rule for identifying the target metadata (MC) comprising the target metadata (MC) in relation to the attached content (MP).",
+        "text": "4 . The method according to claim 1, wherein the step of analysis of the metadata associated with the identified communication protocols (PID) of the particular batch of data packets of the at least one validated session further comprises analysing the metadata associated with attached content (MP) of the protocol chain of the at least one validated session, wherein the analysing the metadata associated with the attached content (MP) is based on the at least one trigger’s rule for identifying the target metadata (MC) comprising the target metadata (MC) in relation to the attached content (MP)."
+      },
+      {
+        "id": "2FBF0F18",
+        "index": 43,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "47F0CFD9",
+        "index": 44,
+        "selectable_text": "5 . The method according to claim 1, wherein the at least one trigger processes and applies a dynamic list of rules for identifying the target metadata (MC).",
+        "text": "5 . The method according to claim 1, wherein the at least one trigger processes and applies a dynamic list of rules for identifying the target metadata (MC)."
+      },
+      {
+        "id": "1CCED26A",
+        "index": 45,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "47498066",
+        "index": 46,
+        "selectable_text": "6 . The method according to claim 1, wherein the target metadata (MC) of identification rules of the at least one trigger belong to a group formed by native metadata and other metadata calculated from selected mathematical formulae.",
+        "text": "6 . The method according to claim 1, wherein the target metadata (MC) of identification rules of the at least one trigger belong to a group formed by native metadata and other metadata calculated from selected mathematical formulae."
+      },
+      {
+        "id": "67E6BDC5",
+        "index": 47,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "03E156CB",
+        "index": 48,
+        "selectable_text": "7 . The method according to claim 1, wherein the target metadata (MC) are representative of selected network parameters belonging to a group formed by destination internet protocol (IP), source IP, destination port, source port, protocol, IP address, port, quality of service (QoS) parameters, network tag, session volume, packet size, number of retries, version, encryption algorithm type and version, encryption type, Computer Emergency Response Team (CERT) certificate, Server Name Indication (SNI) value, packet size, returned IP, error flag, domain name, client version, server version, encryption algorithm version, compression algorithm, timestamp, IP version, hostname, lease-time, Uniform Resource Locator (URL), user agent, number of bytes of content attached, content type, status code, cookie header, client name, request service, error code value, request type, protocol value, response timestamp, privilege level, keyboard type and language, product identification, screen size, or any similar specific metadata extracted from the communication protocols in one or more data packets of the at least one validated session, similar specific metadata extracted from content attached to the one or more data packets of the at least one validated session.",
+        "text": "7 . The method according to claim 1, wherein the target metadata (MC) are representative of selected network parameters belonging to a group formed by destination internet protocol (IP), source IP, destination port, source port, protocol, IP address, port, quality of service (QoS) parameters, network tag, session volume, packet size, number of retries, version, encryption algorithm type and version, encryption type, Computer Emergency Response Team (CERT) certificate, Server Name Indication (SNI) value, packet size, returned IP, error flag, domain name, client version, server version, encryption algorithm version, compression algorithm, timestamp, IP version, hostname, lease-time, Uniform Resource Locator (URL), user agent, number of bytes of content attached, content type, status code, cookie header, client name, request service, error code value, request type, protocol value, response timestamp, privilege level, keyboard type and language, product identification, screen size, or any similar specific metadata extracted from the communication protocols in one or more data packets of the at least one validated session, similar specific metadata extracted from content attached to the one or more data packets of the at least one validated session."
+      },
+      {
+        "id": "69A12126",
+        "index": 49,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "2E1B7F34",
+        "index": 50,
+        "selectable_text": "8 . The method according to claim 1, wherein the step of protocol analysis (DAPD) and the step of analysing the metadata of the particular batch of data packets of the at least one validated session (MPID) are carried out on data packets of layer 2 to layer 7 of the Open Systems Interconnection (OSI) model.",
+        "text": "8 . The method according to claim 1, wherein the step of protocol analysis (DAPD) and the step of analysing the metadata of the particular batch of data packets of the at least one validated session (MPID) are carried out on data packets of layer 2 to layer 7 of the Open Systems Interconnection (OSI) model."
+      },
+      {
+        "id": "6AABC0B7",
+        "index": 51,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "29356805",
+        "index": 52,
+        "selectable_text": "9 . A system for processing of a data stream comprising batches of packets, each batch of packets defined by a protocol chain of communication protocols associated with at least one session, comprising:",
+        "text": "9 . A system for processing of a data stream comprising batches of packets, each batch of packets defined by a protocol chain of communication protocols associated with at least one session, comprising:"
+      },
+      {
+        "id": "26806CE3",
+        "index": 53,
+        "selectable_text": "network interface (NIC) configured to receive the data stream from a communication channel;",
+        "text": "network interface (NIC) configured to receive the data stream from a communication channel;"
+      },
+      {
+        "id": "43AE95DD",
+        "index": 54,
+        "selectable_text": "a processor comprising at least one processing core for processing a predetermined number of data packets per minute (ppm);",
+        "text": "a processor comprising at least one processing core for processing a predetermined number of data packets per minute (ppm);"
+      },
+      {
+        "id": "628EACC9",
+        "index": 55,
+        "selectable_text": "a temporary memory, coupled to the processor, storing a plurality of batches of data packets from the network interface (NIC);",
+        "text": "a temporary memory, coupled to the processor, storing a plurality of batches of data packets from the network interface (NIC);"
+      },
+      {
+        "id": "345F29C4",
+        "index": 56,
+        "selectable_text": "a protocol analysis engine executed on the at least one processing core, wherein the protocol analysis engine is configured to:",
+        "text": "a protocol analysis engine executed on the at least one processing core, wherein the protocol analysis engine is configured to:"
+      },
+      {
+        "id": "2034898D",
+        "index": 57,
+        "selectable_text": "receive the plurality of batches of data packets within a predetermined time via the communication channel;",
+        "text": "receive the plurality of batches of data packets within a predetermined time via the communication channel;"
+      },
+      {
+        "id": "0DF1FF9E",
+        "index": 58,
+        "selectable_text": "perform, for each batch of data packets of the plurality of batches of data packets, a protocol analysis (DAPD) enabling the communication protocols in the protocol chain to be identified, and validating at least one associated session;",
+        "text": "perform, for each batch of data packets of the plurality of batches of data packets, a protocol analysis (DAPD) enabling the communication protocols in the protocol chain to be identified, and validating at least one associated session;"
+      },
+      {
+        "id": "184261A4",
+        "index": 59,
+        "selectable_text": "determine at least one digital session fingerprint (HS) associated with the identified protocol chain (PID) of the validated at least one associated session, and",
+        "text": "determine at least one digital session fingerprint (HS) associated with the identified protocol chain (PID) of the validated at least one associated session, and"
+      },
+      {
+        "id": "2CA64E4A",
+        "index": 60,
+        "selectable_text": "store said determined digital session fingerprint (HS) in at least one hash table (TH), and save a list (LM) of metadata (MPID) associated with the identified communication protocols (PID) of the protocol chain of the validated at least one associated session in a knowledge database (BDDS);",
+        "text": "store said determined digital session fingerprint (HS) in at least one hash table (TH), and save a list (LM) of metadata (MPID) associated with the identified communication protocols (PID) of the protocol chain of the validated at least one associated session in a knowledge database (BDDS);"
+      },
+      {
+        "id": "04C0CE60",
+        "index": 61,
+        "selectable_text": "a monitoring engine executed on the at least one processing core, wherein the monitoring engine performs:",
+        "text": "a monitoring engine executed on the at least one processing core, wherein the monitoring engine performs:"
+      },
+      {
+        "id": "28E7D503",
+        "index": 62,
+        "selectable_text": "generating at least one trigger based on the protocol analysis results (DAPD), wherein activation of the at least one trigger is indicative of a match between at least one rule for identifying target metadata (MC) and the list (LM) of metadata (MPID) associated with the identified communication protocols (PID) of the protocol chain of the validated at least one associated session;",
+        "text": "generating at least one trigger based on the protocol analysis results (DAPD), wherein activation of the at least one trigger is indicative of a match between at least one rule for identifying target metadata (MC) and the list (LM) of metadata (MPID) associated with the identified communication protocols (PID) of the protocol chain of the validated at least one associated session;"
+      },
+      {
+        "id": "18623F08",
+        "index": 63,
+        "selectable_text": "analysing the metadata of a particular batch of data packets of the validated at least one associated session, stored in the temporary memory, against the saved list (LM) of metadata (MPID) associated with the identified communication protocols (PID) in the knowledge database (BDDS), and checking whether the metadata (MPID) associated with the identified communication protocols (PID) comply with the at least one trigger’s rule for identifying the target metadata (MC);",
+        "text": "analysing the metadata of a particular batch of data packets of the validated at least one associated session, stored in the temporary memory, against the saved list (LM) of metadata (MPID) associated with the identified communication protocols (PID) in the knowledge database (BDDS), and checking whether the metadata (MPID) associated with the identified communication protocols (PID) comply with the at least one trigger’s rule for identifying the target metadata (MC);"
+      },
+      {
+        "id": "10A73718",
+        "index": 64,
+        "selectable_text": "determining the metadata comply with the at least one trigger’s rule for identifying the target metadata (MC);",
+        "text": "determining the metadata comply with the at least one trigger’s rule for identifying the target metadata (MC);"
+      },
+      {
+        "id": "12FC5D42",
+        "index": 65,
+        "selectable_text": "activating the at least one trigger and assigning a save status (SV) to at least one digital session fingerprint (HS) of the validated at least one associated session; and",
+        "text": "activating the at least one trigger and assigning a save status (SV) to at least one digital session fingerprint (HS) of the validated at least one associated session; and"
+      },
+      {
+        "id": "6535512E",
+        "index": 66,
+        "selectable_text": "emptying the temporary memory for each batch of data packets of the plurality of batches of data packets for which the at least one digital session fingerprint(s) (HS) do not have a save status (SV); and",
+        "text": "emptying the temporary memory for each batch of data packets of the plurality of batches of data packets for which the at least one digital session fingerprint(s) (HS) do not have a save status (SV); and"
+      },
+      {
+        "id": "5B92D06B",
+        "index": 67,
+        "selectable_text": "a storage memory coupled to the processor saving, for subsequent processing, all data packets for which the at least one associated digital session fingerprint (HS) has a save status (SV).",
+        "text": "a storage memory coupled to the processor saving, for subsequent processing, all data packets for which the at least one associated digital session fingerprint (HS) has a save status (SV)."
+      },
+      {
+        "id": "474C3D8D",
+        "index": 68,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "6FDC17AC",
+        "index": 69,
+        "selectable_text": "10 . The system according to claim 9, wherein the monitoring engine is configured to update the at least one hash table (TH) saved following the step of saving the at least one digital session fingerprint (HS), by assigning the save status (SV) to the at least one digital session fingerprint (HS) based on activation of the at least one trigger.",
+        "text": "10 . The system according to claim 9, wherein the monitoring engine is configured to update the at least one hash table (TH) saved following the step of saving the at least one digital session fingerprint (HS), by assigning the save status (SV) to the at least one digital session fingerprint (HS) based on activation of the at least one trigger."
+      },
+      {
+        "id": "36BB1449",
+        "index": 70,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "7D2273EF",
+        "index": 71,
+        "selectable_text": "11 . The system according to claim 9, wherein the monitoring engine is configured to consult the at least one hash table (TH) and check whether the at least one digital session fingerprint (HS) associated with the particular batch of data packets of the validated at least one associated session has a save status (SV).",
+        "text": "11 . The system according to claim 9, wherein the monitoring engine is configured to consult the at least one hash table (TH) and check whether the at least one digital session fingerprint (HS) associated with the particular batch of data packets of the validated at least one associated session has a save status (SV)."
+      },
+      {
+        "id": "78122083",
+        "index": 72,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "52A7BE72",
+        "index": 73,
+        "selectable_text": "12 . The system according to claim 9, wherein the monitoring engine is configured to analyse the metadata associated with attached content (MP) of the protocol chain of the validated at least one associated session during the analysis of the metadata (MPID) associated with the identified communication protocols (PID) of the particular batch of data packets of the validated at least one associated session, wherein the analysing the metadata associated with the attached content (MP) is based on the at least one trigger’s rule for identifying the target metadata (MC) comprising the target metadata (MC) in relation to the attached content (MP).",
+        "text": "12 . The system according to claim 9, wherein the monitoring engine is configured to analyse the metadata associated with attached content (MP) of the protocol chain of the validated at least one associated session during the analysis of the metadata (MPID) associated with the identified communication protocols (PID) of the particular batch of data packets of the validated at least one associated session, wherein the analysing the metadata associated with the attached content (MP) is based on the at least one trigger’s rule for identifying the target metadata (MC) comprising the target metadata (MC) in relation to the attached content (MP)."
+      },
+      {
+        "id": "2FB59D32",
+        "index": 74,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "22E5A1D7",
+        "index": 75,
+        "selectable_text": "13 . The system according to claim 9, wherein the temporary memory is gradually emptied based on usage of an associated Random Access Memory (RAM) being between 95% and 98%.",
+        "text": "13 . The system according to claim 9, wherein the temporary memory is gradually emptied based on usage of an associated Random Access Memory (RAM) being between 95% and 98%."
+      },
+      {
+        "id": "19A349F9",
+        "index": 76,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "1167E226",
+        "index": 77,
+        "selectable_text": "14 . The system according to claim 9, wherein the temporary memory is emptied chronologically by deleting oldest data packets at a chosen emptying rate.",
+        "text": "14 . The system according to claim 9, wherein the temporary memory is emptied chronologically by deleting oldest data packets at a chosen emptying rate."
+      },
+      {
+        "id": "4D6D43B5",
+        "index": 78,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "73CB6665",
+        "index": 79,
+        "selectable_text": "Conclusion",
+        "text": "Conclusion"
+      },
+      {
+        "id": "5D242341",
+        "index": 80,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 14
+        },
+        "number": "14.",
+        "selectable_text": "The prior art made of record and not relied upon is considered pertinent to applicant’s disclosure:",
+        "text": "The prior art made of record and not relied upon is considered pertinent to applicant’s disclosure:"
+      },
+      {
+        "id": "4E696A7A",
+        "index": 81,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "bullet",
+          "level": 0,
+          "num_id": "2",
+          "start": 1,
+          "value": 1
+        },
+        "number": "•",
+        "selectable_text": "Knott. US 2013/0232137. Discloses analyzing data packets based on content and metadata.",
+        "style": "ListParagraph",
+        "text": "Knott. US 2013/0232137. Discloses analyzing data packets based on content and metadata."
+      },
+      {
+        "id": "3D269972",
+        "index": 82,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "bullet",
+          "level": 0,
+          "num_id": "2",
+          "start": 1,
+          "value": 2
+        },
+        "number": "•",
+        "selectable_text": "Watson et al. US 2021/0385138. Discloses monitoring and capturing packets sent over a network.",
+        "style": "ListParagraph",
+        "text": "Watson et al. US 2021/0385138. Discloses monitoring and capturing packets sent over a network."
+      },
+      {
+        "id": "0CD97D10",
+        "index": 83,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "bullet",
+          "level": 0,
+          "num_id": "2",
+          "start": 1,
+          "value": 3
+        },
+        "number": "•",
+        "selectable_text": "Hsiao et al. US 2015/0293954. Discloses grouping and managing event streams generated from captured network data.",
+        "style": "ListParagraph",
+        "text": "Hsiao et al. US 2015/0293954. Discloses grouping and managing event streams generated from captured network data."
+      },
+      {
+        "id": "0E9F8FB4",
+        "index": 84,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "bullet",
+          "level": 0,
+          "num_id": "2",
+          "start": 1,
+          "value": 4
+        },
+        "number": "•",
+        "selectable_text": "Farmer et al. US 2016/0112287. Discloses storage, recovery, and analysis of network traffic data.",
+        "style": "ListParagraph",
+        "text": "Farmer et al. US 2016/0112287. Discloses storage, recovery, and analysis of network traffic data."
+      },
+      {
+        "id": "234D5083",
+        "index": 85,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "bullet",
+          "level": 0,
+          "num_id": "2",
+          "start": 1,
+          "value": 5
+        },
+        "number": "•",
+        "selectable_text": "Maher et al. US 2003/0227917. Discloses enabling trap and trace of internet protocol communications.",
+        "style": "ListParagraph",
+        "text": "Maher et al. US 2003/0227917. Discloses enabling trap and trace of internet protocol communications."
+      },
+      {
+        "id": "1A58AB68",
+        "index": 86,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "56B48567",
+        "index": 87,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": true,
+          "format": "decimal",
+          "level": 0,
+          "num_id": "1",
+          "start": 1,
+          "value": 15
+        },
+        "number": "15.",
+        "selectable_text": "Any inquiry concerning this communication or earlier communications from the examiner should be directed to Johnny B Aguiar whose telephone number is (571)272-3563. The examiner can normally be reached on Monday to Friday 7:30 am - 5:30 pm EST.",
+        "text": "Any inquiry concerning this communication or earlier communications from the examiner should be directed to Johnny B Aguiar whose telephone number is (571)272-3563. The examiner can normally be reached on Monday to Friday 7:30 am - 5:30 pm EST."
+      },
+      {
+        "id": "666EAB57",
+        "index": 88,
+        "selectable_text": "Examiner interviews are available via telephone, in-person, and video conferencing using a USPTO supplied web-based collaboration tool. To schedule an interview, applicant is encouraged to use the USPTO Automated Interview Request (AIR) at http://www.uspto.gov/interviewpractice.",
+        "text": "Examiner interviews are available via telephone, in-person, and video conferencing using a USPTO supplied web-based collaboration tool. To schedule an interview, applicant is encouraged to use the USPTO Automated Interview Request (AIR) at http://www.uspto.gov/interviewpractice."
+      },
+      {
+        "id": "3EB00A2A",
+        "index": 89,
+        "selectable_text": "If attempts to reach the examiner by telephone are unsuccessful, the examiner’s supervisor, Joon Hwang can be reached on (571) 272-4036.  The fax phone number for the organization where this application or proceeding is assigned is 571-273-8300.",
+        "text": "If attempts to reach the examiner by telephone are unsuccessful, the examiner’s supervisor, Joon Hwang can be reached on (571) 272-4036.  The fax phone number for the organization where this application or proceeding is assigned is 571-273-8300."
+      },
+      {
+        "id": "0282B3C5",
+        "index": 90,
+        "selectable_text": "Information regarding the status of an application may be obtained from the Patent Application Information Retrieval (PAIR) system.  Status information for published applications may be obtained from either Private PAIR or Public PAIR.  Status information for unpublished applications is available through Private PAIR only.  For more information about the PAIR system, see http://pair-direct.uspto.gov. Should you have questions on access to the Private PAIR system, contact the Electronic Business Center (EBC) at 866-217-9197 (toll-free). If you would like assistance from a USPTO Customer Service Representative or access to the automated information system, call 800-786-9199 (IN USA OR CANADA) or 571-272-1000.",
+        "text": "Information regarding the status of an application may be obtained from the Patent Application Information Retrieval (PAIR) system.  Status information for published applications may be obtained from either Private PAIR or Public PAIR.  Status information for unpublished applications is available through Private PAIR only.  For more information about the PAIR system, see http://pair-direct.uspto.gov. Should you have questions on access to the Private PAIR system, contact the Electronic Business Center (EBC) at 866-217-9197 (toll-free). If you would like assistance from a USPTO Customer Service Representative or access to the automated information system, call 800-786-9199 (IN USA OR CANADA) or 571-272-1000."
+      },
+      {
+        "id": "6B373D1E",
+        "index": 91,
+        "selectable_text": "",
+        "text": ""
+      },
+      {
+        "id": "41309CB7",
+        "index": 92,
+        "selectable_text": "/JOHNNY B AGUIAR/",
+        "text": "/JOHNNY B AGUIAR/"
+      },
+      {
+        "id": "7AE9EB8F",
+        "index": 93,
+        "selectable_text": "Primary Examiner, Art Unit 2447",
+        "text": "Primary Examiner, Art Unit 2447"
+      },
+      {
+        "id": "46637D4C",
+        "index": 94,
+        "selectable_text": "June 5, 2025",
+        "text": "June 5, 2025"
+      }
+    ]
+  },
+  "source": "sha256:b72f1a1ecd882fc6db690bdeabac81d295e20c0d19f2b199c53556e164393a26"
+}

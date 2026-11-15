@@ -1,0 +1,43 @@
+{
+  "id": "mv-sp7-top-row",
+  "type": "move",
+  "category": "architecture",
+  "deck": {
+    "path": "web/spade-standards-roadmap.pptx",
+    "sha256": "673b1de7864f150fe61c922ac295672205dd1c98470381700622820120d55266",
+    "licence": "CC-BY-4.0"
+  },
+  "slide": "/ppt/slides/slide7.xml",
+  "instruction": "Align the tops of the three boxes in the top row (Observation data, Characteristic or property, Observable entity) with the top of 'Observation data', and keep every connector attached.",
+  "targets": [
+    "s71",
+    "s58",
+    "s72",
+    "s66"
+  ],
+  "checks": [
+    {
+      "type": "align",
+      "targets": [
+        "s69",
+        "s71",
+        "s58"
+      ],
+      "edge": "top",
+      "value": 60.07
+    },
+    {
+      "type": "box",
+      "targets": [
+        "s71",
+        "s58"
+      ],
+      "keep": [
+        "x",
+        "w",
+        "h"
+      ]
+    }
+  ],
+  "max_new": 0
+}

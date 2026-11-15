@@ -1,0 +1,56 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "matches": [
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>x</mi></math>"
+          }
+        ],
+        "id": "00000001",
+        "index": 1,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "lowerLetter",
+          "level": 1,
+          "num_id": "1",
+          "start": 2,
+          "value": 2
+        },
+        "number": "III.b)",
+        "selectable_text": "ΑΣ onein",
+        "text": "ΑΣ oneinout"
+      },
+      {
+        "id": "3AD8DD8D",
+        "index": 2,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "upperRoman",
+          "level": 0,
+          "num_id": "1",
+          "start": 3,
+          "value": 3
+        },
+        "number": "III.",
+        "selectable_text": "barefb",
+        "style": "L",
+        "text": "barefb"
+      },
+      {
+        "id": "309A9EEC",
+        "index": 3,
+        "selectable_text": "",
+        "text": ""
+      }
+    ]
+  },
+  "source": "sha256:b1b68e8bd82db85068474f9dd7ca07bbfbc17dc603323e1469d8b4aca8afddec"
+}

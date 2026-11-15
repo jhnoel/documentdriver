@@ -1,0 +1,10 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "bookmarks": [],
+    "kind": "bookmarks",
+    "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+  },
+  "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+}

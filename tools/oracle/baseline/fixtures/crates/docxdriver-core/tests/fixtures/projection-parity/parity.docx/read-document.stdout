@@ -1,0 +1,534 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "assets": [
+      {
+        "asset_url": "assets/9650eb2ef8b938a5e48e539632fc0cd31216d1f910d85f3855ccb9570c7d97e8.png",
+        "mime": "image/png",
+        "parts": [
+          "word/media/image.png"
+        ],
+        "size": 68,
+        "url": "assets/i1.png"
+      }
+    ],
+    "comments": [
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "at": "22222222",
+              "end": 36,
+              "occurrence": 1,
+              "select": "Commented",
+              "start": 27
+            }
+          ]
+        },
+        "durableId": "",
+        "id": "0",
+        "replies": [],
+        "root": {
+          "author": "Comment Author",
+          "date": "",
+          "paraId": "EE000001",
+          "text": "Comment body"
+        },
+        "status": "open"
+      }
+    ],
+    "content_type": "text/html",
+    "equations": [
+      {
+        "at": "28B506BC",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "4835B59D",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "6C6C0863",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "237FFCFB",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "58ED22F7",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "65B5C986",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "35502A25",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "284EFEE5",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "024A5EFD",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "65CA14EF",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "2D543CA1",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "1B187524",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "78F991DC",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "3DBA0A7D",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "246470C3",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "5BF24182",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "746C05B4",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "6B7986B8",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "7853450D",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "3F5148AB",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "6B642974",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "36E8ADAF",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "57CDF34A",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "0E232A17",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "12F2B191",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "0A504981",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "307A9CF5",
+        "display": false,
+        "editable": true,
+        "equation": 1
+      },
+      {
+        "at": "5B954590",
+        "display": true,
+        "editable": true,
+        "equation": 1
+      }
+    ],
+    "idRepairsNeeded": 38,
+    "kind": "document",
+    "markup": "<section data-docx-section=\"1\" data-docx-first-page=\"true\">\n<header>\n<p>header default</p>\n</header>\n<header data-docx-kind=\"first\">\n<p>header first</p>\n</header>\n<header data-docx-kind=\"even\">\n<p>header even</p>\n</header>\n<footer>\n<p>footer default</p>\n</footer>\n<footer data-docx-kind=\"first\">\n<p>footer first</p>\n</footer>\n<footer data-docx-kind=\"even\">\n<p>footer even</p>\n</footer>\n<p id=\"11111111\" data-docx-style=\"CustomStyle\"><b>Bold</b><i> italic</i><u> underline</u><s> strike</s><sup> super</sup><sub> sub</sub><a href=\"https://example.com/?a=1&amp;b=2\">Safe link</a><a href=\"#\" data-docx-href=\"custom-scheme:opaque-target\">Opaque link</a><a href=\"#bookmark\">Internal link</a></p>\n<p id=\"22222222\"><span data-docx-field=\"AUTHOR\">Author result</span><span data-docx-field=\"REF source\">Complex result</span><span data-docx-comment-start=\"0\" hidden></span>Commented<span data-docx-comment-end=\"0\" hidden></span><b data-docx-format-change=\"true\" data-docx-revision=\"31\" data-docx-author=\"Format Editor\"> changed-format</b><span style=\"font-weight:normal;\" data-docx-format-change=\"true\" data-docx-revision=\"32\" data-docx-author=\"Format Editor\"> neutral-format</span></p>\n<ol data-docx-list=\"42\" data-docx-level=\"0\" start=\"3\" type=\"I\"><li data-docx-marker=\"III.\"><p id=\"33333333\">Roman item</p><ol data-docx-list=\"42\" data-docx-level=\"1\" start=\"1\" type=\"a\"><li data-docx-marker=\"a)\"><p id=\"33333334\">Nested item</p></li></ol></li><li data-docx-marker=\"IV.\"><p id=\"33333335\">Next item</p></li></ol>\n<p id=\"44444444\">Common <ins data-docx-revision=\"21\" data-docx-author=\"Insert Editor\">inserted</ins><del data-docx-revision=\"22\" data-docx-author=\"Delete Editor\">deleted</del><sup data-docx-note=\"footnote\" data-docx-note-id=\"7\"><a>1</a></sup><sup data-docx-note=\"endnote\" data-docx-note-id=\"9\"><a>1</a></sup><del data-docx-revision=\"24\" data-docx-author=\"Delete Editor\"><sup data-docx-note=\"footnote\" data-docx-note-id=\"10\"><a>2</a></sup></del><ins data-docx-revision=\"25\" data-docx-author=\"Insert Editor\"><sup data-docx-note=\"endnote\" data-docx-note-id=\"11\"><a>2</a></sup></ins></p>\n<p id=\"55555555\"><img src=\"assets/i1.png\" data-docx-image-part=\"word/media/image.png\" width=\"32\" height=\"24\" alt=\"Available picture\"><span data-docx-image-unavailable=\"true\" data-docx-image-rid=\"opaque\" data-docx-image-part=\"word/media/image.emf\" data-docx-image-width=\"48\" data-docx-image-height=\"36\" data-docx-image-alt=\"Opaque picture\">Opaque picture</span></p>\n<p id=\"66666666\">Unicode 😀 nonbreaking space literal\ttab<span data-docx-tab=\"true\">\t</span><br><br data-docx-break=\"page\"><br data-docx-break=\"column\">Fallback content</p>\n<p id=\"77777777\" data-docx-break-del=\"23\"><span data-docx-field=\"REF joined\">Joined first</span></p>\n<p id=\"1EDE45A3\">Joined second</p>\n<p id=\"4B101413\" data-docx-break-ins=\"26\">Inserted break first</p>\n<p id=\"11543C1E\">Inserted break second</p>\n<table data-docx-table=\"1\" data-docx-handle=\"table:1\"><tbody>\n<tr data-docx-handle=\"table:1/row:1\">\n<td data-docx-handle=\"table:1/row:1/cell:1\" colspan=\"2\" rowspan=\"2\">\n<p id=\"07B86923\">Merged cell</p>\n</td>\n<td data-docx-handle=\"table:1/row:1/cell:2\">\n<p id=\"5B82D4E5\">Top cell</p>\n</td>\n</tr>\n<tr data-docx-handle=\"table:1/row:2\">\n<td data-docx-handle=\"table:1/row:2/cell:2\">\n<table data-docx-handle=\"table:2\"><tbody>\n<tr data-docx-handle=\"table:2/row:1\">\n<td data-docx-handle=\"table:2/row:1/cell:1\">\n<p id=\"0BA5B732\">Nested cell</p>\n</td>\n</tr>\n</tbody></table>\n<p id=\"78B6F0A2\"></p>\n</td>\n</tr>\n</tbody></table>\n<p id=\"28B506BC\">runs: <math display=\"inline\"><mi>α</mi><mtext> </mtext><mo>+</mo><mtext> </mtext><mi>β</mi><mo mathvariant=\"normal\">sin</mo></math></p>\n<p id=\"4835B59D\">sup: <math display=\"inline\"><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup></math></p>\n<p id=\"6C6C0863\">sub: <math display=\"inline\"><msub><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow></msub></math></p>\n<p id=\"237FFCFB\">subsup: <math display=\"inline\"><msubsup><mrow><mi>x</mi></mrow><mrow><mi>i</mi></mrow><mrow><mn>2</mn></mrow></msubsup></math></p>\n<p id=\"58ED22F7\">prescripts: <math display=\"inline\"><mmultiscripts><mrow><mi>X</mi></mrow><mrow></mrow><mrow></mrow><mprescripts></mprescripts><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mmultiscripts></math></p>\n<p id=\"65B5C986\">fraction: <math display=\"inline\"><mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math></p>\n<p id=\"35502A25\">nobar: <math display=\"inline\"><mfrac linethickness=\"0\"><mrow><mi>n</mi></mrow><mrow><mi>k</mi></mrow></mfrac></math></p>\n<p id=\"284EFEE5\">skew: <math display=\"inline\"><mfrac bevelled=\"true\"><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></math></p>\n<p id=\"024A5EFD\">sqrt: <math display=\"inline\"><msqrt><mrow><mi>x</mi></mrow></msqrt></math></p>\n<p id=\"65CA14EF\">root: <math display=\"inline\"><mroot><mrow><mi>x</mi></mrow><mrow><mn>3</mn></mrow></mroot></math></p>\n<p id=\"2D543CA1\">nary: <math display=\"inline\"><mrow><mover><mo>∑</mo><mrow><mi>N</mi></mrow></mover><mrow><mi>x</mi></mrow></mrow></math></p>\n<p id=\"1B187524\">limlow: <math display=\"inline\"><munder accentunder=\"false\"><mrow><mo mathvariant=\"normal\">lim</mo></mrow><mrow><mn>0</mn></mrow></munder></math></p>\n<p id=\"78F991DC\">limupp: <math display=\"inline\"><mover accent=\"false\"><mrow><mo mathvariant=\"normal\">max</mo></mrow><mrow><mi>N</mi></mrow></mover></math></p>\n<p id=\"3DBA0A7D\">function: <math display=\"inline\"><mrow><mrow><mo mathvariant=\"normal\">sin</mo></mrow><mo>⁡</mo><mrow><mi>x</mi></mrow></mrow></math></p>\n<p id=\"246470C3\">accent: <math display=\"inline\"><mover accent=\"true\"><mrow><mi>v</mi></mrow><mo stretchy=\"true\">→</mo></mover></math></p>\n<p id=\"5BF24182\">bar: <math display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">¯</mo></mover></math></p>\n<p id=\"746C05B4\">underbar: <math display=\"inline\"><munder accentunder=\"true\"><mrow><mi>y</mi></mrow><mo stretchy=\"true\">¯</mo></munder></math></p>\n<p id=\"6B7986B8\">group-default: <math display=\"inline\"><mover accent=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏞</mo></mover></math></p>\n<p id=\"7853450D\">underbrace: <math display=\"inline\"><munder accentunder=\"true\"><mrow><mi>x</mi></mrow><mo stretchy=\"true\">⏟</mo></munder></math></p>\n<p id=\"3F5148AB\">delimiters: <math display=\"inline\"><mrow><mo stretchy=\"true\" form=\"prefix\">[</mo><mrow><mi>a</mi></mrow><mo>;</mo><mrow><mi>b</mi></mrow><mo stretchy=\"true\" form=\"postfix\">]</mo></mrow></math></p>\n<p id=\"6B642974\">matrix: <math display=\"inline\"><mtable><mtr><mtd><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mi>d</mi></mtd></mtr></mtable></math></p>\n<p id=\"36E8ADAF\">equation-array: <math display=\"inline\"><mtable><mtr><mtd><mi>a</mi><mo>=</mo><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi><mo>=</mo><mi>d</mi></mtd></mtr></mtable></math></p>\n<p id=\"57CDF34A\">box: <math display=\"inline\"><mi>x</mi></math></p>\n<p id=\"0E232A17\">borderbox: <math display=\"inline\"><menclose notation=\"box\"><mrow><mi>y</mi></mrow></menclose></math></p>\n<p id=\"12F2B191\">phantom: <math display=\"inline\"><mphantom><mrow><mi>z</mi></mrow></mphantom></math></p>\n<p id=\"0A504981\">deleted-run: <math display=\"inline\"><mtext>Old math</mtext></math></p>\n<p id=\"307A9CF5\">unknown: <math display=\"inline\"><mtext data-docx-unsupported=\"unknown\">Retained unknown</mtext></math></p>\n<p id=\"5B954590\"><math display=\"block\"><mi>d</mi><mi>i</mi><mi>s</mi><mi>p</mi><mi>l</mi><mi>a</mi><mi>y</mi></math></p>\n<p id=\"0BBD43EC\">Section one end</p>\n</section>\n<section data-docx-section=\"2\">\n<header>\n<p>header default</p>\n</header>\n<header data-docx-kind=\"first\">\n<p>header first</p>\n</header>\n<header data-docx-kind=\"even\">\n<p>header even</p>\n</header>\n<footer>\n<p>footer default</p>\n</footer>\n<footer data-docx-kind=\"first\">\n<p>footer first</p>\n</footer>\n<footer data-docx-kind=\"even\">\n<p>footer even</p>\n</footer>\n<h2 id=\"19E0C67D\" data-docx-style=\"Heading2\">Section two heading</h2>\n</section>\n<aside data-docx-notes=\"footnote\"><div data-docx-note-body=\"footnote\" data-docx-note-id=\"7\"><p><b>Footnote body</b></p>\n<table><tbody>\n<tr>\n<td>\n<p>Footnote table</p>\n</td>\n</tr>\n</tbody></table></div><div data-docx-note-body=\"footnote\" data-docx-note-id=\"10\"><p>Deleted footnote body</p></div></aside>\n<aside data-docx-notes=\"endnote\"><div data-docx-note-body=\"endnote\" data-docx-note-id=\"9\"><p><i>Endnote body</i></p></div><div data-docx-note-body=\"endnote\" data-docx-note-id=\"11\"><p>Inserted endnote body</p></div></aside>",
+    "projection_version": 4,
+    "sections": [
+      {
+        "boundary_after": "0BBD43EC",
+        "final": false,
+        "first_page": true,
+        "handle": "section:0BBD43EC",
+        "index": 1,
+        "paragraph_end": 46,
+        "paragraph_start": 0,
+        "stories": [
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/header-default.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "first",
+            "part": "word/header-first.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "even",
+            "part": "word/header-even.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/footer-default.xml",
+            "scope": "ftr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "first",
+            "part": "word/footer-first.xml",
+            "scope": "ftr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "even",
+            "part": "word/footer-even.xml",
+            "scope": "ftr"
+          }
+        ]
+      },
+      {
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "index": 2,
+        "paragraph_end": 47,
+        "paragraph_start": 46,
+        "stories": [
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/header-default.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "first",
+            "part": "word/header-first.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "even",
+            "part": "word/header-even.xml",
+            "scope": "hdr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/footer-default.xml",
+            "scope": "ftr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "first",
+            "part": "word/footer-first.xml",
+            "scope": "ftr"
+          },
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "even",
+            "part": "word/footer-even.xml",
+            "scope": "ftr"
+          }
+        ]
+      }
+    ],
+    "selection_space": {
+      "offset_unit": "unicode_scalar",
+      "view": "final"
+    },
+    "selections": {
+      "paragraphs": [
+        {
+          "at": "22222222",
+          "selectable_text": "Author resultComplex resultCommented changed-format neutral-format"
+        },
+        {
+          "at": "44444444",
+          "selectable_text": "Common inserted"
+        },
+        {
+          "at": "55555555",
+          "selectable_text": ""
+        },
+        {
+          "at": "66666666",
+          "selectable_text": "Unicode 😀 nonbreaking space literal\ttabFallback content"
+        },
+        {
+          "at": "77777777",
+          "selectable_text": "Joined first"
+        },
+        {
+          "at": "1EDE45A3",
+          "selectable_text": "Joined second"
+        },
+        {
+          "at": "4B101413",
+          "selectable_text": "Inserted break first"
+        },
+        {
+          "at": "28B506BC",
+          "selectable_text": "runs: "
+        },
+        {
+          "at": "4835B59D",
+          "selectable_text": "sup: "
+        },
+        {
+          "at": "6C6C0863",
+          "selectable_text": "sub: "
+        },
+        {
+          "at": "237FFCFB",
+          "selectable_text": "subsup: "
+        },
+        {
+          "at": "58ED22F7",
+          "selectable_text": "prescripts: "
+        },
+        {
+          "at": "65B5C986",
+          "selectable_text": "fraction: "
+        },
+        {
+          "at": "35502A25",
+          "selectable_text": "nobar: "
+        },
+        {
+          "at": "284EFEE5",
+          "selectable_text": "skew: "
+        },
+        {
+          "at": "024A5EFD",
+          "selectable_text": "sqrt: "
+        },
+        {
+          "at": "65CA14EF",
+          "selectable_text": "root: "
+        },
+        {
+          "at": "2D543CA1",
+          "selectable_text": "nary: "
+        },
+        {
+          "at": "1B187524",
+          "selectable_text": "limlow: "
+        },
+        {
+          "at": "78F991DC",
+          "selectable_text": "limupp: "
+        },
+        {
+          "at": "3DBA0A7D",
+          "selectable_text": "function: "
+        },
+        {
+          "at": "246470C3",
+          "selectable_text": "accent: "
+        },
+        {
+          "at": "5BF24182",
+          "selectable_text": "bar: "
+        },
+        {
+          "at": "746C05B4",
+          "selectable_text": "underbar: "
+        },
+        {
+          "at": "6B7986B8",
+          "selectable_text": "group-default: "
+        },
+        {
+          "at": "7853450D",
+          "selectable_text": "underbrace: "
+        },
+        {
+          "at": "3F5148AB",
+          "selectable_text": "delimiters: "
+        },
+        {
+          "at": "6B642974",
+          "selectable_text": "matrix: "
+        },
+        {
+          "at": "36E8ADAF",
+          "selectable_text": "equation-array: "
+        },
+        {
+          "at": "57CDF34A",
+          "selectable_text": "box: "
+        },
+        {
+          "at": "0E232A17",
+          "selectable_text": "borderbox: "
+        },
+        {
+          "at": "12F2B191",
+          "selectable_text": "phantom: "
+        },
+        {
+          "at": "0A504981",
+          "selectable_text": "deleted-run: "
+        },
+        {
+          "at": "307A9CF5",
+          "selectable_text": "unknown: "
+        },
+        {
+          "at": "5B954590",
+          "selectable_text": ""
+        }
+      ]
+    },
+    "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7",
+    "styles": {
+      "CustomStyle": "",
+      "Heading2": ""
+    },
+    "tables": [
+      {
+        "at": "table:1",
+        "grid_twips": [
+          null,
+          null,
+          null
+        ],
+        "rows": [
+          {
+            "cells": [
+              {
+                "grid_span": 2,
+                "properties": {
+                  "gridSpan": {
+                    "val": "2"
+                  },
+                  "vMerge": {
+                    "val": "restart"
+                  }
+                },
+                "vertical_merge": "restart"
+              },
+              {}
+            ]
+          },
+          {
+            "cells": [
+              {
+                "grid_span": 2,
+                "logical": false,
+                "properties": {
+                  "gridSpan": {
+                    "val": "2"
+                  },
+                  "vMerge": {}
+                },
+                "vertical_merge": "continue"
+              },
+              {}
+            ]
+          }
+        ]
+      },
+      {
+        "at": "table:2",
+        "rows": [
+          {
+            "cells": [
+              {}
+            ]
+          }
+        ]
+      }
+    ],
+    "view": "markup"
+  },
+  "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+}

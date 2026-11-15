@@ -1,0 +1,71 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "kind": "styles",
+    "source": "sha256:b72f1a1ecd882fc6db690bdeabac81d295e20c0d19f2b199c53556e164393a26",
+    "styles": [
+      {
+        "default": true,
+        "name": "Normal",
+        "styleId": "Normal",
+        "type": "paragraph"
+      },
+      {
+        "default": true,
+        "name": "Default Paragraph Font",
+        "styleId": "DefaultParagraphFont",
+        "type": "character"
+      },
+      {
+        "default": true,
+        "name": "Normal Table",
+        "styleId": "TableNormal",
+        "type": "table"
+      },
+      {
+        "default": true,
+        "name": "No List",
+        "styleId": "NoList",
+        "type": "numbering"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "header",
+        "styleId": "Header",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Header Char",
+        "styleId": "HeaderChar",
+        "type": "character"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "footer",
+        "styleId": "Footer",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "DefaultParagraphFont",
+        "name": "Footer Char",
+        "styleId": "FooterChar",
+        "type": "character"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "List Paragraph",
+        "styleId": "ListParagraph",
+        "type": "paragraph"
+      },
+      {
+        "basedOn": "Normal",
+        "name": "List",
+        "styleId": "List",
+        "type": "paragraph"
+      }
+    ]
+  },
+  "source": "sha256:b72f1a1ecd882fc6db690bdeabac81d295e20c0d19f2b199c53556e164393a26"
+}

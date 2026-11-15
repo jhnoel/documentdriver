@@ -1,0 +1,37 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "comments": [
+      {
+        "anchor": {
+          "ranges": [
+            {
+              "locator": "p2:27-36"
+            }
+          ]
+        },
+        "createdAt": "",
+        "durableId": "",
+        "id": "0",
+        "ooxmlId": "0",
+        "replies": [],
+        "root": {
+          "author": "Comment Author",
+          "date": "",
+          "durableId": "",
+          "id": "0",
+          "ooxmlCommentId": "0",
+          "paraId": "EE000001",
+          "parentId": null,
+          "text": "Comment body",
+          "threadId": "0"
+        },
+        "status": "open"
+      }
+    ],
+    "kind": "comments",
+    "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+  },
+  "source": "sha256:c4c25d2dcc6c68c00c51b70db72c011cae5d58a0f84e891ca728b51858f754e7"
+}

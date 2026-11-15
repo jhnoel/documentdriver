@@ -1,0 +1,5 @@
+go test fuzz v1
+string("A1 B1:C3")
+byte('\x03')
+uint16(21)
+uint8(2)

@@ -1,0 +1,183 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "assets": [
+      {
+        "mime": "image/png",
+        "parts": [
+          "word/media/a.png",
+          "word/media/b.PNG"
+        ],
+        "size": 4,
+        "url": "assets/0f4636c78f65d3639ece5a064b5ae753e3408614a14fb18ab4d7540d2c248543.png"
+      }
+    ],
+    "blocks": [
+      {
+        "html_end": 400,
+        "html_start": 83,
+        "paragraphs": [
+          "17D327A5"
+        ]
+      },
+      {
+        "html_end": 634,
+        "html_start": 401,
+        "paragraphs": [
+          "5661E360"
+        ]
+      }
+    ],
+    "content_type": "text/html",
+    "css": ".docxdriver { font-family: Calibri, Arial, sans-serif; line-height: 1.2; color: #111; }\n.docxdriver p, .docxdriver h1, .docxdriver h2, .docxdriver h3, .docxdriver h4, .docxdriver h5, .docxdriver h6 { white-space: pre-wrap; tab-size: 4; min-height: 1em; }\n.docxdriver p { margin: 0 0 .6em; }\n.docxdriver table { border-collapse: collapse; max-width: 100%; }\n.docxdriver td, .docxdriver th { border: 1px solid #aaa; padding: .3em .5em; vertical-align: top; }\n.docxdriver img { max-width: 100%; }\n.docxdriver ins { color: #067a35; text-decoration: underline; }\n.docxdriver del { color: #b32323; text-decoration: line-through; }\n.docxdriver [data-docx-format-change] { background: #fff1b8; }\n.docxdriver [data-docx-field] { background: #f2f4f7; }\n.docxdriver ol, .docxdriver ul { padding-left: 2em; }\n.docxdriver li > p { margin-bottom: .25em; }\n.docxdriver [data-docx-marker]::marker { content: attr(data-docx-marker) \" \"; }\n.docxdriver aside { border-top: 1px solid #ddd; margin-top: 1em; font-size: .9em; }\n.docxdriver [data-docx-break=\"page\"] { break-after: page; }\n.docxdriver [data-docx-break=\"column\"] { break-after: column; }\n.docxdriver header, .docxdriver footer { color: #555; }\n",
+    "equations": [
+      {
+        "at": "00000001",
+        "display": false,
+        "editable": true,
+        "equation": 1,
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>x</mi></math>"
+      }
+    ],
+    "html": "<section data-docx-section=\"1\">\n<header>\n<p data-docx-style=\"L\">head</p>\n</header>\n<ol data-docx-list=\"1\" data-docx-level=\"0\" start=\"3\" type=\"I\"><li data-docx-marker=\"III.\"><p id=\"17D327A5\" data-docx-ord=\"2\" data-docx-style=\"L\" data-docx-number=\"III.\">ΑΣ one<span data-docx-tab=\"true\">\t</span>in<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>x</mi></math>barefb</p></li></ol>\n<table data-docx-table=\"1\" data-docx-handle=\"table:1\"><tbody>\n<tr data-docx-handle=\"table:1/row:1\">\n<td data-docx-handle=\"table:1/row:1/cell:1\">\n<p id=\"5661E360\" data-docx-ord=\"3\" data-docx-style=\"L\"></p>\n</td>\n</tr>\n</tbody></table>\n</section>",
+    "idRepairsNeeded": 2,
+    "kind": "document",
+    "paragraphs": [
+      {
+        "equations": [
+          {
+            "display": false,
+            "editable": true,
+            "equation": 1,
+            "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mi>x</mi></math>"
+          }
+        ],
+        "id": "00000001",
+        "index": 1,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "lowerLetter",
+          "level": 1,
+          "num_id": "1",
+          "start": 2,
+          "value": 2
+        },
+        "number": "III.b)",
+        "selectable_text": "ΑΣ onein",
+        "text": "ΑΣ onein"
+      },
+      {
+        "id": "17D327A5",
+        "index": 2,
+        "list": {
+          "continuation_paragraph": false,
+          "continued": false,
+          "format": "upperRoman",
+          "level": 0,
+          "num_id": "1",
+          "start": 3,
+          "value": 3
+        },
+        "number": "III.",
+        "selectable_text": "barefb",
+        "style": "L",
+        "text": "barefb"
+      },
+      {
+        "id": "5661E360",
+        "index": 3,
+        "selectable_text": "",
+        "text": ""
+      }
+    ],
+    "projection_version": 4,
+    "sections": [
+      {
+        "boundary_after": null,
+        "break_type": null,
+        "columns": null,
+        "final": true,
+        "first_page": false,
+        "handle": "section:final",
+        "index": 1,
+        "margins": null,
+        "page_numbering": null,
+        "page_size": null,
+        "paragraph_end": 3,
+        "paragraph_start": 0,
+        "stories": [
+          {
+            "explicit": true,
+            "inherited": false,
+            "kind": "default",
+            "part": "word/header1.xml",
+            "scope": "hdr"
+          }
+        ]
+      }
+    ],
+    "source": "sha256:e5fa107faa8a20e14a66bb98100248ce6aa6f161a3263a2f20842f5f521c183b",
+    "source_map": {
+      "html_offset_unit": "utf8_byte",
+      "regions": [
+        {
+          "editable": false,
+          "html_end": 82,
+          "html_start": 32,
+          "paragraphs": [],
+          "part": "word/header1.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 400,
+          "html_start": 83,
+          "paragraphs": [
+            "17D327A5"
+          ],
+          "part": "word/document.xml"
+        },
+        {
+          "editable": true,
+          "html_end": 634,
+          "html_start": 401,
+          "paragraphs": [
+            "5661E360"
+          ],
+          "part": "word/document.xml"
+        }
+      ],
+      "text_offset_unit": "unicode_scalar"
+    },
+    "tables": [
+      {
+        "at": "table:1",
+        "grid_twips": [],
+        "properties": {},
+        "rows": [
+          {
+            "at": "table:1/row:1",
+            "cells": [
+              {
+                "at": "table:1/row:1/cell:1",
+                "grid_span": 1,
+                "logical": true,
+                "physical_index": 1,
+                "properties": {},
+                "vertical_merge": null
+              }
+            ],
+            "properties": {
+              "ins": {
+                "id": "4"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "view": "final"
+  },
+  "source": "sha256:e5fa107faa8a20e14a66bb98100248ce6aa6f161a3263a2f20842f5f521c183b"
+}

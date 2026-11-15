@@ -1,0 +1,28 @@
+# Engine-level intended differences (P4a, P4c). plan id	mode	field	reason
+# P4c (2026-11-13): docxdriver lists a plan report's repaired_ids in HashSet order, which changes from run to run (oracle bug; the Go side sorts them). Reports are not compared, so no case is listed.
+revision_settle/positive/authored:rich-bare-text/sweep-all-accept	*	*	docxdriver panics on a w:t outside a w:r (segments.rs:80 enclosing_run expect) settling rich-bare-text.docx; Go settles it (P4c)
+# P4a (2026-11-13), notes without a recorded case:
+# - inserted paragraph ids come from source, op index and slot, never from plan bytes; compare relabels ids the
+#   source lacks by document order (relabelNewIDs), so no entries are needed;
+# - comment parts are found through the document's relationships, not fixed word/comments*.xml names (read item 4);
+# - removing comments never creates empty, unregistered parts (the parts check is one-way: fewer changed parts pass);
+# - EnsureRootNamespace refuses a prefix already bound to another namespace instead of writing into it.
+edit_table/*/*/insert-*	*	proj:*	P4a: a copied paragraph (inserted row or column) gets a new id; docxdriver copies the original's id
+edit_table/*/*/merge-*	*	proj:*	P4a: copied and merged cell paragraphs get new ids, never the original's
+comment_add/dirty/write:badroot/*	*	*	P4a: content-types root is not Types: an op that must register a part refuses up front (unreadable_target); docxdriver writes
+set_header/dirty/write:badroot/*	*	*	P4a: as above, a new header part must be registered
+set_footer/dirty/write:badroot/*	*	*	P4a: as above, a new footer part must be registered
+set_list/dirty/write:badroot/*	*	*	P4a: as above, a new numbering part must be registered
+# P4c (2026-11-13), settle:
+# - repaired_ids order: HashSet order in docxdriver, a set for the comparator; reports are not compared at all.
+# - n830205.docx: docxdriver refuses settle-all (accept and reject) with integrity_regression "w:pPr is out of order
+#   in w:p"; Go settles it without introducing a finding.
+# - Confirmed (2026-11-13): rejecting a paragraph mark's rPrChange restores the mark's own w:del from the
+#   snapshot, so reject-all leaves the mark's w:del pending in docxdriver (n830205.docx); Go keeps the mark with no join,
+#   its revisions listing is empty and the restored sz 24 is there. Covered by the n830205 entry below.
+# - Direct mode in docxdriver picks the "new" revisions to accept by author and node age, so it skips row marks and
+#   accepts split copies of existing revisions; Go keeps a ledger of the revisions the plan wrote. Cases are listed
+#   by the P5 waves as they meet them (write-ops.tsv).
+revision_settle/*/corpus-lo:ooxmlexport.n830205/sweep-all-*	*	*	P4c: docxdriver refuses settling n830205.docx (its own w:pPr order finding); Go settles it
+# Stored paraIds (P4c 901c503): write cases on sources with duplicate or out-of-range w14:paraIds may project other ids;
+# the P5 waves list them in write-ops.tsv as they meet them.

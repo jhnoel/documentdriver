@@ -1,0 +1,6 @@
+{"ops": [
+  {"op": "object.set", "at": "slide1/s281", "line": {"w": 2, "color": {"hex": "#FF0000"}}},
+  {"op": "object.set", "at": "slide1/s282", "line": {"w": 2, "color": {"hex": "#FF0000"}}},
+  {"op": "object.set", "at": "slide1/s283", "line": {"w": 2, "color": {"hex": "#FF0000"}}},
+  {"op": "object.set", "at": "slide1/s284", "line": {"w": 2, "color": {"hex": "#FF0000"}}}
+]}

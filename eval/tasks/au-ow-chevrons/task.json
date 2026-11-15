@@ -1,0 +1,62 @@
+{
+  "id": "au-ow-chevrons",
+  "type": "author",
+  "category": "process",
+  "deck": {
+    "path": "web/openwhisk-architecture.pptx",
+    "sha256": "ec2fcddd611d85061cf3028ca6f87c047e4fd05b77cdceb778ea87636f1e96b5",
+    "licence": "Apache-2.0"
+  },
+  "slide": "/ppt/slides/slide1.xml",
+  "instruction": "Below the diagram, draw a five-step chevron process reading Event, Trigger, Rule, Action, Result from left to right: equal-sized chevrons on one line, evenly spaced.",
+  "max_new": -1,
+  "rubric": "rubric.md",
+  "checks": [
+    {
+      "type": "sequence",
+      "texts": [
+        "Event",
+        "Trigger",
+        "Rule",
+        "Action",
+        "Result"
+      ],
+      "geoms": [
+        "chevron",
+        "homePlate"
+      ],
+      "axis": "x",
+      "alias": "steps"
+    },
+    {
+      "type": "align",
+      "targets": [
+        "$steps"
+      ],
+      "edge": "top"
+    },
+    {
+      "type": "same_size",
+      "targets": [
+        "$steps"
+      ]
+    },
+    {
+      "type": "distribute",
+      "targets": [
+        "$steps"
+      ],
+      "edge": "left",
+      "tol": 1
+    },
+    {
+      "type": "region",
+      "region": [
+        0,
+        380,
+        960,
+        160
+      ]
+    }
+  ]
+}

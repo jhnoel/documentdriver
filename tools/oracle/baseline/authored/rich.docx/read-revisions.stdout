@@ -1,0 +1,66 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "kind": "revisions",
+    "revisions": [
+      {
+        "author": "a",
+        "date": "",
+        "id": "1",
+        "kind": "ins",
+        "locator": "p1:6-8",
+        "paragraphIndex": 1,
+        "text": "in"
+      },
+      {
+        "author": "",
+        "date": "",
+        "id": "2",
+        "kind": "del",
+        "locator": "p1:8-11",
+        "paragraphIndex": 1,
+        "text": "out"
+      },
+      {
+        "author": "",
+        "date": "",
+        "id": "5",
+        "kind": "del",
+        "locator": "p1:11-11",
+        "paragraphIndex": 1,
+        "text": ""
+      },
+      {
+        "author": "",
+        "date": "",
+        "id": "3",
+        "kind": "pPrChange",
+        "locator": "p2:0-0",
+        "paragraphIndex": 2,
+        "text": ""
+      },
+      {
+        "author": "",
+        "date": "",
+        "id": "4",
+        "kind": "ins",
+        "locator": "row",
+        "paragraphIndex": 0,
+        "text": ""
+      },
+      {
+        "author": "",
+        "date": "",
+        "id": "7",
+        "kind": "ins",
+        "locator": "p1:0-4",
+        "paragraphIndex": 1,
+        "part": "word/header1.xml",
+        "text": "head"
+      }
+    ],
+    "source": "sha256:e5fa107faa8a20e14a66bb98100248ce6aa6f161a3263a2f20842f5f521c183b"
+  },
+  "source": "sha256:e5fa107faa8a20e14a66bb98100248ce6aa6f161a3263a2f20842f5f521c183b"
+}

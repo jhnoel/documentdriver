@@ -1,0 +1,19 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "kind": "styles",
+    "source": "sha256:b1b68e8bd82db85068474f9dd7ca07bbfbc17dc603323e1469d8b4aca8afddec",
+    "styles": [
+      {
+        "basedOn": "N",
+        "default": true,
+        "name": "List",
+        "next": "L",
+        "styleId": "L",
+        "type": "paragraph"
+      }
+    ]
+  },
+  "source": "sha256:b1b68e8bd82db85068474f9dd7ca07bbfbc17dc603323e1469d8b4aca8afddec"
+}

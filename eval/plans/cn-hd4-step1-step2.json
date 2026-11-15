@@ -1,0 +1,4 @@
+{"ops": [
+  {"op": "object.delete", "at": "slide4/s6"},
+  {"op": "object.add", "at": "slide4", "as": "arrow", "kind": "connector", "name": "Step 1 to 2", "geom": "straightConnector1", "from": [95.04, 159.12], "to": [183.6, 159.12], "from_glue": "s4:3", "to_glue": "s7:1", "line": {"w": 1.2, "color": {"hex": "#5E6A72"}, "dash": "solid", "tail": "triangle"}}
+]}

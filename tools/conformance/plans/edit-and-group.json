@@ -1,0 +1,7 @@
+{"units": "pt", "ops": [
+  {"op": "object.add", "at": "slide1", "kind": "shape", "name": "Conformance A", "geom": "rect", "box": [40, 250, 60, 40], "as": "a"},
+  {"op": "object.add", "at": "slide1", "kind": "shape", "name": "Conformance B", "geom": "rect", "box": [120, 250, 60, 40], "as": "b"},
+  {"op": "object.duplicate", "at": "$a", "as": "c", "dx": 0, "dy": 60},
+  {"op": "object.move", "at": "$b", "dx": 10, "dy": 10},
+  {"op": "group.create", "at": ["$a", "$b"], "name": "Conformance group", "as": "g"}
+]}

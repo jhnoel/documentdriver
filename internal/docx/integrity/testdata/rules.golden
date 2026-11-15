@@ -1,0 +1,145 @@
+comments	word/comments.xml	integrity: duplicate w:comment id	1
+comments	word/comments.xml	integrity: w:comment has no commentReference	1
+comments	word/comments.xml	integrity: w:comment has no paragraph	1
+comments	word/comments.xml	schema: w:comment lacks required attribute w:author	3
+comments	word/commentsExtended.xml	integrity: commentEx paraId is not the last paragraph of a comment	1
+comments	word/commentsExtended.xml	integrity: commentEx paraIdParent names no commentEx	1
+comments	word/commentsExtended.xml	integrity: duplicate commentEx paraId	1
+comments	word/commentsExtensible.xml	integrity: commentExtensible durableId is not in commentsIds	1
+comments	word/commentsIds.xml	integrity: commentId paraId is not the last paragraph of a comment	1
+comments	word/commentsIds.xml	integrity: duplicate durableId	1
+comments	word/commentsIds.xml	integrity: durableId is not eight hex digits in (0, 7FFFFFFF)	1
+comments	word/document.xml	integrity: commentReference names no w:comment	1
+content-types	[Content_Types].xml	integrity: content type Override names a missing part	1
+content-types	[Content_Types].xml	integrity: duplicate content type Default extension	1
+content-types	[Content_Types].xml	integrity: duplicate content type Override part name	1
+content-types	word/media/blob	integrity: part has no content type	1
+deletions	word/document.xml	integrity: delInstrText outside a field code	1
+deletions	word/document.xml	integrity: instrText outside a field code	1
+deletions	word/document.xml	integrity: run text has leading or trailing space without xml:space="preserve"	1
+deletions	word/document.xml	integrity: table has no rows	1
+deletions	word/document.xml	integrity: w:delInstrText outside a deletion	1
+deletions	word/document.xml	integrity: w:instrText inside a deletion	1
+deletions	word/document.xml	integrity: w:t inside a deletion	1
+deletions	word/document.xml	integrity: w:txbxContent has no paragraph	1
+deletions	word/document.xml	schema: w:txbxContent is not allowed in w:pict	2
+fields	word/document.xml	integrity: field has more than one fldChar separate	1
+fields	word/document.xml	integrity: fldChar begin without an end	1
+fields	word/document.xml	integrity: fldChar end without a begin	1
+fields	word/document.xml	integrity: fldChar separate outside a field	1
+fields	word/document.xml	integrity: instrText outside a field code	1
+fields	word/document.xml	schema: w:fldChar/@w:fldCharType is not a valid ST_FldCharType	1
+ids	word/document.xml	integrity: duplicate revision w:id	1
+ids	word/document.xml	integrity: duplicate w14:paraId	1
+ids	word/document.xml	integrity: duplicate wp:docPr id	1
+ids	word/document.xml	integrity: w14:textId is not eight hex digits below 80000000	1
+markup-compatibility	word/document.xml	integrity: mc:AlternateContent has no mc:Choice	1
+markup-compatibility	word/document.xml	integrity: mc:Choice Requires names undeclared prefix nope	1
+markup-compatibility	word/document.xml	integrity: mc:Ignorable names undeclared prefix z	1
+markup-compatibility	word/document.xml	integrity: mc:MustUnderstand names namespace Word does not understand urn:example:x	1
+markup-compatibility	word/document.xml	integrity: mc:ProcessContent names undeclared prefix q	1
+markup-compatibility	word/document.xml	integrity: non-ignorable unknown namespace urn:example:x	2
+no-office-document	_rels/.rels	integrity: no officeDocument relationship	1
+no-office-document	word/document.xml	integrity: content type application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml is not what Word writes for styles parts (application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml)	1
+notes	word/document.xml	integrity: endnoteReference names no w:endnote	1
+notes	word/document.xml	integrity: footnoteReference names no w:footnote	1
+notes	word/footnotes.xml	integrity: content type application/xml is not what Word writes for footnotes parts (application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml)	1
+notes	word/footnotes.xml	integrity: w:footnote has no paragraph	1
+notes	word/header1.xml	integrity: content type application/xml is not what Word writes for header parts (application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml)	1
+notes	word/header1.xml	integrity: header has no paragraph	1
+notes	word/header1.xml	integrity: table has no rows	1
+notes	word/header1.xml	schema: w:tbl lacks required w:tblGrid	1
+notes	word/header1.xml	schema: w:tbl lacks required w:tblPr	1
+notes	word/settings.xml	integrity: content type application/xml is not what Word writes for settings parts (application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml)	1
+notes	word/settings.xml	integrity: settings endnotePr names no w:endnote	1
+notes	word/settings.xml	integrity: settings footnotePr names no w:footnote	1
+numbering	word/document.xml	integrity: numPr ilvl is outside 0-8	3
+numbering	word/document.xml	integrity: numPr numId names no w:num	1
+numbering	word/document.xml	schema: w:ilvl lacks required attribute w:val	1
+numbering	word/numbering.xml	integrity: duplicate abstractNumId	1
+numbering	word/numbering.xml	integrity: duplicate lvl ilvl in an abstractNum	1
+numbering	word/numbering.xml	integrity: duplicate w:num numId	1
+numbering	word/numbering.xml	integrity: w:num names no abstractNum	2
+numbering	word/numbering.xml	schema: w:num lacks required w:abstractNumId	1
+orphan-rels	bar.rels	integrity: relationships part name has no source part	1
+orphan-rels	baz/x.rels	integrity: relationships part name has no source part	1
+orphan-rels	foo/_rels/x.xml.rels	integrity: relationships part has no source part	1
+para-ids-across-parts	word/header1.xml	integrity: content type application/xml is not what Word writes for header parts (application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml)	2
+para-ids-across-parts	word/header1.xml	integrity: w14:paraId also used in another part	1
+ranges	word/document.xml	integrity: bookmarkEnd without a bookmarkStart	1
+ranges	word/document.xml	integrity: comment range names no w:comment	3
+ranges	word/document.xml	integrity: commentRangeEnd without a commentRangeStart	1
+ranges	word/document.xml	integrity: commentRangeStart without a commentRangeEnd	1
+ranges	word/document.xml	integrity: duplicate bookmarkStart id	1
+ranges	word/document.xml	integrity: duplicate commentRangeStart id	1
+ranges	word/document.xml	integrity: move range name has no counterpart	1
+ranges	word/document.xml	integrity: moveToRangeEnd without a moveToRangeStart	1
+ranges	word/document.xml	integrity: moveToRangeStart without a moveToRangeEnd	1
+ranges	word/document.xml	schema: w:moveFromRangeStart lacks required attribute w:author	1
+ranges	word/document.xml	schema: w:moveFromRangeStart lacks required attribute w:date	1
+ranges	word/document.xml	schema: w:moveToRangeStart lacks required attribute w:author	1
+ranges	word/document.xml	schema: w:moveToRangeStart lacks required attribute w:date	1
+references	word/chunk.htm	integrity: part has no content type	1
+references	word/document.xml	integrity: blip r:id names a hyperlink relationship, not image	1
+references	word/document.xml	integrity: headerReference r:id names a footer relationship, not header	1
+references	word/document.xml	integrity: hyperlink relationship is not TargetMode="External"	1
+references	word/document.xml	integrity: hyperlink/@r:id names no relationship of this part	1
+references	word/footer1.xml	integrity: content type application/xml is not what Word writes for footer parts (application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml)	1
+relationships	word/_rels/document.xml.rels	integrity: duplicate relationship Id	1
+relationships	word/_rels/document.xml.rels	integrity: more than one styles relationship	1
+relationships	word/_rels/document.xml.rels	integrity: relationship Id is not a valid xsd:ID	1
+relationships	word/_rels/document.xml.rels	integrity: relationship TargetMode is neither External nor Internal	1
+relationships	word/_rels/document.xml.rels	integrity: relationship has no Target	1
+relationships	word/_rels/document.xml.rels	integrity: relationship has no Type	1
+relationships	word/_rels/document.xml.rels	integrity: relationship numbering must target a package part	1
+relationships	word/_rels/document.xml.rels	integrity: relationship settings targets a missing part	1
+relationships	word/_rels/document.xml.rels	integrity: relationship theme targets a missing part	1
+relationships	word/_rels/document.xml.rels	integrity: relationship webSettings targets a missing part	1
+relationships	word/media/image 1.png	integrity: part has no content type	1
+relationships	word/styles.xml	integrity: content type application/xml is not what Word writes for styles parts (application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml)	2
+relationships	word/styles.xml	integrity: image relationship targets content type application/xml	1
+schema	word/document.xml	schema: text is not allowed directly in w:p	1
+schema	word/document.xml	schema: w:b/@w:val is not a valid ST_OnOff	1
+schema	word/document.xml	schema: w:color/@w:val is not a valid ST_HexColor	1
+schema	word/document.xml	schema: w:ind is out of order in w:pPr	1
+schema	word/document.xml	schema: w:p has unexpected attribute w:bogus	1
+schema	word/document.xml	schema: w:pPr is out of order in w:p	2
+schema	word/document.xml	schema: w:pPr occurs too often in w:p	1
+schema	word/document.xml	schema: w:pgMar lacks required attribute w:bottom	1
+schema	word/document.xml	schema: w:pgMar lacks required attribute w:footer	1
+schema	word/document.xml	schema: w:pgMar lacks required attribute w:gutter	1
+schema	word/document.xml	schema: w:pgMar lacks required attribute w:header	1
+schema	word/document.xml	schema: w:pgMar lacks required attribute w:left	1
+schema	word/document.xml	schema: w:pgMar lacks required attribute w:right	1
+schema	word/document.xml	schema: w:pgSz/@w:orient is not a valid ST_PageOrientation	1
+schema	word/document.xml	schema: w:spacing is out of order in w:pPr	1
+schema	word/document.xml	schema: w:spacing/@w:after is not a valid ST_TwipsMeasure	1
+schema	word/document.xml	schema: w:t/@xml:space is not a valid anonymous1	1
+sections	word/document.xml	integrity: duplicate footerReference type in a section	1
+sections	word/document.xml	integrity: duplicate headerReference type in a section	1
+sections	word/document.xml	integrity: footerReference/@r:id names no relationship of this part	2
+sections	word/document.xml	integrity: headerReference/@r:id names no relationship of this part	2
+sections	word/document.xml	schema: w:footerReference lacks required attribute w:type	1
+strict-office-document	word/orphan.bin	integrity: part has no content type	1
+styles	word/styles.xml	integrity: content type application/xml is not what Word writes for styles parts (application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml)	1
+styles	word/styles.xml	integrity: duplicate styleId	1
+styles	word/styles.xml	integrity: style basedOn names no style	1
+styles	word/styles.xml	integrity: style link names no style	1
+styles	word/styles.xml	schema: w:next lacks required attribute w:val	1
+tables	word/document.xml	integrity: row spans a different number of grid columns than tblGrid declares	2
+tables	word/document.xml	integrity: table cell does not end with a paragraph	1
+tables	word/document.xml	integrity: table cell has no paragraph	1
+tables	word/document.xml	integrity: table row has no cells	1
+tables	word/document.xml	integrity: vMerge continue cell has no merged cell above it	1
+tables	word/document.xml	schema: w:gridAfter/@w:val is not a valid ST_DecimalNumber	1
+tables	word/document.xml	schema: w:gridSpan is out of order in w:tcPr	1
+xml-parts	word/bad16.xml	xml: declares encoding utf-8 but is utf-16	1
+xml-parts	word/data.bin	xml: not well-formed: unclosed element	1
+xml-parts	word/dtd.xml	xml: contains a DTD	1
+xml-parts	word/junk.xml	xml: not well-formed: text outside the root element	1
+xml-parts	word/latin.xml	xml: declares encoding iso-8859-1, not UTF-8 or UTF-16	1
+xml-parts	word/prefix.xml	xml: undeclared namespace prefix p	1
+zip-names	word/./d.xml	package: invalid part name	1
+zip-names	word/a./b.xml	package: invalid part name	1
+zip-names	word/document.xml	integrity: duplicate part name (part names are case-insensitive)	1
+zip-names	word\c.xml	package: invalid part name	1

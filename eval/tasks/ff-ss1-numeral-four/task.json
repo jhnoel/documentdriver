@@ -1,0 +1,36 @@
+{
+  "id": "ff-ss1-numeral-four",
+  "type": "freeform",
+  "category": "icon-grid",
+  "deck": {
+    "path": "repos/libreoffice-core/sd/qa/unit/data/pptx/slide-sections.pptx",
+    "sha256": "2e2d1a6cfa6c282a2c81f92c74c704716357155741c9ed0abd9815aeac684369",
+    "licence": "MPL-2.0 (LibreOffice test data)"
+  },
+  "slide": "/ppt/slides/slide1.xml",
+  "instruction": "In the empty space at the bottom left of the slide, draw an outline numeral 4 as a single freeform shape, in the same style as the big 1, 2 and 3 (a filled custom shape tracing the outline, no text).",
+  "max_new": 1,
+  "rubric": "rubric.md",
+  "checks": [
+    {
+      "type": "new_shape",
+      "custom": true,
+      "alias": "f"
+    },
+    {
+      "type": "path",
+      "target": "$f",
+      "min_points": 8
+    },
+    {
+      "type": "region",
+      "region": [
+        30,
+        300,
+        316,
+        240
+      ]
+    }
+  ],
+  "notes": "Region widened 2026-11-13: the numerals are 204.63 pt tall, so the old 195 pt region could not hold one in the same style; the empty area runs from below numeral 1 (y 302.5) to the slide bottom (540) and left of numeral 2 (x 346.8)."
+}

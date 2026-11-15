@@ -1,0 +1,2 @@
+go test fuzz v1
+[]byte("<doc xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns00=\"0\"><m:oMathPara><m:oMath><m:eqArr><m:e></m:e><m:e></m:e></m:eqArr></m:oMath></m:oMathPara></doc>")

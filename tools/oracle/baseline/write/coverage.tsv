@@ -1,0 +1,268 @@
+# refusal site	runs tagged with it	first such run (plan id and mode); 0 and "-" when no recorded plan reaches the site
+bookmarks.rs:58	0	-
+bookmarks.rs:78	0	-
+bookmarks.rs:83	0	-
+bookmarks.rs:94	0	-
+bookmarks.rs:251	84	bookmark_rename/negative/write:badroot/no-such-bookmark track
+bookmarks.rs:269	34	bookmark_add/negative/write:badroot/the-same-name-twice track
+bookmarks.rs:283	0	-
+bookmarks.rs:305	4	bookmark_rename/negative/authored:rich/site-bookmarks-rs-305-bookmark-in-a-header track
+bookmarks.rs:394	0	-
+bookmarks.rs:409	2	bookmark_add/negative/write:mixed/site-bookmarks-rs-409-select-with-markup track
+bookmarks.rs:416	0	-
+bookmarks.rs:426	0	-
+bookmarks.rs:476	0	-
+bookmarks.rs:534	0	-
+comments.rs:64	26	comment_add/negative/write:malformed/site-comments-rs-407-malformed-commentsextended-xml track
+comments.rs:80	0	-
+comments.rs:112	0	-
+comments.rs:365	0	-
+comments.rs:407	0	-
+comments.rs:429	0	-
+comments.rs:441	0	-
+comments.rs:757	90	comment_reply/negative/write:badroot/no-such-comment track
+comments.rs:789	90	comment_reply/negative/write:badroot/no-such-comment track
+comments.rs:797	0	-
+comments.rs:841	90	comment_reply/negative/write:badroot/no-such-comment track
+equations.rs:80	48	replace_equation/negative/write:badroot/paragraph-without-an-equation track
+equations.rs:81	4	replace_equation/negative/write:mixed/site-equations-rs-81-several-equations-no-index track
+equations.rs:82	8	replace_equation/negative/write:mixed/equation-index-out-of-range track
+equations.rs:86	2	replace_equation/negative/write:mixed/site-equations-rs-86-equation-inside-a-revision track
+equations.rs:142	48	replace_equation/negative/write:badroot/paragraph-without-an-equation track
+equations.rs:143	4	replace_equation/negative/write:mixed/site-equations-rs-81-several-equations-no-index track
+equations.rs:144	8	replace_equation/negative/write:mixed/equation-index-out-of-range track
+equations.rs:148	2	delete_equation/negative/write:mixed/site-equations-rs-148-equation-inside-a-revision track
+headers.rs:51	0	-
+headers.rs:81	0	-
+headers.rs:119	0	-
+headers.rs:214	0	-
+headers.rs:223	2	set_header/positive/write:sections/even-header-while-even-odd-is-off track
+headers.rs:248	0	-
+headers.rs:251	0	-
+headers.rs:361	0	-
+headers.rs:364	6	set_header/positive/corpus-lo:ooxmlexport.tableCurrupt/default-header track
+headers.rs:378	0	-
+headers.rs:388	0	-
+headers.rs:389	0	-
+headers.rs:407	0	-
+headers.rs:547	0	-
+headers.rs:554	22	clear_header/negative/write:badroot/clear-a-first-header-that-is-not-there track
+headers.rs:564	15	clear_header/positive/write:sections/section-3-default-after-section-1 track
+headers.rs:569	0	-
+headers.rs:643	0	-
+layout.rs:19	0	-
+layout.rs:25	168	set_page_margins/negative/write:badroot/section-out-of-range track
+layout.rs:70	0	-
+layout.rs:76	0	-
+layout.rs:447	3	set_page_margins/negative/write:sections/site-layout-rs-447-pending-sectprchange-by-another-author track
+layout.rs:471	14	set_section_layout/positive/write:sections/portrait-letter track
+layout.rs:494	14	set_section_layout/positive/write:sections/portrait-letter track
+layout.rs:524	2	set_section_layout/negative/write:mixed/site-layout-rs-524-columns-do-not-fit-the-text-area track
+layout.rs:526	70	set_section_layout/dirty/write:badroot/explicit-column-widths track
+layout.rs:528	70	set_section_layout/dirty/write:badroot/explicit-column-widths track
+lists.rs:83	0	-
+lists.rs:93	0	-
+lists.rs:95	0	-
+lists.rs:105	0	-
+lists.rs:133	2	set_list/dirty/authored:rich/join-an-existing-list-one-level-down track
+lists.rs:138	0	-
+lists.rs:247	0	-
+lists.rs:259	0	-
+lists.rs:267	0	-
+lists.rs:270	2	set_list/negative/write:mixed/site-lists-rs-270-duplicate-paragraph track
+lists.rs:277	2	set_list/positive/corpus-lo:ooxmlimport.bnc821804/new-decimal-list track
+lists.rs:301	0	-
+lists.rs:307	22	set_list/negative/write:badroot/no-such-list track
+lists.rs:327	2	set_list/negative/write:mixed/site-lists-rs-327-level-the-list-does-not-define track
+lists.rs:379	0	-
+mod.rs:188	96	edit_table/negative/write:badroot/table-out-of-range track
+mod.rs:189	2	edit_table/negative/write:sections/delete-then-format-the-table direct
+mod.rs:255	0	-
+mod.rs:539	110	set_even_and_odd_headers/dirty/write:badroot/on track
+readonly.rs:119	0	-
+readonly.rs:162	0	-
+readonly.rs:238	0	-
+readonly.rs:242	0	-
+readonly.rs:248	0	-
+readonly.rs:254	0	-
+readonly.rs:259	0	-
+readonly.rs:263	0	-
+readonly.rs:267	0	-
+readonly.rs:479	4	set_even_and_odd_headers/negative/write:malformed/site-headers-rs-643-malformed-settings-xml direct
+readonly.rs:480	0	-
+readonly.rs:512	9	set_even_and_odd_headers/dirty/authored:rich/on direct
+readonly.rs:513	0	-
+readonly.rs:526	32	comment_set_status/dirty/write:dirty/resolve track
+readonly.rs:527	0	-
+readonly.rs:535	0	-
+readonly.rs:536	0	-
+readonly.rs:575	0	-
+revisions.rs:646	30	revision_settle/positive/corpus-lo:ooxmlexport.n830205/settle-by-first-paragraph-reject track
+sections.rs:46	0	-
+sections.rs:60	0	-
+sections.rs:73	2	set_section_layout/negative/write:mixed/site-sections-rs-73-handle-names-no-boundary track
+sections.rs:85	67	set_section_boundary/dirty/write:badroot/new-boundary-after-a-paragraph track
+sections.rs:90	1	set_section_boundary/negative/write:mixed/site-sections-rs-90-boundary-in-a-table-cell direct
+sections.rs:96	1	set_section_boundary/positive/corpus-lo:ooxmlimport.bnc821804/new-boundary-after-a-paragraph direct
+sections.rs:112	0	-
+sections.rs:115	2	set_section_boundary/positive/write:sections/new-boundary-in-section-3 direct
+sections.rs:120	13	set_section_boundary/negative/write:badroot/remove-a-boundary-that-is-not-one direct
+sections.rs:126	0	-
+sections.rs:129	2	set_section_boundary/positive/write:sections/remove-the-section-2-boundary-no-paraid direct
+sections.rs:167	9	set_section_boundary/positive/write:sections/change-a-boundary-s-break-type direct
+table_structure.rs:20	0	-
+table_structure.rs:33	0	-
+table_structure.rs:60	0	-
+table_structure.rs:79	0	-
+table_structure.rs:112	52	edit_table/positive/write:mixed/delete-a-foreign-tracked-inserted-row direct
+table_structure.rs:140	44	edit_table/negative/write:sections/site-table-structure-rs-386-remove-every-row track
+table_structure.rs:212	3	edit_table/dirty/corpus-lo:ooxmlexport.tdf131203/insert-a-column direct
+table_structure.rs:225	0	-
+table_structure.rs:228	0	-
+table_structure.rs:230	0	-
+table_structure.rs:322	46	edit_table/positive/write:mixed/split-a-horizontally-merged-cell track
+table_structure.rs:352	0	-
+table_structure.rs:354	0	-
+table_structure.rs:386	0	-
+table_structure.rs:405	0	-
+table_structure.rs:408	0	-
+table_structure.rs:439	0	-
+table_structure.rs:444	0	-
+table_structure.rs:517	0	-
+table_structure.rs:520	0	-
+table_structure.rs:524	0	-
+table_structure.rs:529	1	edit_table/negative/write:sections/site-table-structure-rs-529-split-a-vertical-continuation direct
+table_structure.rs:543	0	-
+table_structure.rs:552	2	edit_table/negative/write:sections/site-table-structure-rs-552-split-an-unmerged-cell direct
+table_structure.rs:585	20	edit_table/positive/write:mixed/delete-a-foreign-tracked-inserted-row track
+table_structure.rs:590	0	-
+table_structure.rs:601	52	edit_table/positive/write:mixed/delete-a-foreign-tracked-inserted-row direct
+table_structure.rs:625	4	insert_table/negative/write:sections/site-table-structure-rs-625-table-at-a-section-boundary-para track
+table_structure.rs:631	0	-
+table_structure.rs:634	0	-
+table_structure.rs:676	0	-
+table_structure.rs:700	1	insert_table/negative/write:mixed/site-table-structure-rs-700-last-block-of-a-table-cell-track track
+tables.rs:118	0	-
+tables.rs:124	0	-
+tables.rs:161	0	-
+tables.rs:165	0	-
+tables.rs:170	0	-
+tables.rs:176	2	format_cell/negative/write:mixed/site-tables-rs-176-a-vertical-merge-continuation track
+tables.rs:184	0	-
+tables.rs:192	0	-
+tables.rs:210	0	-
+tables.rs:249	0	-
+tables.rs:252	0	-
+tables.rs:258	0	-
+tables.rs:267	0	-
+tables.rs:283	0	-
+tables.rs:304	0	-
+tables.rs:310	0	-
+tables.rs:316	0	-
+tables.rs:319	0	-
+tables.rs:333	0	-
+tables.rs:339	0	-
+tables.rs:342	0	-
+tables.rs:359	0	-
+tables.rs:362	0	-
+tables.rs:395	0	-
+tables.rs:402	3	format_row/positive/write:mixed/a-tracked-row track
+tables.rs:495	4	format_table/dirty/corpus-lo:ooxmlexport.tdf131203/padding-spacing-style-clear track
+tables.rs:502	12	format_table/dirty/authored:rich/padding-spacing-style-clear track
+tables.rs:508	0	-
+tables.rs:516	2	format_table/negative/write:mixed/site-tables-rs-516-column-widths-count-differs-from-the-grid track
+tables.rs:533	0	-
+tables.rs:923	0	-
+tables.rs:927	0	-
+tables.rs:955	0	-
+typed.rs:77	122	replace_text/negative/write:badroot/select-not-found track
+typed.rs:84	24	replace_text/negative/write:badroot/occurrence-out-of-range track
+typed.rs:90	6	replace_text/negative/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/ambiguous-select track
+typed.rs:208	35	delete_paragraphs/negative/write:badroot/delete-then-format-the-paragraph direct
+typed.rs:218	66	replace_paragraph/dirty/write:badroot/inline-html track
+typed.rs:227	2	replace_paragraph/negative/write:mixed/site-typed-rs-227-mixed-hyperlink-targets-in-with track
+typed.rs:232	66	replace_paragraph/dirty/write:badroot/inline-html track
+typed.rs:249	50	replace_paragraph/negative/write:badroot/unsupported-html-element track
+typed.rs:260	26	replace_paragraph/negative/write:mixed/site-typed-rs-271-table-structure-in-with track
+typed.rs:271	0	-
+typed.rs:280	2	replace_paragraph/negative/write:mixed/site-typed-rs-280-revision-tags-in-with track
+typed.rs:285	2	replace_paragraph/negative/write:mixed/site-typed-rs-285-a-field-in-with track
+typed.rs:298	2	replace_paragraph/negative/write:mixed/site-typed-rs-298-a-pending-format-tag-in-with track
+typed.rs:326	2	replace_paragraph/negative/write:mixed/site-typed-rs-326-a-footnote-in-with track
+typed.rs:331	0	-
+typed.rs:336	2	replace_paragraph/negative/write:mixed/site-typed-rs-336-a-comment-milestone-in-with track
+typed.rs:494	6	replace_text/negative/write:mixed/site-typed-rs-494-select-with-markup track
+typed.rs:570	0	-
+typed.rs:675	0	-
+typed.rs:686	2	replace_text/negative/write:mixed/site-typed-rs-850-selection-crosses-a-field track
+typed.rs:818	7	replace_text/positive/write:mixed/inside-the-author-s-own-pending-insertion direct
+typed.rs:827	9	replace_text/dirty/write:malformed/unique-word direct
+typed.rs:840	0	-
+typed.rs:850	2	replace_text/negative/write:mixed/site-typed-rs-850-selection-crosses-a-field direct
+typed.rs:1006	2	revise_text/negative/write:mixed/site-typed-rs-1006-edit-select-with-markup track
+typed.rs:1010	0	-
+typed.rs:1043	24	revise_text/negative/write:badroot/within-not-found track
+typed.rs:1050	2	revise_text/negative/write:mixed/site-typed-rs-1050-within-occurrence-out-of-range track
+typed.rs:1061	2	revise_text/negative/write:mixed/site-typed-rs-1061-within-ambiguous-in-the-body track
+typed.rs:1109	64	revise_text/dirty/write:badroot/body-scope-replace-all track
+typed.rs:1119	2	revise_text/negative/write:mixed/site-typed-rs-1119-edit-occurrence-out-of-range track
+typed.rs:1126	24	revise_text/negative/write:badroot/body-scope-ambiguous track
+typed.rs:1140	24	revise_text/negative/write:badroot/overlapping-edits track
+typed.rs:1219	6	replace_paragraph/positive/write:mixed/paragraph-holding-a-comment-range track
+typed.rs:1297	0	-
+typed.rs:1354	1	replace_text/negative/fixtures:crates.docxdriver-core.tests.fixtures.projection-parity.parity/selector-drift-after-an-earlier-edit direct
+typed.rs:1593	0	-
+typed.rs:1641	0	-
+typed.rs:1650	0	-
+typed.rs:1661	0	-
+typed.rs:1663	0	-
+typed.rs:1667	0	-
+typed.rs:1712	0	-
+typed.rs:1721	0	-
+typed.rs:1726	0	-
+typed.rs:1734	0	-
+typed.rs:1740	0	-
+typed.rs:1751	0	-
+typed.rs:1754	0	-
+typed.rs:1764	0	-
+typed.rs:1779	0	-
+typed.rs:1932	0	-
+typed.rs:1945	0	-
+typed.rs:1955	2	format_text/positive/write:mixed/run-with-a-foreign-rprchange track
+typed.rs:2017	0	-
+typed.rs:2024	6	replace_text/negative/write:mixed/site-typed-rs-494-select-with-markup track
+typed.rs:2030	0	-
+typed.rs:2057	0	-
+typed.rs:2159	0	-
+typed.rs:2163	0	-
+typed.rs:2176	0	-
+typed.rs:2188	0	-
+typed.rs:2192	0	-
+typed.rs:2202	0	-
+typed.rs:2217	0	-
+typed.rs:2443	0	-
+typed.rs:2462	60	format_paragraph/negative/write:badroot/unknown-style track
+typed.rs:2476	6	format_paragraph/positive/write:mixed/paragraph-with-a-foreign-pprchange track
+typed.rs:2710	0	-
+typed.rs:2720	24	insert_paragraph/negative/write:badroot/table-anchor-out-of-range track
+typed.rs:2728	0	-
+typed.rs:2739	24	insert_paragraph/negative/write:badroot/unknown-style track
+typed.rs:2752	0	-
+typed.rs:2816	0	-
+typed.rs:3017	2	delete_paragraphs/negative/write:mixed/site-typed-rs-3017-paragraph-holding-a-content-control track
+typed.rs:3065	0	-
+typed.rs:3074	0	-
+typed.rs:3081	4	delete_paragraphs/positive/write:mixed/paragraph-in-a-table-cell track
+typed.rs:3189	0	-
+typed.rs:3194	0	-
+typed.rs:3243	0	-
+typed.rs:3252	6	replace_text/negative/write:mixed/site-typed-rs-494-select-with-markup track
+typed.rs:3268	0	-
+typed.rs:3281	0	-
+typed.rs:3291	2	comment_add/negative/write:mixed/site-typed-rs-3291-selection-crosses-a-field track
+typed.rs:3301	0	-
+typed.rs:3313	0	-
+typed.rs:3343	0	-
+typed.rs:3348	0	-
+typed.rs:3349	0	-
+unmatched	476	replace_equation/negative/write:badroot/undefined-alias track

@@ -1,0 +1,29 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "kind": "revisions",
+    "revisions": [
+      {
+        "author": "Agent",
+        "date": "2026-07-05T02:35:50.196Z",
+        "id": "2",
+        "kind": "del",
+        "locator": "p1:0-5",
+        "paragraphIndex": 1,
+        "text": "Hello"
+      },
+      {
+        "author": "Agent",
+        "date": "2026-07-05T02:35:50.196Z",
+        "id": "1",
+        "kind": "ins",
+        "locator": "p1:5-11",
+        "paragraphIndex": 1,
+        "text": " brave"
+      }
+    ],
+    "source": "sha256:b14bd56270fc3f86fb7e236b29dedfc6b8ceac5b972408d4085d1cc0207461b1"
+  },
+  "source": "sha256:b14bd56270fc3f86fb7e236b29dedfc6b8ceac5b972408d4085d1cc0207461b1"
+}

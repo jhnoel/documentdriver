@@ -1,0 +1,20 @@
+{
+  "bytes": null,
+  "outcome": "completed",
+  "result": {
+    "assets": [
+      {
+        "data_url": "data:image/png;base64,iVBORw==",
+        "mime": "image/png",
+        "parts": [
+          "word/media/a.png",
+          "word/media/b.PNG"
+        ],
+        "size": 4,
+        "url": "assets/0f4636c78f65d3639ece5a064b5ae753e3408614a14fb18ab4d7540d2c248543.png"
+      }
+    ],
+    "kind": "assets"
+  },
+  "source": "sha256:e5fa107faa8a20e14a66bb98100248ce6aa6f161a3263a2f20842f5f521c183b"
+}

@@ -1,0 +1,5 @@
+go test fuzz v1
+string("<sheetData><row r=\"0000100\"></row></sheetData>")
+int(83)
+int(99)
+bool(false)
