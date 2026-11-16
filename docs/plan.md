@@ -34,7 +34,7 @@ MCP, WASM, Python and Monty bindings are out of scope; agents call the binaries.
 | JSON Schema for plans | A small reflect-based generator under `tools/`, output committed, drift test in `make check` | Replaces `schemars` |
 | Equation format | LaTeX only (the Markdown/MathJax dialect), converted to and from OMML directly with a lossless round-trip law; MathML is dropped. Equations are `<equation display="inline\|block">` in HTML and `latex` in `replace_equation` | One format, not two. docxdriver's own benchmark: LaTeX used 27% fewer tokens than MathML on the same equation task with equal success, and equation reads were 3.4x smaller. Agents know LaTeX from Markdown. Breaks the 0.5.2 `mathml` plan field, recorded as an intended difference |
 | Conformance tooling | Copied as is (Python + lxml, .NET Open XML validator, Word smoke) | Dev-only; never shipped |
-| Python access | Deferred. If needed: a pure-Python wrapper that runs the binary, shipped in `py3-none-<platform>` wheels | No cgo; one wheel per platform covers every Python |
+| Python access | The `documentdriver` wheel: the binaries plus a pure-Python runner (`run`, `EngineError`, `binary`), shipped in `py3-none-<platform>` wheels (RELEASING.md) | No cgo; one wheel per platform covers every Python |
 | Portability guard | `make wasip1` builds `GOOS=wasip1` | Keeps a WASM build possible without committing to it |
 
 ## Layout

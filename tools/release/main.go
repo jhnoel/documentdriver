@@ -1,7 +1,7 @@
 // Command release builds a documentdriver release into a directory
 // (default dist/): every CLI under cmd/ for linux/amd64, linux/arm64 and
 // darwin/arm64 as <cmd>-<version>-<os>-<arch>, one Python wheel per
-// platform carrying the docx and pptx binaries (packaging/python) —
+// platform carrying the docx, pptx and xlsx binaries (packaging/python) —
 // the linux wheels under a compressed manylinux/musllinux tag set, one
 // file per architecture — and SHA256SUMS over all of them. Builds are
 // CGO_ENABLED=0 -trimpath with the version stamped into main.version,

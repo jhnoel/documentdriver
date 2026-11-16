@@ -99,7 +99,11 @@ A [review] rule is still a rule; when you automate one, change its mark.
 - Python is for throwaway analysis only; run it with `uv run`. Anything
   reused is Go. The one exception is the dev-only conformance gate in
   `tools/conformance` (lxml via inline script metadata, `uv run --script`);
-  it never ships.
+  it never ships. The shipped exception is the wheel's import package
+  `packaging/python/documentdriver`: standard library only, Python 3.8
+  and later, a runner over the contract's streams and exit codes, never
+  a second copy of its commands or operations; `make release-smoke`
+  tests it.
 
 ## Dependencies and builds
 

@@ -107,7 +107,7 @@ func digestsModule(pyVersion string, bins map[string][]byte) []byte {
 
 // metadata is the core metadata file (METADATA) of the wheel.
 func metadata(pyVersion string, bins map[string][]byte) []byte {
-	names := strings.Join(sortedKeys(bins), " and ")
+	names := joinNames(sortedKeys(bins))
 	return []byte("Metadata-Version: 2.1\n" +
 		"Name: " + distName + "\n" +
 		"Version: " + pyVersion + "\n" +
@@ -118,10 +118,21 @@ func metadata(pyVersion string, bins map[string][]byte) []byte {
 		"# documentdriver\n\n" +
 		"The " + names + " command-line tools of documentdriver for one platform,\n" +
 		"static binaries that read and edit Office documents for agents.\n\n" +
-		"```python\nimport subprocess, documentdriver\n" +
-		"subprocess.run([documentdriver.binary(\"docx\"), \"read\", \"report.docx\"], check=True)\n```\n\n" +
+		"```python\nimport documentdriver\n" +
+		"with open(\"report.docx\", \"rb\") as f:\n" +
+		"    facts, _ = documentdriver.run(\"docx\", [\"read\", \"in.docx\"], {\"in.docx\": f.read()})\n```\n\n" +
+		"`run()` makes one call in a private directory and returns the parsed\n" +
+		"result, or raises `EngineError` with the contract's errors.\n" +
 		"`binary(name)` returns the bundled binary's path after checking it against\n" +
 		"the SHA-256 recorded when the wheel was built.\n")
+}
+
+// joinNames joins names as English prose: "a", "a and b", "a, b and c".
+func joinNames(names []string) string {
+	if len(names) <= 1 {
+		return strings.Join(names, "")
+	}
+	return strings.Join(names[:len(names)-1], ", ") + " and " + names[len(names)-1]
 }
 
 // wheelMeta is the WHEEL file of a wheel for a platform tag set: one

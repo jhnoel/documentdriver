@@ -28,9 +28,9 @@ var targets = []target{
 	{"darwin", "arm64", []string{"macosx_11_0_arm64"}},
 }
 
-// wheelCommands are the CLIs the Python wheel carries. A CLI joins when it
-// has real commands (xlsx is a skeleton: built and released, not wheeled).
-var wheelCommands = []string{"docx", "pptx"}
+// wheelCommands are the CLIs the Python wheel carries, sorted: every CLI
+// with real commands.
+var wheelCommands = []string{"docx", "pptx", "xlsx"}
 
 // binaryName is the release file name of a CLI for a target, e.g.
 // docx-0.1.0-linux-amd64.

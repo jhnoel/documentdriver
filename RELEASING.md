@@ -11,16 +11,33 @@ git remote.
 
 | File | What |
 | --- | --- |
-| `<cmd>-<version>-<os>-<arch>` | Every CLI under `cmd/` (today `docx`, `pptx` and the `xlsx` skeleton) for `linux-amd64`, `linux-arm64` and `darwin-arm64`: static, `CGO_ENABLED=0 -trimpath`, with the version stamped into `--version` |
-| `documentdriver-<pep440>-py3-none-<tag>.whl` | One Python wheel per platform carrying that platform's `docx` and `pptx`. The linux wheels use a compressed platform tag set (PEP 425: tags joined with `.`), so one file per architecture covers both libc families: `manylinux2014_x86_64.musllinux_1_1_x86_64` and `manylinux2014_aarch64.musllinux_1_1_aarch64`; darwin is `macosx_11_0_arm64`. The `WHEEL` file lists one `Tag:` line per expanded tag, in a fixed order |
+| `<cmd>-<version>-<os>-<arch>` | Every CLI under `cmd/` (today `docx`, `pptx` and `xlsx`) for `linux-amd64`, `linux-arm64` and `darwin-arm64`: static, `CGO_ENABLED=0 -trimpath`, with the version stamped into `--version` |
+| `documentdriver-<pep440>-py3-none-<tag>.whl` | One Python wheel per platform carrying that platform's `docx`, `pptx` and `xlsx`. The linux wheels use a compressed platform tag set (PEP 425: tags joined with `.`), so one file per architecture covers both libc families: `manylinux2014_x86_64.musllinux_1_1_x86_64` and `manylinux2014_aarch64.musllinux_1_1_aarch64`; darwin is `macosx_11_0_arm64`. The `WHEEL` file lists one `Tag:` line per expanded tag, in a fixed order |
 | `SHA256SUMS` | The SHA-256 of every file above, in `sha256sum -c` format |
 
-The wheel's import package (`packaging/python/documentdriver`) is a few
-lines: `documentdriver.binary("docx")` returns the bundled binary's path
-after checking it against the SHA-256 recorded at build time (it raises
-`RuntimeError` on a mismatch), and `documentdriver.names()` lists the
-binaries. `xlsx` joins the wheel when it has real commands
-(`wheelCommands` in `tools/release/build.go`).
+The wheel's import package (`packaging/python/documentdriver`, standard
+library only, Python 3.8 and later) is small:
+
+- `documentdriver.run(tool, args, files=None, *, stdin=None, output=None,
+  parse=True, timeout=60)` runs one command in a new private directory
+  and returns `Run(result, output)`. `files` (`{name: bytes}`) are written
+  there first and `args` name them; `stdin` (str, bytes, or a dict or
+  list sent as JSON) feeds a `-` argument; `output` names the `-o` file
+  whose bytes come back. The binary runs from argv with an empty
+  environment, stdout and stderr go to files (capped at 64 MiB and
+  1 MiB), and past `timeout` it is killed. Exit 1 or 2 with the
+  contract's errors object raises `EngineError` (a `ValueError` with
+  `errors`, `exit_code`, `code` and `path`); anything else the contract
+  does not allow raises `RuntimeError`. It knows the contract's streams
+  and exit codes, not its commands or operations: those stay in
+  `help`.
+- `documentdriver.binary("docx")` returns the bundled binary's path
+  after checking it against the SHA-256 recorded at build time (it raises
+  `RuntimeError` on a mismatch), and `documentdriver.names()` lists the
+  binaries (`wheelCommands` in `tools/release/build.go`).
+
+`packaging/python/smoke.py` (`make release-smoke`) checks both on the
+installed wheel.
 
 Versions are `MAJOR.MINOR.PATCH`, optionally with one pre-release label.
 The binaries report the version as given; the wheel uses its PEP 440
@@ -114,15 +131,18 @@ image's platform:
 ```python
 """
 title: Word documents
-requirements: documentdriver==0.1.0
+requirements: documentdriver==0.2.0
 """
-import json, subprocess
 import documentdriver
 
-def read_docx(path: str) -> dict:
-    out = subprocess.run([documentdriver.binary("docx"), "read", path],
-                         capture_output=True, check=True).stdout
-    return json.loads(out)
+def read_docx(data: bytes) -> dict:
+    result, _ = documentdriver.run("docx", ["read", "in.docx"], {"in.docx": data})
+    return result
+
+def apply_docx(data: bytes, plan: dict) -> bytes:
+    _, out = documentdriver.run("docx", ["apply", "in.docx", "-", "-o", "out.docx"],
+                                {"in.docx": data}, stdin=plan, output="out.docx")
+    return out if out is not None else data  # a no-op plan writes nothing
 ```
 
 `binary()` hashes the binary on its first call in a process and raises if

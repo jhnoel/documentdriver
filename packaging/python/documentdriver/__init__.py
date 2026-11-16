@@ -1,12 +1,17 @@
 """The documentdriver command-line tools, as static binaries.
 
-This wheel carries the docx and pptx binaries for one platform. Run them
-as subprocesses; their command line, results and errors follow the agent
-contract (docs/contract.md in the documentdriver repository):
+This wheel carries the docx, pptx and xlsx binaries for one platform.
+Their command line, results and errors follow the agent contract
+(docs/contract.md in the documentdriver repository). run() makes one call
+in a private directory and returns the parsed result, or raises
+EngineError with the contract's errors:
 
-    import subprocess, documentdriver
-    out = subprocess.run([documentdriver.binary("docx"), "read", "a.docx"],
-                         capture_output=True, check=True).stdout
+    import documentdriver
+    facts, _ = documentdriver.run("docx", ["read", "in.docx"], {"in.docx": data})
+    res, out = documentdriver.run("docx", ["apply", "in.docx", "-", "-o", "out.docx"],
+                                  {"in.docx": data}, stdin=plan, output="out.docx")
+
+binary() returns a binary's path, to run it yourself.
 
 binary() checks the file against the SHA-256 recorded when the wheel was
 built and raises if it differs, so a damaged or replaced install fails
@@ -18,8 +23,10 @@ import os
 import stat
 
 from ._digests import DIGESTS, VERSION
+from ._run import DEFAULT_TIMEOUT, STDERR_CAP, STDOUT_CAP, EngineError, Run, run
 
-__all__ = ["binary", "names", "__version__"]
+__all__ = ["binary", "names", "run", "Run", "EngineError", "DEFAULT_TIMEOUT",
+           "STDOUT_CAP", "STDERR_CAP", "__version__"]
 
 __version__ = VERSION
 
@@ -33,7 +40,7 @@ def names():
 
 
 def binary(name):
-    """Return the absolute path of the bundled binary `name` ("docx", "pptx").
+    """Return the absolute path of the bundled binary `name` ("docx", "pptx", "xlsx").
 
     The first call per binary hashes it and compares the digest recorded at
     build time; a mismatch raises RuntimeError. It also restores the
