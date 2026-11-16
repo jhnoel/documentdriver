@@ -35,6 +35,55 @@ func TestPEP440(t *testing.T) {
 	}
 }
 
+// rewriteWheel copies a wheel entry by entry, replacing the content of the
+// entry named tamper (if any) with "tampered". streamed writes each entry
+// with zip.Writer.CreateHeader, which adds data descriptors; otherwise
+// it uses writeEntry, as makeWheel does.
+func rewriteWheel(t *testing.T, whl []byte, tamper string, streamed bool) []byte {
+	t.Helper()
+	zr, err := zip.NewReader(bytes.NewReader(whl), int64(len(whl)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+	for _, f := range zr.File {
+		rc, err := f.Open()
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, err := io.ReadAll(rc)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := rc.Close(); err != nil {
+			t.Fatal(err)
+		}
+		if f.Name == tamper {
+			data = []byte("tampered")
+		}
+		if !streamed {
+			if err := writeEntry(zw, wheelFile{Name: f.Name, Data: data, Exec: f.Mode()&0o111 != 0}); err != nil {
+				t.Fatal(err)
+			}
+			continue
+		}
+		h := zip.FileHeader{Name: f.Name, Method: zip.Deflate, Modified: zipTime}
+		h.SetMode(f.Mode())
+		w, err := zw.CreateHeader(&h)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := w.Write(data); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := zw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return buf.Bytes()
+}
+
 func testPackage(t *testing.T) pyPackage {
 	t.Helper()
 	root, err := repo.Root()
@@ -101,42 +150,18 @@ func TestWheelReproducibleAndVerified(t *testing.T) {
 		t.Error("verifyWheel accepted a WHEEL missing one tag")
 	}
 
-	// Rewrite the wheel with one binary changed but RECORD kept.
-	zr, err := zip.NewReader(bytes.NewReader(a), int64(len(a)))
-	if err != nil {
-		t.Fatal(err)
-	}
-	var buf bytes.Buffer
-	zw := zip.NewWriter(&buf)
-	for _, f := range zr.File {
-		rc, err := f.Open()
-		if err != nil {
-			t.Fatal(err)
-		}
-		data, err := io.ReadAll(rc)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := rc.Close(); err != nil {
-			t.Fatal(err)
-		}
-		if f.Name == distName+"/bin/docx" {
-			data = []byte("tampered")
-		}
-		h := f.FileHeader
-		w, err := zw.CreateHeader(&h)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if _, err := w.Write(data); err != nil {
-			t.Fatal(err)
-		}
-	}
-	if err := zw.Close(); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := verifyWheel(buf.Bytes(), "1.2.3rc1", linux); err == nil || !strings.Contains(err.Error(), "bin/docx") {
+	// One binary changed but RECORD kept.
+	tampered := rewriteWheel(t, a, distName+"/bin/docx", false)
+	if _, err := verifyWheel(tampered, "1.2.3rc1", linux); err == nil || !strings.Contains(err.Error(), "bin/docx") {
 		t.Errorf("verifyWheel on a tampered binary = %v, want a RECORD mismatch for bin/docx", err)
+	}
+	// The same entries written by streaming carry data descriptors.
+	streamed := rewriteWheel(t, a, "", true)
+	if _, err := verifyWheel(streamed, "1.2.3rc1", linux); err == nil || !strings.Contains(err.Error(), "data descriptor") {
+		t.Errorf("verifyWheel on a streamed wheel = %v, want a data descriptor refusal", err)
+	}
+	if got := rewriteWheel(t, a, "", false); !bytes.Equal(got, a) {
+		t.Error("rewriting a wheel entry by entry with writeEntry changed its bytes")
 	}
 }
 

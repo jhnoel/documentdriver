@@ -3,10 +3,12 @@ package main
 import (
 	"archive/zip"
 	"bytes"
+	"compress/flate"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"hash/crc32"
 	"io/fs"
 	"maps"
 	"os"
@@ -219,17 +221,7 @@ func makeWheel(pyVersion string, tags []string, pkg pyPackage, bins map[string][
 		if path.Clean(f.Name) != f.Name || strings.HasPrefix(f.Name, "/") {
 			return nil, fmt.Errorf("wheel entry %q is not a clean relative path", f.Name)
 		}
-		h := &zip.FileHeader{Name: f.Name, Method: zip.Deflate, Modified: zipTime}
-		mode := fs.FileMode(0o644)
-		if f.Exec {
-			mode = 0o755
-		}
-		h.SetMode(mode)
-		w, err := zw.CreateHeader(h)
-		if err != nil {
-			return nil, fmt.Errorf("wheel entry %s: %w", f.Name, err)
-		}
-		if _, err := w.Write(f.Data); err != nil {
+		if err := writeEntry(zw, f); err != nil {
 			return nil, fmt.Errorf("wheel entry %s: %w", f.Name, err)
 		}
 	}
@@ -237,6 +229,46 @@ func makeWheel(pyVersion string, tags []string, pkg pyPackage, bins map[string][
 		return nil, fmt.Errorf("close the wheel: %w", err)
 	}
 	return buf.Bytes(), nil
+}
+
+// writeEntry adds one file to the wheel, deflated in advance so its
+// local header carries the CRC-32 and both sizes. zip.Writer.CreateHeader
+// streams and sets the data-descriptor flag, which PyPI rejects ("ZIP
+// contains a data descriptor"); CreateRaw with the flag clear writes no
+// descriptor.
+func writeEntry(zw *zip.Writer, f wheelFile) error {
+	var deflated bytes.Buffer
+	fw, err := flate.NewWriter(&deflated, flate.DefaultCompression)
+	if err != nil {
+		return fmt.Errorf("deflate: %w", err)
+	}
+	if _, err := fw.Write(f.Data); err != nil {
+		return fmt.Errorf("deflate: %w", err)
+	}
+	if err := fw.Close(); err != nil {
+		return fmt.Errorf("deflate: %w", err)
+	}
+	h := &zip.FileHeader{
+		Name:               f.Name,
+		Method:             zip.Deflate,
+		Modified:           zipTime,
+		CRC32:              crc32.ChecksumIEEE(f.Data),
+		CompressedSize64:   uint64(deflated.Len()), //nolint:gosec // G115: a buffer length is never negative
+		UncompressedSize64: uint64(len(f.Data)),
+	}
+	mode := fs.FileMode(0o644)
+	if f.Exec {
+		mode = 0o755
+	}
+	h.SetMode(mode)
+	w, err := zw.CreateRaw(h)
+	if err != nil {
+		return err
+	}
+	if _, err := w.Write(deflated.Bytes()); err != nil {
+		return err
+	}
+	return nil
 }
 
 // sortedKeys returns the map keys in sorted order.

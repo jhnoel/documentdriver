@@ -19,6 +19,11 @@ import (
 // largest entry is one binary of a few tens of MiB.
 const maxEntry = 512 << 20
 
+// dataDescriptorFlag is general-purpose bit 3 of a zip entry: its CRC-32
+// and sizes follow the data in a descriptor instead of the local header.
+// PyPI refuses wheels with one (https://docs.pypi.org/archives).
+const dataDescriptorFlag = 0x8
+
 // verifyWheel checks a wheel against what makeWheel promises: RECORD lists
 // every other entry exactly once with its size and hash, and nothing
 // else; the WHEEL Tag lines are exactly tags, in order; METADATA names
@@ -30,12 +35,21 @@ func verifyWheel(b []byte, pyVersion string, tags []string) (map[string][]byte, 
 	if err != nil {
 		return nil, fmt.Errorf("open the wheel: %w", err)
 	}
+	if zr.Comment != "" {
+		return nil, errors.New("the wheel has an archive comment, which PyPI rejects")
+	}
 	info := distInfo(pyVersion)
 	entries := map[string][]byte{}
 	var order []string
 	for _, f := range zr.File {
 		if _, dup := entries[f.Name]; dup {
 			return nil, fmt.Errorf("entry %s appears twice", f.Name)
+		}
+		if f.Flags&dataDescriptorFlag != 0 {
+			return nil, fmt.Errorf("entry %s has a data descriptor, which PyPI rejects", f.Name)
+		}
+		if f.Comment != "" {
+			return nil, fmt.Errorf("entry %s has a comment, which PyPI rejects", f.Name)
 		}
 		rc, err := f.Open()
 		if err != nil {
