@@ -125,6 +125,13 @@ func SheetPrefix(first, last string) string {
 	return b.String()
 }
 
+// quotedApart writes a 3-D span prefix with each end quoted on its own
+// ("'Jan':'My Sheet'!"), the form Excel-authored corpus files hold beside
+// Excel's usual 'Jan:My Sheet'! (prefixAt reads both).
+func quotedApart(first, last string) string {
+	return "'" + strings.ReplaceAll(first, "'", "''") + "':'" + strings.ReplaceAll(last, "'", "''") + "'!"
+}
+
 // writeSheetPrefix writes the sheet or 3-D span prefix, with its workbook, to b.
 func writeSheetPrefix(b *strings.Builder, book string, hasBook bool, first, last string) {
 	if last != "" && strings.ContainsRune(first+last, ':') {

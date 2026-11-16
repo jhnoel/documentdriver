@@ -297,7 +297,7 @@ func Rename(src, old, name string) string {
 	for i, t := range toks {
 		out := t.Text
 		if t.Kind == Ref || t.Kind == Name || t.Kind == Func {
-			out = renameToken(t.Text, old, name)
+			out = renameToken(t.Text, old, name, i > 0 && toks[i-1].Text == ":")
 		}
 		if out != t.Text && !changed {
 			changed = true
@@ -315,8 +315,13 @@ func Rename(src, old, name string) string {
 	return b.String()
 }
 
-// renameToken renames the sheet prefix in text to name when it names old ignoring case.
-func renameToken(text, old, name string) string {
+// renameToken renames the sheet prefix in text to name when it names old
+// ignoring case. afterColon says the token directly follows a ":" token:
+// a 3-D span quoted as a whole there ("x:'Jan:My Sheet'!A1") would read
+// back as the span x:'Jan:My Sheet' and swallow the "x:" before it, so
+// the span is written with each end quoted apart ("x:'Jan':'My Sheet'!A1"),
+// which a prefix of at most two names cannot extend.
+func renameToken(text, old, name string, afterColon bool) string {
 	pre, rest, ok := SplitQualified(text)
 	if !ok || !pre.HasSheet() || pre.HasBook {
 		return text
@@ -332,5 +337,9 @@ func renameToken(text, old, name string) string {
 	if !hit {
 		return text
 	}
-	return SheetPrefix(first, last) + rest
+	p := SheetPrefix(first, last)
+	if afterColon && last != "" && p[0] == '\'' {
+		p = quotedApart(first, last)
+	}
+	return p + rest
 }

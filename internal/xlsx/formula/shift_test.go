@@ -133,6 +133,14 @@ func TestRename(t *testing.T) {
 		{"[1]Feb!A1", "Feb", "Q1", "[1]Feb!A1"},
 		{"INDIRECT(\"Feb!A1\")", "Feb", "Q1", "INDIRECT(\"Feb!A1\")"},
 		{"Febr!A1", "Feb", "Q1", "Febr!A1"},
+		// After "rate_a:" (a name, then the range operator) a span quoted
+		// as a whole would read back as the span rate_a:'Jan:Q 1' and
+		// swallow the name; each end is quoted apart instead (FuzzShift
+		// seeds dfa56f2bf1fb36ef, 3b7486f07c7ff3c9).
+		{"rate_a:Jan:Feb!A1", "Feb", "Q 1", "rate_a:'Jan':'Q 1'!A1"},
+		{"rate_a:2024:Feb!A1", "Feb", "Mar", "rate_a:'2024':'Mar'!A1"},
+		{"rate_a:Jan:Feb!A1", "Feb", "Mar", "rate_a:Jan:Mar!A1"},
+		{"rate_a:'Jan':'Q 1'!A1", "Q 1", "Feb", "rate_a:Jan:Feb!A1"},
 	} {
 		if got := Rename(tc.src, tc.old, tc.new); got != tc.want {
 			t.Errorf("Rename(%q, %q, %q) = %q, want %q", tc.src, tc.old, tc.new, got, tc.want)
