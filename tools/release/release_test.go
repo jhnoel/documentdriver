@@ -35,7 +35,7 @@ func TestPEP440(t *testing.T) {
 	}
 }
 
-func testPackage(t *testing.T) []wheelFile {
+func testPackage(t *testing.T) pyPackage {
 	t.Helper()
 	root, err := repo.Root()
 	if err != nil {
@@ -45,8 +45,11 @@ func testPackage(t *testing.T) []wheelFile {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pkg) == 0 || pkg[0].Name != distName+"/__init__.py" {
-		t.Fatalf("package = %v, want documentdriver/__init__.py first", pkg)
+	if len(pkg.Files) == 0 || pkg.Files[0].Name != distName+"/__init__.py" {
+		t.Fatalf("package = %v, want documentdriver/__init__.py first", pkg.Files)
+	}
+	if !bytes.Contains(pkg.License, []byte("Apache License")) {
+		t.Fatalf("license = %.40q, want the Apache License", pkg.License)
 	}
 	return pkg
 }

@@ -25,6 +25,20 @@ const distName = "documentdriver"
 // the import package that goes into every wheel.
 const pythonSource = "packaging/python/" + distName
 
+// licenseFile is the repository's license, carried in every wheel's
+// .dist-info/licenses (PEP 639) and named by METADATA's License-File.
+const licenseFile = "LICENSE"
+
+// projectURL is the public source repository, the wheel's Project-URL.
+const projectURL = "https://github.com/jhnoel/documentdriver"
+
+// pyPackage is what every wheel carries besides the binaries: the import
+// package sources and the license text.
+type pyPackage struct {
+	Files   []wheelFile
+	License []byte
+}
+
 // zipTime is the modification time of every wheel entry: the earliest a
 // zip can record, so the archive depends on its contents alone.
 var zipTime = time.Date(1980, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -56,8 +70,8 @@ func recordHash(b []byte) string {
 }
 
 // readPackage reads the import package sources under root/pythonSource,
-// skipping caches and compiled files.
-func readPackage(root string) ([]wheelFile, error) {
+// skipping caches and compiled files, and the repository's license.
+func readPackage(root string) (pyPackage, error) {
 	dir := filepath.Join(root, filepath.FromSlash(pythonSource))
 	var files []wheelFile
 	err := filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
@@ -85,9 +99,13 @@ func readPackage(root string) ([]wheelFile, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("read the Python package %s: %w", pythonSource, err)
+		return pyPackage{}, fmt.Errorf("read the Python package %s: %w", pythonSource, err)
 	}
-	return files, nil
+	license, err := os.ReadFile(filepath.Join(root, licenseFile)) //nolint:gosec // G304: the repository's own license
+	if err != nil {
+		return pyPackage{}, fmt.Errorf("read the license: %w", err)
+	}
+	return pyPackage{Files: files, License: license}, nil
 }
 
 // digestsModule is the generated documentdriver/_digests.py: the version
@@ -105,26 +123,49 @@ func digestsModule(pyVersion string, bins map[string][]byte) []byte {
 	return []byte(b.String())
 }
 
-// metadata is the core metadata file (METADATA) of the wheel.
+// metadata is the core metadata file (METADATA) of the wheel, version
+// 2.4 for License-Expression and License-File (PEP 639). The description
+// is PyPI's project page.
 func metadata(pyVersion string, bins map[string][]byte) []byte {
 	names := joinNames(sortedKeys(bins))
-	return []byte("Metadata-Version: 2.1\n" +
+	return []byte("Metadata-Version: 2.4\n" +
 		"Name: " + distName + "\n" +
 		"Version: " + pyVersion + "\n" +
-		"Summary: The documentdriver " + names + " command-line tools, as static binaries\n" +
+		"Summary: Read and edit Word, PowerPoint and Excel files from agents: the " + names + " CLIs as static binaries\n" +
+		"Keywords: docx,pptx,xlsx,ooxml,office,agents\n" +
+		"License-Expression: Apache-2.0\n" +
+		"License-File: " + licenseFile + "\n" +
+		"Project-URL: Source, " + projectURL + "\n" +
+		"Project-URL: Contract, " + projectURL + "/blob/main/docs/contract.md\n" +
+		"Project-URL: Releasing, " + projectURL + "/blob/main/RELEASING.md\n" +
+		"Classifier: Development Status :: 3 - Alpha\n" +
+		"Classifier: Intended Audience :: Developers\n" +
+		"Classifier: Operating System :: MacOS\n" +
+		"Classifier: Operating System :: POSIX :: Linux\n" +
+		"Classifier: Programming Language :: Python :: 3\n" +
+		"Classifier: Topic :: Office/Business\n" +
+		"Classifier: Topic :: Text Processing :: Markup :: XML\n" +
 		"Requires-Python: >=3.8\n" +
 		"Description-Content-Type: text/markdown\n" +
 		"\n" +
 		"# documentdriver\n\n" +
-		"The " + names + " command-line tools of documentdriver for one platform,\n" +
-		"static binaries that read and edit Office documents for agents.\n\n" +
-		"```python\nimport documentdriver\n" +
+		"The " + names + " command-line tools of documentdriver for one platform:\n" +
+		"static binaries (no cgo, no libc) that read and edit Office documents for\n" +
+		"agents, with one JSON result or one errors object per call. Wheels exist\n" +
+		"for linux x86_64 and aarch64 (glibc and musl) and macOS arm64.\n\n" +
+		"```python\nimport documentdriver\n\n" +
 		"with open(\"report.docx\", \"rb\") as f:\n" +
-		"    facts, _ = documentdriver.run(\"docx\", [\"read\", \"in.docx\"], {\"in.docx\": f.read()})\n```\n\n" +
+		"    data = f.read()\n" +
+		"facts, _ = documentdriver.run(\"docx\", [\"read\", \"in.docx\"], {\"in.docx\": data})\n" +
+		"plan = {\"ops\": [...]}  # see `docx help ops`\n" +
+		"result, out = documentdriver.run(\"docx\", [\"apply\", \"in.docx\", \"-\", \"-o\", \"out.docx\"],\n" +
+		"                                 {\"in.docx\": data}, stdin=plan, output=\"out.docx\")\n```\n\n" +
 		"`run()` makes one call in a private directory and returns the parsed\n" +
-		"result, or raises `EngineError` with the contract's errors.\n" +
+		"result and the output file's bytes, or raises `EngineError` with the\n" +
+		"contract's errors (`code`, `path`, `message`, `hint`).\n" +
 		"`binary(name)` returns the bundled binary's path after checking it against\n" +
-		"the SHA-256 recorded when the wheel was built.\n")
+		"the SHA-256 recorded when the wheel was built, to run it yourself.\n\n" +
+		"Commands, plans, results and errors: [the agent contract](" + projectURL + "/blob/main/docs/contract.md).\n")
 }
 
 // joinNames joins names as English prose: "a", "a and b", "a, b and c".
@@ -150,10 +191,10 @@ func wheelMeta(tags []string) []byte {
 
 // makeWheel builds the wheel for one platform: the import package, the
 // generated digests, the binaries under documentdriver/bin, and the
-// .dist-info files with RECORD last. The bytes are a function of the
+// .dist-info files (the license under licenses/) with RECORD last. The bytes are a function of the
 // inputs: sorted entries, one fixed time, fixed modes.
-func makeWheel(pyVersion string, tags []string, pkg []wheelFile, bins map[string][]byte) ([]byte, error) {
-	files := append([]wheelFile(nil), pkg...)
+func makeWheel(pyVersion string, tags []string, pkg pyPackage, bins map[string][]byte) ([]byte, error) {
+	files := append([]wheelFile(nil), pkg.Files...)
 	files = append(files, wheelFile{Name: distName + "/_digests.py", Data: digestsModule(pyVersion, bins)})
 	for _, name := range sortedKeys(bins) {
 		files = append(files, wheelFile{Name: distName + "/bin/" + name, Data: bins[name], Exec: true})
@@ -163,6 +204,7 @@ func makeWheel(pyVersion string, tags []string, pkg []wheelFile, bins map[string
 	files = append(files,
 		wheelFile{Name: info + "/METADATA", Data: metadata(pyVersion, bins)},
 		wheelFile{Name: info + "/WHEEL", Data: wheelMeta(tags)},
+		wheelFile{Name: info + "/licenses/" + licenseFile, Data: pkg.License},
 	)
 	var record strings.Builder
 	for _, f := range files {

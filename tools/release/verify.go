@@ -21,7 +21,8 @@ const maxEntry = 512 << 20
 
 // verifyWheel checks a wheel against what makeWheel promises: RECORD lists
 // every other entry exactly once with its size and hash, and nothing
-// else; the WHEEL Tag lines are exactly tags, in order; the binaries
+// else; the WHEEL Tag lines are exactly tags, in order; METADATA names
+// the license the wheel carries; the binaries
 // are executable; and _digests.py records their SHA-256. It returns
 // the binaries by name.
 func verifyWheel(b []byte, pyVersion string, tags []string) (map[string][]byte, error) {
@@ -103,6 +104,13 @@ func verifyWheel(b []byte, pyVersion string, tags []string) (map[string][]byte, 
 	}
 	if got, want := string(entries[info+"/WHEEL"]), string(wheelMeta(tags)); got != want {
 		return nil, fmt.Errorf("WHEEL is %q, want %q", got, want)
+	}
+	if meta := string(entries[info+"/METADATA"]); !strings.HasPrefix(meta, "Metadata-Version: 2.4\n") ||
+		!strings.Contains(meta, "\nVersion: "+pyVersion+"\n") || !strings.Contains(meta, "\nLicense-File: "+licenseFile+"\n") {
+		return nil, fmt.Errorf("METADATA is not version 2.4 with Version %s and License-File %s", pyVersion, licenseFile)
+	}
+	if len(entries[info+"/licenses/"+licenseFile]) == 0 {
+		return nil, fmt.Errorf("the wheel has no %s/licenses/%s", info, licenseFile)
 	}
 	bins := map[string][]byte{}
 	for name, data := range entries {

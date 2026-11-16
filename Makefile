@@ -1,4 +1,4 @@
-.PHONY: build test vet fmt norequire wasip1 check corpus fuzz tools tool-golangci-lint tool-govulncheck lint vuln race repro release release-check release-smoke ci hooks powerpoint-smoke word-smoke excel-smoke conformance oracle-write-gen oracle-write-record oracle-write-compare oracle-write-gate
+.PHONY: build test vet fmt norequire wasip1 check corpus fuzz tools tool-golangci-lint tool-govulncheck lint vuln race repro release release-check release-smoke publish ci hooks powerpoint-smoke word-smoke excel-smoke conformance oracle-write-gen oracle-write-record oracle-write-compare oracle-write-gate
 
 # Builds and tests are pure Go: no cgo. The one exception is `make race`,
 # because the race detector needs cgo on macOS and Linux (see below).
@@ -216,8 +216,8 @@ repro:
 # release builds a release into dist/ (gitignored) with tools/release:
 # every CLI under cmd/ for linux/amd64, linux/arm64 and darwin/arm64 as
 # <cmd>-<VERSION>-<os>-<arch> (CGO_ENABLED=0 -trimpath, VERSION stamped
-# into --version), one documentdriver wheel per platform carrying docx and
-# pptx (packaging/python), and SHA256SUMS. It then checks what it wrote
+# into --version), one documentdriver wheel per platform carrying docx,
+# pptx and xlsx (packaging/python), and SHA256SUMS. It then checks what it wrote
 # (digests, each wheel's RECORD, --version of this machine's binaries).
 # It publishes nothing; RELEASING.md has the procedure.
 # Usage: make release VERSION=0.1.0
@@ -248,8 +248,9 @@ release-check:
 # release-smoke installs this machine's wheel from dist/ with pip into a
 # fresh venv (made by uv, seeded with pip, as Open WebUI installs a
 # tool's requirements) and runs packaging/python/smoke.py there with uv
-# run (python -I, so the source package beside it is not imported): binary("docx") and binary("pptx") run and report VERSION, and the
-# SHA-256 self-check refuses a mismatch. SMOKE_DIR is an empty directory
+# run (python -I, so the source package beside it is not imported): every
+# bundled binary runs and reports VERSION, run() returns results, outputs
+# and the contract's errors, and the SHA-256 self-check refuses a mismatch. SMOKE_DIR is an empty directory
 # for the venv (default: a temporary one, removed after). Needs uv.
 # Usage: make release-smoke VERSION=0.1.0 [SMOKE_DIR=<empty dir>]
 SMOKE_DIR ?=
@@ -267,6 +268,42 @@ release-smoke:
 	uv venv --quiet --seed "$$d/venv"; \
 	"$$d/venv/bin/python" -m pip install --quiet --no-index --no-deps "$$whl"; \
 	uv run --no-project --python "$$d/venv/bin/python" python -I packaging/python/smoke.py "$(VERSION)" "$$py"
+
+# publish uploads the wheels of a built and checked release from dist/
+# to PyPI (PYPI=pypi, the default) or TestPyPI (PYPI=testpypi) with uv
+# publish. It is the owner's step (RELEASING.md); nothing runs it
+# automatically. The token comes from UV_PUBLISH_TOKEN in the environment
+# (a PyPI API token scoped to the documentdriver project), never from a
+# file in the repository. Before uploading it re-checks dist/ (go run
+# ./tools/release -check: SHA256SUMS, every wheel's RECORD and tags), and
+# for PyPI it also wants a clean tree with HEAD tagged vVERSION. Only the
+# wheels go up: the raw binaries and SHA256SUMS belong to the download
+# host. --check-url makes a rerun skip files already uploaded with the
+# same hash. PUBLISH_DRY_RUN=1 passes uv publish --dry-run (no token).
+# Usage: make publish VERSION=0.2.0 [PYPI=testpypi] [PUBLISH_DRY_RUN=1]
+PYPI ?= pypi
+PUBLISH_DRY_RUN ?=
+
+publish:
+	@if [ -z "$(VERSION)" ]; then echo "usage: make publish VERSION=x.y.z [PYPI=pypi|testpypi] [PUBLISH_DRY_RUN=1]"; exit 2; fi
+	@command -v uv >/dev/null || { echo "uv is required (uv publish uploads the wheels)"; exit 1; }
+	@set -e; \
+	case "$(PYPI)" in \
+		pypi) up=https://upload.pypi.org/legacy/; check=https://pypi.org/simple/ ;; \
+		testpypi) up=https://test.pypi.org/legacy/; check=https://test.pypi.org/simple/ ;; \
+		*) echo "publish: PYPI must be pypi or testpypi, not $(PYPI)"; exit 2 ;; \
+	esac; \
+	if [ "$(PYPI)" = pypi ]; then \
+		[ -z "$$(git status --porcelain)" ] || { echo "publish: the tree is not clean; publish a committed, tagged release"; exit 1; }; \
+		git tag --points-at HEAD | grep -qx 'v$(VERSION)' || { echo "publish: HEAD is not tagged v$(VERSION) (git tag -a v$(VERSION) -m 'documentdriver $(VERSION)')"; exit 1; }; \
+	fi; \
+	[ -n "$(PUBLISH_DRY_RUN)" ] || [ -n "$$UV_PUBLISH_TOKEN" ] || { echo "publish: set UV_PUBLISH_TOKEN to a $(PYPI) API token for documentdriver"; exit 1; }; \
+	go run ./tools/release -version $(VERSION) -out dist -check; \
+	py="$$(basename "$$(go run ./tools/release -version $(VERSION) -out dist -host-wheel)" | cut -d- -f2)"; \
+	set -- dist/documentdriver-$$py-py3-none-*.whl; \
+	{ [ "$$#" = 3 ] && [ -f "$$1" ]; } || { echo "publish: want 3 wheels for $$py in dist/, found: $$*"; exit 1; }; \
+	echo "publish: $$* -> $(PYPI)"; \
+	uv publish --trusted-publishing never --publish-url "$$up" --check-url "$$check" $(if $(PUBLISH_DRY_RUN),--dry-run) "$$@"
 
 # ci is the single local gate (run by the pre-push hook and before merging
 # to main). It runs every step even after a failure and lists what failed.

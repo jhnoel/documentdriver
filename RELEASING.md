@@ -1,9 +1,10 @@
 # Releasing documentdriver
 
 A release is built locally by `make release` (the stdlib Go tool
-`tools/release`) and published by the owner by hand. Nothing in this
-repository uploads, tags remotely or pushes: there is no hosted CI and no
-git remote.
+`tools/release`) and published by the owner: the wheels with
+`make publish`, which uploads to PyPI with a token the owner gives it.
+Nothing uploads, tags remotely or pushes on its own: there is no hosted
+CI.
 
 ## What a release contains
 
@@ -76,14 +77,63 @@ sorted entries, one fixed time and fixed modes.
    binaries for this machine, raw and unpacked from its wheel.
    `go run ./tools/release -version 0.1.0 -check` repeats the check alone.
 3. Tag the commit locally: `git tag -a v0.1.0 -m "documentdriver 0.1.0"`.
-4. Publish (the owner's call; nothing here does it):
-   - the wheels to PyPI, e.g. `uv publish dist/documentdriver-0.1.0-*.whl`
-     with the owner's token from the environment;
+4. Publish (the owner's call; nothing runs it automatically):
+   - the wheels to PyPI with `make publish` (below);
    - the binaries and `SHA256SUMS` to the download host consumers fetch
      from, at a URL per version (for example `<base>/v0.1.0/<file>`).
 
    Publish the files exactly as built: a rebuild of the same commit gives
    the same bytes, but a different Go toolchain does not.
+5. Push the tag: `git push origin v0.1.0`.
+
+## Publishing to PyPI
+
+`make publish VERSION=x.y.z [PYPI=pypi|testpypi] [PUBLISH_DRY_RUN=1]`
+uploads the three wheels in `dist/` with `uv publish`. It re-runs the
+`-check` of step 2 first, wants exactly three wheels for the version,
+and for `PYPI=pypi` (the default) also a clean tree with HEAD tagged
+`vVERSION`. `--check-url` makes a rerun after a partial upload skip the
+files already there with the same hash. Only the wheels go to PyPI.
+
+One-time setup:
+
+1. Create accounts on [PyPI](https://pypi.org) and
+   [TestPyPI](https://test.pypi.org) (separate sites, separate
+   accounts), with two-factor authentication.
+2. The first upload creates the `documentdriver` project, so the first
+   token has to be account-scoped. After that, replace it with a token
+   scoped to the `documentdriver` project (Account settings, API tokens)
+   and delete the account-wide one.
+3. Keep each token in your password manager. Never put one in the
+   repository, a Makefile, `~/.pypirc` or a shell profile. Give it to a
+   single command:
+
+   ```sh
+   UV_PUBLISH_TOKEN=<testpypi token> make publish VERSION=0.2.0-rc1 PYPI=testpypi
+   ```
+
+Each release:
+
+1. Rehearse on TestPyPI with a pre-release version (TestPyPI, like PyPI,
+   never accepts the same file name twice, so a rehearsal burns that
+   version there), and install from it in a fresh venv:
+
+   ```sh
+   d="$(mktemp -d)" && uv venv --seed "$d/venv"
+   "$d/venv/bin/python" -m pip install --index-url https://test.pypi.org/simple/ documentdriver==0.2.0rc1
+   "$d/venv/bin/python" -c 'import documentdriver as d; print(d.run("docx", ["--version"]).result)'
+   ```
+
+2. Cut the real release (steps 1 to 3 above), then
+   `UV_PUBLISH_TOKEN=<pypi token> make publish VERSION=0.2.0`.
+3. A version on PyPI is permanent: it can be yanked but its files are
+   never replaced. A broken release is fixed by the next patch version.
+
+`PUBLISH_DRY_RUN=1` runs everything except the upload and needs no token.
+
+The repository has no hosted CI, so publishing uses an API token, not
+PyPI's trusted publishing (which needs a CI identity such as GitHub
+Actions).
 
 ## Pinning a release as a consumer
 
