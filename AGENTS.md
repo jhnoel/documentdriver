@@ -28,7 +28,13 @@ A [review] rule is still a rule; when you automate one, change its mark.
   once per clone with `make hooks` (it sets `core.hooksPath` to
   `.githooks`) and never bypass them with `--no-verify`. The pre-commit
   hook runs gofmt, `go vet`, `make norequire` and `internal/archtest`; the
-  pre-push hook runs `make ci`. `fuzz`, `make conformance` and
+  pre-push hook requires a `make ci` pass for every pushed commit. A pass
+  on a clean tree is recorded by tree hash and Go version in the common
+  git directory (shared by worktrees, so a pass on a `wt/` branch covers
+  the fast-forwarded main), and the hook pushes recorded commits at once;
+  for the clean HEAD with no record it runs `make ci` itself. Run
+  `make ci` before `git push`: git connects to the remote before the
+  hook runs, and the remote drops the connection during a long one. `fuzz`, `make conformance` and
   `make powerpoint-smoke` are manual only; the smoke target force-quits
   PowerPoint, so run it only after the maintainer agrees. `make conformance`
   is the OOXML conformance gate (ECMA-376 schemas, package integrity, Open

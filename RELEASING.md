@@ -62,6 +62,21 @@ sorted entries, one fixed time and fixed modes.
 
 ## Cutting a release
 
+The short way, on a clean `main` with everything for the release merged:
+
+```sh
+UV_PUBLISH_TOKEN=<pypi token> make ship VERSION=0.2.1
+```
+
+`make ship` runs the steps below in order: `make ci` (skipped when this
+tree already passed), `release-check`, `release`, `release-smoke`, the
+tag, `make publish` and `git push origin main v0.2.1`. If it stops
+partway, fix the cause and run the same command again: a tag already at
+HEAD is kept and wheels already on PyPI are skipped. It does not upload
+the raw binaries to a download host (step 4).
+
+The steps one by one:
+
 1. Merge everything for the release to `main` and run `make ci` there.
 2. Build and check, from a clean checkout of the commit:
 

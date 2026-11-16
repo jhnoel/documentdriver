@@ -1,5 +1,67 @@
 #!/bin/sh
 # Full gate before a push. Install once per clone with: make hooks
+#
+# Every commit being pushed must have passed `make ci`: its tree, with
+# the current Go toolchain, is listed in documentdriver-ci-passed in the
+# common git directory (make ci records it after a pass on a clean
+# tree). A pushed commit is covered too when it is already on the remote
+# (a tag for a pushed commit) or is an ancestor of another pushed commit
+# that passed (a release tag behind main); like any push, the gate checks
+# what is pushed, not each commit before it. When every
+# pushed commit is covered the push goes ahead at once. Otherwise, when
+# the only commit missing is the clean HEAD, make ci runs here; anything
+# else is refused with what to run.
+#
+# Run make ci before git push: git opens the connection to the remote
+# before this hook runs, and the remote may drop it during a long run.
 set -e
 cd "$(git rev-parse --show-toplevel)"
-make ci
+remote="$1" # git passes the remote's name, then its URL
+
+passed="$(git rev-parse --git-common-dir)/documentdriver-ci-passed"
+gov="$(go env GOVERSION)"
+zero=0000000000000000000000000000000000000000
+
+# listed reports whether a commit's tree passed make ci with this Go.
+listed() {
+	[ -f "$passed" ] && grep -qx "$(git rev-parse "$1^{tree}") $gov" "$passed"
+}
+
+commits=""
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
+	[ "$local_sha" = "$zero" ] && continue # a deletion pushes no code
+	commits="$commits $(git rev-parse "$local_sha^{commit}")"
+done
+
+good=""
+for c in $commits; do
+	if listed "$c"; then good="$good $c"; fi
+done
+missing=""
+for c in $commits; do
+	case " $good " in *" $c "*) continue ;; esac
+	covered=""
+	if [ -n "$(git for-each-ref --contains "$c" "refs/remotes/$remote/")" ]; then
+		covered=1 # already on the remote, gated when it got there
+	fi
+	for g in $good; do
+		[ -n "$covered" ] && break
+		if git merge-base --is-ancestor "$c" "$g"; then covered=1; fi
+	done
+	[ -n "$covered" ] && continue
+	case " $missing " in *" $c "*) ;; *) missing="$missing $c" ;; esac
+done
+
+if [ -z "$missing" ]; then
+	echo "pre-push: every pushed commit passed make ci ($gov) or is already on $remote"
+	exit 0
+fi
+
+if [ "$missing" = " $(git rev-parse HEAD)" ] && [ -z "$(git status --porcelain)" ]; then
+	echo "pre-push: HEAD has not passed make ci; running it now (next time run make ci before git push)"
+	make ci
+	exit 0
+fi
+echo "pre-push: these commits have not passed make ci with $gov:$missing"
+echo "pre-push: check each out on a clean tree and run make ci, then push again"
+exit 1

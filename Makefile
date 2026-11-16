@@ -1,4 +1,4 @@
-.PHONY: build test vet fmt norequire wasip1 check corpus fuzz tools tool-golangci-lint tool-govulncheck lint vuln race repro release release-check release-smoke publish ci hooks powerpoint-smoke word-smoke excel-smoke conformance oracle-write-gen oracle-write-record oracle-write-compare oracle-write-gate
+.PHONY: build test vet fmt norequire wasip1 check corpus fuzz tools tool-golangci-lint tool-govulncheck lint vuln race repro release release-check release-smoke publish ship ci hooks powerpoint-smoke word-smoke excel-smoke conformance oracle-write-gen oracle-write-record oracle-write-compare oracle-write-gate
 
 # Builds and tests are pure Go: no cgo. The one exception is `make race`,
 # because the race detector needs cgo on macOS and Linux (see below).
@@ -305,21 +305,70 @@ publish:
 	echo "publish: $$* -> $(PYPI)"; \
 	uv publish --trusted-publishing never --publish-url "$$up" --check-url "$$check" $(if $(PUBLISH_DRY_RUN),--dry-run) "$$@"
 
-# ci is the single local gate (run by the pre-push hook and before merging
-# to main). It runs every step even after a failure and lists what failed.
-# fuzz is included only when the target exists.
+# ship cuts a release in one command, from a clean main: make ci (skipped
+# when this tree already passed with this Go), release-check, release,
+# release-smoke, the annotated tag vVERSION, publish to PyPI, and git
+# push of main and the tag. A rerun after a failure picks up where it
+# stopped: a tag already at HEAD is kept, uploaded files are skipped and
+# the push is quick once ci passed. The token is UV_PUBLISH_TOKEN, as for
+# publish. It publishes and pushes, so it is the owner's command.
+# Usage: UV_PUBLISH_TOKEN=<pypi token> make ship VERSION=0.2.1
+ship:
+	@if [ -z "$(VERSION)" ]; then echo "usage: UV_PUBLISH_TOKEN=<token> make ship VERSION=x.y.z"; exit 2; fi
+	@set -e; \
+	[ -n "$$UV_PUBLISH_TOKEN" ] || { echo "ship: set UV_PUBLISH_TOKEN to a PyPI API token for documentdriver"; exit 1; }; \
+	[ "$$(git rev-parse --abbrev-ref HEAD)" = main ] || { echo "ship: check out main (releases are cut from main)"; exit 1; }; \
+	[ -z "$$(git status --porcelain)" ] || { echo "ship: the tree is not clean"; exit 1; }; \
+	if t="$$(git rev-parse -q --verify 'refs/tags/v$(VERSION)^{commit}')"; then \
+		[ "$$t" = "$$(git rev-parse HEAD)" ] || { echo "ship: v$(VERSION) already tags another commit ($$t)"; exit 1; }; \
+	fi; \
+	passed="$$(git rev-parse --git-common-dir)/$(CI_PASSED)"; \
+	if [ -f "$$passed" ] && grep -qx "$$(git rev-parse HEAD^{tree}) $$(go env GOVERSION)" "$$passed"; then \
+		echo "ship: this tree already passed make ci"; \
+	else \
+		$(MAKE) --no-print-directory ci; \
+	fi; \
+	$(MAKE) --no-print-directory release-check VERSION=$(VERSION); \
+	$(MAKE) --no-print-directory release VERSION=$(VERSION); \
+	$(MAKE) --no-print-directory release-smoke VERSION=$(VERSION); \
+	git rev-parse -q --verify 'refs/tags/v$(VERSION)' >/dev/null || git tag -a v$(VERSION) -m "documentdriver $(VERSION)"; \
+	$(MAKE) --no-print-directory publish VERSION=$(VERSION) PYPI=pypi; \
+	git push origin main v$(VERSION); \
+	echo "ship: documentdriver $(VERSION) is on PyPI and v$(VERSION) is pushed"
+
+# ci is the single local gate (run before merging to main, and by the
+# pre-push hook for a commit it has not passed). It runs every step even
+# after a failure and lists what failed. fuzz is included only when the
+# target exists.
+#
+# When it passes on a clean tree (git status --porcelain empty, so no
+# untracked or modified file took part), and the tree is still the same
+# afterwards, it appends "<tree hash> <go version>" to CI_PASSED in the
+# repository's common git directory, which every worktree shares. The
+# pre-push hook pushes a commit whose tree and Go toolchain are listed
+# without running ci again; a fast-forward merge keeps the tree, so a
+# pass on a wt/ branch covers main. The file is local and untracked.
 CI_STEPS = norequire vet test fmt lint vuln race repro wasip1 scaling
+CI_PASSED = documentdriver-ci-passed
 
 ci:
 	@steps="$(CI_STEPS)"; \
 	if grep -Eq '^fuzz:' Makefile; then steps="$$steps fuzz"; fi; \
+	tree=""; \
+	if [ -z "$$(git status --porcelain)" ]; then tree="$$(git rev-parse HEAD^{tree})"; fi; \
 	failed=""; \
 	for s in $$steps; do \
 		echo "=== make $$s"; \
 		$(MAKE) --no-print-directory $$s || failed="$$failed $$s"; \
 	done; \
 	if [ -n "$$failed" ]; then echo "make ci FAILED:$$failed"; exit 1; fi; \
-	echo "make ci OK: $$steps"
+	echo "make ci OK: $$steps"; \
+	if [ -n "$$tree" ] && [ -z "$$(git status --porcelain)" ] && [ "$$(git rev-parse HEAD^{tree})" = "$$tree" ]; then \
+		echo "$$tree $$(go env GOVERSION)" >> "$$(git rev-parse --git-common-dir)/$(CI_PASSED)"; \
+		echo "make ci: recorded tree $$tree as passed"; \
+	else \
+		echo "make ci: the tree was not clean (or changed during the run), so this pass is not recorded for git push"; \
+	fi
 
 # hooks points this clone at the committed hooks in .githooks (per clone;
 # it writes only to this clone's config). Never bypass them with
