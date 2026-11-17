@@ -261,3 +261,43 @@ func TestScalingMarks(t *testing.T) {
 	laws.Scales(t, "vsdx render marks", setup)
 	laws.TimeScales(t, "vsdx render marks", setup)
 }
+
+// TestRenderUnreadable checks the RNF rows: render of v10-defects
+// page2 and page4 (whose parts cannot be read) fails with exit 1,
+// unreadable_target at --page, whatever the overlay, and writes no
+// file. It runs without LibreOffice: the check is before it.
+func TestRenderUnreadable(t *testing.T) {
+	file := vsdxtest.Fixture(t, "v10-defects")
+	for _, tc := range []struct {
+		name string
+		page string
+		args []string
+	}{
+		{"plain page2", "page2", nil},
+		{"overlay page2", "page2", []string{"--overlay", "ids"}},
+		{"plain page4", "page4", nil},
+		{"overlay page4", "page4", []string{"--overlay", "ids,sites,glue"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			out := filepath.Join(t.TempDir(), "x.png")
+			var stdout, stderr bytes.Buffer
+			args := []string{"render", file, "--page", tc.page}
+			args = append(args, tc.args...)
+			args = append(args, "-o", out)
+			if code := run(args, &stdout, &stderr); code != 1 {
+				t.Fatalf("render %s: exit %d, want 1: %s", tc.page, code, stderr.String())
+			}
+			for _, want := range []string{`"code":"unreadable_target"`, `"path":"--page"`} {
+				if !strings.Contains(stderr.String(), want) {
+					t.Errorf("stderr = %q, want it to contain %s", stderr.String(), want)
+				}
+			}
+			if stdout.Len() != 0 {
+				t.Errorf("stdout = %q, want empty on failure", stdout.String())
+			}
+			if _, err := os.Stat(out); !os.IsNotExist(err) {
+				t.Errorf("output file exists after a refused render: stat err = %v", err)
+			}
+		})
+	}
+}

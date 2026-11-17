@@ -2,13 +2,15 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
+	"github.com/jhnoel/documentdriver/internal/geom"
 	"github.com/jhnoel/documentdriver/internal/pptx/render"
+	sharedrender "github.com/jhnoel/documentdriver/internal/render"
 )
 
 var renderCommand = &cli.Command{
@@ -43,9 +45,9 @@ func runRender(p *cli.Parsed, stdout io.Writer) error {
 	}
 	scale := render.DefaultScale
 	if p.Has("scale") {
-		v, err := strconv.ParseFloat(p.Get("scale"), 64)
-		if err != nil || v <= 0 {
-			return cli.Errorf(cli.CodeUsage, "--scale", "--scale is a positive number")
+		v, err := sharedrender.ParseScale(p.Get("scale"))
+		if err != nil {
+			return cli.Wrap(cli.CodeUsage, "--scale", err)
 		}
 		scale = v
 	}
@@ -58,19 +60,9 @@ func runRender(p *cli.Parsed, stdout io.Writer) error {
 			ids = append(ids, id)
 		}
 	}
-	var ov render.Overlay
-	for k := range strings.SplitSeq(p.Get("overlay"), ",") {
-		switch strings.TrimSpace(k) {
-		case "":
-		case "ids":
-			ov.IDs = true
-		case "sites":
-			ov.Sites = true
-		case "glue":
-			ov.Glue = true
-		default:
-			return cli.Errorf(cli.CodeUsage, "--overlay", "unknown overlay %q: ids, sites or glue", k)
-		}
+	ov, err := sharedrender.ParseOverlay(p.Get("overlay"))
+	if err != nil {
+		return cli.Wrap(cli.CodeUsage, "--overlay", err)
 	}
 	r, err := render.New()
 	if err != nil {
@@ -96,21 +88,10 @@ func runRender(p *cli.Parsed, stdout io.Writer) error {
 	if err := os.WriteFile(out, buf.Bytes(), 0o644); err != nil { //nolint:gosec // G306: a picture for the caller, not a secret
 		return cli.Errorf(cli.CodeIO, "--out", "write the picture: %v", err)
 	}
-	type keyEntry struct {
-		N  int    `json:"n"`
-		ID string `json:"id"`
-	}
 	b := res.Image.Bounds()
-	result := struct {
-		Saved  string     `json:"saved"`
-		Px     [2]int     `json:"px"`
-		Size   [2]float64 `json:"size"`
-		Scale  float64    `json:"scale"`
-		Hidden bool       `json:"hidden"`
-		Key    []keyEntry `json:"key"`
-	}{Saved: out, Px: [2]int{b.Dx(), b.Dy()}, Size: [2]float64{res.Info.W, res.Info.H}, Scale: scale, Hidden: res.Info.Hidden, Key: []keyEntry{}}
+	result := sharedrender.Result{Saved: out, Px: [2]int{b.Dx(), b.Dy()}, Size: [2]json.Number{json.Number(geom.FormatNum(res.Info.W)), json.Number(geom.FormatNum(res.Info.H))}, Scale: scale, Hidden: res.Info.Hidden, Key: []sharedrender.KeyEntry{}}
 	for _, k := range key {
-		result.Key = append(result.Key, keyEntry{N: k.N, ID: slide + "/" + k.ID})
+		result.Key = append(result.Key, sharedrender.KeyEntry{N: k.N, ID: slide + "/" + k.ID})
 	}
 	j, err := cli.Marshal(result)
 	if err != nil {
