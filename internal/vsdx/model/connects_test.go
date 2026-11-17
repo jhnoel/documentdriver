@@ -1,0 +1,167 @@
+package model
+
+import (
+	"fmt"
+	"slices"
+	"strings"
+	"testing"
+
+	"github.com/jhnoel/documentdriver/internal/geom"
+	"github.com/jhnoel/documentdriver/internal/laws"
+	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
+	"github.com/jhnoel/documentdriver/internal/vsdx/place"
+)
+
+// TestLinkConnectsV5 checks the V5 row: s3's FromGlue is "s1" and its
+// ToGlue "s2:1"; Connections are the s3, s4 and s5 entries in that
+// order; hazards are dangling-glue on page0/s4 and stale-connector on
+// page0/s5 whose detail states 80.5 pt, and none on s3.
+func TestLinkConnectsV5(t *testing.T) {
+	d, r := openFixture(t, "v5-glue")
+	p := buildPageOf(t, d, r, 0)
+	if o := byID(t, p, "page0/s3"); o.FromGlue != "s1" || o.ToGlue != "s2:1" {
+		t.Errorf("s3 FromGlue, ToGlue = %q, %q, want s1, s2:1", o.FromGlue, o.ToGlue)
+	}
+	if o := byID(t, p, "page0/s4"); o.ToGlue != "#9" {
+		t.Errorf("s4 ToGlue = %q, want #9", o.ToGlue)
+	}
+	if o := byID(t, p, "page0/s5"); o.FromGlue != "s1:1" {
+		t.Errorf("s5 FromGlue = %q, want s1:1", o.FromGlue)
+	}
+	want := []Connection{
+		{Connector: "page0/s3", From: "page0/s1", To: "page0/s2", FromGlue: "s1", ToGlue: "s2:1"},
+		{Connector: "page0/s4", ToGlue: "#9"},
+		{Connector: "page0/s5", From: "page0/s1", FromGlue: "s1:1"},
+	}
+	if !slices.Equal(p.Connections, want) {
+		t.Errorf("Connections = %+v, want %+v", p.Connections, want)
+	}
+	if len(p.Hazards) != 2 {
+		t.Fatalf("Hazards = %+v, want dangling-glue page0/s4 and stale-connector page0/s5", p.Hazards)
+	}
+	if h := p.Hazards[0]; h.Kind != "dangling-glue" || h.ID != "page0/s4" {
+		t.Errorf("Hazards[0] = %+v, want dangling-glue page0/s4", h)
+	}
+	if h := p.Hazards[1]; h.Kind != "stale-connector" || h.ID != "page0/s5" || !strings.Contains(h.Detail, "80.5 pt") {
+		t.Errorf("Hazards[1] = %+v, want stale-connector page0/s5 with detail stating 80.5 pt", h)
+	}
+	for _, h := range p.Hazards {
+		if h.ID == "page0/s3" {
+			t.Errorf("s3 has hazard %+v, want none", h)
+		}
+	}
+	if o := byID(t, p, "page0/s6"); o.FromGlue != "" || o.ToGlue != "" {
+		t.Errorf("s6 FromGlue, ToGlue = %q, %q, want empty (its Connect is not an end)", o.FromGlue, o.ToGlue)
+	}
+}
+
+// TestLinkConnectsV1 checks the V1 row for glue: no connections and
+// no hazards.
+func TestLinkConnectsV1(t *testing.T) {
+	d, r := openFixture(t, "v1-minimal")
+	p := buildPageOf(t, d, r, 0)
+	if len(p.Connections) != 0 {
+		t.Errorf("Connections = %+v, want none", p.Connections)
+	}
+	if len(p.Hazards) != 0 {
+		t.Errorf("Hazards = %+v, want none", p.Hazards)
+	}
+}
+
+// TestLinkConnectsV10 checks the V10 row for glue: a Connect with
+// FromSheet 0 is a note, no hazard, and no connection.
+func TestLinkConnectsV10(t *testing.T) {
+	d, r := openFixture(t, "v10-defects")
+	p := buildPageOf(t, d, r, 0)
+	if len(p.Connections) != 0 {
+		t.Errorf("Connections = %+v, want none", p.Connections)
+	}
+	if len(p.Hazards) != 0 {
+		t.Errorf("Hazards = %+v, want none", p.Hazards)
+	}
+	found := false
+	for _, n := range p.Notes {
+		if n.At == "page0" && strings.Contains(n.Reason, "connect") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("Notes = %+v, want a note at page0 about the connect with FromSheet 0", p.Notes)
+	}
+}
+
+// TestLinkConnectsStaleUnit checks the stale rule of the V5 row on
+// hand-placed objects: a whole-shape-glued end 28 pt outside its
+// target's box and a point-glued end 40 pt from its site are both
+// stale-connector, and an end on its site is not.
+func TestLinkConnectsStaleUnit(t *testing.T) {
+	connects := func(cell string) *tree.Node {
+		d, err := tree.ParseString("<Connects><Connect FromSheet='2' FromCell='BeginX' ToSheet='1' ToCell='" + cell + "'/></Connects>")
+		if err != nil {
+			t.Fatalf("ParseString: %v", err)
+		}
+		return d.Root()
+	}
+	run := func(end geom.Pt, sites []Site, cell string) *Page {
+		target := &Object{ID: "page0/s1", ShapeID: 1, Box: &geom.Box{X: 0, Y: 0, W: 72, H: 36}}
+		conn := &Object{ID: "page0/s2", ShapeID: 2, From: &end}
+		p := &Page{ID: "page0", Objects: []*Object{target, conn}}
+		byID := map[uint32]*placed{
+			1: {obj: target, frame: place.Page, sites: sites},
+			2: {obj: conn, frame: place.Page},
+		}
+		linkConnects(p, connects(cell), byID, 11)
+		return p
+	}
+	if p := run(geom.Pt{X: 100, Y: 18}, nil, "PinX"); len(p.Hazards) != 1 || p.Hazards[0].Kind != "stale-connector" || !strings.Contains(p.Hazards[0].Detail, "28 pt") {
+		t.Errorf("whole-shape outside: Hazards = %+v, want one stale-connector stating 28 pt", p.Hazards)
+	}
+	if p := run(geom.Pt{X: 10, Y: 50}, []Site{{N: 1, Pt: geom.Pt{X: 10, Y: 10}}}, "Connections.X1"); len(p.Hazards) != 1 || !strings.Contains(p.Hazards[0].Detail, "40 pt") {
+		t.Errorf("point off site: Hazards = %+v, want one stale-connector stating 40 pt", p.Hazards)
+	}
+	if p := run(geom.Pt{X: 10, Y: 10}, []Site{{N: 1, Pt: geom.Pt{X: 10, Y: 10}}}, "Connections.X1"); len(p.Hazards) != 0 {
+		t.Errorf("on site: Hazards = %+v, want none", p.Hazards)
+	}
+}
+
+// TestScalingLinkConnects checks the scaling row: BuildPage (which
+// links the Connects) on Generated(1000) and Generated(4000), N and
+// 4N, allocates at most 5.5 times as much (laws.Scales) and the
+// best-of-5 time ratio is at most 8.
+func TestScalingLinkConnects(t *testing.T) {
+	setup := func(n int) (func() error, error) {
+		d, r := openGenerated(t, n)
+		e, ok := d.Page(0)
+		if !ok {
+			return nil, fmt.Errorf("Generated(%d): no page 0", n)
+		}
+		return func() error {
+			p, err := BuildPage(d, r, e, Options{})
+			if err != nil {
+				return err
+			}
+			if len(p.Connections) == 0 {
+				return fmt.Errorf("Generated(%d): no connections", n)
+			}
+			return nil
+		}, nil
+	}
+	laws.Scales(t, "vsdx linkConnects", setup)
+	times := make([]float64, 0, 2)
+	for _, n := range []int{laws.Small, laws.Large} {
+		run, err := setup(n)
+		if err != nil {
+			t.Fatalf("setup at %d: %v", n, err)
+		}
+		cost, err := laws.Measure(5, run)
+		if err != nil {
+			t.Fatalf("at %d: %v", n, err)
+		}
+		times = append(times, float64(cost.Time))
+	}
+	ratio := times[1] / max(times[0], 1)
+	t.Logf("vsdx linkConnects: best times %.3g, %.3g: time ratio %.2f", times[0], times[1], ratio)
+	if ratio > 8 {
+		t.Errorf("vsdx linkConnects time ratio %.2f for 4 times the input (budget 8): super-linear", ratio)
+	}
+}
