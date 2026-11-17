@@ -2,9 +2,15 @@ package model
 
 import (
 	"math"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
+	"github.com/jhnoel/documentdriver/internal/opc"
+	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/inherit"
 )
 
@@ -160,5 +166,93 @@ func TestPaintNil(t *testing.T) {
 	paint(o, nil, nil)
 	if o.Fill != nil || o.Line != nil {
 		t.Errorf("paint with nil resolver and shape left Fill %+v Line %+v, want both absent", o.Fill, o.Line)
+	}
+}
+
+// TestPaintThemed checks the MF3 rows on V1's document with a shape
+// storing the cell: a Themed FillPattern omits the fill, a Themed
+// LinePattern omits the line, a Themed LineWeight with LinePattern 1
+// and a colour keeps the colour and dash with no weight, and a
+// FillPattern of "x" keeps the "not a number" omission.
+func TestPaintThemed(t *testing.T) {
+	_, r := openFixture(t, "v1-minimal")
+	for _, tc := range []struct {
+		name    string
+		xml     string
+		fill    *Paint
+		line    *Line
+		omitted []Omission
+	}{
+		{"FillPattern Themed", `<Shape ID='1'><Cell N='FillPattern' V='Themed'/></Shape>`, nil, nil, []Omission{{Prop: "fill", Reason: "themed value not derived"}}},
+		{"LinePattern Themed", `<Shape ID='1'><Cell N='LinePattern' V='Themed'/></Shape>`, nil, nil, []Omission{{Prop: "line", Reason: "themed value not derived"}}},
+		{"LineWeight Themed", `<Shape ID='1'><Cell N='LinePattern' V='1'/><Cell N='LineWeight' V='Themed'/><Cell N='LineColor' V='#FF0000'/></Shape>`, nil, &Line{Color: "#FF0000", Dash: "1"}, []Omission{{Prop: "line", Reason: "themed value not derived"}}},
+		{"FillPattern not a number", `<Shape ID='1'><Cell N='FillPattern' V='x'/></Shape>`, nil, nil, []Omission{{Prop: "fill", Reason: "FillPattern not a number"}}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			o := paintOf(t, r, tc.xml)
+			if !reflect.DeepEqual(o.Fill, tc.fill) {
+				t.Errorf("Fill = %+v, want %+v", o.Fill, tc.fill)
+			}
+			if !reflect.DeepEqual(o.Line, tc.line) {
+				t.Errorf("Line = %+v, want %+v", o.Line, tc.line)
+			}
+			if !reflect.DeepEqual(o.Omitted, tc.omitted) {
+				t.Errorf("Omitted = %v, want %v", o.Omitted, tc.omitted)
+			}
+		})
+	}
+}
+
+// corpusTest9Path returns the path of python-vsdx tests/test9.vsdx
+// under VSDX_CORPUS (a vsdx directory holding repos/<source>/, a
+// worktree root holding corpus/vsdx/repos, or a repos directory
+// directly), or "" when VSDX_CORPUS is unset or holds no such file.
+func corpusTest9Path() string {
+	dir := os.Getenv("VSDX_CORPUS")
+	if dir == "" {
+		return ""
+	}
+	rel := filepath.Join("python-vsdx", "tests", "test9.vsdx")
+	for _, cand := range []string{
+		filepath.Join(dir, "repos", rel),
+		filepath.Join(dir, "corpus", "vsdx", "repos", rel),
+		filepath.Join(dir, rel),
+	} {
+		if _, err := os.Stat(cand); err == nil {
+			return cand
+		}
+	}
+	return ""
+}
+
+// TestPaintThemedCorpus checks the MF3 corpus row: python-vsdx
+// tests/test9.vsdx page 0 has no object with a "not a number"
+// omission for a Themed cell. It skips without VSDX_CORPUS or
+// without that file in the corpus.
+func TestPaintThemedCorpus(t *testing.T) {
+	path := corpusTest9Path()
+	if path == "" {
+		t.Skip("no vsdx corpus (set VSDX_CORPUS)")
+	}
+	p, err := opc.Open(path)
+	if err != nil {
+		t.Fatalf("opc.Open(test9.vsdx): %v", err)
+	}
+	t.Cleanup(func() {
+		if err := p.Close(); err != nil {
+			t.Errorf("close test9.vsdx: %v", err)
+		}
+	})
+	d, err := doc.Open(p)
+	if err != nil {
+		t.Fatalf("doc.Open(test9.vsdx): %v", err)
+	}
+	page := buildPageOf(t, d, inherit.New(d), 0)
+	for _, o := range page.Objects {
+		for _, om := range o.Omitted {
+			if strings.Contains(om.Reason, "not a number") {
+				t.Errorf("%s omission %q, want none for a Themed cell", o.ID, om.Reason)
+			}
+		}
 	}
 }
