@@ -105,6 +105,29 @@ func TestReadErrors(t *testing.T) {
 	}
 }
 
+// TestJunkInvalidDocumentNW checks the NW row: read, find and xml
+// on a file that is not a zip give invalid_document with pptx's
+// form opc: <path>: zip: not a valid zip file (the path the caller
+// named).
+func TestJunkInvalidDocumentNW(t *testing.T) {
+	junk := t.TempDir() + "/junk.vsdx"
+	if err := os.WriteFile(junk, []byte("not a zip"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	want := "opc: " + junk + ": zip: not a valid zip file"
+	for _, args := range [][]string{
+		{"read", junk},
+		{"read", junk, "--page", "page0"},
+		{"find", junk, "Hello"},
+		{"xml", junk, "page0/s1"},
+	} {
+		code, _, errs := runCLI(t, args...)
+		if code != cli.ExitFailed || len(errs) != 1 || errs[0].Code != cli.CodeInvalidDocument || errs[0].Message != want {
+			t.Errorf("vsdx %v: exit %d, errors %+v; want invalid_document %q", args, code, errs, want)
+		}
+	}
+}
+
 // TestReadPage checks read --page and --master wire their options to
 // read.Page: the page, its detail, ids, region and units.
 func TestReadPage(t *testing.T) {

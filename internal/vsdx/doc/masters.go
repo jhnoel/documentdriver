@@ -2,6 +2,7 @@ package doc
 
 import (
 	"github.com/jhnoel/documentdriver/internal/ooxml/ctypes"
+	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
 
@@ -14,6 +15,10 @@ type MasterEntry struct {
 	BaseID   string
 	Hidden   bool
 	Part     string
+	// PageSheet is the Master's PageSheet in masters.xml (nil when
+	// the Master stores none): the frame a master is shown in, its
+	// PageWidth and PageHeight giving the page height (chunk NW).
+	PageSheet *tree.Node
 }
 
 // readMasters parses masters.xml into entries, in stored order, as
@@ -44,6 +49,7 @@ func (d *Document) readMasters() error {
 		if v, ok := elem.Attr("Hidden"); ok {
 			entry.Hidden, _ = vsd.Bool(v)
 		}
+		entry.PageSheet = childMain(elem, vsd.ElemPageSheet)
 		entry.Part = d.entryPart(rels, elem, vsd.MasterID(id))
 		d.Masters = append(d.Masters, entry)
 	}

@@ -45,7 +45,10 @@ func BuildPage(d *doc.Document, r *inherit.Resolver, e *doc.PageEntry, o Options
 }
 
 // BuildMaster builds the model of master m, read only, as BuildPage.
-// Chunk M1.
+// The master is shown in the frame of its own PageSheet (chunk NW):
+// masterFacts sets its page height from that sheet, and a master
+// without PageHeight leaves box, from and to out, with a note.
+// Chunk M1; the frame is NW.
 func BuildMaster(d *doc.Document, r *inherit.Resolver, m *doc.MasterEntry, o Options) (*Page, error) {
 	if d == nil {
 		return nil, fmt.Errorf("vsdx: no document")
@@ -56,11 +59,21 @@ func BuildMaster(d *doc.Document, r *inherit.Resolver, m *doc.MasterEntry, o Opt
 	p := &Page{Name: m.Name, NameU: m.NameU}
 	container := vsd.MasterID(m.ID)
 	p.ID = container
+	hasHeight := masterFacts(p, r, m)
 	contents, err := d.MasterContents(m.ID)
 	if err != nil {
 		return nil, err
 	}
-	return build(p, d, r, contents, container, o)
+	p, err = build(p, d, r, contents, container, o)
+	if err != nil {
+		return nil, err
+	}
+	if !hasHeight {
+		for _, obj := range p.Objects {
+			obj.Box, obj.From, obj.To = nil, nil, nil
+		}
+	}
+	return p, nil
 }
 
 // build walks the contents of container into p: the Shapes of the root

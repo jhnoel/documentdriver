@@ -4,11 +4,80 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/inherit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/sheet"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
+
+// sheetShape builds the resolver shape of a PageSheet node (a page's
+// or a master's): its indexed sheet and its LineStyle, FillStyle and
+// TextStyle attributes as stored, for the style-chain lookup of its
+// cells. A nil node gives an empty shape with no sheet. Chunk NW
+// (extracted from pageFacts, for pages and masters alike).
+func sheetShape(node *tree.Node) (*inherit.Shape, *sheet.Sheet) {
+	shape := &inherit.Shape{}
+	if node == nil {
+		return shape, nil
+	}
+	s, _ := sheet.Index(node)
+	shape.Sheet = s
+	for name, value := range node.AttrsSeq() {
+		var i int
+		switch name {
+		case "LineStyle":
+			i = 0
+		case "FillStyle":
+			i = 1
+		case "TextStyle":
+			i = 2
+		default:
+			continue
+		}
+		if u, err := strconv.ParseUint(value, 10, 32); err == nil {
+			shape.Styles[i], shape.HasStyle[i] = uint32(u), true
+		}
+	}
+	return shape, s
+}
+
+// masterFacts fills p's page height (and size, when both width and
+// height are derived) from master m's PageSheet, in the frame the
+// contract draft gives a master: its own page sheet, origin top-left,
+// y down. It reports whether PageHeight was derived; without it p
+// keeps H zero and the caller leaves box, from and to out, with a
+// note naming the master. Chunk NW.
+func masterFacts(p *Page, r *inherit.Resolver, m *doc.MasterEntry) bool {
+	if p == nil || m == nil {
+		return false
+	}
+	pageShape, _ := sheetShape(m.PageSheet)
+	wCell, _, wOK := r.Cell(pageShape, sheet.ShapeCell(vsd.CellPageWidth))
+	hCell, _, hOK := r.Cell(pageShape, sheet.ShapeCell(vsd.CellPageHeight))
+	w, wNum := vsd.Number(wCell.V)
+	h, hNum := vsd.Number(hCell.V)
+	hasHeight := hOK && hNum
+	if hasHeight {
+		p.H = h
+	}
+	if wOK && hasHeight && wNum {
+		p.W = w
+		p.HasSize = true
+		switch {
+		case h > w:
+			p.Orientation = "portrait"
+		case w > h:
+			p.Orientation = "landscape"
+		default:
+			p.Orientation = ""
+		}
+	}
+	if !hasHeight {
+		p.Notes = append(p.Notes, doc.Note{At: p.ID, Reason: "master has no PageHeight"})
+	}
+	return hasHeight
+}
 
 // pageFacts fills the page's size (PageWidth, PageHeight), Orientation
 // (from the size), PrintOrientation (PrintPageOrientation of the page
@@ -32,28 +101,7 @@ func pageFacts(p *Page, d *doc.Document, r *inherit.Resolver, e *doc.PageEntry) 
 	} else {
 		p.BackPage = ""
 	}
-	var pageSheet *sheet.Sheet
-	pageShape := &inherit.Shape{}
-	if e.PageSheet != nil {
-		pageSheet, _ = sheet.Index(e.PageSheet)
-		pageShape.Sheet = pageSheet
-		for name, value := range e.PageSheet.AttrsSeq() {
-			var i int
-			switch name {
-			case "LineStyle":
-				i = 0
-			case "FillStyle":
-				i = 1
-			case "TextStyle":
-				i = 2
-			default:
-				continue
-			}
-			if u, err := strconv.ParseUint(value, 10, 32); err == nil {
-				pageShape.Styles[i], pageShape.HasStyle[i] = uint32(u), true
-			}
-		}
-	}
+	pageShape, pageSheet := sheetShape(e.PageSheet)
 	wCell, _, wOK := r.Cell(pageShape, sheet.ShapeCell(vsd.CellPageWidth))
 	hCell, _, hOK := r.Cell(pageShape, sheet.ShapeCell(vsd.CellPageHeight))
 	w, wNum := vsd.Number(wCell.V)

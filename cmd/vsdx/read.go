@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
+	"github.com/jhnoel/documentdriver/internal/opc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/read"
 )
 
@@ -31,11 +32,23 @@ on a page whose origin is the top-left corner, y down, unless --units
 in. Every result starts with base, the file's hash, and has notes.`,
 }
 
-// readInput reads the drawing the caller named, once.
+// readInput reads the drawing the caller named, once, and opens it
+// as a package so a file that is not a zip (or trips a package
+// limit) is reported in pptx read's form, opc: <path>: <cause> (the
+// path the caller named), as invalid_document, before the bytes are
+// handed to the read layer (which opens them in memory and would
+// name "(in memory)"). Chunk NW.
 func readInput(path string) ([]byte, error) {
 	data, err := os.ReadFile(path) //nolint:gosec // G304: the drawing is the file the caller named
 	if err != nil {
 		return nil, cli.Errorf(cli.CodeIO, "", "read the drawing: %v", err)
+	}
+	pkg, err := opc.Open(path)
+	if err != nil {
+		return nil, cli.Wrap(cli.CodeInvalidDocument, "", err)
+	}
+	if err := pkg.Close(); err != nil {
+		return nil, cli.Errorf(cli.CodeIO, "", "close the drawing: %v", err)
 	}
 	return data, nil
 }

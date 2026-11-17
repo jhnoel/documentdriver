@@ -314,6 +314,64 @@ func TestBuildMasterV2(t *testing.T) {
 	}
 }
 
+// TestBuildMasterFrameNW checks the NW row: BuildMaster on V2's
+// master2 gives master2/s5 box [0,0,72,54] in its own PageSheet
+// frame (PageHeight 0.75 in, y down from the top), not y -54.
+func TestBuildMasterFrameNW(t *testing.T) {
+	d, r := openFixture(t, "v2-master")
+	m, ok := d.Master(2)
+	if !ok {
+		t.Fatalf("Master(2) not found, Masters = %v", d.Masters)
+	}
+	p, err := BuildMaster(d, r, m, Options{})
+	if err != nil {
+		t.Fatalf("BuildMaster(master2): %v", err)
+	}
+	o := byID(t, p, "master2/s5")
+	if o.Box == nil {
+		t.Fatal("master2/s5 Box = nil, want [0,0,72,54]")
+	}
+	if got := *o.Box; got.X != 0 || got.Y != 0 || got.W != 72 || got.H != 54 {
+		t.Errorf("master2/s5 Box = %v, want [0,0,72,54]", got)
+	}
+	if !p.HasSize || p.W != 1 || p.H != 0.75 {
+		t.Errorf("master2 W, H, HasSize = %v, %v, %v, want 1, 0.75, true", p.W, p.H, p.HasSize)
+	}
+}
+
+// TestBuildMasterNoPageHeightNW checks the NW row: a master built
+// without PageHeight (a test-built entry whose PageSheet stores no
+// PageHeight) leaves box, from and to out and carries the note
+// "master has no PageHeight".
+func TestBuildMasterNoPageHeightNW(t *testing.T) {
+	d, r := openFixture(t, "v2-master")
+	m, ok := d.Master(2)
+	if !ok {
+		t.Fatalf("Master(2) not found, Masters = %v", d.Masters)
+	}
+	noHeight := *m
+	noHeight.PageSheet = nil
+	p, err := BuildMaster(d, r, &noHeight, Options{})
+	if err != nil {
+		t.Fatalf("BuildMaster(master without PageHeight): %v", err)
+	}
+	for _, o := range p.Objects {
+		if o.Box != nil || o.From != nil || o.To != nil {
+			t.Errorf("%s Box, From, To = %v, %v, %v, want all nil", o.ID, o.Box, o.From, o.To)
+		}
+	}
+	want := doc.Note{At: "master2", Reason: "master has no PageHeight"}
+	found := false
+	for _, n := range p.Notes {
+		if n == want {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("notes = %v, want %v", p.Notes, want)
+	}
+}
+
 // TestBuildPageNil checks that BuildPage and BuildMaster refuse a
 // nil document, page or master with an error, never a panic.
 func TestBuildPageNil(t *testing.T) {
