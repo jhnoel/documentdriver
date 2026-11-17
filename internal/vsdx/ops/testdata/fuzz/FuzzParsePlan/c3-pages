@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"ops\":[{\"op\":\"page.set\",\"at\":\"page0\",\"orientation\":\"landscape\"},{\"op\":\"page.add\",\"name\":\"Wide\",\"as\":\"p2\",\"size\":[1224,792]}]}")

@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"ops\":[{\"op\":\"object.add\",\"at\":\"page0\",\"geom\":\"triangle\",\"box\":[0,0,10,10]},{\"op\":\"page.set\",\"at\":\"page0\",\"orientation\":\"upright\"},{\"op\":\"page.set\",\"at\":\"page0\",\"size\":[0,10]}]}")

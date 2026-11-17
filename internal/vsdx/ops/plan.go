@@ -25,6 +25,50 @@ type Plan struct {
 // the shared decoder and then every op's rules; all document-independent
 // faults come back together in plan order. Chunk O0.
 func ParsePlan(text []byte) (*Plan, cli.Errors) {
-	_ = text
-	return nil, cli.Errors{cli.Errorf(cli.CodeOperationFailed, "", "vsdx plans are not implemented yet")}
+	env, d := cli.ParsePlan(text, "units")
+	if env == nil {
+		return nil, d.Errs()
+	}
+	p := &Plan{Base: env.Base}
+	if u := env.Settings["units"]; u != nil {
+		d.Value(u, "units", &p.Units)
+		if u.Kind == cli.String && p.Units != "pt" && p.Units != "in" {
+			d.Fail(cli.CodeInvalidPlan, "units", u, "units is pt or in, not %q", p.Units)
+		}
+	}
+	for i, v := range env.Ops {
+		name := env.Names[i]
+		if name == "" {
+			continue
+		}
+		path := cli.Index("ops", i)
+		def, ok := Lookup(name)
+		if !ok {
+			d.UnknownOp(i, v, "vsdx")
+			continue
+		}
+		spec := def.New()
+		n := len(d.Errs())
+		d.Value(v, path, spec)
+		if len(d.Errs()) > n {
+			continue
+		}
+		if msg, field, bad := checkSpec(spec); bad {
+			at, val := path, v
+			if field != "" {
+				at = cli.Join(path, field)
+				val = v.Get(field)
+				if val == nil {
+					val = v
+				}
+			}
+			d.Add(cli.Errorf(cli.CodeInvalidOperation, at, "%s", msg), val)
+			continue
+		}
+		p.Ops = append(p.Ops, spec)
+	}
+	if errs := d.Errs(); len(errs) > 0 {
+		return nil, errs
+	}
+	return p, nil
 }

@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"ops\":[{\"op\":\"object.add\",\"at\":\"page0\",\"geom\":\"rect\",\"box\":[0,0,10,10],\"fill\":{\"hex\":\"red\"}}]}")

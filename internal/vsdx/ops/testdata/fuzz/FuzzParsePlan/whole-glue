@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"ops\":[{\"op\":\"object.set\",\"at\":\"page0/s1\",\"to_glue\":\"s3\"}]}")

@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"ops\":[{\"op\":\"page.set\",\"at\":\"page0\",\"size\":[0,10]}]}")
