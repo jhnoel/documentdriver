@@ -211,7 +211,7 @@ race:
 # the same command, and the 20k/5k ratio of the largest runs at most 5.5 (darwin and linux; other platforms skip).
 scaling:
 	go test -count=1 -run '^(TestScaling|TestMemoryBudget)' ./internal/docx/apply ./internal/docx/create ./internal/pptx/apply ./internal/xlsx/read ./internal/xlsx/apply ./internal/xlsx/shift ./internal/vsdx/read
-	go test -count=1 -run '^TestMemGate$' ./tools/memgate
+	go test -count=1 -run '^TestMemGate$$' ./tools/memgate
 
 # repro builds each CLI of REPRO_CMDS twice from `git archive HEAD` in two
 # separate clean directories (fresh build caches, different paths) with
