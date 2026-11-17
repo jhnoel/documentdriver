@@ -31,6 +31,9 @@ func (s *ObjectDeleteSpec) Run(ws *edit.Workspace, aliases map[string]string, _ 
 	if err := targetRefusal(ws, shapeAddr, "at", true); err != nil {
 		return "", nil, nil, "", err
 	}
+	if err := inheritedSubShapeRefusal(ws, shapeAddr, "at"); err != nil {
+		return "", nil, nil, "", err
+	}
 	deleted, changed, err := ws.DeleteShape(shapeAddr)
 	if err != nil {
 		if errors.Is(err, edit.ErrNotFound) {
