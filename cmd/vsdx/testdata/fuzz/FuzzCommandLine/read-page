@@ -1,0 +1,2 @@
+go test fuzz v1
+string("read\x00drawing.vsdx\x00--page\x00page0")

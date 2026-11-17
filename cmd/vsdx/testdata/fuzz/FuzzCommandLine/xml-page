@@ -1,0 +1,2 @@
+go test fuzz v1
+string("xml\x00drawing.vsdx\x00page0")
