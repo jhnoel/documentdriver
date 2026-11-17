@@ -175,6 +175,36 @@ func TestRunRefusals(t *testing.T) {
 	}
 }
 
+// TestRunOutputMode checks the CRF row: vsdx create -o x.vsdx writes
+// x.vsdx with mode 0644, not CreateTemp's 0600, with no plan, an empty
+// plan, and a plan that changes the drawing.
+func TestRunOutputMode(t *testing.T) {
+	parsed, errs := ops.ParsePlan([]byte(createPlanText(t, "c2-shapes.json")))
+	if len(errs) != 0 {
+		t.Fatalf("ParsePlan(c2): %v", errs)
+	}
+	for _, c := range []struct {
+		name string
+		plan *ops.Plan
+	}{
+		{"blank", nil},
+		{"empty", &ops.Plan{}},
+		{"plan", parsed},
+	} {
+		out := filepath.Join(t.TempDir(), "x.vsdx")
+		if _, err := Run(c.plan, Options{Out: out, IDs: ids.Fixed(0, fixedClock)}); err != nil {
+			t.Fatalf("%s create: %v", c.name, err)
+		}
+		info, err := os.Stat(out)
+		if err != nil {
+			t.Fatalf("%s stat out: %v", c.name, err)
+		}
+		if got := info.Mode().Perm(); got != 0o644 {
+			t.Errorf("%s create output mode %o, want 644", c.name, got)
+		}
+	}
+}
+
 // TestRunDeterministic checks the CR1 determinism row: the same plan
 // and clock twice give equal bytes.
 func TestRunDeterministic(t *testing.T) {
