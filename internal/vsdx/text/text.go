@@ -115,30 +115,63 @@ func Parse(el *tree.Node) (b Body, skipped int) {
 		skipped++
 		return s
 	}
+	// emit writes one segment of segRunes runes, seg, lying between
+	// separators (or at the end of a text node), counting it against
+	// MaxText as take does and cutting (counting one skip) when it
+	// runs past the bound; the separator after an over-long segment
+	// is then not handled by the caller.
+	emit := func(seg string, segRunes int) {
+		if runes+segRunes <= MaxText {
+			runes += segRunes
+			if seg != "" {
+				ensure()
+				terminated = false
+				buf.WriteString(seg)
+			}
+			return
+		}
+		keep := MaxText - runes
+		truncated := seg
+		if keep <= 0 {
+			truncated = ""
+		} else {
+			n := 0
+			for i := range seg {
+				if n == keep {
+					truncated = seg[:i]
+					break
+				}
+				n++
+			}
+		}
+		runes, cut = MaxText, true
+		skipped++
+		if truncated != "" {
+			ensure()
+			terminated = false
+			buf.WriteString(truncated)
+		}
+	}
 	for c := range el.ChildrenSeq() {
 		switch c.Kind() {
 		case tree.TextNode, tree.CDataNode:
-			for s := c.Data(); len(s) > 0 && !cut; {
-				nl, br := strings.IndexByte(s, '\n'), strings.Index(s, "\u2028")
-				idx, sep, isNL := -1, 0, false
-				if nl >= 0 && (br < 0 || nl < br) {
-					idx, sep, isNL = nl, 1, true
-				} else if br >= 0 {
-					idx, sep = br, utf8.RuneLen('\u2028')
+			// One pass over the runes of the text node: a line feed
+			// ends the current segment and starts a new paragraph,
+			// a U+2028 ends it with a line break in the paragraph;
+			// segStart and segRunes delimit the segment so far.
+			s := c.Data()
+			segStart, segRunes := 0, 0
+			for i := 0; i < len(s) && !cut; {
+				r, size := utf8.DecodeRuneInString(s[i:])
+				if r != '\n' && r != '\u2028' {
+					segRunes++
+					i += size
+					continue
 				}
-				chunk := s
-				if idx >= 0 {
-					chunk = s[:idx]
-				}
-				if chunk = take(chunk); chunk != "" {
-					ensure()
-					terminated = false
-					buf.WriteString(chunk)
-				}
-				if idx < 0 || cut {
+				emit(s[segStart:i], segRunes)
+				if cut {
 					break
 				}
-				s = s[idx+sep:]
 				if runes >= MaxText {
 					cut, skipped = true, skipped+1
 					break
@@ -146,13 +179,18 @@ func Parse(el *tree.Node) (b Body, skipped int) {
 				runes++
 				flush()
 				ensure()
-				if isNL {
+				if r == '\n' {
 					started, terminated = false, true
 				} else {
 					terminated = false
 					last := &paras[len(paras)-1]
 					last.Runs = append(last.Runs, Run{CP: cp, Br: true, Field: -1})
 				}
+				i += size
+				segStart, segRunes = i, 0
+			}
+			if !cut {
+				emit(s[segStart:], segRunes)
 			}
 		case tree.ElementNode:
 			switch c.Local() {

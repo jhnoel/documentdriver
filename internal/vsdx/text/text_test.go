@@ -5,11 +5,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jhnoel/documentdriver/internal/laws"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 )
 
-// parseText parses src as a document and returns Parse of its root.
-func parseText(t *testing.T, src string) (Body, int) {
+// parseRoot parses src as a document and returns its root element.
+func parseRoot(t *testing.T, src string) *tree.Node {
 	t.Helper()
 	doc, err := tree.ParseString(src)
 	if err != nil {
@@ -19,7 +20,13 @@ func parseText(t *testing.T, src string) (Body, int) {
 	if root == nil {
 		t.Fatalf("ParseString(%q) has no root", src)
 	}
-	return Parse(root)
+	return root
+}
+
+// parseText parses src as a document and returns Parse of its root.
+func parseText(t *testing.T, src string) (Body, int) {
+	t.Helper()
+	return Parse(parseRoot(t, src))
 }
 
 // TestParsePlain checks the chunk T1 rows: Parse of a Text element
@@ -87,6 +94,32 @@ func TestParsePlain(t *testing.T) {
 			plain: "a\nb",
 		},
 		{
+			name: "newlines and line breaks",
+			src:  "<Text>a\nb\u2028c\n\u2028</Text>",
+			want: Body{Paras: []Para{
+				{PP: -1, Runs: []Run{{CP: -1, Text: "a", Field: -1}}},
+				{PP: -1, Runs: []Run{
+					{CP: -1, Text: "b", Field: -1},
+					{CP: -1, Br: true, Field: -1},
+					{CP: -1, Text: "c", Field: -1},
+				}},
+				{PP: -1, Runs: []Run{{CP: -1, Br: true, Field: -1}}},
+			}},
+			plain: "a\nb\nc\n\n",
+		},
+		{
+			name:  "three newlines",
+			src:   "<Text>\n\n\n</Text>",
+			want:  Body{Paras: []Para{{PP: -1}, {PP: -1}, {PP: -1}}, Terminated: true},
+			plain: "\n\n",
+		},
+		{
+			name:  "two line breaks",
+			src:   "<Text>\u2028\u2028</Text>",
+			want:  Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: -1, Br: true, Field: -1}, {CP: -1, Br: true, Field: -1}}}}},
+			plain: "\n\n",
+		},
+		{
 			name:  "tab",
 			src:   "<Text>a\tb</Text>",
 			want:  Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: -1, Text: "a\tb", Field: -1}}}}},
@@ -136,6 +169,58 @@ func TestParsePlain(t *testing.T) {
 			}
 			if skipped != tc.wantSkip {
 				t.Errorf("Parse(%q) skipped = %d; want %d", tc.src, skipped, tc.wantSkip)
+			}
+		})
+	}
+}
+
+// TestParseScaling checks chunk T1F rows 4 and 5: Parse of a Text
+// holding N = 50,000 and 4N = 200,000 separators (newlines, U+2028
+// line separators, and alternating "x\n" pairs) costs, at four
+// times the units, at most 5.5 times the bytes and allocations
+// and at most 8 times the time (the minimum of 5 runs, measured
+// through laws.Measure); a quadratic scan for U+2028 after each
+// newline would cost about 16 times the time.
+func TestParseScaling(t *testing.T) {
+	cases := []struct {
+		name string
+		unit string
+	}{
+		{"newlines", "\n"},
+		{"line separators", "\u2028"},
+		{"alternating x and newlines", "x\n"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var costs [2]laws.Cost
+			for i, n := range []int{50000, 200000} {
+				root := parseRoot(t, "<Text>"+strings.Repeat(tc.unit, n)+"</Text>")
+				run := func() error {
+					_, _ = Parse(root)
+					return nil
+				}
+				if err := run(); err != nil { // warm: first-use caches
+					t.Fatalf("%s at %d: %v", tc.name, n, err)
+				}
+				cost, err := laws.Measure(5, run)
+				if err != nil {
+					t.Fatalf("%s at %d: %v", tc.name, n, err)
+				}
+				costs[i] = cost
+			}
+			bytes := float64(costs[1].Bytes) / float64(max(costs[0].Bytes, 1))
+			mallocs := float64(costs[1].Mallocs) / float64(max(costs[0].Mallocs, 1))
+			tm := float64(costs[1].Time) / float64(max(costs[0].Time, 1))
+			t.Logf("%s: 50000 units %d bytes %d allocs, 200000 units %d bytes %d allocs: ratio bytes %.2f, allocs %.2f, time %.2f",
+				tc.name, costs[0].Bytes, costs[0].Mallocs, costs[1].Bytes, costs[1].Mallocs, bytes, mallocs, tm)
+			if bytes > 5.5 {
+				t.Errorf("%s allocates %.2f times the bytes for 4 times the input (budget 5.5): super-linear", tc.name, bytes)
+			}
+			if mallocs > 5.5 {
+				t.Errorf("%s makes %.2f times the allocations for 4 times the input (budget 5.5): super-linear", tc.name, mallocs)
+			}
+			if tm > 8 {
+				t.Errorf("%s takes %.2f times the time for 4 times the input (budget 8): super-linear", tc.name, tm)
 			}
 		})
 	}
