@@ -7,31 +7,22 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/jhnoel/documentdriver/internal/laws"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 	"github.com/jhnoel/documentdriver/internal/plan"
 	"github.com/jhnoel/documentdriver/internal/repo"
-	"github.com/jhnoel/documentdriver/internal/vsdx/create"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsdxtest"
 )
 
-// blankPath writes the blank drawing (create.Template) as a file in
-// t.TempDir and returns its path: the blank of the E1 rows, with one
-// empty page0.
+// blankPath builds the blank drawing from its golden members
+// (testdata/vsdx/create/blank, which create.Template is held equal to)
+// and returns its path: the blank of the E1 rows, with one empty page0.
+// It does not call create, which imports ops, which imports edit.
 func blankPath(t *testing.T) string {
 	t.Helper()
-	data, err := create.Template(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
-	if err != nil {
-		t.Fatalf("create.Template: %v", err)
-	}
-	path := filepath.Join(t.TempDir(), "blank.vsdx")
-	if err := os.WriteFile(path, data, 0o600); err != nil {
-		t.Fatalf("write blank: %v", err)
-	}
-	return path
+	return vsdxtest.Blank(t)
 }
 
 // goldenEmit returns the bytes of the designer-authored emit golden

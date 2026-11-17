@@ -40,6 +40,24 @@ func Fixture(t testing.TB, name string) string {
 	return writePackage(t, name+".vsdx", fixtureMembers(t, name))
 }
 
+// Blank builds the blank drawing from its golden members,
+// testdata/vsdx/create/blank (create.Template is held byte-equal to
+// them), alone (no common members), and returns its path. Tests of
+// packages create imports (edit, ops) use it instead of create, which
+// would be an import cycle.
+func Blank(t testing.TB) string {
+	t.Helper()
+	root, err := repo.Root()
+	if err != nil {
+		t.Fatalf("vsdxtest: repo root: %v", err)
+	}
+	members := map[string]string{}
+	if err := collectMembers(filepath.Join(root, "testdata", "vsdx", "create", "blank"), false, members); err != nil {
+		t.Fatalf("vsdxtest: blank: %v", err)
+	}
+	return writePackage(t, "blank.vsdx", members)
+}
+
 // OpenPackage opens the built fixture testdata/vsdx/<name> with
 // opc.Open and returns its package, closing it in t.Cleanup.
 // Chunk MF6.
