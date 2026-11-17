@@ -200,7 +200,8 @@ func TestLinkConnectsMasterSites(t *testing.T) {
 
 // TestLinkConnectsGeneratedHazardsAcrossViews checks row 5: the
 // hazards of Generated(5000) are identical (count and contents) in
-// the default view, with Sites and with Full.
+// the default view, with Sites and with Full, and are one stale end per
+// generated connector besides off-page ones.
 func TestLinkConnectsGeneratedHazardsAcrossViews(t *testing.T) {
 	d, r := openGenerated(t, 5000)
 	e, ok := d.Page(0)
@@ -222,10 +223,16 @@ func TestLinkConnectsGeneratedHazardsAcrossViews(t *testing.T) {
 				o, len(p.Hazards), firstHazard(p.Hazards), len(want), firstHazard(want))
 		}
 	}
+	// Generated places shapes off the page as well (OPF's off-page
+	// hazards); every other hazard is a connector's stale end.
 	stale := 0
 	for _, h := range want {
-		if h.Kind == "stale-connector" {
+		switch h.Kind {
+		case "stale-connector":
 			stale++
+		case "off-page":
+		default:
+			t.Errorf("Generated(5000): unexpected hazard %+v", h)
 		}
 	}
 	if stale != 2500 {

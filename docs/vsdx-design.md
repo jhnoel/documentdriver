@@ -448,7 +448,18 @@ Adjacent runs that show the same formatting are merged (pptx's
 `canonical`). A shape without its own `Text` shows its master shape's
 (origin `master`); `text.set` on it writes local Text and local
 Character/Paragraph rows only for what the HTML sets differently from
-the inherited rows. `text` (plain, `find`'s haystack) puts `\n` between
+the inherited rows. `text.replace` on such a shape writes local Text
+only: the master's Text markup (cp, pp, tp, fld) with the match
+replaced, and no Character or Paragraph rows, which Visio inherits from
+the master by row index, so the text looks the same in Visio. The html
+then follows the rule above: the master's rows are under the shape's
+own Text and are not shown (V2 s1 `<p><i>Process</i></p>` origin
+master becomes `<p>Step</p>` origin local, Character row 0 Style still
+2 with origin master). Copying the master's rows locally would change
+nothing in the html (a local Style 2 over an inherited 2 shows
+nothing) and would store redundant rows; and `text.set` of the html
+read then shows writes nothing (the identity write). Designer ruling on
+TRP, 2026-11-17. `text` (plain, `find`'s haystack) puts `\n` between
 paragraphs, a break as `\n`, a field as its cached text.
 
 ### (g) Opaque and refused in v1 (closed list)
@@ -693,7 +704,15 @@ Hot paths and how they stay linear:
   small and shared); pages do not.
 - **Connects.** One map from shape ID to object; O(connects).
 - **find** visits pages one at a time (parse, build, match, drop,
-  `Part.Forget`): peak is the largest page, not the document.
+  `Part.Forget`): peak is the largest page, not the document. Within a
+  page it streams (chunk RM2): one top-level shape parsed, built and
+  matched at a time, so the peak is the page bytes plus one shape.
+  Measured before RM2 (2026-11-17, Generated(20000), page XML 15.1 MB,
+  GOGC 50): find held the whole tree and model, 78 MB live and
+  134-137 MB RSS; read default 97 MB live, 179 MB RSS; `--detail full`
+  116 MB live, 220-272 MB RSS. The tree is 46 MB (3 times the page
+  XML) and `Object.Node` pinned it through marshalling; RM2 releases
+  it. RSS1 gates RSS at twice the live budgets, every run.
 - **Summary** counts objects with `tree.ScanString` (memory in the
   depth).
 
