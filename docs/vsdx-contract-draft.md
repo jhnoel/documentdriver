@@ -140,13 +140,7 @@ across nesting); `parent` names the group.
 html`), a subset of it: `<p>`, `<ul><li>` (`data-char`), `<b> <i> <u>
 <s>`, `<br/>`, `<span style>` with `font-weight`, `font-style`,
 `text-decoration` (the `normal`/`none` forms), `font-size`, `color`,
-`font-family`, and `data-color` beside `color` in pptx's canonical form
-(`<span style="color:#FF0000" data-color="#FF0000">`: the colour as
-written, always an sRGB `#RRGGBB` in Visio; an indexed colour is written
-resolved); on input `data-color` takes only `#RRGGBB` and must agree
-with `color` when both are given (pptx's scheme forms such as
-`accent1 lumMod=75000` are refused: Visio text has no theme colour
-references); paragraph `style` with `text-align`, `margin-left`,
+`font-family`; paragraph `style` with `text-align`, `margin-left`,
 `margin-right`, `text-indent`, `margin-top`, `margin-bottom`,
 `line-height`. Fields are placeholders:
 `<opaque data-ref="page0/s5/field:1" data-kind="field" data-text="3"></opaque>`

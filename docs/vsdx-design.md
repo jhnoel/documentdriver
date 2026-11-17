@@ -415,7 +415,7 @@ and is in the differs list. Formats are built by `model.formats`
 | `Style` bits 1, 2, 4 | `<b>`, `<i>`, `<u>` |
 | `Strikethru` | `<s>` |
 | `Size` (inches) | `font-size` in pt |
-| `Color` (`#RRGGBB` or an index, resolved by `doc.Document.Color`) | `style="color:#RRGGBB" data-color="#RRGGBB"` (pptx's canonical form, decided 2026-11-17: data-color is "the colour as written"; for Visio that is always an sRGB value, so the mirror is true; X1 keeps its fixed-point law) |
+| `Color` (`#RRGGBB` or an index, resolved by `doc.Document.Color`) | `color:#RRGGBB` |
 | `Font` (the face name as stored: `Calibri`, `Arial`; `Themed` omitted) | `font-family:'Calibri'` |
 | `\u2028` | `<br/>` |
 | `fld` | `<opaque data-ref="page0/s5/field:1" data-kind="field" data-text="cached"></opaque>` (contract placeholder; `data-text` derived, ignored on input) |
