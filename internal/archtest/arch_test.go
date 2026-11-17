@@ -162,7 +162,7 @@ var (
 	// edit layer (comment and header parts) and the xlsx edit layer
 	// (sheet.add's worksheet, the calcChain the recalculation policy
 	// removes) call them inside a plan transaction.
-	partWriterPkgs = set(pkgOPC, pkgOps, pkgOracle, pkgDocxEdit, pkgXlsxEdit)
+	partWriterPkgs = set(pkgOPC, pkgOps, pkgOracle, pkgDocxEdit, module+"/internal/vsdx/edit", pkgXlsxEdit)
 	// Test files that write parts directly: opc tests, ops tests whose
 	// deliberately misbehaving operations write undeclared parts, and
 	// render_test, which builds its fixture deck.
