@@ -197,6 +197,29 @@ func sitesOf(r *inherit.Resolver, s *inherit.Shape, f place.Frame, t place.Trans
 	return sites
 }
 
+// siteAt returns the connection site of s numbered n (the n of
+// Connections.Xn, row IX + 1) in f's space, and false when there is
+// no such row or its X or Y cannot be read. It is sitesOf for the one
+// site, so a caller that needs only one site (the glue pass) builds no
+// site list.
+func siteAt(r *inherit.Resolver, s *inherit.Shape, f place.Frame, t place.Transform, pageH float64, n int) (geom.Pt, bool) {
+	for _, row := range r.Rows(s, vsd.SectionConnection) {
+		if row.Key.RowIX+1 != n {
+			continue
+		}
+		x, ok := rowNumber(r, s, row.Key, "X")
+		if !ok {
+			return geom.Pt{}, false
+		}
+		y, ok := rowNumber(r, s, row.Key, "Y")
+		if !ok {
+			return geom.Pt{}, false
+		}
+		return place.Site(f, t, x, y, pageH), true
+	}
+	return geom.Pt{}, false
+}
+
 // rowNumber reads the effective number of cell cellName of the row
 // named by key for s, reporting false when it is absent or not a number.
 func rowNumber(r *inherit.Resolver, s *inherit.Shape, key sheet.Key, cellName string) (float64, bool) {
@@ -208,22 +231,26 @@ func rowNumber(r *inherit.Resolver, s *inherit.Shape, key sheet.Key, cellName st
 }
 
 // transformOrigin returns the most inherited origin of the transform
-// cells of s, as box's origin.
+// cells of s, as box's origin. It folds the cells' origins one at a
+// time (boxOrigin is the maximum over its arguments, so a fold equals
+// the fold of the whole list), rather than building the list first.
 func transformOrigin(r *inherit.Resolver, s *inherit.Shape) inherit.Origin {
 	names := [9]string{vsd.CellPinX, vsd.CellPinY, vsd.CellWidth, vsd.CellHeight, vsd.CellLocPinX, vsd.CellLocPinY, vsd.CellAngle, vsd.CellFlipX, vsd.CellFlipY}
-	origins := make([]inherit.Origin, 0, len(names))
+	best := inherit.Origin("")
 	for _, name := range names {
 		_, origin, _ := r.Cell(s, sheet.ShapeCell(name))
-		origins = append(origins, origin)
+		best = boxOrigin(best, origin)
 	}
-	return boxOrigin(origins...)
+	return best
 }
 
 // setOrigin records origin for prop on o, creating the origins map when
-// o has none.
+// o has none. The map is sized for the properties one object can hold
+// (from, to, box, fill, line, html), so its first insert builds one
+// bucket array instead of growing by rehashing.
 func setOrigin(o *Object, prop string, origin inherit.Origin) {
 	if o.Origins == nil {
-		o.Origins = map[string]inherit.Origin{}
+		o.Origins = make(map[string]inherit.Origin, 6)
 	}
 	o.Origins[prop] = origin
 }

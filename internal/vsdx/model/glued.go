@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
@@ -50,7 +49,7 @@ func gluedOf(p *Page, c *tree.Node, byID map[uint32]*placed) bool {
 	fromPl.obj.Glued = append(fromPl.obj.Glued, Glued{Cell: fromCell, To: vsd.Glue(toID, toCell, resolved)})
 	if !resolved {
 		p.Hazards = append(p.Hazards, Hazard{Kind: "dangling-glue", ID: fromPl.obj.ID,
-			Detail: fmt.Sprintf("%s names shape %d, which is not on the page", fromCell, toID)})
+			Detail: fromCell + " names shape " + strconv.FormatUint(uint64(toID), 10) + ", which is not on the page"})
 	}
 	return true
 }

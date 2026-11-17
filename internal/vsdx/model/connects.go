@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -177,7 +176,7 @@ func linkConnects(p *Page, r *inherit.Resolver, connects *tree.Node, byID map[ui
 		}
 		if !resolved {
 			p.Hazards = append(p.Hazards, Hazard{Kind: "dangling-glue", ID: fromPl.obj.ID,
-				Detail: fmt.Sprintf("%s names shape %d, which is not on the page", glueName, toID)})
+				Detail: glueName + " names shape " + strconv.FormatUint(uint64(toID), 10) + ", which is not on the page"})
 			continue
 		}
 		l.stale(fromID, fromPl, begin, which, toID, toPl, toCell, glue)
@@ -225,7 +224,7 @@ func (l *linker) stale(fromID uint32, fromPl *placed, begin bool, which string, 
 		}
 		if d := math.Hypot(dx, dy); d > place.GlueTolerance {
 			l.p.Hazards = append(l.p.Hazards, Hazard{Kind: "stale-connector", ID: fromPl.obj.ID,
-				Detail: fmt.Sprintf("%s end is %s pt outside shape %s", which, geom.FormatNum(d), glue)})
+				Detail: which + " end is " + geom.FormatNum(d) + " pt outside shape " + glue})
 		}
 		return
 	}
@@ -233,20 +232,13 @@ func (l *linker) stale(fromID uint32, fromPl *placed, begin bool, which string, 
 	if !ok {
 		return
 	}
-	var site *geom.Pt
-	for _, s := range l.targetSites(toID, toPl) {
-		if s.N == n {
-			pt := s.Pt
-			site = &pt
-			break
-		}
-	}
-	if site == nil {
+	site, found := l.sitePoint(toID, toPl, n)
+	if !found {
 		return
 	}
 	if d := math.Hypot(end.X-site.X, end.Y-site.Y); d > place.GlueTolerance {
 		l.p.Hazards = append(l.p.Hazards, Hazard{Kind: "stale-connector", ID: fromPl.obj.ID,
-			Detail: fmt.Sprintf("%s end is %s pt from site %s", which, geom.FormatNum(d), glue)})
+			Detail: which + " end is " + geom.FormatNum(d) + " pt from site " + glue})
 	}
 }
 
@@ -291,19 +283,25 @@ func (l *linker) boxOf(toID uint32, toPl *placed) (geom.Box, bool) {
 	return box, true
 }
 
-// targetSites returns the target's connection sites: the Sites the walk
-// derived (with Sites or Full), or, when they were not derived, the
-// sites of the shape indexed on demand. A nil result means the
-// target has no Connection rows to glue to.
-func (l *linker) targetSites(toID uint32, toPl *placed) []Site {
+// sitePoint returns the target's connection site numbered n: the Sites
+// the walk derived (with Sites or Full), or, when they were not
+// derived, the one site of the shape indexed on demand (siteAt, so no
+// site list is built just to scan it). It reports false when the
+// target has no Connection row to glue to.
+func (l *linker) sitePoint(toID uint32, toPl *placed, n int) (geom.Pt, bool) {
 	if toPl.obj.Sites != nil {
-		return toPl.obj.Sites
+		for _, s := range toPl.obj.Sites {
+			if s.N == n {
+				return s.Pt, true
+			}
+		}
+		return geom.Pt{}, false
 	}
 	t, _, ok := transformOf(l.r, l.shapeOf(toID, toPl))
 	if !ok {
-		return nil
+		return geom.Pt{}, false
 	}
-	return sitesOf(l.r, l.shapeOf(toID, toPl), toPl.frame, t, l.pageH)
+	return siteAt(l.r, l.shapeOf(toID, toPl), toPl.frame, t, l.pageH, n)
 }
 
 // siteNumber returns the 1-based point number of a Connections.Xn

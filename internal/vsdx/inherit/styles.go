@@ -41,19 +41,6 @@ func (r *Resolver) styleCell(c vsd.Category, id uint32, k sheet.Key) (sheet.Cell
 	return found, ok
 }
 
-// styleSheets returns the sheets of the style chain of category c from
-// id, in chain order, at most MaxStyleDepth of them. A cycle or a chain
-// longer than MaxStyleDepth stops the walk with one note and the sheets
-// before it. Chunk H3.
-func (r *Resolver) styleSheets(c vsd.Category, id uint32) []*sheet.Sheet {
-	var out []*sheet.Sheet
-	r.styleWalk(c, id, func(sh *sheet.Sheet) bool {
-		out = append(out, sh)
-		return false
-	})
-	return out
-}
-
 // styleWalk visits the sheets of the style chain of category c from id
 // in chain order, stopping when visit returns true, when the chain
 // ends, when a style repeats (a cycle) or when it would pass
