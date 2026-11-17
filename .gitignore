@@ -1,6 +1,7 @@
 /pptx
 /docx
 /xlsx
+/vsdx
 /dist/
 *.test
 *.out

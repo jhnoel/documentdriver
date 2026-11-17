@@ -15,6 +15,7 @@ build:
 	go build -o pptx ./cmd/pptx
 	go build -o docx ./cmd/docx
 	go build -o xlsx ./cmd/xlsx
+	go build -o vsdx ./cmd/vsdx
 
 test:
 	go test ./...

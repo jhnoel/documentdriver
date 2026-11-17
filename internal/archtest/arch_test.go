@@ -49,7 +49,7 @@ const (
 // the dev-only harnesses under eval/ and tools/: the shared engine
 // (internal/opc, internal/ooxml, ...) never depends on a format, and one
 // format never depends on the other.
-var formats = []string{"pptx", "docx", "xlsx"}
+var formats = []string{"pptx", "docx", "xlsx", "vsdx"}
 
 // importsFormat reports the format whose packages path belongs to, or "".
 func importsFormat(path string) string {
