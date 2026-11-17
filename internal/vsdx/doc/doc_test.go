@@ -76,7 +76,8 @@ func TestOpenV1(t *testing.T) {
 }
 
 // TestOpenV2 checks the V2 row: masters 2 "Process" and 3 "Pair" at
-// their master parts, found by Master.
+// their master parts, found by Master, each with its PageSheet
+// (chunk NW: the frame BuildMaster reads the page height from).
 func TestOpenV2(t *testing.T) {
 	d := openFixture(t, "v2-master")
 	want := []MasterEntry{
@@ -87,6 +88,10 @@ func TestOpenV2(t *testing.T) {
 		t.Fatalf("Masters = %v, want %v", d.Masters, want)
 	}
 	for i, m := range d.Masters {
+		if m.PageSheet == nil {
+			t.Errorf("Masters[%d].PageSheet = nil, want the Master's PageSheet", i)
+		}
+		m.PageSheet = nil
 		if m != want[i] {
 			t.Errorf("Masters[%d] = %+v, want %+v", i, m, want[i])
 		}
