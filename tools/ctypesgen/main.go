@@ -21,6 +21,7 @@
 //	-src docx-lo=<docxdriver>/corpus/lo             (the LibreOffice test-doc corpus, Word-authored files)
 //	-src docx-test-docs=<docxdriver>/test-docs
 //	-src xlsx-repos=<documentdriver>/corpus/xlsx/repos (Excel workbooks from public repos, eval/corpus/fetch-xlsx.sh)
+//	-src vsdx-repos=<documentdriver>/corpus/vsdx/repos (Visio drawings from public repos, eval/corpus/fetch-vsdx.sh, 53 accepted)
 //
 // where docxdriver was at git 1ffb0d7afed108a36a25c4a95b489d0fbf7a58bb.
 // corpus/renders holds this tool's own outputs and is not scanned.

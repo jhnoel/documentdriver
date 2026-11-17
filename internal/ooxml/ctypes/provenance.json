@@ -46,6 +46,14 @@
         "Microsoft Excel": 1106,
         "Microsoft Macintosh Excel": 70
       }
+    },
+    {
+      "label": "vsdx-repos",
+      "scanned": 65,
+      "accepted": 53,
+      "accepted_by_application": {
+        "Microsoft Visio": 53
+      }
     }
   ],
   "content_types": [
@@ -324,11 +332,11 @@
     },
     {
       "value": "application/vnd.ms-office.vbaProject",
-      "files": 34,
+      "files": 36,
       "word": 0,
       "powerpoint": 1,
       "excel": 33,
-      "visio": 0,
+      "visio": 2,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/keyframes.pptx",
@@ -388,6 +396,110 @@
       }
     },
     {
+      "value": "application/vnd.ms-visio.drawing.macroEnabled.main+xml",
+      "files": 3,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 3,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/SimpleMacro.vsdm",
+        "sha256": "c2ce0edb7d5b53b536af1937068b347817489193de6ae11ae4e51dc8e69447fc"
+      }
+    },
+    {
+      "value": "application/vnd.ms-visio.drawing.main+xml",
+      "files": 48,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 48,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "application/vnd.ms-visio.master+xml",
+      "files": 40,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 40,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "application/vnd.ms-visio.masters+xml",
+      "files": 40,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 40,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "application/vnd.ms-visio.page+xml",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "application/vnd.ms-visio.pages+xml",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "application/vnd.ms-visio.validation+xml",
+      "files": 2,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 2,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "libvisio/src/test/data/tdf154379-QuickStyleFillMatrix.vsdx",
+        "sha256": "4a2c8a08567f9c6e59d4784affea1ecf024d6890dd8c2c9020e0c71d64d37783"
+      }
+    },
+    {
+      "value": "application/vnd.ms-visio.windows+xml",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
       "value": "application/vnd.ms-word.keyMapCustomizations+xml",
       "files": 2,
       "word": 2,
@@ -415,11 +527,11 @@
     },
     {
       "value": "application/vnd.openxmlformats-officedocument.custom-properties+xml",
-      "files": 417,
+      "files": 470,
       "word": 138,
       "powerpoint": 179,
       "excel": 100,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -532,11 +644,11 @@
     },
     {
       "value": "application/vnd.openxmlformats-officedocument.extended-properties+xml",
-      "files": 3556,
+      "files": 3609,
       "word": 1218,
       "powerpoint": 1162,
       "excel": 1176,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -1117,11 +1229,11 @@
     },
     {
       "value": "application/vnd.openxmlformats-officedocument.theme+xml",
-      "files": 3535,
+      "files": 3564,
       "word": 1213,
       "powerpoint": 1162,
       "excel": 1160,
-      "visio": 0,
+      "visio": 29,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -1377,11 +1489,11 @@
     },
     {
       "value": "application/vnd.openxmlformats-package.core-properties+xml",
-      "files": 3554,
+      "files": 3607,
       "word": 1218,
       "powerpoint": 1161,
       "excel": 1175,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -1416,11 +1528,11 @@
     },
     {
       "value": "application/vnd.openxmlformats-package.relationships+xml",
-      "files": 3556,
+      "files": 3609,
       "word": 1218,
       "powerpoint": 1162,
       "excel": 1176,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -1585,11 +1697,11 @@
     },
     {
       "value": "image/x-emf",
-      "files": 125,
+      "files": 174,
       "word": 64,
       "powerpoint": 41,
       "excel": 20,
-      "visio": 0,
+      "visio": 49,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/KEY02.pptx",
@@ -1717,11 +1829,11 @@
     },
     {
       "value": "http://schemas.microsoft.com/office/2006/relationships/vbaProject",
-      "files": 35,
+      "files": 37,
       "word": 0,
       "powerpoint": 1,
       "excel": 34,
-      "visio": 0,
+      "visio": 2,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/keyframes.pptx",
@@ -2043,6 +2155,97 @@
       }
     },
     {
+      "value": "http://schemas.microsoft.com/visio/2010/relationships/document",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "http://schemas.microsoft.com/visio/2010/relationships/master",
+      "files": 40,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 40,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "http://schemas.microsoft.com/visio/2010/relationships/masters",
+      "files": 40,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 40,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "http://schemas.microsoft.com/visio/2010/relationships/page",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "http://schemas.microsoft.com/visio/2010/relationships/pages",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "value": "http://schemas.microsoft.com/visio/2010/relationships/validation",
+      "files": 2,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 2,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "libvisio/src/test/data/tdf154379-QuickStyleFillMatrix.vsdx",
+        "sha256": "4a2c8a08567f9c6e59d4784affea1ecf024d6890dd8c2c9020e0c71d64d37783"
+      }
+    },
+    {
+      "value": "http://schemas.microsoft.com/visio/2010/relationships/windows",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
       "value": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate",
       "files": 44,
       "word": 44,
@@ -2189,11 +2392,11 @@
     },
     {
       "value": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties",
-      "files": 415,
+      "files": 468,
       "word": 138,
       "powerpoint": 179,
       "excel": 98,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -2332,11 +2535,11 @@
     },
     {
       "value": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties",
-      "files": 3452,
+      "files": 3505,
       "word": 1218,
       "powerpoint": 1061,
       "excel": 1173,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2479,11 +2682,11 @@
     },
     {
       "value": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
-      "files": 732,
+      "files": 733,
       "word": 231,
       "powerpoint": 407,
       "excel": 94,
-      "visio": 0,
+      "visio": 1,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -2845,11 +3048,11 @@
     },
     {
       "value": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
-      "files": 3535,
+      "files": 3564,
       "word": 1212,
       "powerpoint": 1162,
       "excel": 1161,
-      "visio": 0,
+      "visio": 29,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -3028,11 +3231,11 @@
     },
     {
       "value": "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties",
-      "files": 3547,
+      "files": 3600,
       "word": 1218,
       "powerpoint": 1159,
       "excel": 1170,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -3054,11 +3257,11 @@
     },
     {
       "value": "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail",
-      "files": 1068,
+      "files": 1117,
       "word": 39,
       "powerpoint": 959,
       "excel": 70,
-      "visio": 0,
+      "visio": 49,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -3153,11 +3356,11 @@
     {
       "rel": "http://schemas.microsoft.com/office/2006/relationships/vbaProject",
       "content_type": "application/vnd.ms-office.vbaProject",
-      "files": 34,
+      "files": 36,
       "word": 0,
       "powerpoint": 1,
       "excel": 33,
-      "visio": 0,
+      "visio": 2,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/keyframes.pptx",
@@ -3515,6 +3718,118 @@
       }
     },
     {
+      "rel": "http://schemas.microsoft.com/visio/2010/relationships/document",
+      "content_type": "application/vnd.ms-visio.drawing.macroEnabled.main+xml",
+      "files": 3,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 3,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/SimpleMacro.vsdm",
+        "sha256": "c2ce0edb7d5b53b536af1937068b347817489193de6ae11ae4e51dc8e69447fc"
+      }
+    },
+    {
+      "rel": "http://schemas.microsoft.com/visio/2010/relationships/document",
+      "content_type": "application/vnd.ms-visio.drawing.main+xml",
+      "files": 48,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 48,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "rel": "http://schemas.microsoft.com/visio/2010/relationships/master",
+      "content_type": "application/vnd.ms-visio.master+xml",
+      "files": 40,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 40,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "rel": "http://schemas.microsoft.com/visio/2010/relationships/masters",
+      "content_type": "application/vnd.ms-visio.masters+xml",
+      "files": 40,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 40,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "rel": "http://schemas.microsoft.com/visio/2010/relationships/page",
+      "content_type": "application/vnd.ms-visio.page+xml",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "rel": "http://schemas.microsoft.com/visio/2010/relationships/pages",
+      "content_type": "application/vnd.ms-visio.pages+xml",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
+      "rel": "http://schemas.microsoft.com/visio/2010/relationships/validation",
+      "content_type": "application/vnd.ms-visio.validation+xml",
+      "files": 2,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 2,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "libvisio/src/test/data/tdf154379-QuickStyleFillMatrix.vsdx",
+        "sha256": "4a2c8a08567f9c6e59d4784affea1ecf024d6890dd8c2c9020e0c71d64d37783"
+      }
+    },
+    {
+      "rel": "http://schemas.microsoft.com/visio/2010/relationships/windows",
+      "content_type": "application/vnd.ms-visio.windows+xml",
+      "files": 53,
+      "word": 0,
+      "powerpoint": 0,
+      "excel": 0,
+      "visio": 53,
+      "source": {
+        "label": "vsdx-repos",
+        "path": "apache-poi/test-data/diagram/60489.vsdx",
+        "sha256": "15494702ecb5554c1dfaee2c09ac35e2ea656e2eed7ba4ba0cf1039e6125fbe1"
+      }
+    },
+    {
       "rel": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/audio",
       "content_type": "audio/mpeg",
       "files": 4,
@@ -3713,11 +4028,11 @@
     {
       "rel": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties",
       "content_type": "application/vnd.openxmlformats-officedocument.custom-properties+xml",
-      "files": 415,
+      "files": 468,
       "word": 138,
       "powerpoint": 179,
       "excel": 98,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -3881,11 +4196,11 @@
     {
       "rel": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties",
       "content_type": "application/vnd.openxmlformats-officedocument.extended-properties+xml",
-      "files": 3452,
+      "files": 3505,
       "word": 1218,
       "powerpoint": 1061,
       "excel": 1173,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4091,11 +4406,11 @@
     {
       "rel": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
       "content_type": "image/x-emf",
-      "files": 94,
+      "files": 95,
       "word": 33,
       "powerpoint": 41,
       "excel": 20,
-      "visio": 0,
+      "visio": 1,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/KEY02.pptx",
@@ -4693,11 +5008,11 @@
     {
       "rel": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
       "content_type": "application/vnd.openxmlformats-officedocument.theme+xml",
-      "files": 3534,
+      "files": 3563,
       "word": 1212,
       "powerpoint": 1162,
       "excel": 1160,
-      "visio": 0,
+      "visio": 29,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4917,11 +5232,11 @@
     {
       "rel": "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties",
       "content_type": "application/vnd.openxmlformats-package.core-properties+xml",
-      "files": 3547,
+      "files": 3600,
       "word": 1218,
       "powerpoint": 1159,
       "excel": 1170,
-      "visio": 0,
+      "visio": 53,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4959,11 +5274,11 @@
     {
       "rel": "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail",
       "content_type": "image/x-emf",
-      "files": 31,
+      "files": 80,
       "word": 31,
       "powerpoint": 0,
       "excel": 0,
-      "visio": 0,
+      "visio": 49,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/AnchorId.docx",
