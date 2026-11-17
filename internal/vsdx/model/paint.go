@@ -9,8 +9,8 @@ import (
 // paint derives fill and line: FillPattern 0 is fill "none", otherwise
 // FillForegnd through doc.Document.Color; LinePattern 0 is line "none",
 // otherwise LineWeight in points, LineColor through Color and
-// LinePattern as Dash. "Themed" and unresolvable colours omit the
-// colour with the reason. Chunk M2b.
+// LinePattern as Dash. A Themed pattern or weight, and unresolvable
+// colours, omit with the reason. Chunk M2b, MF3.
 func paint(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 	if o == nil {
 		return
@@ -21,14 +21,19 @@ func paint(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 
 // paintFill sets o's fill from the effective FillPattern and
 // FillForegnd cells of s: a pattern of 0 is fill none, otherwise the
-// foreground colour through paintColor. A themed or unresolvable
-// foreground, or a pattern that is not a number, leaves the fill out
-// with an omission; a foreground no sheet stores leaves it out
-// silently when no pattern is stored either. The fill's origin is the
-// most inherited of the pattern and foreground cells' origins.
+// foreground colour through paintColor. A Themed pattern (checked
+// before the pattern is parsed as a number), a themed or
+// unresolvable foreground, or a pattern that is not a number, leaves
+// the fill out with an omission; a foreground no sheet stores leaves
+// it out silently when no pattern is stored either. The fill's origin
+// is the most inherited of the pattern and foreground cells' origins.
 func paintFill(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 	pattern, patternOrigin, patternOk := r.Cell(s, sheet.ShapeCell(vsd.CellFillPattern))
 	if patternOk {
+		if pattern.V == vsd.ValueThemed {
+			o.Omitted = append(o.Omitted, Omission{Prop: "fill", Reason: "themed value not derived"})
+			return
+		}
 		n, ok := vsd.Number(pattern.V)
 		if !ok {
 			o.Omitted = append(o.Omitted, Omission{Prop: "fill", Reason: vsd.CellFillPattern + " not a number"})
@@ -64,13 +69,19 @@ func paintFill(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 // and LineColor cells of s: a pattern of 0 is line none, otherwise the
 // weight in points (stored inches through vsd.PointsPerInch), the
 // colour through paintColor and the pattern as stored for Dash. A
-// themed or unresolvable colour omits only the colour, keeping the
-// weight and dash; a cell that is not a number omits that part. A line
-// no sheet stores at all is left out. The line's origin is the most
-// inherited of the origins of the parts it shows.
+// Themed pattern (checked before the pattern is parsed as a number)
+// leaves the whole line out; a Themed weight (checked before it is
+// parsed as a number) or a themed or unresolvable colour omits only
+// that part, keeping the rest; a cell that is not a number omits that
+// part. A line no sheet stores at all is left out. The line's origin
+// is the most inherited of the origins of the parts it shows.
 func paintLine(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 	pattern, patternOrigin, patternOk := r.Cell(s, sheet.ShapeCell(vsd.CellLinePattern))
 	if patternOk {
+		if pattern.V == vsd.ValueThemed {
+			o.Omitted = append(o.Omitted, Omission{Prop: "line", Reason: "themed value not derived"})
+			return
+		}
 		n, ok := vsd.Number(pattern.V)
 		if !ok {
 			o.Omitted = append(o.Omitted, Omission{Prop: "line", Reason: vsd.CellLinePattern + " not a number"})
@@ -90,7 +101,9 @@ func paintLine(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 	line := &Line{}
 	var origins []inherit.Origin
 	if weightOk {
-		if n, ok := vsd.Number(weight.V); ok {
+		if weight.V == vsd.ValueThemed {
+			o.Omitted = append(o.Omitted, Omission{Prop: "line", Reason: "themed value not derived"})
+		} else if n, ok := vsd.Number(weight.V); ok {
 			line.W = n * vsd.PointsPerInch
 			line.HasW = true
 			origins = append(origins, weightOrigin)
