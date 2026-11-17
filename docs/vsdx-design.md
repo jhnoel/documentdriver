@@ -297,7 +297,7 @@ Policy (the xlsx precedent made explicit for Visio):
        `CM`, `M`, `PT`, `DEG`, `RAD`, and none), each with its exact
        factor to internal units; any other unit makes the formula
        outside the grammar.
-     - *Acceptance requires a corpus sweep* (P2 chunk F4): over every
+     - *Acceptance requires a corpus sweep* (chunk FL4): over every
        cell of `VSDX_CORPUS` whose formula is in the closed grammar, the
        evaluator's result on the file's own cached inputs equals the
        cached `V` (within 1e-9 relative). Disagreements are classified
@@ -448,7 +448,18 @@ Adjacent runs that show the same formatting are merged (pptx's
 `canonical`). A shape without its own `Text` shows its master shape's
 (origin `master`); `text.set` on it writes local Text and local
 Character/Paragraph rows only for what the HTML sets differently from
-the inherited rows. `text` (plain, `find`'s haystack) puts `\n` between
+the inherited rows. `text.replace` on such a shape writes local Text
+only: the master's Text markup (cp, pp, tp, fld) with the match
+replaced, and no Character or Paragraph rows, which Visio inherits from
+the master by row index, so the text looks the same in Visio. The html
+then follows the rule above: the master's rows are under the shape's
+own Text and are not shown (V2 s1 `<p><i>Process</i></p>` origin
+master becomes `<p>Step</p>` origin local, Character row 0 Style still
+2 with origin master). Copying the master's rows locally would change
+nothing in the html (a local Style 2 over an inherited 2 shows
+nothing) and would store redundant rows; and `text.set` of the html
+read then shows writes nothing (the identity write). Designer ruling on
+TRP, 2026-11-17. `text` (plain, `find`'s haystack) puts `\n` between
 paragraphs, a break as `\n`, a field as its cached text.
 
 ### (g) Opaque and refused in v1 (closed list)
@@ -693,7 +704,15 @@ Hot paths and how they stay linear:
   small and shared); pages do not.
 - **Connects.** One map from shape ID to object; O(connects).
 - **find** visits pages one at a time (parse, build, match, drop,
-  `Part.Forget`): peak is the largest page, not the document.
+  `Part.Forget`): peak is the largest page, not the document. Within a
+  page it streams (chunk RM2): one top-level shape parsed, built and
+  matched at a time, so the peak is the page bytes plus one shape.
+  Measured before RM2 (2026-11-17, Generated(20000), page XML 15.1 MB,
+  GOGC 50): find held the whole tree and model, 78 MB live and
+  134-137 MB RSS; read default 97 MB live, 179 MB RSS; `--detail full`
+  116 MB live, 220-272 MB RSS. The tree is 46 MB (3 times the page
+  XML) and `Object.Node` pinned it through marshalling; RM2 releases
+  it. RSS1 gates RSS at twice the live budgets, every run.
 - **Summary** counts objects with `tree.ScanString` (memory in the
   depth).
 
@@ -1013,7 +1032,7 @@ conclusion holds.
 | 9 | Disjointness | done (`read/page.go`, `inherit/styles.go`, `doc/contents.go`, `doc/colors.go` stubs; W4 owns FUZZ_TARGETS; dependency fixes in chunks.md) |
 | 10 | Signatures | done (`vsd.FieldID`, `KindField`, `PageID` dup; `ParaFormat.BulletChar`; `model.Site` with N; `linkConnects` with the Connects node, placed shapes and page height; M4 uses math.Hypot; T2 rows) |
 | 11 | Missing chunks; split M2 and L1; drop vsdxnaive | done (M5 formats, M6 page sheet and layers, M7 cells and origins, Glued in M4b; M2a-c; L1a-c; vsdxnaive dropped) |
-| 12 | R closure | recorded in decision c, binding at P2 (with F4 corpus sweep and `formula.OneD`) |
+| 12 | R closure | recorded in decision c, binding at P2 (with the FL4 corpus sweep and `formula.OneD`) |
 | 13 | Contract §13: find is an addition; render option | done (contract draft; decision 7) |
 | 14 | HTML rule for inherited character properties | done (decision f: own formatting only, as pptx; V7 to be re-derived in FX; V1/V2 rows on Visio-shaped fixtures) |
 | opt | off-page after page.set; `page0~2`; casefold messages; V4 s13 row | taken (off-page hazard in the orientation rule; `PageID(id, dup)`; casefold_test messages; P1 row 13); H1 presizing hint taken in H1's spec |
