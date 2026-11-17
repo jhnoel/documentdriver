@@ -436,6 +436,13 @@ palette) chunk V3 records. `doc.Document.Color` resolves a cell value:
 hex, then Colors, then the built-in table; an index neither holds (255)
 is omitted with a note.
 
+**Field placeholders on input (ruling 2026-11-17).** `field:N` is the
+shape's N-th field in text order, as read numbers it. ParseHTML keeps a
+placeholder unresolved (`text.Run.Ref`); the operation that writes the
+text checks its shape and maps N to the IX of that shape's N-th `fld`.
+A font name holding `;` is not shown in the html (the shared CSS
+splitter splits on `;`), so read never writes markup apply refuses.
+
 Adjacent runs that show the same formatting are merged (pptx's
 `canonical`). A shape without its own `Text` shows its master shape's
 (origin `master`); `text.set` on it writes local Text and local
