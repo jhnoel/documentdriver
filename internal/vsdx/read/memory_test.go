@@ -22,12 +22,23 @@ import (
 // build (Page: "walk" after the walk and "link" after the glue pass,
 // with the nodes released on this path; Find: "shape" as the
 // streamed walk goes and "notes" after its notes pass). read.Page
-// default holds peak live heap at most 92 MB, --detail full at most
-// 60 MB plus 3 times the output, Find at most 45 MB, and the 20k/5k
-// peak ratio is at most 5.5. The allocation budgets are the measured
-// numbers with about twenty percent of margin (default: 87.7 MB at
-// 5k, 357.5 MB at 20k; full: 150.2 MB and 608.5 MB; find: 38.1 MB
-// and 152.4 MB).
+// default and --detail full hold peak live heap at most 2 KB per
+// object plus 3 times the output (memoryCeiling), Find at most
+// min(2 KB per object, 45 MB), and the 20k/5k peak ratio is at most
+// 5.5. The budgets are the designer's (RM1, restored after RM2; a
+// chunk does not loosen the checks that judge it). Allocation: page
+// default 96 MB at 5k and 388 MB at 20k, full 164 MB and 662 MB (RM1's
+// numbers); find 46 MB and 183 MB (lowered by RM2's streaming, kept).
+// Measured at 7d09f90: default 87.7 and 357.5 MB, full 150.2 and
+// 608.5 MB, find 38.1 and 152.4 MB; RM3 removes marshalPage's second
+// marshal and lowers the page budgets.
+
+// memoryCeiling is the peak-live ceiling for a page read with objects
+// objects and outBytes bytes of output: 2 KB per object plus 3 times
+// the output.
+func memoryCeiling(objects, outBytes int) uint64 {
+	return uint64(objects)*2048 + 3*uint64(outBytes)
+}
 
 // generatedBytes returns the bytes of Generated(n).
 func generatedBytes(t *testing.T, n int) []byte {
@@ -62,11 +73,11 @@ func peakRatio(t *testing.T, name string, run func(n int, mark func(string)) err
 }
 
 // TestMemoryBudgetPageDefault is the RM2 gate for read.Page default:
-// Generated(5000) and Generated(20000) stay under 92 MB of peak live
-// heap at the "walk" and "link" checkpoints, and the peak ratio is
+// Generated(5000) and Generated(20000) stay under memoryCeiling of
+// peak live heap at the "walk" and "link" checkpoints, and the peak ratio is
 // at most 5.5.
 func TestMemoryBudgetPageDefault(t *testing.T) {
-	alloc := map[int]uint64{5000: laws.MB(105), 20000: laws.MB(430)}
+	alloc := map[int]uint64{5000: laws.MB(96), 20000: laws.MB(388)}
 	for _, n := range []int{5000, 20000} {
 		data := generatedBytes(t, n)
 		out, err := Page(data, "B", "page0", Options{})
@@ -74,7 +85,7 @@ func TestMemoryBudgetPageDefault(t *testing.T) {
 			t.Fatalf("Page(Generated(%d)): %v", n, err)
 		}
 		runtime.KeepAlive(out)
-		budget := laws.Budget{PeakLive: laws.MB(92), Alloc: alloc[n]}
+		budget := laws.Budget{PeakLive: memoryCeiling(n+n/2, len(out)), Alloc: alloc[n]}
 		laws.WithinMemory(t, fmt.Sprintf("vsdx Page default Generated(%d)", n), budget, func(mark func(string)) error {
 			out, err := Page(data, "B", "page0", Options{Checkpoint: mark})
 			if err != nil {
@@ -101,17 +112,16 @@ func TestMemoryBudgetPageDefault(t *testing.T) {
 
 // TestMemoryBudgetPageFull is the RM2 gate for --detail full, as
 // TestMemoryBudgetPageDefault for the full view: peak live heap at
-// the "walk" and "link" checkpoints is at most 60 MB plus 3 times
-// the output.
+// the "walk" and "link" checkpoints is at most memoryCeiling.
 func TestMemoryBudgetPageFull(t *testing.T) {
-	alloc := map[int]uint64{5000: laws.MB(180), 20000: laws.MB(730)}
+	alloc := map[int]uint64{5000: laws.MB(164), 20000: laws.MB(662)}
 	for _, n := range []int{5000, 20000} {
 		data := generatedBytes(t, n)
 		out, err := Page(data, "B", "page0", Options{Detail: "full"})
 		if err != nil {
 			t.Fatalf("Page(Generated(%d), full): %v", n, err)
 		}
-		budget := laws.Budget{PeakLive: laws.MB(60) + 3*uint64(len(out)), Alloc: alloc[n]}
+		budget := laws.Budget{PeakLive: memoryCeiling(n+n/2, len(out)), Alloc: alloc[n]}
 		laws.WithinMemory(t, fmt.Sprintf("vsdx Page full Generated(%d)", n), budget, func(mark func(string)) error {
 			out, err := Page(data, "B", "page0", Options{Detail: "full", Checkpoint: mark})
 			if err != nil {
@@ -137,7 +147,8 @@ func TestMemoryBudgetPageFull(t *testing.T) {
 }
 
 // TestMemoryBudgetFind is the RM2 gate for Find: Generated(5000)
-// and Generated(20000) stay under 45 MB of peak live heap at the
+// and Generated(20000) stay under min(2 KB per object, 45 MB) of
+// peak live heap at the
 // "shape" and "notes" checkpoints (the page bytes plus one shape
 // plus the stored-ID set), and the peak ratio is at most 5.5.
 func TestMemoryBudgetFind(t *testing.T) {
@@ -151,7 +162,7 @@ func TestMemoryBudgetFind(t *testing.T) {
 		if len(res.Matches) != n {
 			t.Fatalf("Find(Generated(%d)): len(Matches) = %d, want %d", n, len(res.Matches), n)
 		}
-		budget := laws.Budget{PeakLive: laws.MB(45), Alloc: alloc[n]}
+		budget := laws.Budget{PeakLive: min(uint64(n+n/2)*2048, laws.MB(45)), Alloc: alloc[n]}
 		laws.WithinMemory(t, fmt.Sprintf("vsdx Find Generated(%d)", n), budget, func(mark func(string)) error {
 			res, err := Find(data, "B", FindRequest{Query: "Box", Checkpoint: mark})
 			if err != nil {

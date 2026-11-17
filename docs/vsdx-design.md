@@ -237,7 +237,9 @@ values are always visible in `cells`.
 Scaled drawings (PageScale != DrawingScale) are **pending VE11**: the
 notes cannot confirm whether stored lengths are page or drawing inches.
 Until then read shows stored values unscaled and adds a page note
-`drawing scale 1 in = 10 ft: lengths are stored drawing units`;
+`drawing scale <PageScale> = <DrawingScale>: lengths are stored drawing
+units`, each with its stored unit (V13: `1 in = 120 ft`; CC6; the
+binary at 7d09f90 wrote "1 in = 10 ft" for every page);
 P2 refuses geometry writes on such pages (`operation_failed`).
 
 ### (c) Formulas and cached values
@@ -469,21 +471,44 @@ Foreign shapes (images, OLE, ink), guides, master shapes (all of a
 master), comments (not shown in v1), hyperlinks, actions, user cells and
 geometry (`--detail full` `cells` only), data-graphic callouts, themes.
 
-Refused by P2 ops, `operation_failed` with `detail` naming the construct:
+Refused by P2 ops (the closed list; rewritten 2026-11-17 to match the
+binary after Fable's contract review; "(CCn)" marks a refusal the
+binary does not make yet and the chunk that adds it). `operation_failed`
+unless given:
 
-1. a target cell whose formula is outside the allow list (decision c);
-2. a shape in a container, list or callout structure (`User.msvStructureType`,
-   `User.msvSDContainer...`, a non-empty `Relationships` cell) for
-   move, resize, delete;
-3. a data-linked shape data row (`DataLinked` 1) for `prop.set` and
+1. a target cell whose formula vsdx does not evaluate (decision c),
+   `detail` each cell as `Width F=User.DefaultWidth`, `path` the field
+   written (`ops[n].at` for object.move) (detail and path: CC10);
+2. a container, list or callout (`User.msvStructureType` `Container`,
+   `List`, `Callout`) for every write op, and a member of one (a
+   `Relationships` cell with `DEPENDSON`) for box, rotation, flips,
+   move and delete (CC6);
+3. geometry on a page with a drawing scale: box, rot, flips, connector
+   ends, object.move, object.add, page.set size (CC6; until VE11);
+4. a data-linked shape data row (`DataLinked` 1) for `prop.set` and
    `prop.delete`;
-4. any op on a master or a master shape, and any write to a stencil;
-5. text and fill on a Foreign shape;
-6. glue to a ToCell other than `PinX` and `Connections.Xn`;
-7. deleting a page another page uses as its background;
-8. geometry writes on a scaled page (until VE11);
-9. `page.set` orientation or size when PageWidth or PageHeight has a
-   formula outside the allow list.
+5. any write to a master or a master shape, and any write to a stencil;
+6. text and fill on a picture or other read-only kind;
+7. glue to a cell other than a shape's pin or a connection point
+   (`invalid_operation` at the glue field: the address form is
+   checked before the document opens);
+8. deleting the last foreground page;
+9. deleting a page another page uses as its background;
+10. a duplicate page name (page.add, page.rename);
+11. a duplicate shape data row (prop.add);
+12. object.reorder relative to an object of another parent;
+13. a connector whose ends coincide (object.add, object.set, move);
+14. `from`, `to` or glue on a 2-D shape (`invalid_operation` when the
+    op says it is a shape; `operation_failed` when the target is);
+15. object.move of a connector glued at both ends (CC2);
+16. `page.set` orientation or size when PageWidth or PageHeight has a
+    formula outside the allow list.
+
+Not refused any more (Fable's review): whole-shape glue (every
+connector, CC2); free ends, point glue and move on Visio-drawn
+connectors with the standard 1-D forms (CC1, CC2); object.add of a 1-D
+master (CC3); glue to a shape without connection points (whole-shape
+glue, CC2).
 
 Everything else no op targets is copied byte for byte, unknown parts and
 `v:` extensions included; `.vsdm` VBA copied through.
@@ -597,10 +622,10 @@ shapes:
   `formula.OneD`; a glued end `F="PAR(PNT(Sheet.N!Connections.Xk,
   Sheet.N!Connections.Yk))"` with the site's value; Geometry NoFill 1,
   MoveTo (0,0), LineTo (Width,0); Connect rows FromPart 9/12, ToPart
-  100+k-1. Whole-shape glue (`"$a"`) needs Visio's dynamic routing,
-  which only master instances of "Dynamic connector" have in the corpus,
-  so create refuses it on a master-less connector (`operation_failed`,
-  path `ops[n].to_glue`, hint: glue to a connection point).
+  100+k-1. Whole-shape glue (`"$a"`) is written in Visio's stored
+  form (`_WALKGLUE`, triggers, Connect ToCell PinX ToPart 3) on a
+  master-less connector too (Fable's review, CC2; it was refused here
+  before), with RecalcDocument so Visio routes it.
 - `object.add` with `master` on a new drawing is `not_found` (no
   masters). Copying masters from another file is the master-import
   chunk of P3 (notes §7's checklist).
@@ -910,7 +935,7 @@ S0's ctypes extraction runs over the Visio-authored subset
 per entry; a type seen in fewer files stays out of the table and the
 code that needs it waits (S0 reports which).
 
-### Visio experiments (VE1 to VE12, results recorded before dependent code merges)
+### Visio experiments (VE1 to VE13, results recorded before dependent code merges)
 
 Fixtures under `testdata/vsdx/experiments`, written by a Go generator,
 with a README of what to look for; run by the owner if and when a Visio
@@ -931,6 +956,7 @@ labelled "LibreOffice ...: Visio unconfirmed" as xlsx did.
 | VE10 | Does Visio keep stored pins when the orientation is flipped (shapes stay measured from the lower-left)? |
 | VE11 | Are lengths on a scaled page stored in page or drawing inches? |
 | VE12 | Does a created `docProps/custom.xml` with only RecalcDocument open cleanly? |
+| VE13 | Does Visio re-walk whole-shape glue CC2 writes (`_WALKGLUE`, `_XFTRIGGER(Sheet.N!EventXFMod)`, Connect `ToCell PinX ToPart 3`) when the target moves, and route the straight line CC2 stores when RecalcDocument is set (with VE4)? |
 
 ### What cannot be verified without real Visio
 
@@ -1037,3 +1063,40 @@ conclusion holds.
 | 14 | HTML rule for inherited character properties | done (decision f: own formatting only, as pptx; V7 to be re-derived in FX; V1/V2 rows on Visio-shaped fixtures) |
 | opt | off-page after page.set; `page0~2`; casefold messages; V4 s13 row | taken (off-page hazard in the orientation rule; `PageID(id, dup)`; casefold_test messages; P1 row 13); H1 presizing hint taken in H1's spec |
 
+
+## 12. Contract review by Fable for the owner (2026-11-17)
+
+Verdict APPROVE-WITH-AMENDMENTS: the shape is right, but the draft
+promised what the binary at 7d09f90 did not do. The designer probed
+each item against the binary (9a57372) and the corpus, rewrote the
+draft in the Replace / Add-after form with a status line and a merge
+plan, rewrote the closed refusal list (decision g), and specified
+chunks CC1 to CC14 with rows and a coverage matrix in the chunk plan.
+Main does not move until they merge.
+
+Designer rulings in the chunks (Fable to confirm, as architect for
+contract questions):
+
+- `from` with `from_glue` is accepted as pptx does; an end off its site
+  is stale-connector plus stale-values (CC10).
+- object.move keeps glued ends where their glue puts them and refuses a
+  connector glued at both ends (CC2); pptx moves glued ends and
+  reports stale-connector, which in Visio would be undone by the glue
+  formula on recalculation.
+- Whole-shape glue writes Visio's stored form with the cached end at
+  the midpoint of the target's box edge facing the other end (decision
+  d); Visio re-walks it (VE13, unverified here).
+- A connector whose ends change gets decision (d)'s straight two-point
+  geometry; a dynamic connector also gets RecalcDocument and a
+  stale-values "route" entry, so Visio routes it (CC2).
+- Container members (`Relationships` with `DEPENDSON`) are refused for
+  geometry, move and delete, the structure shapes for every write
+  (CC6), as decision g said; the earlier draft named only the
+  structure shapes.
+- object.set stores a value equal to the inherited one (origin becomes
+  local); only text formats follow "equal to inherited is not stored"
+  (CC11, decision f).
+- prop.add names: `[A-Za-z_][A-Za-z0-9_]*` (all 98 corpus row names
+  match); non-ASCII names are refused in v1 (CC8).
+- page.add `before` the first page is allowed; the refusal had no
+  design source (CC13).

@@ -38,7 +38,22 @@ WASIP1_PKGS = ./cmd/... ./internal/... ./tools/... ./eval/grade/... ./eval/oracl
 wasip1:
 	GOOS=wasip1 GOARCH=wasm go build $(WASIP1_PKGS)
 
-check: norequire vet test fmt
+check: norequire vet test fmt recipes
+
+# recipes syntax-checks the shell of every target make ci runs (and
+# fuzz, which ci adds): make -n prints each recipe as the shell gets it,
+# after make's own $ expansion, and bash -n parses it without running
+# anything. A quoting slip that only the slow step would hit (RSS1's
+# unescaped $' in scaling) then fails make check. ci itself is left
+# out: its recipe runs $(MAKE), which make -n executes rather than
+# prints; so are recipes and check (whose prerequisites include
+# recipes), for the same reason: check's other prerequisites are listed.
+RECIPE_TARGETS = $(filter-out recipes,$(CI_STEPS)) fuzz
+recipes:
+	@for t in $(RECIPE_TARGETS); do \
+		out=$$($(MAKE) -s -n --no-print-directory $$t) || { echo "make recipes: make -n $$t failed"; exit 1; }; \
+		printf '%s\n' "$$out" | bash -n || { echo "make recipes: $$t: shell syntax error in its recipe"; exit 1; }; \
+	done
 
 # corpus is the full corpus sweep: every test of the module with both
 # corpora set, PPTX_CORPUS (default: the repository's corpus/, from a
@@ -371,7 +386,7 @@ ship:
 # pre-push hook pushes a commit whose tree and Go toolchain are listed
 # without running ci again; a fast-forward merge keeps the tree, so a
 # pass on a wt/ branch covers main. The file is local and untracked.
-CI_STEPS = norequire vet test fmt lint vuln race repro wasip1 scaling
+CI_STEPS = norequire vet test fmt recipes lint vuln race repro wasip1 scaling
 CI_PASSED = documentdriver-ci-passed
 
 ci:
