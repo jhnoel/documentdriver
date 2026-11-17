@@ -24,10 +24,20 @@ const TimeRounds = 11
 // chunks whose loops can grow carry this too. It runs the small and the
 // large input in TimeRounds interleaved pairs, so both see the same
 // machine load, and compares the best time of each against
-// MaxTimeRatio, one verdict, always enforced. Bytes and allocations are
+// MaxTimeRatio, one verdict, enforced in every run without -race (under
+// -race it is not measured: the detector distorts ratios). Bytes and allocations are
 // Scales' job and stay strict there.
 func TimeScales(t *testing.T, name string, setup func(n int) (func() error, error)) {
 	t.Helper()
+	if RaceEnabled {
+		// The race detector slows memory accesses unevenly, so time
+		// ratios under -race say nothing about the code (make ci's race
+		// step measured a linear op at 10.72). make check and make
+		// scaling run without -race and give the verdict; Scales keeps
+		// bytes and allocations enforced under -race too.
+		t.Logf("%s: time not checked under -race", name)
+		return
+	}
 	var runs [2]func() error
 	for i, n := range []int{Small, Large} {
 		run, err := setup(n)

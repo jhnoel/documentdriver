@@ -36,8 +36,10 @@ func (d *OpDef) Implemented() bool {
 	return ok
 }
 
-// Ops is the op table: the ops create needs first (docs/vsdx-design.md,
-// Create), then the rest of P2 as they are designed. An op is
+// Ops is the op table: every op of the contract draft (section 3), so
+// that an op not implemented yet is operation_failed, never an unknown
+// op (docs/contract.md, section 2). The specs of the later ops live in
+// spec_<name>.go (designer-owned). An op is
 // implemented when its run_<name>.go gives its spec a Run method; this
 // table does not change when one lands.
 var Ops = []OpDef{
@@ -49,6 +51,13 @@ var Ops = []OpDef{
 	{Name: "page.add", Summary: "add a page", New: func() Spec { return &PageAddSpec{} }},
 	{Name: "page.rename", Summary: "rename a page", New: func() Spec { return &PageRenameSpec{} }},
 	{Name: "page.set", Summary: "set a page's size or orientation", New: func() Spec { return &PageSetSpec{} }},
+	{Name: "object.move", Summary: "translate an object by dx, dy", New: func() Spec { return &ObjectMoveSpec{} }},
+	{Name: "object.delete", Summary: "delete an object and the Connect rows that name it", New: func() Spec { return &ObjectDeleteSpec{} }},
+	{Name: "object.reorder", Summary: "move an object in paint order within its parent", New: func() Spec { return &ObjectReorderSpec{} }},
+	{Name: "text.replace", Summary: "replace exact text in a shape or in every shape of a page", New: func() Spec { return &TextReplaceSpec{} }},
+	{Name: "prop.delete", Summary: "delete a shape data row (hide a master's with Del)", New: func() Spec { return &PropDeleteSpec{} }},
+	{Name: "page.delete", Summary: "delete a page", New: func() Spec { return &PageDeleteSpec{} }},
+	{Name: "page.reorder", Summary: "move a page before or after another", New: func() Spec { return &PageReorderSpec{} }},
 }
 
 // index is the op table's index, built once.

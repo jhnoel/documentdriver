@@ -9,36 +9,36 @@ package ops
 // group, with optional text and name.
 type ObjectAddSpec struct {
 	At       string     `json:"at"`
-	As       string     `json:"as,omitempty"`
-	Kind     string     `json:"kind,omitempty"`
-	Master   string     `json:"master,omitempty"`
-	Geom     string     `json:"geom,omitempty"`
-	Box      []float64  `json:"box,omitempty"`
-	Pin      []float64  `json:"pin,omitempty"`
-	Name     string     `json:"name,omitempty"`
-	HTML     *string    `json:"html,omitempty"`
-	Fill     *PaintSpec `json:"fill,omitempty"`
-	Line     *LineSpec  `json:"line,omitempty"`
-	From     []float64  `json:"from,omitempty"`
-	To       []float64  `json:"to,omitempty"`
-	FromGlue string     `json:"from_glue,omitempty"`
-	ToGlue   string     `json:"to_glue,omitempty"`
+	As       string     `json:"as,omitempty" plan:"optional"`
+	Kind     string     `json:"kind,omitempty" plan:"optional"`
+	Master   string     `json:"master,omitempty" plan:"optional"`
+	Geom     string     `json:"geom,omitempty" plan:"optional"`
+	Box      []float64  `json:"box,omitempty" plan:"optional"`
+	Pin      []float64  `json:"pin,omitempty" plan:"optional"`
+	Name     string     `json:"name,omitempty" plan:"optional"`
+	HTML     *string    `json:"html,omitempty" plan:"optional"`
+	Fill     *PaintSpec `json:"fill,omitempty" plan:"optional"`
+	Line     *LineSpec  `json:"line,omitempty" plan:"optional"`
+	From     []float64  `json:"from,omitempty" plan:"optional"`
+	To       []float64  `json:"to,omitempty" plan:"optional"`
+	FromGlue string     `json:"from_glue,omitempty" plan:"optional"`
+	ToGlue   string     `json:"to_glue,omitempty" plan:"optional"`
 }
 
 // ObjectSetSpec is object.set (the fields create and P2 share first).
 type ObjectSetSpec struct {
 	At       string     `json:"at"`
-	Box      []float64  `json:"box,omitempty"`
-	Rot      *float64   `json:"rot,omitempty"`
-	FlipH    *bool      `json:"flip_h,omitempty"`
-	FlipV    *bool      `json:"flip_v,omitempty"`
-	Name     *string    `json:"name,omitempty"`
-	Fill     *PaintSpec `json:"fill,omitempty"`
-	Line     *LineSpec  `json:"line,omitempty"`
-	From     []float64  `json:"from,omitempty"`
-	To       []float64  `json:"to,omitempty"`
-	FromGlue *string    `json:"from_glue,omitempty"`
-	ToGlue   *string    `json:"to_glue,omitempty"`
+	Box      []float64  `json:"box,omitempty" plan:"optional"`
+	Rot      *float64   `json:"rot,omitempty" plan:"optional"`
+	FlipH    *bool      `json:"flip_h,omitempty" plan:"optional"`
+	FlipV    *bool      `json:"flip_v,omitempty" plan:"optional"`
+	Name     *string    `json:"name,omitempty" plan:"optional"`
+	Fill     *PaintSpec `json:"fill,omitempty" plan:"optional"`
+	Line     *LineSpec  `json:"line,omitempty" plan:"optional"`
+	From     []float64  `json:"from,omitempty" plan:"optional"`
+	To       []float64  `json:"to,omitempty" plan:"optional"`
+	FromGlue *string    `json:"from_glue,omitempty" plan:"optional"`
+	ToGlue   *string    `json:"to_glue,omitempty" plan:"optional"`
 }
 
 // PaintSpec is a fill: "none" or {"hex": "#RRGGBB"}, as read shows it.
@@ -65,10 +65,10 @@ type TextSetSpec struct {
 type PropAddSpec struct {
 	At     string `json:"at"`
 	Name   string `json:"name"`
-	Label  string `json:"label,omitempty"`
+	Label  string `json:"label,omitempty" plan:"optional"`
 	Type   string `json:"type"`
-	Value  any    `json:"value,omitempty"`
-	Format string `json:"format,omitempty"`
+	Value  any    `json:"value,omitempty" plan:"optional"`
+	Format string `json:"format,omitempty" plan:"optional"`
 }
 
 // PropSetSpec is prop.set.
@@ -80,11 +80,11 @@ type PropSetSpec struct {
 // PageAddSpec is page.add: appended, or before/after At.
 type PageAddSpec struct {
 	Name        string    `json:"name"`
-	As          string    `json:"as,omitempty"`
-	At          string    `json:"at,omitempty"`
-	Position    string    `json:"position,omitempty"`
-	Size        []float64 `json:"size,omitempty"`
-	Orientation string    `json:"orientation,omitempty"`
+	As          string    `json:"as,omitempty" plan:"optional"`
+	At          string    `json:"at,omitempty" plan:"optional"`
+	Position    string    `json:"position,omitempty" plan:"optional"`
+	Size        []float64 `json:"size,omitempty" plan:"optional"`
+	Orientation string    `json:"orientation,omitempty" plan:"optional"`
 }
 
 // PageRenameSpec is page.rename.
@@ -96,6 +96,6 @@ type PageRenameSpec struct {
 // PageSetSpec is page.set: orientation and/or size (decision 6).
 type PageSetSpec struct {
 	At          string    `json:"at"`
-	Size        []float64 `json:"size,omitempty"`
-	Orientation string    `json:"orientation,omitempty"`
+	Size        []float64 `json:"size,omitempty" plan:"optional"`
+	Orientation string    `json:"orientation,omitempty" plan:"optional"`
 }

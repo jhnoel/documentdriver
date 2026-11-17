@@ -332,6 +332,25 @@ func checkSpec(s Spec) (string, string, bool) {
 		return checkPageRename(v)
 	case *PageSetSpec:
 		return checkPageSet(v)
+	case checker:
+		return v.check()
+	}
+	return "", "", false
+}
+
+// checker is a spec whose rules live in its own spec_<name>.go file
+// (the extension rule: a new op adds files, it does not extend this
+// switch).
+type checker interface {
+	check() (msg, field string, broken bool)
+}
+
+// needAddress reports the rule "field must be <what> or $name" broken
+// when s is not an address of one of kinds (or an alias), for the
+// spec_<name>.go checks.
+func needAddress(s, field, what string, kinds ...vsd.Kind) (string, string, bool) {
+	if !addressOK(s, kinds...) {
+		return field + " must be " + what + " or $name", field, true
 	}
 	return "", "", false
 }

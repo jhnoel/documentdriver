@@ -102,6 +102,7 @@ func build(p *Page, d *doc.Document, r *inherit.Resolver, contents *tree.Documen
 		w.step(fr)
 	}
 	linkConnects(p, r, connects, w.placed, p.H)
+	offPage(p)
 	return p, nil
 }
 
