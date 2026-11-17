@@ -69,9 +69,12 @@ func visioType(e *tree.Node) (string, bool) {
 }
 
 // isElem reports whether e is an element of local name in a Visio main
-// namespace (either spelling).
+// namespace (either spelling). The local name is compared first: most
+// elements a page holds are not Shapes, and resolving the namespace
+// walks the ancestors, so checking the local name first keeps the
+// common no-match case cheap.
 func isElem(e *tree.Node, local string) bool {
-	return e != nil && e.Kind() == tree.ElementNode && vsd.IsMain(e.Space()) && e.Local() == local
+	return e != nil && e.Kind() == tree.ElementNode && e.Local() == local && vsd.IsMain(e.Space())
 }
 
 // child returns the first direct element child of parent of local
@@ -128,6 +131,11 @@ type Workspace struct {
 	core      *core.Workspace
 	doc       *doc.Document
 	pagesPart string // the pages.xml part, for page-sheet cells
+	// shapes caches, per page part and on first use, the shape index
+	// of the page's tree (shapeIndex). InsertShape is the only write
+	// that adds shapes, and it updates the index as it inserts, so a
+	// lookup never has to walk the page again.
+	shapes map[string]*shapeIndex
 }
 
 // failing is the workspace of a package the edit layer refused.
@@ -275,29 +283,78 @@ func findShape(root *tree.Node, id uint32, dup int) *tree.Node {
 	return found
 }
 
-// nextID returns one more than the largest shape ID in root's tree,
-// nested shapes included, or 1 when there are none.
-func nextID(root *tree.Node) (uint32, error) {
-	var largest uint32
-	seen := false
+// shapeIndex is the cached shape lookup of one page tree: every shape
+// of the page, nested shapes included, by stored ID in document
+// order (the dup-th shape of an ID is its index in the slice), the
+// largest stored ID, and the last shape child of every Shapes
+// element, keyed by that element. It is built once, on first use,
+// and InsertShape updates it as it inserts.
+type shapeIndex struct {
+	root    *tree.Node
+	largest uint32
+	seen    bool
+	byID    map[uint32][]*tree.Node
+	lasts   map[*tree.Node]*tree.Node
+}
+
+// shapeIndexFor returns the shape index of the page part, building it
+// on first use (one walk of the page tree) and reusing it while the
+// page tree is the same one it was built from.
+func (w *Workspace) shapeIndexFor(part string, root *tree.Node) *shapeIndex {
+	if w.shapes == nil {
+		w.shapes = map[string]*shapeIndex{}
+	}
+	if idx, ok := w.shapes[part]; ok && idx.root == root {
+		return idx
+	}
+	idx := &shapeIndex{root: root, byID: map[uint32][]*tree.Node{}, lasts: map[*tree.Node]*tree.Node{}}
 	root.Walk(func(n *tree.Node) bool {
-		if isElem(n, vsd.ElemShape) {
-			if v, ok := shapeID(n); ok {
-				seen = true
-				if v > largest {
-					largest = v
-				}
-			}
+		if n.Kind() == tree.ElementNode && n.Local() == vsd.ElemShape && vsd.IsMain(n.Space()) {
+			idx.add(n)
 		}
 		return true
 	})
-	if !seen {
+	w.shapes[part] = idx
+	return idx
+}
+
+// add records shape n in the index: its stored ID (in document
+// order, as the walk and the inserts visit shapes) and as the last
+// shape of its Shapes parent.
+func (idx *shapeIndex) add(n *tree.Node) {
+	if id, ok := shapeID(n); ok {
+		idx.byID[id] = append(idx.byID[id], n)
+		idx.seen = true
+		if id > idx.largest {
+			idx.largest = id
+		}
+	}
+	if p := n.Parent(); p != nil && isElem(p, vsd.ElemShapes) {
+		idx.lasts[p] = n
+	}
+}
+
+// find returns the dup-th (1-based) shape with stored ID id, or nil.
+func (idx *shapeIndex) find(id uint32, dup int) *tree.Node {
+	if dup < 1 {
+		return nil
+	}
+	if list := idx.byID[id]; dup <= len(list) {
+		return list[dup-1]
+	}
+	return nil
+}
+
+// next returns one more than the largest shape ID in the index, or 1
+// when the page has no shape ID.
+func (idx *shapeIndex) next() (uint32, error) {
+	if !idx.seen {
 		return 1, nil
 	}
-	if largest == ^uint32(0) {
+	if idx.largest == ^uint32(0) {
 		return 0, errors.New("vsdx edit: shape ID space exhausted")
 	}
-	return largest + 1, nil
+	return idx.largest + 1, nil
 }
 
 // ensureChild makes sure container has a child of local name through
@@ -330,11 +387,11 @@ func (w *Workspace) NextShapeID(page string) (uint32, error) {
 	if a.Kind != vsd.KindPage || a.InMaster {
 		return 0, fmt.Errorf("vsdx edit: %s: want a page address (page0)", page)
 	}
-	_, _, d, err := w.pageTree(a)
+	_, part, d, err := w.pageTree(a)
 	if err != nil {
 		return 0, err
 	}
-	return nextID(d.Root())
+	return w.shapeIndexFor(part, d.Root()).next()
 }
 
 // InsertShape inserts a Shape element (emit's bytes) as the last child
@@ -355,6 +412,7 @@ func (w *Workspace) InsertShape(page, parent string, frag []byte) (string, error
 		return "", err
 	}
 	root := d.Root()
+	idx := w.shapeIndexFor(part, root)
 	container := root
 	label := vsd.PageID(a.Container, a.PageDup)
 	if parent != "" {
@@ -368,7 +426,7 @@ func (w *Workspace) InsertShape(page, parent string, frag []byte) (string, error
 		if p.Container != a.Container || p.PageDup != a.PageDup {
 			return "", fmt.Errorf("vsdx edit: %s: not on %s", parent, label)
 		}
-		g := findShape(root, p.Shape, p.Dup)
+		g := idx.find(p.Shape, p.Dup)
 		if g == nil {
 			return "", fmt.Errorf("%w: %s", ErrNotFound, parent)
 		}
@@ -377,7 +435,7 @@ func (w *Workspace) InsertShape(page, parent string, frag []byte) (string, error
 		}
 		container, label = g, parent
 	}
-	id, err := nextID(root)
+	id, err := idx.next()
 	if err != nil {
 		return "", err
 	}
@@ -397,7 +455,7 @@ func (w *Workspace) InsertShape(page, parent string, frag []byte) (string, error
 	// what lets the first shape expand it (plan.Verify checks the
 	// start tag of a container).
 	_ = w.core.Target(part, label, []*tree.Node{shapes})
-	pos, err := w.core.SlotEnd(shapes, "v:Shapes", vsdxNS.Name(vsd.ElemShape), true, nil, nil)
+	pos, err := w.shapesPos(idx, shapes)
 	if err != nil {
 		return "", err
 	}
@@ -405,7 +463,39 @@ func (w *Workspace) InsertShape(page, parent string, frag []byte) (string, error
 	if err := w.core.Insert(part, pos, u, []core.NodeAttr{{Node: u, Name: "ID", Value: strconv.FormatUint(uint64(id), 10)}}); err != nil {
 		return "", err
 	}
+	// The inserted shape, and any shape nested in its fragment, are
+	// in the page now: record them (and their IDs) so the next lookup
+	// or next ID is the same one a walk of the page would give.
+	u.Walk(func(n *tree.Node) bool {
+		if n.Kind() == tree.ElementNode && n.Local() == vsd.ElemShape && vsd.IsMain(n.Space()) {
+			idx.add(n)
+		}
+		return true
+	})
 	return vsd.ShapeID(vsd.PageID(a.Container, a.PageDup), id, 1), nil
+}
+
+// shapesPos returns the position for a new shape at the end of the
+// shape slot of shapes: after the last shape the index already knows
+// (the last top-level shape, or the last shape of a group), with no
+// scan of the shapes. A Shapes with no known shape, or with an
+// element standing after its last known shape (one the schema does
+// not place, which a scan alone can place against), goes through
+// the core's SlotEnd as before.
+func (w *Workspace) shapesPos(idx *shapeIndex, shapes *tree.Node) (core.Position, error) {
+	if last := idx.lasts[shapes]; last != nil && last.Parent() == shapes {
+		trailing := false
+		for s := last.NextSibling(); s != nil; s = s.NextSibling() {
+			if s.Kind() == tree.ElementNode {
+				trailing = true
+				break
+			}
+		}
+		if !trailing {
+			return core.After(last, nil), nil
+		}
+	}
+	return w.core.SlotEnd(shapes, "v:Shapes", vsdxNS.Name(vsd.ElemShape), true, nil, nil)
 }
 
 // InsertConnects appends Connect rows to the page's Connects, creating
@@ -481,7 +571,7 @@ func (w *Workspace) SetText(shape string, sections, text []byte) error {
 	if err != nil {
 		return err
 	}
-	shapeNode := findShape(d.Root(), a.Shape, a.Dup)
+	shapeNode := w.shapeIndexFor(part, d.Root()).find(a.Shape, a.Dup)
 	if shapeNode == nil {
 		return fmt.Errorf("%w: %s", ErrNotFound, shape)
 	}
@@ -589,7 +679,7 @@ func (w *Workspace) setShapeCells(at string, a vsd.Address, cells []Cell) error 
 	if err != nil {
 		return err
 	}
-	shapeNode := findShape(d.Root(), a.Shape, a.Dup)
+	shapeNode := w.shapeIndexFor(part, d.Root()).find(a.Shape, a.Dup)
 	if shapeNode == nil {
 		return fmt.Errorf("%w: %s", ErrNotFound, at)
 	}
