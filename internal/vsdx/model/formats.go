@@ -123,10 +123,12 @@ func formatsPara(r *inherit.Resolver, owner, below *inherit.Shape, row sheet.Key
 // formatsCells returns the cell owner stores at key and the inherited
 // cell below owner (the master shape's or the style chain's),
 // reporting whether each is present. A cell the owner does not store,
-// or holds only through the master or a style, is not present.
+// or stores only as inherited (F="Inh"), or holds only through the
+// master or a style, is not present: only a local cell is the owner's
+// formatting.
 func formatsCells(r *inherit.Resolver, owner, below *inherit.Shape, key sheet.Key) (sheet.Cell, sheet.Cell, bool, bool) {
 	own, origin, ok := r.Cell(owner, key)
-	if !ok || (origin != inherit.Local && origin != inherit.Inherited) {
+	if !ok || origin != inherit.Local {
 		return sheet.Cell{}, sheet.Cell{}, false, false
 	}
 	inh, _, inhOK := r.Cell(below, key)
