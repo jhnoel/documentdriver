@@ -10,7 +10,10 @@
 // Two small tables hold simple types WordprocessingML attributes use from
 // other schemas: the relationship reference (prefix r, r:ST_RelationshipId)
 // and the XML namespace (prefix xml, the type of xml:space, from the W3C
-// xml.xsd the zip lacks). The WordprocessingML and SpreadsheetML content
+// xml.xsd the zip lacks). The Visio vocabulary (prefix v) is generated
+// by tools/vsdorder from the MS-VSDX schema and the Visio-authored corpus
+// and is keyed by element name, not complex-type name (see v_lookup.go).
+// The WordprocessingML and SpreadsheetML content
 // models (ContentModel, RootType) add what an integrity check needs and
 // the slot tables leave out: order ranks, occurrence counts, required
 // children and attributes, wildcards, for every complex type of wml.xsd
@@ -84,6 +87,8 @@ func tables(qname string) (types map[string][]Slot, attrs map[string]map[string]
 		return relTypes, relAttrs, relSimple
 	case "xml":
 		return xmlTypes, xmlAttrs, xmlSimple
+	case "v":
+		return vTables()
 	}
 	return nil, nil, nil
 }
@@ -126,11 +131,17 @@ func Find(slots []Slot, prefix, local string) (int, Child) {
 }
 
 // ChildType returns the complex type of child (a qualified name such as
-// "a:lumMod") in the tabulated complex type ctype.
+// "a:lumMod") in the tabulated complex type ctype. For the Visio table
+// (keyed by element name) an unqualified child is taken to be in that
+// same vocabulary, as ChildType("v:Shape", "Shapes") returns "v:Shapes".
 func ChildType(ctype, child string) (string, bool) {
 	prefix, local, ok := strings.Cut(child, ":")
 	if !ok {
-		return "", false
+		p, _, _ := strings.Cut(ctype, ":")
+		if p != "v" {
+			return "", false
+		}
+		prefix, local = p, child
 	}
 	slots, _ := Slots(ctype)
 	_, c := Find(slots, prefix, local)
