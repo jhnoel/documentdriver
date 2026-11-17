@@ -252,27 +252,35 @@ func propNumber(value any) (float64, bool) {
 }
 
 // propDate returns the date text of a plan date value, which read
-// shows as {"date": "2024-03-01T00:00:00"}.
+// shows as {"date": "2024-03-01T00:00:00"}: the string must be
+// YYYY-MM-DDThh:mm:ss (chunk CC8, checked before open in rules, and
+// again here for a caller that builds the spec directly).
 func propDate(value any) (string, error) {
 	switch v := value.(type) {
 	case map[string]any:
 		if len(v) != 1 {
-			return "", fmt.Errorf("value for type date must be {\"date\": \"...\"}")
+			return "", fmt.Errorf("value for type date must be {\"date\": \"YYYY-MM-DDThh:mm:ss\"}")
 		}
 		s, ok := v["date"].(string)
 		if !ok {
-			return "", fmt.Errorf("value for type date must be {\"date\": \"...\"}")
+			return "", fmt.Errorf("value for type date must be {\"date\": \"YYYY-MM-DDThh:mm:ss\"}")
+		}
+		if !validPropDateText(s) {
+			return "", fmt.Errorf("date value %q is not YYYY-MM-DDThh:mm:ss", s)
 		}
 		return s, nil
 	case map[string]string:
 		if len(v) != 1 {
-			return "", fmt.Errorf("value for type date must be {\"date\": \"...\"}")
+			return "", fmt.Errorf("value for type date must be {\"date\": \"YYYY-MM-DDThh:mm:ss\"}")
 		}
 		s, ok := v["date"]
 		if !ok {
-			return "", fmt.Errorf("value for type date must be {\"date\": \"...\"}")
+			return "", fmt.Errorf("value for type date must be {\"date\": \"YYYY-MM-DDThh:mm:ss\"}")
+		}
+		if !validPropDateText(s) {
+			return "", fmt.Errorf("date value %q is not YYYY-MM-DDThh:mm:ss", s)
 		}
 		return s, nil
 	}
-	return "", fmt.Errorf("value for type date must be {\"date\": \"...\"}")
+	return "", fmt.Errorf("value for type date must be {\"date\": \"YYYY-MM-DDThh:mm:ss\"}")
 }
