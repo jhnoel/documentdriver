@@ -12,5 +12,7 @@ func fillObject(o *Object, r *inherit.Resolver, s *inherit.Shape, f place.Frame,
 	geometry(o, r, s, f, pageH, opt)
 	paint(o, r, s)
 	textOf(o, r, s)
-	o.Props, o.Omitted = readProps(o.ID, r, s)
+	var propsOmitted []Omission
+	o.Props, propsOmitted = readProps(o.ID, r, s)
+	o.Omitted = append(o.Omitted, propsOmitted...)
 }
