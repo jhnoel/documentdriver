@@ -23,9 +23,6 @@ func spin(n int, quadratic bool) int {
 // bound for quadratic work at the gate's sizes (scaled up so the runs
 // last long enough to time).
 func TestTimeRatio(t *testing.T) {
-	if testing.Short() {
-		t.Skip("timing")
-	}
 	sink := 0
 	mk := func(quadratic bool, scale int) [2]func() error {
 		var r [2]func() error
@@ -35,8 +32,8 @@ func TestTimeRatio(t *testing.T) {
 		}
 		return r
 	}
-	lin, _ := timeRatio(t, "linear", mk(false, 2000), timeRounds)
-	quad, _ := timeRatio(t, "quadratic", mk(true, 1), timeRounds)
+	lin, _ := timeRatio(t, "linear", mk(false, 2000), TimeRounds)
+	quad, _ := timeRatio(t, "quadratic", mk(true, 1), TimeRounds)
 	t.Logf("linear %.2f, quadratic %.2f (sink %d)", lin, quad, sink)
 	if lin > MaxTimeRatio {
 		t.Errorf("linear work measured at ratio %.2f, over the bound %d", lin, MaxTimeRatio)
