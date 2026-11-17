@@ -117,8 +117,8 @@ func shortRel(v string) []string {
 
 // entryLit renders one table entry as a Go struct literal.
 func entryLit(name string, e Entry) string {
-	return fmt.Sprintf("{Name: %q, Value: %q, Files: %d, Word: %d, PowerPoint: %d, Excel: %d, External: %d, Source: %q, SHA256: %q},\n",
-		name, e.Value, e.Files, e.Word, e.PowerPoint, e.Excel, e.External, e.Source.Label+"/"+e.Source.Path, e.Source.SHA256)
+	return fmt.Sprintf("{Name: %q, Value: %q, Files: %d, Word: %d, PowerPoint: %d, Excel: %d, Visio: %d, External: %d, Source: %q, SHA256: %q},\n",
+		name, e.Value, e.Files, e.Word, e.PowerPoint, e.Excel, e.Visio, e.External, e.Source.Label+"/"+e.Source.Path, e.Source.SHA256)
 }
 
 // RenderGo returns the source of internal/ooxml/ctypes/table_gen.go.
@@ -163,8 +163,8 @@ func RenderGo(p *Provenance) ([]byte, error) {
 	}
 	b.WriteString("}\n\n// relTargets lists, per relationship type, the content types of the parts\n// it targeted in Office-authored files.\nvar relTargets = []Target{\n")
 	for _, t := range p.RelTargets {
-		fmt.Fprintf(&b, "\t{Rel: %s, ContentType: %s, Files: %d, Word: %d, PowerPoint: %d, Excel: %d, Source: %q},\n",
-			relName(rn, t.Rel), ctName(cn, t.ContentType), t.Files, t.Word, t.PowerPoint, t.Excel, t.Source.Label+"/"+t.Source.Path)
+		fmt.Fprintf(&b, "\t{Rel: %s, ContentType: %s, Files: %d, Word: %d, PowerPoint: %d, Excel: %d, Visio: %d, Source: %q},\n",
+			relName(rn, t.Rel), ctName(cn, t.ContentType), t.Files, t.Word, t.PowerPoint, t.Excel, t.Visio, t.Source.Label+"/"+t.Source.Path)
 	}
 	b.WriteString("}\n")
 	fmt.Fprintf(&b, "\n// minFiles is the evidence threshold the table was extracted with.\nconst minFiles = %d\n", p.MinFiles)
@@ -198,8 +198,8 @@ func ctName(cn map[string]string, v string) string {
 // Python integrity checker reads it. The checker guards docx and pptx
 // outputs, so it gets the Word and PowerPoint view: entries and pairs
 // seen in at least MinFiles Word or PowerPoint files, and the external
-// relationship types those files show. Evidence from Excel files alone
-// does not widen it.
+// relationship types those files show. Evidence from Excel or Visio
+// files alone does not widen it.
 func RenderJSON(p *Provenance) ([]byte, error) {
 	type out struct {
 		Note            string              `json:"note"`
@@ -227,7 +227,7 @@ func RenderJSON(p *Provenance) ([]byte, error) {
 			continue
 		}
 		o.RelTypes = append(o.RelTypes, e.Value)
-		if e.External-e.ExternalExcel > 0 {
+		if e.External-e.ExternalExcel-e.ExternalVisio > 0 {
 			o.RelExternal = append(o.RelExternal, e.Value)
 		}
 	}

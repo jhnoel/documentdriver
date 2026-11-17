@@ -16,8 +16,8 @@ func TestTablesWellFormed(t *testing.T) {
 			if e.Name == "" || e.Value == "" || e.Source == "" || len(e.SHA256) != 64 {
 				t.Errorf("incomplete entry %+v", e)
 			}
-			if e.Word+e.PowerPoint+e.Excel != e.Files {
-				t.Errorf("%s: Word+PowerPoint+Excel != Files", e.Name)
+			if e.Word+e.PowerPoint+e.Excel+e.Visio != e.Files {
+				t.Errorf("%s: Word+PowerPoint+Excel+Visio != Files", e.Name)
 			}
 			if seen[e.Name] {
 				t.Errorf("duplicate name %s", e.Name)
@@ -33,8 +33,8 @@ func TestTablesWellFormed(t *testing.T) {
 		if !known[tg.Rel] || !known[tg.ContentType] {
 			t.Errorf("target %s -> %s names a value missing from the tables", tg.Rel, tg.ContentType)
 		}
-		if tg.Word+tg.PowerPoint+tg.Excel != tg.Files {
-			t.Errorf("target %s -> %s: Word+PowerPoint+Excel != Files", tg.Rel, tg.ContentType)
+		if tg.Word+tg.PowerPoint+tg.Excel+tg.Visio != tg.Files {
+			t.Errorf("target %s -> %s: Word+PowerPoint+Excel+Visio != Files", tg.Rel, tg.ContentType)
 		}
 
 	}

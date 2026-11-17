@@ -33,6 +33,7 @@ var officeApps = map[string]string{
 	"Microsoft PowerPoint":           "powerpoint",
 	"Microsoft Excel":                "excel",
 	"Microsoft Macintosh Excel":      "excel",
+	"Microsoft Visio":                "visio",
 }
 
 const (
@@ -53,11 +54,12 @@ type Source struct {
 type Entry struct {
 	Value string `json:"value"`
 	// Files counts distinct Office-authored files that use it, Word,
-	// PowerPoint and Excel separately.
+	// PowerPoint, Excel and Visio separately.
 	Files      int    `json:"files"`
 	Word       int    `json:"word"`
 	PowerPoint int    `json:"powerpoint"`
 	Excel      int    `json:"excel"`
+	Visio      int    `json:"visio"`
 	Source     Source `json:"source"`
 	// External counts files where a relationship of this type has
 	// TargetMode="External" (relationship types only).
@@ -65,6 +67,9 @@ type Entry struct {
 	// ExternalExcel is the part of External seen in Excel files, so that
 	// the Word and PowerPoint view (RenderJSON) can leave it out.
 	ExternalExcel int `json:"external_excel,omitempty"`
+	// ExternalVisio is the part of External seen in Visio files, left
+	// out of that view for the same reason.
+	ExternalVisio int `json:"external_visio,omitempty"`
 }
 
 // Pair says a relationship type targeted a part of a content type.
@@ -75,6 +80,7 @@ type Pair struct {
 	Word        int    `json:"word"`
 	PowerPoint  int    `json:"powerpoint"`
 	Excel       int    `json:"excel"`
+	Visio       int    `json:"visio"`
 	Source      Source `json:"source"`
 }
 
@@ -100,8 +106,8 @@ type Provenance struct {
 type Root struct{ Label, Dir string }
 
 type acc struct {
-	files, word, ppt, excel, external, externalExcel int
-	src                                              Source
+	files, word, ppt, excel, visio, external, externalExcel, externalVisio int
+	src                                                                    Source
 }
 
 // add records one file of family family using entry, noting an external relationship.
@@ -115,13 +121,18 @@ func (a *acc) add(family string, src Source, ext bool) {
 		a.word++
 	case "excel":
 		a.excel++
+	case "visio":
+		a.visio++
 	default:
 		a.ppt++
 	}
 	if ext {
 		a.external++
-		if family == "excel" {
+		switch family {
+		case "excel":
 			a.externalExcel++
+		case "visio":
+			a.externalVisio++
 		}
 	}
 }
@@ -180,7 +191,7 @@ func Extract(roots []Root, minFiles int) (*Provenance, error) {
 	}
 	for k, a := range pairs {
 		if a.files >= minFiles {
-			p.RelTargets = append(p.RelTargets, Pair{Rel: k[0], ContentType: k[1], Files: a.files, Word: a.word, PowerPoint: a.ppt, Excel: a.excel, Source: a.src})
+			p.RelTargets = append(p.RelTargets, Pair{Rel: k[0], ContentType: k[1], Files: a.files, Word: a.word, PowerPoint: a.ppt, Excel: a.excel, Visio: a.visio, Source: a.src})
 		}
 	}
 	sort.Slice(p.ContentTypes, func(i, j int) bool { return p.ContentTypes[i].Value < p.ContentTypes[j].Value })
@@ -206,7 +217,7 @@ func bump[K comparable](m map[K]*acc, k K, family string, src Source, ext bool) 
 
 // entry converts accumulator a for value v into an Entry.
 func entry(v string, a *acc) Entry {
-	return Entry{Value: v, Files: a.files, Word: a.word, PowerPoint: a.ppt, Excel: a.excel, Source: a.src, External: a.external, ExternalExcel: a.externalExcel}
+	return Entry{Value: v, Files: a.files, Word: a.word, PowerPoint: a.ppt, Excel: a.excel, Visio: a.visio, Source: a.src, External: a.external, ExternalExcel: a.externalExcel, ExternalVisio: a.externalVisio}
 
 }
 
@@ -223,7 +234,7 @@ func listPackages(dir string) ([]string, error) {
 			return nil
 		}
 		switch strings.ToLower(filepath.Ext(p)) {
-		case ".docx", ".pptx", ".potx", ".xlsx", ".xlsm", ".xltx", ".xltm":
+		case ".docx", ".pptx", ".potx", ".xlsx", ".xlsm", ".xltx", ".xltm", ".vsdx", ".vsdm", ".vstx", ".vstm", ".vssx", ".vssm":
 			rel, err := filepath.Rel(dir, p)
 			if err != nil {
 				return err

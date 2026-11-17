@@ -214,6 +214,13 @@ diag(fx, fy) * (p - LocPin)`; groups compose; the page map is
 1-D shapes show `from` and `to` (BeginX/Y, EndX/Y through the parent
 frame), and their box only with `--detail full`, as pptx connectors.
 
+Numbers written to cells are the shortest decimal that reads back to
+the same double (`vsd.FormatInches`, strconv 'f' -1). Visio writes its
+own 16-to-17-digit spelling (0.1666666666666667 for 12 pt, which is not
+the same double as 12/72 = 0.16666666666666666); both are read alike,
+and a write keeps a stored value that already shows as the requested
+one, so identity writes stay no-ops (decided 2026-11-17, K5b).
+
 `--units in` (and plan `units: "in"`) shows lengths in stored inches,
 written as Visio writes numbers (`vsd.FormatInches`): the native-unit
 twin of pptx's `--units emu`. Coordinates stay y down in both units;

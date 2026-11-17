@@ -55,6 +55,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -67,6 +68,7 @@
       "word": 1,
       "powerpoint": 4,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug62513.pptx",
@@ -79,6 +81,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/customxml.pptx",
@@ -91,6 +94,7 @@
       "word": 2,
       "powerpoint": 3,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -103,6 +107,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 23,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/62629_target.xlsm",
@@ -115,6 +120,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/64420.xlsm",
@@ -127,6 +133,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/64759.xlsx",
@@ -139,6 +146,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -151,6 +159,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -163,6 +172,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -175,6 +185,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -187,6 +198,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/fdo76098.docx",
@@ -199,6 +211,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 45,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -211,6 +224,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 4,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-tika/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents/testEXCEL_macro_enabled_template.xltm",
@@ -223,6 +237,7 @@
       "word": 5,
       "powerpoint": 13,
       "excel": 5,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/activex_checkbox.pptx",
@@ -235,6 +250,7 @@
       "word": 5,
       "powerpoint": 14,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/keyframes.pptx",
@@ -247,6 +263,7 @@
       "word": 7,
       "powerpoint": 79,
       "excel": 25,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/chart-picture-bg.pptx",
@@ -259,6 +276,7 @@
       "word": 0,
       "powerpoint": 6,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/chart2/qa/extras/data/pptx/funnel-pp1.pptx",
@@ -271,6 +289,7 @@
       "word": 7,
       "powerpoint": 79,
       "excel": 25,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/chart-picture-bg.pptx",
@@ -283,6 +302,7 @@
       "word": 0,
       "powerpoint": 14,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/multiplelayoutfooter.pptx",
@@ -295,6 +315,7 @@
       "word": 8,
       "powerpoint": 72,
       "excel": 6,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -307,6 +328,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 33,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/keyframes.pptx",
@@ -319,6 +341,7 @@
       "word": 1,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlimport/n820504.docx",
@@ -331,6 +354,7 @@
       "word": 0,
       "powerpoint": 3,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/modern-comments.pptx",
@@ -343,6 +367,7 @@
       "word": 0,
       "powerpoint": 8,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/ArtisticEffectSample.pptx",
@@ -355,6 +380,7 @@
       "word": 0,
       "powerpoint": 65,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug65228.pptx",
@@ -367,6 +393,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/bnc837302.docx",
@@ -379,6 +406,7 @@
       "word": 514,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/2-id.docx",
@@ -391,6 +419,7 @@
       "word": 138,
       "powerpoint": 179,
       "excel": 100,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -403,6 +432,7 @@
       "word": 319,
       "powerpoint": 36,
       "excel": 28,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -415,6 +445,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 210,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -427,6 +458,7 @@
       "word": 14,
       "powerpoint": 140,
       "excel": 74,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -439,6 +471,7 @@
       "word": 0,
       "powerpoint": 6,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -451,6 +484,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -463,6 +497,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -475,6 +510,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -487,6 +523,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -499,6 +536,7 @@
       "word": 1218,
       "powerpoint": 1162,
       "excel": 1176,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -511,6 +549,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "closedxml/ClosedXML.Tests/Resource/Other/Cubes/CubeFromRange-Input.xlsx",
@@ -523,6 +562,7 @@
       "word": 14,
       "powerpoint": 35,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/alterman_security.pptx",
@@ -535,6 +575,7 @@
       "word": 0,
       "powerpoint": 48,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -547,6 +588,7 @@
       "word": 0,
       "powerpoint": 5,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-tika/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents/testComment.pptx",
@@ -559,6 +601,7 @@
       "word": 0,
       "powerpoint": 124,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/openxml4j/at.pzp.www_uploads_media_PP_Scheinecker-jdk6error.pptx",
@@ -571,6 +614,7 @@
       "word": 0,
       "powerpoint": 352,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -583,6 +627,7 @@
       "word": 0,
       "powerpoint": 267,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -595,6 +640,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -607,6 +653,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/ExcelWithAttachments.xlsm",
@@ -619,6 +666,7 @@
       "word": 0,
       "powerpoint": 1116,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -631,6 +679,7 @@
       "word": 0,
       "powerpoint": 77,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/2411-Performance_Up.pptx",
@@ -643,6 +692,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/fdo79968.docx",
@@ -655,6 +705,7 @@
       "word": 0,
       "powerpoint": 1147,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -667,6 +718,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -679,6 +731,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -691,6 +744,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -703,6 +757,7 @@
       "word": 0,
       "powerpoint": 30,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -715,6 +770,7 @@
       "word": 0,
       "powerpoint": 44,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug59273.potx",
@@ -727,6 +783,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -739,6 +796,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 311,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -751,6 +809,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 23,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/47813.xlsx",
@@ -763,6 +822,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 53,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/45544.xlsx",
@@ -775,6 +835,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 36,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/55923.xlsx",
@@ -787,6 +848,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/60512.xlsm",
@@ -799,6 +861,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "closedxml/ClosedXML.Tests/Resource/TryToLoad/DialogSheet.xlsx",
@@ -811,6 +874,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 32,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/46535.xlsx",
@@ -823,6 +887,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 139,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/54436.xlsx",
@@ -835,6 +900,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 129,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/54436.xlsx",
@@ -847,6 +913,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 135,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/54436.xlsx",
@@ -859,6 +926,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 380,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/1_NoIden.xlsx",
@@ -871,6 +939,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 9,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/StructuredRefs-lots-with-lookups.xlsx",
@@ -883,6 +952,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/workbookProtection_workbook_revision_protected.xlsx",
@@ -895,6 +965,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/workbookProtection_workbook_revision_protected.xlsx",
@@ -907,6 +978,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 873,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -919,6 +991,7 @@
       "word": 16,
       "powerpoint": 130,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -931,6 +1004,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 1082,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/123233_charts.xlsx",
@@ -943,6 +1017,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 11,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -955,6 +1030,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 1173,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -967,6 +1043,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 132,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/50867_with_table.xlsx",
@@ -979,6 +1056,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 15,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/55850.xlsx",
@@ -991,6 +1069,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 45,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/test.xltx",
@@ -1003,6 +1082,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/workbookProtection_workbook_revision_protected.xlsx",
@@ -1015,6 +1095,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "closedxml/ClosedXML.Tests/Resource/Other/Cubes/CubeFromRange-Input.xlsx",
@@ -1027,6 +1108,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 1175,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -1039,6 +1121,7 @@
       "word": 1213,
       "powerpoint": 1162,
       "excel": 1160,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -1051,6 +1134,7 @@
       "word": 0,
       "powerpoint": 14,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -1063,6 +1147,7 @@
       "word": 0,
       "powerpoint": 49,
       "excel": 94,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -1075,6 +1160,7 @@
       "word": 21,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1087,6 +1173,7 @@
       "word": 10,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CommentDone.docx",
@@ -1099,6 +1186,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CommentDone.docx",
@@ -1111,6 +1199,7 @@
       "word": 10,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CommentDone.docx",
@@ -1123,6 +1212,7 @@
       "word": 3,
       "powerpoint": 6,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug62513.pptx",
@@ -1135,6 +1225,7 @@
       "word": 56,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/Cool15788_symbolContentControl.docx",
@@ -1147,6 +1238,7 @@
       "word": 1217,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1159,6 +1251,7 @@
       "word": 456,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1171,6 +1264,7 @@
       "word": 1213,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1183,6 +1277,7 @@
       "word": 274,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1195,6 +1290,7 @@
       "word": 456,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1207,6 +1303,7 @@
       "word": 261,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1219,6 +1316,7 @@
       "word": 353,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1231,6 +1329,7 @@
       "word": 32,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CT-with-frame.docx",
@@ -1243,6 +1342,7 @@
       "word": 1212,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1255,6 +1355,7 @@
       "word": 1215,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1267,6 +1368,7 @@
       "word": 1189,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -1279,6 +1381,7 @@
       "word": 1218,
       "powerpoint": 1161,
       "excel": 1175,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -1291,6 +1394,7 @@
       "word": 0,
       "powerpoint": 4,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/xmldsign/PPT2016withComment.pptx",
@@ -1303,6 +1407,7 @@
       "word": 0,
       "powerpoint": 4,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/xmldsign/PPT2016withComment.pptx",
@@ -1315,6 +1420,7 @@
       "word": 1218,
       "powerpoint": 1162,
       "excel": 1176,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -1327,6 +1433,7 @@
       "word": 0,
       "powerpoint": 9,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/placeholder-layout-color.pptx",
@@ -1339,6 +1446,7 @@
       "word": 327,
       "powerpoint": 37,
       "excel": 50,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -1351,6 +1459,7 @@
       "word": 0,
       "powerpoint": 4,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/EmbeddedAudio.pptx",
@@ -1363,6 +1472,7 @@
       "word": 0,
       "powerpoint": 3,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "open-xml-sdk/test/DocumentFormat.OpenXml.Tests.Assets/assets/TestDataStorage/v2FxTestFiles/presentation/SoundTest.pptx",
@@ -1375,6 +1485,7 @@
       "word": 0,
       "powerpoint": 3,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/tdf114848.pptx",
@@ -1387,6 +1498,7 @@
       "word": 16,
       "powerpoint": 16,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -1399,6 +1511,7 @@
       "word": 64,
       "powerpoint": 1014,
       "excel": 64,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -1411,6 +1524,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "python-pptx/features/steps/test_files/test-image-jpg-mime.pptx",
@@ -1423,6 +1537,7 @@
       "word": 109,
       "powerpoint": 248,
       "excel": 35,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -1435,6 +1550,7 @@
       "word": 2,
       "powerpoint": 14,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/tdf169496_hidden_graphic.pptx",
@@ -1447,6 +1563,7 @@
       "word": 4,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/ArtisticEffectSample.pptx",
@@ -1459,6 +1576,7 @@
       "word": 4,
       "powerpoint": 3,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug65523.pptx",
@@ -1471,6 +1589,7 @@
       "word": 64,
       "powerpoint": 41,
       "excel": 20,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/KEY02.pptx",
@@ -1483,6 +1602,7 @@
       "word": 19,
       "powerpoint": 34,
       "excel": 46,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/openxml4j/at.pzp.www_uploads_media_PP_Scheinecker-jdk6error.pptx",
@@ -1495,6 +1615,7 @@
       "word": 0,
       "powerpoint": 9,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/EmbeddedVideo.pptx",
@@ -1507,6 +1628,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "open-xml-powertools/TestFiles/PP006-Videos.pptx",
@@ -1519,6 +1641,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/tdf106867.pptx",
@@ -1533,6 +1656,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/customxml.pptx",
@@ -1545,6 +1669,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/customxml.pptx",
@@ -1557,6 +1682,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/customxml.pptx",
@@ -1569,6 +1695,7 @@
       "word": 5,
       "powerpoint": 13,
       "excel": 5,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/activex_checkbox.pptx",
@@ -1581,6 +1708,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/bnc837302.docx",
@@ -1593,6 +1721,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 34,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/keyframes.pptx",
@@ -1605,6 +1734,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 5,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/errors.xlsx",
@@ -1619,6 +1749,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/64420.xlsm",
@@ -1631,6 +1762,7 @@
       "word": 8,
       "powerpoint": 73,
       "excel": 6,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -1643,6 +1775,7 @@
       "word": 4,
       "powerpoint": 3,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug65523.pptx",
@@ -1655,6 +1788,7 @@
       "word": 0,
       "powerpoint": 17,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/EmbeddedAudio.pptx",
@@ -1667,6 +1801,7 @@
       "word": 515,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/2-id.docx",
@@ -1679,6 +1814,7 @@
       "word": 7,
       "powerpoint": 79,
       "excel": 25,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/chart-picture-bg.pptx",
@@ -1691,6 +1827,7 @@
       "word": 7,
       "powerpoint": 79,
       "excel": 25,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/chart-picture-bg.pptx",
@@ -1703,6 +1840,7 @@
       "word": 10,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CommentDone.docx",
@@ -1715,6 +1853,7 @@
       "word": 32,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CT-with-frame.docx",
@@ -1727,6 +1866,7 @@
       "word": 1,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlimport/n820504.docx",
@@ -1739,6 +1879,7 @@
       "word": 0,
       "powerpoint": 6,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/chart2/qa/extras/data/pptx/funnel-pp1.pptx",
@@ -1751,6 +1892,7 @@
       "word": 0,
       "powerpoint": 65,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug65228.pptx",
@@ -1763,6 +1905,7 @@
       "word": 10,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CommentDone.docx",
@@ -1775,6 +1918,7 @@
       "word": 0,
       "powerpoint": 8,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/ArtisticEffectSample.pptx",
@@ -1787,6 +1931,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "open-xml-sdk/test/DocumentFormat.OpenXml.Tests.Assets/assets/TestFiles/3dtestdash.pptx",
@@ -1799,6 +1944,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -1811,6 +1957,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -1823,6 +1970,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -1835,6 +1983,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/64759.xlsx",
@@ -1847,6 +1996,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CommentDone.docx",
@@ -1859,6 +2009,7 @@
       "word": 0,
       "powerpoint": 3,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/modern-comments.pptx",
@@ -1871,6 +2022,7 @@
       "word": 0,
       "powerpoint": 14,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/multiplelayoutfooter.pptx",
@@ -1883,6 +2035,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -1895,6 +2048,7 @@
       "word": 44,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/1_page.docx",
@@ -1908,6 +2062,7 @@
       "word": 0,
       "powerpoint": 15,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/EmbeddedAudio.pptx",
@@ -1921,6 +2076,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 311,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -1933,6 +2089,7 @@
       "word": 14,
       "powerpoint": 139,
       "excel": 74,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -1945,6 +2102,7 @@
       "word": 0,
       "powerpoint": 6,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -1957,6 +2115,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 23,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/47813.xlsx",
@@ -1969,6 +2128,7 @@
       "word": 0,
       "powerpoint": 48,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -1981,6 +2141,7 @@
       "word": 21,
       "powerpoint": 5,
       "excel": 53,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-tika/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents/testComment.pptx",
@@ -1993,6 +2154,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 36,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/55923.xlsx",
@@ -2005,6 +2167,7 @@
       "word": 5,
       "powerpoint": 14,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/keyframes.pptx",
@@ -2017,6 +2180,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 23,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/62629_target.xlsm",
@@ -2029,6 +2193,7 @@
       "word": 138,
       "powerpoint": 179,
       "excel": 98,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -2041,6 +2206,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/60512.xlsm",
@@ -2053,6 +2219,7 @@
       "word": 318,
       "powerpoint": 39,
       "excel": 28,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -2065,6 +2232,7 @@
       "word": 319,
       "powerpoint": 36,
       "excel": 28,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -2077,6 +2245,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -2089,6 +2258,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -2101,6 +2271,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -2113,6 +2284,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -2125,6 +2297,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "closedxml/ClosedXML.Tests/Resource/TryToLoad/DialogSheet.xlsx",
@@ -2137,6 +2310,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 210,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -2149,6 +2323,7 @@
       "word": 457,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -2161,6 +2336,7 @@
       "word": 1218,
       "powerpoint": 1061,
       "excel": 1173,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2173,6 +2349,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 33,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/46535.xlsx",
@@ -2185,6 +2362,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 34,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/46535.xlsx",
@@ -2199,6 +2377,7 @@
       "word": 0,
       "powerpoint": 9,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/placeholder-layout-color.pptx",
@@ -2211,6 +2390,7 @@
       "word": 1215,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -2223,6 +2403,7 @@
       "word": 281,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -2235,6 +2416,7 @@
       "word": 457,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -2247,6 +2429,7 @@
       "word": 58,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/Cool15788_symbolContentControl.docx",
@@ -2259,6 +2442,7 @@
       "word": 0,
       "powerpoint": 124,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/openxml4j/at.pzp.www_uploads_media_PP_Scheinecker-jdk6error.pptx",
@@ -2271,6 +2455,7 @@
       "word": 262,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -2283,6 +2468,7 @@
       "word": 55,
       "powerpoint": 35,
       "excel": 39,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -2297,6 +2483,7 @@
       "word": 231,
       "powerpoint": 407,
       "excel": 94,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -2310,6 +2497,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/oox/qa/unit/data/tdf165180_standardConnectorsISO29500.potx",
@@ -2322,6 +2510,7 @@
       "word": 0,
       "powerpoint": 352,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -2334,6 +2523,7 @@
       "word": 0,
       "powerpoint": 267,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -2346,6 +2536,7 @@
       "word": 354,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -2358,6 +2549,7 @@
       "word": 1218,
       "powerpoint": 1162,
       "excel": 1175,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2370,6 +2562,7 @@
       "word": 20,
       "powerpoint": 58,
       "excel": 8,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -2383,6 +2576,7 @@
       "word": 27,
       "powerpoint": 132,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2395,6 +2589,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 139,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/54436.xlsx",
@@ -2407,6 +2602,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 129,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/54436.xlsx",
@@ -2419,6 +2615,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 135,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/54436.xlsx",
@@ -2431,6 +2628,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "closedxml/ClosedXML.Tests/Resource/Other/Cubes/CubeFromRange-Input.xlsx",
@@ -2443,6 +2641,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2455,6 +2654,7 @@
       "word": 0,
       "powerpoint": 77,
       "excel": 380,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/2411-Performance_Up.pptx",
@@ -2467,6 +2667,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 9,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/StructuredRefs-lots-with-lookups.xlsx",
@@ -2479,6 +2680,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/workbookProtection_workbook_revision_protected.xlsx",
@@ -2491,6 +2693,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/workbookProtection_workbook_revision_protected.xlsx",
@@ -2503,6 +2706,7 @@
       "word": 1213,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -2515,6 +2719,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 874,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -2527,6 +2732,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 11,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -2539,6 +2745,7 @@
       "word": 0,
       "powerpoint": 1147,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2551,6 +2758,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2563,6 +2771,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2575,6 +2784,7 @@
       "word": 1216,
       "powerpoint": 0,
       "excel": 1173,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -2587,6 +2797,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 132,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/50867_with_table.xlsx",
@@ -2599,6 +2810,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 15,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/55850.xlsx",
@@ -2611,6 +2823,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2623,6 +2836,7 @@
       "word": 0,
       "powerpoint": 30,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -2635,6 +2849,7 @@
       "word": 1212,
       "powerpoint": 1162,
       "excel": 1161,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2647,6 +2862,7 @@
       "word": 0,
       "powerpoint": 14,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -2659,6 +2875,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/workbookProtection_workbook_revision_protected.xlsx",
@@ -2671,6 +2888,7 @@
       "word": 0,
       "powerpoint": 13,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/EmbeddedVideo.pptx",
@@ -2684,6 +2902,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2696,6 +2915,7 @@
       "word": 0,
       "powerpoint": 49,
       "excel": 94,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -2708,6 +2928,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "closedxml/ClosedXML.Tests/Resource/Other/Cubes/CubeFromRange-Input.xlsx",
@@ -2720,6 +2941,7 @@
       "word": 1190,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -2732,6 +2954,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 1175,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -2744,6 +2967,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 17,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/55850.xlsx",
@@ -2756,6 +2980,7 @@
       "word": 12,
       "powerpoint": 1,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "python-pptx/tests/test_files/test_slides.pptx",
@@ -2768,6 +2993,7 @@
       "word": 0,
       "powerpoint": 4,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/xmldsign/PPT2016withComment.pptx",
@@ -2780,6 +3006,7 @@
       "word": 0,
       "powerpoint": 4,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/xmldsign/PPT2016withComment.pptx",
@@ -2792,6 +3019,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/bug66675.xlsx",
@@ -2804,6 +3032,7 @@
       "word": 1218,
       "powerpoint": 1159,
       "excel": 1170,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2816,6 +3045,7 @@
       "word": 0,
       "powerpoint": 101,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "pandoc/test/pptx-reader/lists-writer.pptx",
@@ -2828,6 +3058,7 @@
       "word": 39,
       "powerpoint": 959,
       "excel": 70,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -2840,6 +3071,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/tdf90789-2.docx",
@@ -2855,6 +3087,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/customxml.pptx",
@@ -2868,6 +3101,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/customxml.pptx",
@@ -2881,6 +3115,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/customxml.pptx",
@@ -2894,6 +3129,7 @@
       "word": 5,
       "powerpoint": 13,
       "excel": 5,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/activex_checkbox.pptx",
@@ -2907,6 +3143,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/bnc837302.docx",
@@ -2920,6 +3157,7 @@
       "word": 0,
       "powerpoint": 1,
       "excel": 33,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/keyframes.pptx",
@@ -2933,6 +3171,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/64420.xlsm",
@@ -2946,6 +3185,7 @@
       "word": 8,
       "powerpoint": 72,
       "excel": 6,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -2959,6 +3199,7 @@
       "word": 4,
       "powerpoint": 3,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug65523.pptx",
@@ -2972,6 +3213,7 @@
       "word": 0,
       "powerpoint": 4,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/EmbeddedAudio.pptx",
@@ -2985,6 +3227,7 @@
       "word": 0,
       "powerpoint": 9,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/EmbeddedVideo.pptx",
@@ -2998,6 +3241,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "open-xml-powertools/TestFiles/PP006-Videos.pptx",
@@ -3011,6 +3255,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/tdf106867.pptx",
@@ -3024,6 +3269,7 @@
       "word": 514,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/2-id.docx",
@@ -3037,6 +3283,7 @@
       "word": 7,
       "powerpoint": 79,
       "excel": 25,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/chart-picture-bg.pptx",
@@ -3050,6 +3297,7 @@
       "word": 7,
       "powerpoint": 79,
       "excel": 25,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/chart-picture-bg.pptx",
@@ -3063,6 +3311,7 @@
       "word": 10,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CommentDone.docx",
@@ -3076,6 +3325,7 @@
       "word": 32,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CT-with-frame.docx",
@@ -3089,6 +3339,7 @@
       "word": 1,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlimport/n820504.docx",
@@ -3102,6 +3353,7 @@
       "word": 0,
       "powerpoint": 6,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/chart2/qa/extras/data/pptx/funnel-pp1.pptx",
@@ -3115,6 +3367,7 @@
       "word": 0,
       "powerpoint": 65,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug65228.pptx",
@@ -3128,6 +3381,7 @@
       "word": 10,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CommentDone.docx",
@@ -3141,6 +3395,7 @@
       "word": 0,
       "powerpoint": 8,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/ArtisticEffectSample.pptx",
@@ -3154,6 +3409,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -3167,6 +3423,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -3180,6 +3437,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -3193,6 +3451,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/64759.xlsx",
@@ -3206,6 +3465,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/CommentDone.docx",
@@ -3219,6 +3479,7 @@
       "word": 0,
       "powerpoint": 3,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/modern-comments.pptx",
@@ -3232,6 +3493,7 @@
       "word": 0,
       "powerpoint": 14,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/multiplelayoutfooter.pptx",
@@ -3245,6 +3507,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -3258,6 +3521,7 @@
       "word": 0,
       "powerpoint": 4,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/EmbeddedAudio.pptx",
@@ -3271,6 +3535,7 @@
       "word": 0,
       "powerpoint": 3,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "open-xml-sdk/test/DocumentFormat.OpenXml.Tests.Assets/assets/TestDataStorage/v2FxTestFiles/presentation/SoundTest.pptx",
@@ -3284,6 +3549,7 @@
       "word": 0,
       "powerpoint": 3,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/tdf114848.pptx",
@@ -3297,6 +3563,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 310,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -3310,6 +3577,7 @@
       "word": 14,
       "powerpoint": 139,
       "excel": 74,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -3323,6 +3591,7 @@
       "word": 0,
       "powerpoint": 6,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -3336,6 +3605,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 23,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/47813.xlsx",
@@ -3349,6 +3619,7 @@
       "word": 0,
       "powerpoint": 48,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -3362,6 +3633,7 @@
       "word": 0,
       "powerpoint": 5,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-tika/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents/testComment.pptx",
@@ -3375,6 +3647,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 53,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/45544.xlsx",
@@ -3388,6 +3661,7 @@
       "word": 21,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -3401,6 +3675,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 36,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/55923.xlsx",
@@ -3414,6 +3689,7 @@
       "word": 5,
       "powerpoint": 14,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/keyframes.pptx",
@@ -3427,6 +3703,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 23,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/62629_target.xlsm",
@@ -3440,6 +3717,7 @@
       "word": 138,
       "powerpoint": 179,
       "excel": 98,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -3453,6 +3731,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/60512.xlsm",
@@ -3466,6 +3745,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -3479,6 +3759,7 @@
       "word": 318,
       "powerpoint": 37,
       "excel": 28,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -3492,6 +3773,7 @@
       "word": 319,
       "powerpoint": 36,
       "excel": 28,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/60810.pptx",
@@ -3505,6 +3787,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -3518,6 +3801,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -3531,6 +3815,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -3544,6 +3829,7 @@
       "word": 8,
       "powerpoint": 125,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -3557,6 +3843,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "closedxml/ClosedXML.Tests/Resource/TryToLoad/DialogSheet.xlsx",
@@ -3570,6 +3857,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 210,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -3583,6 +3871,7 @@
       "word": 456,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -3596,6 +3885,7 @@
       "word": 1218,
       "powerpoint": 1061,
       "excel": 1173,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -3609,6 +3899,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 32,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/46535.xlsx",
@@ -3622,6 +3913,7 @@
       "word": 0,
       "powerpoint": 9,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/placeholder-layout-color.pptx",
@@ -3635,6 +3927,7 @@
       "word": 1213,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -3648,6 +3941,7 @@
       "word": 273,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -3661,6 +3955,7 @@
       "word": 456,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -3674,6 +3969,7 @@
       "word": 56,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/Cool15788_symbolContentControl.docx",
@@ -3687,6 +3983,7 @@
       "word": 0,
       "powerpoint": 124,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/openxml4j/at.pzp.www_uploads_media_PP_Scheinecker-jdk6error.pptx",
@@ -3700,6 +3997,7 @@
       "word": 261,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -3713,6 +4011,7 @@
       "word": 16,
       "powerpoint": 16,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -3726,6 +4025,7 @@
       "word": 61,
       "powerpoint": 179,
       "excel": 39,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -3739,6 +4039,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "python-pptx/features/steps/test_files/test-image-jpg-mime.pptx",
@@ -3752,6 +4053,7 @@
       "word": 109,
       "powerpoint": 248,
       "excel": 35,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -3765,6 +4067,7 @@
       "word": 2,
       "powerpoint": 14,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/tdf169496_hidden_graphic.pptx",
@@ -3778,6 +4081,7 @@
       "word": 4,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/ArtisticEffectSample.pptx",
@@ -3791,6 +4095,7 @@
       "word": 33,
       "powerpoint": 41,
       "excel": 20,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/KEY02.pptx",
@@ -3804,6 +4109,7 @@
       "word": 15,
       "powerpoint": 32,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/openxml4j/at.pzp.www_uploads_media_PP_Scheinecker-jdk6error.pptx",
@@ -3817,6 +4123,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/oox/qa/unit/data/tdf165180_standardConnectorsISO29500.potx",
@@ -3830,6 +4137,7 @@
       "word": 0,
       "powerpoint": 352,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -3843,6 +4151,7 @@
       "word": 0,
       "powerpoint": 267,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress013.pptx",
@@ -3856,6 +4165,7 @@
       "word": 353,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -3869,6 +4179,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 45,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -3882,6 +4193,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 4,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-tika/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents/testEXCEL_macro_enabled_template.xltm",
@@ -3895,6 +4207,7 @@
       "word": 0,
       "powerpoint": 1116,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -3908,6 +4221,7 @@
       "word": 0,
       "powerpoint": 44,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug59273.potx",
@@ -3921,6 +4235,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 1081,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/123233_charts.xlsx",
@@ -3934,6 +4249,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 45,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/test.xltx",
@@ -3947,6 +4263,7 @@
       "word": 1217,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -3960,6 +4277,7 @@
       "word": 1,
       "powerpoint": 4,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug62513.pptx",
@@ -3973,6 +4291,7 @@
       "word": 2,
       "powerpoint": 3,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -3986,6 +4305,7 @@
       "word": 14,
       "powerpoint": 35,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/alterman_security.pptx",
@@ -3999,6 +4319,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/fdo76098.docx",
@@ -4012,6 +4333,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/ExcelWithAttachments.xlsm",
@@ -4025,6 +4347,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/fdo79968.docx",
@@ -4038,6 +4361,7 @@
       "word": 16,
       "powerpoint": 130,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4051,6 +4375,7 @@
       "word": 3,
       "powerpoint": 6,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/bug62513.pptx",
@@ -4064,6 +4389,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 139,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/54436.xlsx",
@@ -4077,6 +4403,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 129,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/54436.xlsx",
@@ -4090,6 +4417,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 135,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/54436.xlsx",
@@ -4103,6 +4431,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 3,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "closedxml/ClosedXML.Tests/Resource/Other/Cubes/CubeFromRange-Input.xlsx",
@@ -4116,6 +4445,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4129,6 +4459,7 @@
       "word": 0,
       "powerpoint": 77,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/2411-Performance_Up.pptx",
@@ -4142,6 +4473,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 380,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/1_NoIden.xlsx",
@@ -4155,6 +4487,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 9,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/StructuredRefs-lots-with-lookups.xlsx",
@@ -4168,6 +4501,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/workbookProtection_workbook_revision_protected.xlsx",
@@ -4181,6 +4515,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/workbookProtection_workbook_revision_protected.xlsx",
@@ -4194,6 +4529,7 @@
       "word": 1212,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -4207,6 +4543,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 873,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -4220,6 +4557,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 11,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "calamine/tests/picture_richdata.xlsx",
@@ -4233,6 +4571,7 @@
       "word": 0,
       "powerpoint": 1147,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4246,6 +4585,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4259,6 +4599,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4272,6 +4613,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 1173,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -4285,6 +4627,7 @@
       "word": 1215,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -4298,6 +4641,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 132,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/50867_with_table.xlsx",
@@ -4311,6 +4655,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 15,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/55850.xlsx",
@@ -4324,6 +4669,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4337,6 +4683,7 @@
       "word": 0,
       "powerpoint": 30,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -4350,6 +4697,7 @@
       "word": 1212,
       "powerpoint": 1162,
       "excel": 1160,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4363,6 +4711,7 @@
       "word": 0,
       "powerpoint": 14,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/integration/stress021.pptx",
@@ -4376,6 +4725,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/workbookProtection_workbook_revision_protected.xlsx",
@@ -4389,6 +4739,7 @@
       "word": 0,
       "powerpoint": 9,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/EmbeddedVideo.pptx",
@@ -4402,6 +4753,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "open-xml-powertools/TestFiles/PP006-Videos.pptx",
@@ -4415,6 +4767,7 @@
       "word": 0,
       "powerpoint": 2,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "libreoffice-core/sd/qa/unit/data/pptx/tdf106867.pptx",
@@ -4428,6 +4781,7 @@
       "word": 0,
       "powerpoint": 1162,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4441,6 +4795,7 @@
       "word": 0,
       "powerpoint": 49,
       "excel": 94,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/aascu.org_workarea_downloadasset.aspx_id=5864.pptx",
@@ -4454,6 +4809,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 7,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "closedxml/ClosedXML.Tests/Resource/Other/Cubes/CubeFromRange-Input.xlsx",
@@ -4467,6 +4823,7 @@
       "word": 1189,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/090716_Studentische_Arbeit_VWS.docx",
@@ -4480,6 +4837,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 1175,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/0-www-crossref-org.lib.rivier.edu_education-files_suffix-generator.xlsm",
@@ -4493,6 +4851,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 17,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/55850.xlsx",
@@ -4506,6 +4865,7 @@
       "word": 12,
       "powerpoint": 1,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "python-pptx/tests/test_files/test_slides.pptx",
@@ -4519,6 +4879,7 @@
       "word": 0,
       "powerpoint": 4,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/xmldsign/PPT2016withComment.pptx",
@@ -4532,6 +4893,7 @@
       "word": 0,
       "powerpoint": 4,
       "excel": 1,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/xmldsign/PPT2016withComment.pptx",
@@ -4545,6 +4907,7 @@
       "word": 0,
       "powerpoint": 0,
       "excel": 2,
+      "visio": 0,
       "source": {
         "label": "xlsx-repos",
         "path": "apache-poi/test-data/spreadsheet/bug66675.xlsx",
@@ -4558,6 +4921,7 @@
       "word": 1218,
       "powerpoint": 1159,
       "excel": 1170,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4571,6 +4935,7 @@
       "word": 0,
       "powerpoint": 101,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "pandoc/test/pptx-reader/lists-writer.pptx",
@@ -4584,6 +4949,7 @@
       "word": 4,
       "powerpoint": 955,
       "excel": 25,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/poi-examples/src/main/java/org/apache/poi/examples/xslf/bar-chart-template.pptx",
@@ -4597,6 +4963,7 @@
       "word": 31,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/AnchorId.docx",
@@ -4610,6 +4977,7 @@
       "word": 4,
       "powerpoint": 2,
       "excel": 44,
+      "visio": 0,
       "source": {
         "label": "pptx-repos",
         "path": "apache-poi/test-data/slideshow/sample_pptx_grouping_issues.pptx",
@@ -4623,6 +4991,7 @@
       "word": 2,
       "powerpoint": 0,
       "excel": 0,
+      "visio": 0,
       "source": {
         "label": "docx-lo",
         "path": "ooxmlexport/tdf90789-2.docx",
