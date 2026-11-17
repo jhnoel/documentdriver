@@ -104,6 +104,9 @@ func Run(path string, p *ops.Plan, opt Options) (*plan.Result, error) {
 			}
 			res.Aliases[alias] = asAddr
 		}
+		// Collect changed addresses once each, in first-change order:
+		// an op repeating an earlier address neither duplicates it
+		// in the result nor moves it from its first change.
 		for _, a := range ch {
 			if !changedSeen[a] {
 				changedSeen[a] = true
