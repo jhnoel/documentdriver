@@ -10,6 +10,7 @@ package emit
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -43,15 +44,45 @@ type Shape struct {
 // RelMoveTo (0,0), RelLineTo (1,0) (1,1) (0,1) (0,0), ellipse as one
 // Ellipse row (centre W/2,H/2, A,B the right point, C,D the top point,
 // with formulas). Numbers through vsd.FormatInches. Chunk K3.
+// It refuses a non-finite PinX, PinY, Width, Height, LocPinX, LocPinY,
+// Angle or LineWeight, and a negative LineWeight, naming the field;
+// a zero LineWeight keeps the style's. Chunk K3F.
 func ShapeXML(s Shape) ([]byte, error) {
 	if s.Geom != "rect" && s.Geom != "ellipse" {
 		return nil, fmt.Errorf("vsdx: emit ShapeXML: unknown geom %q (want rect or ellipse)", s.Geom)
 	}
+	if math.IsNaN(s.PinX) || math.IsInf(s.PinX, 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: PinX %v is not finite", s.PinX)
+	}
+	if math.IsNaN(s.PinY) || math.IsInf(s.PinY, 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: PinY %v is not finite", s.PinY)
+	}
+	if math.IsNaN(s.Width) || math.IsInf(s.Width, 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: Width %v is not finite", s.Width)
+	}
+	if math.IsNaN(s.Height) || math.IsInf(s.Height, 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: Height %v is not finite", s.Height)
+	}
+	if math.IsNaN(s.LocPinX) || math.IsInf(s.LocPinX, 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: LocPinX %v is not finite", s.LocPinX)
+	}
+	if math.IsNaN(s.LocPinY) || math.IsInf(s.LocPinY, 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: LocPinY %v is not finite", s.LocPinY)
+	}
+	if math.IsNaN(s.Angle) || math.IsInf(s.Angle, 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: Angle %v is not finite", s.Angle)
+	}
+	if math.IsNaN(s.LineWeight) || math.IsInf(s.LineWeight, 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: LineWeight %v is not finite", s.LineWeight)
+	}
+	if s.LineWeight < 0 {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: LineWeight %v is negative", s.LineWeight)
+	}
 	if !(s.Width > 0) {
-		return nil, fmt.Errorf("vsdx: emit ShapeXML: width must be positive, got %v", s.Width)
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: Width must be positive, got %v", s.Width)
 	}
 	if !(s.Height > 0) {
-		return nil, fmt.Errorf("vsdx: emit ShapeXML: height must be positive, got %v", s.Height)
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: Height must be positive, got %v", s.Height)
 	}
 	var b strings.Builder
 	b.Grow(1024)
