@@ -27,6 +27,13 @@ Layout rules the goldens fix (R2 implements them):
 - Numbers: points through geom.FormatNum; inches through
   vsd.FormatInches; raw cells as stored.
 - line: {w, color, dash}; colours {"hex": "#RRGGBB"}.
-- Hazard details: dangling-glue "<field> names shape <n>, which is not
-  on the page"; stale-connector "<from|to> end is <d> pt from site <glue>"
-  with d through geom.FormatNum (rounded to 0.1 pt here: 80.5).
+- Hazard details (approved wording, compared whole; `<glue>` as
+  vsd.Glue writes it, `<d>` through geom.FormatNum):
+  - dangling end: "<from_glue|to_glue> names shape <n>, which is not on
+    the page";
+  - dangling non-end Connect: "<FromCell> names shape <n>, which is not
+    on the page" ("Controls.Row_1 names shape 99, …");
+  - stale point glue: "<from|to> end is <d> pt from site <glue>"
+    ("from end is 80.5 pt from site s1:1");
+  - stale whole-shape glue: "<from|to> end is <d> pt outside shape
+    <glue>" ("to end is 18 pt outside shape s2").
