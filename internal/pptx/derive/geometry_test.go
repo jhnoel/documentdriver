@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strconv"
 	"testing"
+
+	"github.com/jhnoel/documentdriver/internal/geom"
 )
 
 func TestGuideOperators(t *testing.T) {
@@ -81,7 +83,7 @@ func TestPresetSitesRect(t *testing.T) {
 	}
 	for i, w := range want {
 		if !ptNear(s[i].Pt, w[0], w[1]) {
-			t.Errorf("site %d = %v, want %v", i, Pt{s[i].X / pt, s[i].Y / pt}, w)
+			t.Errorf("site %d = %v, want %v", i, Pt{X: s[i].X / pt, Y: s[i].Y / pt}, w)
 		}
 	}
 	if s[0].Ang != 270 || s[3].Ang != 0 {
@@ -95,7 +97,7 @@ func TestPresetSitesRotated(t *testing.T) {
 	s := sitesOf(t, "rect", nil, x)
 	// Centre (150,125); the top site (0,-25) rotates to (25,0).
 	if !ptNear(s[0].Pt, 175, 125) || s[0].Ang != 0 {
-		t.Errorf("rotated top site = %v ang %g", Pt{s[0].X / pt, s[0].Y / pt}, s[0].Ang)
+		t.Errorf("rotated top site = %v ang %g", Pt{X: s[0].X / pt, Y: s[0].Y / pt}, s[0].Ang)
 	}
 	x.Rot, x.FlipH = 0, true
 	s = sitesOf(t, "rect", nil, x)
@@ -110,7 +112,7 @@ func TestPresetSitesEllipse(t *testing.T) {
 	if len(s) != 8 {
 		t.Fatalf("%d sites", len(s))
 	}
-	c, sn := sincosDeg(45)
+	c, sn := geom.SinCosDeg(45)
 	if !ptNear(s[0].Pt, 100, 0) || !ptNear(s[2].Pt, 0, 50) || !ptNear(s[1].Pt, 100-100*sn, 50-50*c) {
 		t.Errorf("ellipse sites %v", s[:3])
 	}
@@ -157,7 +159,7 @@ func TestCustomSites(t *testing.T) {
 		Gd:  []Adjust{{"x1", "*/ w 1 4"}},
 		Cxn: [][3]string{{"0", "x1", "0"}, {"cd4", "r", "b"}},
 	}
-	s, err := CustomSites(c, 400, 100, translate(10, 20))
+	s, err := CustomSites(c, 400, 100, geom.Translate(10, 20))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -263,10 +265,10 @@ func TestConnectorCurved(t *testing.T) {
 }
 
 func TestStaleGlueAndFrame(t *testing.T) {
-	if _, stale := StaleGlue(Pt{0, 0}, Pt{0.4 * pt, 0}); stale {
+	if _, stale := StaleGlue(Pt{X: 0, Y: 0}, Pt{X: 0.4 * pt, Y: 0}); stale {
 		t.Error("0.4 pt is within tolerance")
 	}
-	if d, stale := StaleGlue(Pt{0, 0}, Pt{3 * pt, 4 * pt}); !stale || !near(d, 5*pt) {
+	if d, stale := StaleGlue(Pt{X: 0, Y: 0}, Pt{X: 3 * pt, Y: 4 * pt}); !stale || !near(d, 5*pt) {
 		t.Errorf("5 pt: %g %v", d, stale)
 	}
 	g := GroupXfrm{Xfrm: xf(0, 0, 50, 50), ChW: 100 * pt, ChH: 100 * pt}

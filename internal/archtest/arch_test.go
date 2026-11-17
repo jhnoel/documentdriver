@@ -94,7 +94,7 @@ var placeFiles = set("internal/ooxml/edit/place.go", "internal/ooxml/edit/unit.g
 // sharedEngine are the shared engine's package trees. Neither they nor
 // anything they import depends on a format (internal/pptx,
 // internal/docx).
-var sharedEngine = []string{"internal/opc", "internal/ooxml", "internal/plan", "internal/ids", "internal/htmlx", "internal/cli", "internal/laws", "internal/ascii"}
+var sharedEngine = []string{"internal/opc", "internal/ooxml", "internal/plan", "internal/ids", "internal/htmlx", "internal/cli", "internal/laws", "internal/ascii", "internal/geom", "internal/casefold"}
 
 // savers are the opc methods that write a package to disk. Only plan
 // transactions call them (Commit, CommitTo, Snapshot), after the

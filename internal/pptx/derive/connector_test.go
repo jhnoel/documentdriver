@@ -5,6 +5,8 @@ import (
 	"math"
 	"math/rand/v2"
 	"testing"
+
+	"github.com/jhnoel/documentdriver/internal/geom"
 )
 
 func connectorPresets() []string {
@@ -30,7 +32,7 @@ func TestConnectorPathsRunCornerToCorner(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if g.From != (Pt{0, 0}) || g.To != (Pt{3000, 2000}) {
+		if g.From != (Pt{X: 0, Y: 0}) || g.To != (Pt{X: 3000, Y: 2000}) {
 			t.Errorf("%s: path runs %v -> %v", prst, g.From, g.To)
 		}
 	}
@@ -61,8 +63,8 @@ func TestConnectorXfrmRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewPCG(1, 2))
 	for name, p := range testParents(t) {
 		for range 200 {
-			from := Pt{rng.Float64()*1e6 - 5e5, rng.Float64()*1e6 - 5e5}
-			to := Pt{rng.Float64()*1e6 - 5e5, rng.Float64()*1e6 - 5e5}
+			from := Pt{X: rng.Float64()*1e6 - 5e5, Y: rng.Float64()*1e6 - 5e5}
+			to := Pt{X: rng.Float64()*1e6 - 5e5, Y: rng.Float64()*1e6 - 5e5}
 			for _, c := range []struct{ prst, first string }{{"straightConnector1", ""}, {"bentConnector3", "h"}, {"bentConnector3", "v"}, {"curvedConnector3", ""}} {
 				x, err := ConnectorXfrm(from, to, c.first, nil, p)
 				if err != nil {
@@ -91,7 +93,7 @@ func TestConnectorXfrmKeepsExpressibleEncoding(t *testing.T) {
 	// same quadrant keep that encoding.
 	cur := Xfrm{X: 0, Y: 0, W: 1000, H: 500, Rot: 180, FlipH: true, FlipV: true}
 	g, _ := ConnectorGeom("straightConnector1", nil, cur.W, cur.H, cur.Matrix())
-	from, to := g.From, Pt{g.To.X + 300, g.To.Y + 100}
+	from, to := g.From, Pt{X: g.To.X + 300, Y: g.To.Y + 100}
 	x, err := ConnectorXfrm(from, to, "", &cur, Root)
 	if err != nil {
 		t.Fatal(err)
@@ -101,7 +103,7 @@ func TestConnectorXfrmKeepsExpressibleEncoding(t *testing.T) {
 	}
 	// Endpoints that would need other flips fall back to rotation 0,
 	// with the flips they need.
-	x, err = ConnectorXfrm(to, Pt{to.X + 10, to.Y - 10}, "", &cur, Root)
+	x, err = ConnectorXfrm(to, Pt{X: to.X + 10, Y: to.Y - 10}, "", &cur, Root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +112,7 @@ func TestConnectorXfrmKeepsExpressibleEncoding(t *testing.T) {
 	}
 	// An elbow whose first segment changes falls back to 90 degrees.
 	elbow := Xfrm{W: 1000, H: 500}
-	x, err = ConnectorXfrm(Pt{0, 0}, Pt{1000, 500}, "v", &elbow, Root)
+	x, err = ConnectorXfrm(Pt{X: 0, Y: 0}, Pt{X: 1000, Y: 500}, "v", &elbow, Root)
 	if err != nil || x.Rot != 90 {
 		t.Fatalf("first v: %+v, %v", x, err)
 	}
@@ -118,7 +120,7 @@ func TestConnectorXfrmKeepsExpressibleEncoding(t *testing.T) {
 
 func TestConnectorXfrmSingular(t *testing.T) {
 	p := Parent{M: Affine{}}
-	if _, err := ConnectorXfrm(Pt{}, Pt{1, 1}, "", nil, p); !errors.Is(err, ErrInexpressible) {
+	if _, err := ConnectorXfrm(Pt{}, Pt{X: 1, Y: 1}, "", nil, p); !errors.Is(err, ErrInexpressible) {
 		t.Fatalf("err = %v", err)
 	}
 }
@@ -140,12 +142,12 @@ func FuzzUnplace(f *testing.F) {
 		if sx <= 1e-3 || sy <= 1e-3 || w < 0 || h < 0 {
 			return
 		}
-		g := GroupXfrm{Xfrm: Xfrm{X: 100 * pt, Y: 50 * pt, W: 400 * pt * sx, H: 200 * pt * sy, Rot: normDeg(grot), FlipH: gfh, FlipV: gfv}, ChX: 3 * pt, ChY: 7 * pt, ChW: 400 * pt, ChH: 200 * pt}
+		g := GroupXfrm{Xfrm: Xfrm{X: 100 * pt, Y: 50 * pt, W: 400 * pt * sx, H: 200 * pt * sy, Rot: geom.NormDeg(grot), FlipH: gfh, FlipV: gfv}, ChX: 3 * pt, ChY: 7 * pt, ChW: 400 * pt, ChH: 200 * pt}
 		p, err := Root.Child(g)
 		if err != nil {
 			return
 		}
-		want := Xfrm{X: x * pt, Y: y * pt, W: w * pt, H: h * pt, Rot: normDeg(rot), FlipH: fh, FlipV: fv}
+		want := Xfrm{X: x * pt, Y: y * pt, W: w * pt, H: h * pt, Rot: geom.NormDeg(rot), FlipH: fh, FlipV: fv}
 		back, err := Unplace(want, p)
 		if err != nil {
 			if !errors.Is(err, ErrInexpressible) {

@@ -185,33 +185,6 @@ func TestParseNumber(t *testing.T) {
 	}
 }
 
-func TestFold(t *testing.T) {
-	for _, tc := range []struct{ a, b string }{
-		{"Item", "iTEM"}, {"ΣΑΣ", "σας"}, {"Straße", "STRAßE"}, {"KELVIN", "Kelvin"}, {"ſ", "S"}, {"Ǆ", "ǆ"},
-	} {
-		if Fold(tc.a) != Fold(tc.b) {
-			t.Errorf("Fold(%q) %q != Fold(%q) %q", tc.a, Fold(tc.a), tc.b, Fold(tc.b))
-		}
-		if !strings.EqualFold(tc.a, tc.b) {
-			t.Errorf("EqualFold(%q, %q) is false: the test is wrong", tc.a, tc.b)
-		}
-	}
-	for _, tc := range []struct{ a, b string }{{"ß", "ss"}, {"ı", "i"}, {"a", "b"}} {
-		if Fold(tc.a) == Fold(tc.b) {
-			t.Errorf("Fold(%q) == Fold(%q): simple folding only", tc.a, tc.b)
-		}
-	}
-	if s := "already folded"; Fold(s) != s {
-		t.Error("lower ASCII changed")
-	}
-	if got := Fold("A\xffB"); got != "a\xffb" {
-		t.Errorf("invalid UTF-8: %q", got)
-	}
-	if n := testing.AllocsPerRun(10, func() { _ = Fold("lower case text") }); n != 0 {
-		t.Errorf("Fold of folded text allocates %v", n)
-	}
-}
-
 func TestValueJSON(t *testing.T) {
 	skipIfUnimplemented(t, func() { _ = Value{}.AppendJSON(nil) })
 	for _, tc := range []struct {

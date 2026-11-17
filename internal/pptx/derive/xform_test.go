@@ -35,9 +35,9 @@ func TestPlaceTopLevel(t *testing.T) {
 	// The local origin of a flipped shape maps to its right edge before
 	// rotation: centre (120, 60) plus R(30) * (20, -10).
 	s, c := math.Sincos(30 * math.Pi / 180)
-	want := Pt{120 + 20*c + 10*s, 60 + 20*s - 10*c}
+	want := Pt{X: 120 + 20*c + 10*s, Y: 60 + 20*s - 10*c}
 	if got := p.M.Apply(Pt{}); !ptNear(got, want.X, want.Y) {
-		t.Errorf("origin maps to %v, want %v pt", Pt{got.X / pt, got.Y / pt}, want)
+		t.Errorf("origin maps to %v, want %v pt", Pt{X: got.X / pt, Y: got.Y / pt}, want)
 	}
 }
 
@@ -184,9 +184,9 @@ func TestUnplaceRoundTrip(t *testing.T) {
 			// The same slide-space result is what matters; the stored
 			// encoding may trade a flip pair for a half turn.
 			again, _ := Place(back, cp)
-			for _, q := range []Pt{{0, 0}, {back.W, 0}, {0, back.H}} {
+			for _, q := range []Pt{{X: 0, Y: 0}, {X: back.W, Y: 0}, {X: 0, Y: back.H}} {
 				a := again.M.Apply(q)
-				b := p.M.Apply(Pt{q.X * c.W / back.W, q.Y * c.H / back.H})
+				b := p.M.Apply(Pt{X: q.X * c.W / back.W, Y: q.Y * c.H / back.H})
 				if math.Hypot(a.X-b.X, a.Y-b.Y) > 1e-3 {
 					t.Errorf("group %d child %d: corner %v maps to %v, want %v", gi, ci, q, a, b)
 				}

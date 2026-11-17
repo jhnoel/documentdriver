@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jhnoel/documentdriver/internal/geom"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 )
 
@@ -43,17 +44,10 @@ func (a Angle) Degrees() float64 { return float64(a) / AngleUnit }
 // RoundAngle rounds degrees to the nearest stored angle.
 func RoundAngle(deg float64) Angle { return Angle(math.Round(deg * AngleUnit)) }
 
-// FormatNum formats a number with at most two decimals, trimming zeros.
-// It is the one formatting rule of both views and of the property codecs,
-// so a value shown can be compared with a value written in the same form.
-func FormatNum(f float64) string {
-	s := strconv.FormatFloat(f, 'f', 2, 64)
-	s = strings.TrimRight(strings.TrimRight(s, "0"), ".")
-	if s == "-0" {
-		s = "0"
-	}
-	return s
-}
+// FormatNum formats a number with at most two decimals, trimming zeros
+// (geom.FormatNum, the one formatting rule of the views and of the
+// property codecs, shared with vsdx).
+func FormatNum(f float64) string { return geom.FormatNum(f) }
 
 // ErrAbsent is wrapped by readers when an attribute or element is not
 // written.

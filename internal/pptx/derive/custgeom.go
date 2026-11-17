@@ -375,7 +375,7 @@ func ParsePath(s string) ([]PathCmd, error) {
 				return nil, err
 			}
 			b := base()
-			pt = Pt{b.X + pt.X, b.Y + pt.Y}
+			pt = Pt{X: b.X + pt.X, Y: b.Y + pt.Y}
 			if up == 'M' {
 				out = append(out, PathCmd{Op: 'M', Pts: []Pt{pt}})
 				start = pt
@@ -420,7 +420,7 @@ func ParsePath(s string) ([]PathCmd, error) {
 				if err != nil {
 					return nil, err
 				}
-				pts[k] = Pt{b.X + pt.X, b.Y + pt.Y}
+				pts[k] = Pt{X: b.X + pt.X, Y: b.Y + pt.Y}
 			}
 			out = append(out, PathCmd{Op: up, Pts: pts})
 			cur = pts[n-1]
@@ -514,7 +514,7 @@ func (p *pathParser) pair() (Pt, error) {
 	if err != nil {
 		return Pt{}, err
 	}
-	return Pt{x, y}, nil
+	return Pt{X: x, Y: y}, nil
 }
 
 // FormatPath writes parsed commands in the form the views show: absolute

@@ -194,7 +194,7 @@ const GroupFrameTolerance = 0.5 * 12700
 
 // Corners returns the four corners of a placed box in slide space.
 func Corners(p Placed, w, h float64) [4]Pt {
-	return [4]Pt{p.M.Apply(Pt{0, 0}), p.M.Apply(Pt{w, 0}), p.M.Apply(Pt{w, h}), p.M.Apply(Pt{0, h})}
+	return [4]Pt{p.M.Apply(Pt{X: 0, Y: 0}), p.M.Apply(Pt{X: w, Y: 0}), p.M.Apply(Pt{X: w, Y: h}), p.M.Apply(Pt{X: 0, Y: h})}
 }
 
 // BoundsBox is the axis-aligned box a rotated object occupies for group

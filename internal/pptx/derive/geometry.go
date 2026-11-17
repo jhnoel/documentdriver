@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math"
 	"strings"
+
+	"github.com/jhnoel/documentdriver/internal/geom"
 )
 
 // Site is a connection site in slide space.
@@ -103,9 +105,9 @@ func sites(g *Guides, defs []cxnDef, m Affine) ([]Site, error) {
 		if err != nil {
 			return nil, fmt.Errorf("site %d: %w", i, err)
 		}
-		s, c := sincosDeg(ang / angleUnit)
-		v := m.Vec(Pt{c, s})
-		out = append(out, Site{Index: i, Pt: m.Apply(p), Ang: normDeg(math.Atan2(v.Y, v.X) * 180 / math.Pi)})
+		s, c := geom.SinCosDeg(ang / angleUnit)
+		v := m.Vec(Pt{X: c, Y: s})
+		out = append(out, Site{Index: i, Pt: m.Apply(p), Ang: geom.NormDeg(math.Atan2(v.Y, v.X) * 180 / math.Pi)})
 	}
 	return out, nil
 }
@@ -188,7 +190,7 @@ func ConnectorGeom(prst string, adj []Adjust, w, h float64, m Affine) (Connector
 		// The first segment runs along the local x axis in every
 		// bentConnector path; its slide direction is what rotation
 		// encodes.
-		v := m.Vec(Pt{1, 0})
+		v := m.Vec(Pt{X: 1, Y: 0})
 		out.First = "h"
 		if math.Abs(v.Y) > math.Abs(v.X) {
 			out.First = "v"
@@ -222,10 +224,10 @@ func ConnectorXfrm(from, to Pt, first string, cur *Xfrm, p Parent) (Xfrm, error)
 		return Xfrm{}, ErrInexpressible
 	}
 	f, t := inv.Apply(from), inv.Apply(to)
-	d := Pt{t.X - f.X, t.Y - f.Y}
+	d := Pt{X: t.X - f.X, Y: t.Y - f.Y}
 	build := func(rot float64, fh, fv bool) Xfrm {
-		s, c := sincosDeg(-rot)
-		v := Pt{c*d.X - s*d.Y, s*d.X + c*d.Y} // R(-rot) d = (fx w, fy h)
+		s, c := geom.SinCosDeg(-rot)
+		v := Pt{X: c*d.X - s*d.Y, Y: s*d.X + c*d.Y} // R(-rot) d = (fx w, fy h)
 		w, h := math.Abs(v.X), math.Abs(v.Y)
 		if v.X != 0 {
 			fh = v.X < 0
@@ -237,8 +239,8 @@ func ConnectorXfrm(from, to Pt, first string, cur *Xfrm, p Parent) (Xfrm, error)
 		return Xfrm{X: cx - w/2, Y: cy - h/2, W: w, H: h, Rot: rot, FlipH: fh, FlipV: fv}
 	}
 	firstOf := func(rot float64) string {
-		s, c := sincosDeg(rot)
-		v := p.M.Vec(Pt{c, s})
+		s, c := geom.SinCosDeg(rot)
+		v := p.M.Vec(Pt{X: c, Y: s})
 		if math.Abs(v.Y) > math.Abs(v.X) {
 			return "v"
 		}

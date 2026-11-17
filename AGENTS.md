@@ -286,7 +286,7 @@ All **[enforced: `internal/archtest`]** unless marked.
   `cmd/pptx`, and from the dev-only `eval/` and `tools/`; likewise for
   `internal/docx` with `cmd/docx` and `internal/xlsx` with `cmd/xlsx`. The shared engine (`internal/opc`,
   `internal/ooxml/...` including the edit core, `internal/plan`,
-  `internal/ids`, `internal/ascii`, the HTML front end `internal/htmlx`, and the test-only law
+  `internal/ids`, `internal/ascii`, `internal/geom`, `internal/casefold`, the HTML front end `internal/htmlx`, and the test-only law
   harness `internal/laws`) never depends on a format, not even through
   another package. `internal/laws` is imported only by tests. The shared
   agent surface `internal/cli` (command grammar, errors object, exit
@@ -351,6 +351,8 @@ it.
 | Ids and clock | `ids.Source` | rand, time.Now |
 | Element sibling | tree sibling links, `model.NextElement`, `model.PrevElement` | a list of a node's children in a loop |
 | ASCII case and classes | `ascii.Lower`, `ascii.EqualFold`, `ascii.IsAlpha` and friends | asciiLower, isASCII |
+| Case-insensitive find | `casefold.Simple` (simple Unicode folding) | a fold table, `strings.ToLower` on both sides |
+| Points, affine maps, box/rotation/flips of a placed object, view number form | `geom.Pt`, `geom.Affine`, `geom.Box`, `geom.Decompose`, `geom.FormatNum` | a matrix type, a decompose, a two-decimal formatter |
 | docx body blocks | `model.FindSectPr`, `model.AssetURL`, `model.InsidePPr` | a sectPr, asset or pPr walk in a reader |
 | Map keys in sorted order | `slices.Sorted(maps.Keys(m))` | a range over a map plus a sort |
 | Content and relationship types | `ctypes` constants | a type string |

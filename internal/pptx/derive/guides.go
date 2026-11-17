@@ -212,7 +212,7 @@ func (g *Guides) Point(p [2]string) (Pt, error) {
 	if err != nil {
 		return Pt{}, err
 	}
-	return Pt{x, y}, nil
+	return Pt{X: x, Y: y}, nil
 }
 
 // HasSiteTable reports whether prst is in the connection-site table.

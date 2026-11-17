@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jhnoel/documentdriver/internal/casefold"
 	"github.com/jhnoel/documentdriver/internal/xlsx/formula"
 	"github.com/jhnoel/documentdriver/internal/xlsx/model"
 	"github.com/jhnoel/documentdriver/internal/xlsx/sheet"
@@ -15,7 +16,7 @@ type FindRequest struct {
 	// Query is the text searched for; "" matches every cell that has
 	// text in the view (as docx's find matches every paragraph).
 	Query string
-	// IgnoreCase is --ignore-case: both sides through model.Fold.
+	// IgnoreCase is --ignore-case: both sides through casefold.Simple.
 	IgnoreCase bool
 	// Sheet is --sheet ("" for every worksheet in tab order, hidden ones
 	// included).
@@ -71,7 +72,7 @@ func Find(input []byte, req FindRequest, opt Options) (*FindResult, error) {
 	}
 	f := &finder{book: b, req: req, res: res, folded: req.Query, maxBytes: opt.maxOutput()}
 	if req.IgnoreCase {
-		f.folded = model.Fold(req.Query)
+		f.folded = casefold.Simple(req.Query)
 	}
 	if req.Sheet != "" {
 		t, err := b.resolve("", req.Sheet)
@@ -109,7 +110,7 @@ type finder struct {
 	book *Book
 	req  FindRequest
 	res  *FindResult
-	// folded is the query, through model.Fold when IgnoreCase.
+	// folded is the query, through casefold.Simple when IgnoreCase.
 	folded string
 	// conv is the current sheet's converter (ix set per row).
 	conv *converter
@@ -204,7 +205,7 @@ func (f *finder) cellValue(rc *sheet.RawCell) (model.Value, bool) {
 }
 
 // build indexes the shared strings' matching items in one SST.Each pass,
-// once per Find (model.Fold on both sides when IgnoreCase).
+// once per Find (casefold.Simple on both sides when IgnoreCase).
 func (f *finder) build() {
 	if f.built {
 		return
@@ -233,7 +234,7 @@ func (f *finder) build() {
 // the search ignores case.
 func (f *finder) match(text string) bool {
 	if f.req.IgnoreCase {
-		text = model.Fold(text)
+		text = casefold.Simple(text)
 	}
 	return strings.Contains(text, f.folded)
 }
