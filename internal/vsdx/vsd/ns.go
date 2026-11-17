@@ -14,6 +14,5 @@ const (
 // IsMain reports whether uri is a Visio main namespace (either
 // spelling). Chunk V1.
 func IsMain(uri string) bool {
-	_ = uri
-	return false
+	return uri == NSMain2012 || uri == NSCore2011
 }
