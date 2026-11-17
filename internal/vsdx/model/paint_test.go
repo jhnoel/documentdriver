@@ -203,16 +203,19 @@ func TestPaintThemed(t *testing.T) {
 	}
 }
 
-// corpusTest9Path returns the path of python-vsdx tests/test9.vsdx
-// under VSDX_CORPUS (a vsdx directory holding repos/<source>/, a
-// worktree root holding corpus/vsdx/repos, or a repos directory
-// directly), or "" when VSDX_CORPUS is unset or holds no such file.
-func corpusTest9Path() string {
+// corpusTest9Path returns the path of dave-howard-vsdx
+// tests/test9_rect_and_line.vsdx under VSDX_CORPUS (a vsdx directory
+// holding repos/<source>/, a worktree root holding corpus/vsdx/repos,
+// or a repos directory directly). It skips when VSDX_CORPUS is unset
+// and fails naming the path when VSDX_CORPUS is set but the file is
+// missing.
+func corpusTest9Path(t *testing.T) string {
+	t.Helper()
 	dir := os.Getenv("VSDX_CORPUS")
 	if dir == "" {
-		return ""
+		t.Skip("no vsdx corpus (set VSDX_CORPUS)")
 	}
-	rel := filepath.Join("python-vsdx", "tests", "test9.vsdx")
+	rel := filepath.Join("dave-howard-vsdx", "tests", "test9_rect_and_line.vsdx")
 	for _, cand := range []string{
 		filepath.Join(dir, "repos", rel),
 		filepath.Join(dir, "corpus", "vsdx", "repos", rel),
@@ -222,30 +225,28 @@ func corpusTest9Path() string {
 			return cand
 		}
 	}
+	t.Fatalf("corpus file %s not found under VSDX_CORPUS %s", filepath.Join(dir, "repos", rel), dir)
 	return ""
 }
 
-// TestPaintThemedCorpus checks the MF3 corpus row: python-vsdx
-// tests/test9.vsdx page 0 has no object with a "not a number"
-// omission for a Themed cell. It skips without VSDX_CORPUS or
-// without that file in the corpus.
+// TestPaintThemedCorpus checks the MF3 corpus row: dave-howard-vsdx
+// tests/test9_rect_and_line.vsdx page 0 has no object with a "not a
+// number" omission for a Themed cell. It skips without VSDX_CORPUS
+// and fails when VSDX_CORPUS is set but the file is missing.
 func TestPaintThemedCorpus(t *testing.T) {
-	path := corpusTest9Path()
-	if path == "" {
-		t.Skip("no vsdx corpus (set VSDX_CORPUS)")
-	}
+	path := corpusTest9Path(t)
 	p, err := opc.Open(path)
 	if err != nil {
-		t.Fatalf("opc.Open(test9.vsdx): %v", err)
+		t.Fatalf("opc.Open(test9_rect_and_line.vsdx): %v", err)
 	}
 	t.Cleanup(func() {
 		if err := p.Close(); err != nil {
-			t.Errorf("close test9.vsdx: %v", err)
+			t.Errorf("close test9_rect_and_line.vsdx: %v", err)
 		}
 	})
 	d, err := doc.Open(p)
 	if err != nil {
-		t.Fatalf("doc.Open(test9.vsdx): %v", err)
+		t.Fatalf("doc.Open(test9_rect_and_line.vsdx): %v", err)
 	}
 	page := buildPageOf(t, d, inherit.New(d), 0)
 	for _, o := range page.Objects {
