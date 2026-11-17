@@ -76,23 +76,24 @@ func New(sofficePath string) (*Renderer, error) {
 // Close removes the Renderer's temporary files.
 func (r *Renderer) Close() error { return os.RemoveAll(r.dir) }
 
-// PDFs returns a copy of the PDF cache, keyed by the sha256 of each
-// converted file's bytes.
-func (r *Renderer) PDFs() map[string]string {
-	out := make(map[string]string, len(r.pdf))
-	for k, v := range r.pdf {
-		out[k] = v
-	}
-	return out
-}
+// Conversions returns the number of distinct files converted so far: the
+// size of the PDF cache.
+func (r *Renderer) Conversions() int { return len(r.pdf) }
 
 // Convert returns the PDF of file, converting it at most once per distinct
-// file content. filter is soffice's --convert-to value ("pdf" when empty);
-// the caller names the format's filter (for example the impress filter that
-// exports hidden slides). The file is copied under a fixed name carrying
-// the file's extension so odd file names cannot confuse soffice and the
-// output name is known.
-func (r *Renderer) Convert(file, filter string, timeout time.Duration) (string, error) {
+// file content. name is the base name the caller wants LibreOffice to see
+// ("deck.pptx" for pptx, "drawing.vsdx" for vsdx): the file is copied
+// under name in the work directory, so odd file names cannot confuse
+// soffice, and the PDF is the stem of name with a .pdf extension. A name
+// with a path separator or without an extension is an error. filter is
+// soffice's --convert-to value ("pdf" when empty); the caller names the
+// format's filter (for example the impress filter that exports hidden
+// slides).
+func (r *Renderer) Convert(file, name, filter string, timeout time.Duration) (string, error) {
+	ext := filepath.Ext(name)
+	if strings.ContainsAny(name, `/\`) || ext == "" || ext == "." {
+		return "", fmt.Errorf("render: Convert name %q must be a base name with an extension", name)
+	}
 	if filter == "" {
 		filter = "pdf"
 	}
@@ -109,7 +110,7 @@ func (r *Renderer) Convert(file, filter string, timeout time.Duration) (string, 
 	if err := os.MkdirAll(work, 0o755); err != nil { //nolint:gosec // G301: render scratch directory under the renderer's own temp dir
 		return "", err
 	}
-	src := filepath.Join(work, "input"+filepath.Ext(file))
+	src := filepath.Join(work, name)
 	if err := os.WriteFile(src, b, 0o644); err != nil { //nolint:gosec // G306: scratch file under the renderer's own temp dir, or a fixture the caller reads back
 		return "", err
 	}
@@ -118,7 +119,7 @@ func (r *Renderer) Convert(file, filter string, timeout time.Duration) (string, 
 		"-env:UserInstallation=file://"+profile,
 		"--headless", "--norestore", "--nolockcheck", "--nodefault", "--nologo",
 		"--convert-to", filter, "--outdir", work, src)
-	pdf := filepath.Join(work, "input.pdf")
+	pdf := filepath.Join(work, strings.TrimSuffix(name, ext)+".pdf")
 	if err != nil {
 		return "", fmt.Errorf("render: LibreOffice could not convert %s: %w%s", file, err, tail(out))
 	}

@@ -56,7 +56,7 @@ func Draw(img *image.RGBA, width, height float64, marks []Mark, ov Overlay) []Ke
 	px := func(x, y float64) (float64, float64) { return float64(b.Min.X) + x*sx, float64(b.Min.Y) + y*sy }
 	var key []KeyEntry
 	if ov.IDs {
-		key = drawIDs(img, px, sx, marks)
+		key = drawIDs(img, px, marks)
 	}
 	if ov.Sites {
 		for _, m := range marks {
@@ -81,7 +81,7 @@ func Draw(img *image.RGBA, width, height float64, marks []Mark, ov Overlay) []Ke
 }
 
 // drawIDs draws shape outlines and ID tags for marks, returning the key entries.
-func drawIDs(img *image.RGBA, px func(x, y float64) (float64, float64), _ float64, marks []Mark) []KeyEntry {
+func drawIDs(img *image.RGBA, px func(x, y float64) (float64, float64), marks []Mark) []KeyEntry {
 	type tag struct {
 		x, y int
 		id   string
