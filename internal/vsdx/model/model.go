@@ -104,6 +104,7 @@ type Prop struct {
 	Type   string // string, number, boolean, date, duration, currency, fixed_list, variable_list
 	Value  any    // string, float64, bool, or map{"date": ...}
 	Format string
+	Unit   string // the Value cell's U for a number stored with a length unit ("MM"); the value stays in stored inches
 	Hidden bool
 	Linked bool // DataLinked: read only in P2
 	Origin inherit.Origin
