@@ -74,7 +74,7 @@ func TestPageXML(t *testing.T) {
 }
 
 // TestPageXMLBad checks the refusals the bounds guard: an orientation
-// outside {0, 1, 2} and a non-finite size.
+// outside {0, 1, 2}, a non-finite size and a non-positive size.
 func TestPageXMLBad(t *testing.T) {
 	for _, tc := range []struct {
 		name string
@@ -84,10 +84,37 @@ func TestPageXMLBad(t *testing.T) {
 		{name: "orientation-negative", page: Page{ID: 1, Name: "X", Width: 8.5, Height: 11, Orientation: -1, RelID: "rId1"}},
 		{name: "width-nan", page: Page{ID: 1, Name: "X", Width: math.NaN(), Height: 11, RelID: "rId1"}},
 		{name: "height-inf", page: Page{ID: 1, Name: "X", Width: 8.5, Height: math.Inf(1), RelID: "rId1"}},
+		{name: "width-zero", page: Page{ID: 1, Name: "X", Width: 0, Height: 11, RelID: "rId1"}},
+		{name: "height-zero", page: Page{ID: 1, Name: "X", Width: 8.5, Height: 0, RelID: "rId1"}},
+		{name: "width-negative", page: Page{ID: 1, Name: "X", Width: -1, Height: 11, RelID: "rId1"}},
+		{name: "height-negative", page: Page{ID: 1, Name: "X", Width: 8.5, Height: -8.5, RelID: "rId1"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if got, err := PageXML(tc.page); err == nil {
 				t.Errorf("PageXML(%+v) = %s, nil error; want refusal", tc.page, got)
+			}
+		})
+	}
+}
+
+// TestPageXMLBadSizeNamesSize checks the K6F rows: a non-positive size
+// is refused with an error naming that size.
+func TestPageXMLBadSizeNamesSize(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		page Page
+		want string
+	}{
+		{name: "width-zero", page: Page{ID: 1, Name: "X", Width: 0, Height: 11, RelID: "rId1"}, want: "page size (0, 11) inches"},
+		{name: "height-zero", page: Page{ID: 1, Name: "X", Width: 8.5, Height: 0, RelID: "rId1"}, want: "page size (8.5, 0) inches"},
+		{name: "width-negative", page: Page{ID: 1, Name: "X", Width: -1, Height: 11, RelID: "rId1"}, want: "page size (-1, 11) inches"},
+		{name: "height-negative", page: Page{ID: 1, Name: "X", Width: 8.5, Height: -8.5, RelID: "rId1"}, want: "page size (8.5, -8.5) inches"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got, err := PageXML(tc.page); err == nil {
+				t.Errorf("PageXML(%+v) = %s, nil error; want refusal naming %s", tc.page, got, tc.want)
+			} else if !strings.Contains(err.Error(), tc.want) {
+				t.Errorf("PageXML(%+v) error = %q, want it to name %s", tc.page, err, tc.want)
 			}
 		})
 	}
