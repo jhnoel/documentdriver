@@ -919,23 +919,11 @@ func fontFamily(v string) (string, error) {
 		return "+" + m[1], nil
 	}
 	if len(v) >= 2 && (v[0] == '\'' || v[0] == '"') {
-		q := v[0]
-		var b strings.Builder
-		for i := 1; i < len(v); i++ {
-			c := v[i]
-			switch {
-			case c == '\\' && i+1 < len(v):
-				i++
-				b.WriteByte(v[i])
-			case c == q:
-				if i != len(v)-1 {
-					return "", fmt.Errorf("font-family:%s: one quoted name only", v)
-				}
-				return b.String(), nil
-			default:
-				b.WriteByte(c)
-			}
+		name, err := htmlx.QuotedName(v)
+		if err != nil {
+			return "", fmt.Errorf("font-family:%s: one quoted name only", v)
 		}
+		return name, nil
 	}
 	return "", fmt.Errorf("font-family:%s: want var(--theme-font) or one quoted name", v)
 }

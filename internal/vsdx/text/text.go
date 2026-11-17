@@ -38,13 +38,20 @@ type Para struct {
 }
 
 // Run is a stretch of text under one Character row (cp IX, -1 when no
-// marker precedes it), a line break (Br), or a field (Field >= 0: the
-// Field row IX, Text its cached text).
+// marker precedes it), a line break (Br), or a field: Field >= 0 is the
+// Field row IX of a field read from the file, Text its cached text. A
+// field placeholder read from HTML (ParseHTML) is not resolved yet: Ref
+// is its data-ref as written ("page0/s5/field:2", the shape's second
+// field in text order, as Render numbers them) and Field is -1; the
+// operation that writes the text checks Ref's shape and sets Field to
+// the IX of that shape's n-th fld (docs/vsdx-design.md, K5 ruling).
+// A run is a field when Field >= 0 or Ref is set.
 type Run struct {
 	CP    int
 	Text  string
 	Br    bool
 	Field int
+	Ref   string
 }
 
 // MaxText bounds the characters one Text element may yield; a longer
