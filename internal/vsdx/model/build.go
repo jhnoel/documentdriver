@@ -88,7 +88,7 @@ func build(p *Page, d *doc.Document, r *inherit.Resolver, contents *tree.Documen
 		w.stack = w.stack[:len(w.stack)-1]
 		w.step(fr)
 	}
-	linkConnects(p, connects, w.placed, p.H)
+	linkConnects(p, r, connects, w.placed, p.H)
 	return p, nil
 }
 
@@ -156,7 +156,7 @@ func (w *walker) step(fr frame) {
 	}
 	t, _, ok := transformOf(w.r, head.s)
 	if _, dup := w.placed[head.id]; !dup {
-		w.placed[head.id] = &placed{obj: obj, frame: fr.f, t: t, hasT: ok, sites: obj.Sites}
+		w.placed[head.id] = &placed{obj: obj, s: head.s, frame: fr.f}
 	}
 	w.p.Objects = append(w.p.Objects, obj)
 	childFrame := fr.f
