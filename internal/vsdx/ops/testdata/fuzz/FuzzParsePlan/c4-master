@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"ops\":[{\"op\":\"object.add\",\"at\":\"page0\",\"master\":\"master2\",\"pin\":[100,100]}]}")

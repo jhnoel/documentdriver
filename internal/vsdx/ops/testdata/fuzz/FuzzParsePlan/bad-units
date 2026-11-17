@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"units\":\"cm\",\"ops\":[{\"op\":\"page.rename\",\"at\":\"page0\",\"name\":\"X\"}]}")

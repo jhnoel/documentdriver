@@ -1,0 +1,337 @@
+package ops
+
+import (
+	"strconv"
+	"strings"
+
+	"github.com/jhnoel/documentdriver/internal/cli"
+	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
+)
+
+// addressOK reports whether s parses as an address whose kind is one
+// of allowed, or as an alias, which any op may name.
+func addressOK(s string, allowed ...vsd.Kind) bool {
+	if s == "" {
+		return false
+	}
+	a, err := vsd.Parse(s)
+	if err != nil {
+		return false
+	}
+	if a.Kind == vsd.KindAlias {
+		return true
+	}
+	for _, k := range allowed {
+		if k == a.Kind {
+			return true
+		}
+	}
+	return false
+}
+
+// masterOK reports whether s names a master: a master address, or a
+// master name, which carries no address punctuation.
+func masterOK(s string) bool {
+	if s == "" {
+		return false
+	}
+	if strings.HasPrefix(s, "$") {
+		return cli.ValidAlias(s[1:])
+	}
+	if a, err := vsd.Parse(s); err == nil {
+		return a.Kind == vsd.KindMaster
+	}
+	if strings.Contains(s, "/") || strings.HasPrefix(s, "page") || strings.HasPrefix(s, "master") {
+		return false
+	}
+	return true
+}
+
+// glueOK reports whether s is a glue reference: a shape or an alias,
+// with an optional colon and a point number, and "none" only on the
+// ops that disconnect.
+func glueOK(s string, allowNone bool) bool {
+	if s == "" {
+		return false
+	}
+	if s == "none" {
+		return allowNone
+	}
+	if strings.HasPrefix(s, "$") {
+		head, point, hasPoint := strings.Cut(s[1:], ":")
+		if !cli.ValidAlias(head) {
+			return false
+		}
+		return !hasPoint || pointOK(point)
+	}
+	if strings.HasPrefix(s, "s") {
+		head, point, hasPoint := strings.Cut(s[1:], ":")
+		if !idOK(head) {
+			return false
+		}
+		return !hasPoint || pointOK(point)
+	}
+	return false
+}
+
+// idOK reports whether s is a canonical stored id, as an address
+// holds it.
+func idOK(s string) bool {
+	if s == "" {
+		return false
+	}
+	n, err := strconv.ParseUint(s, 10, 32)
+	if err != nil {
+		return false
+	}
+	return strconv.FormatUint(n, 10) == s
+}
+
+// pointOK reports whether s is a canonical 1-based point number.
+func pointOK(s string) bool {
+	if s == "" {
+		return false
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil || n <= 0 {
+		return false
+	}
+	return strconv.Itoa(n) == s
+}
+
+// boxOK reports whether b is [x, y, width, height] with positive
+// width and height.
+func boxOK(b []float64) bool { return len(b) == 4 && b[2] > 0 && b[3] > 0 }
+
+// pointOK2 reports whether p is [x, y].
+func pointOK2(p []float64) bool { return len(p) == 2 }
+
+// sizeOK reports whether s is [width, height] with both positive.
+func sizeOK(s []float64) bool { return len(s) == 2 && s[0] > 0 && s[1] > 0 }
+
+// orientationOK reports whether s is portrait or landscape.
+func orientationOK(s string) bool { return s == "portrait" || s == "landscape" }
+
+// geomOK reports whether s is rect or ellipse.
+func geomOK(s string) bool { return s == "rect" || s == "ellipse" }
+
+// checkObjectAdd reports the first rule object.add breaks: its
+// message and its field relative to the operation, or false.
+func checkObjectAdd(s *ObjectAddSpec) (string, string, bool) {
+	if !addressOK(s.At, vsd.KindPage, vsd.KindShape) {
+		return "at must be a page or shape address or $name", "at", true
+	}
+	if s.As != "" && !cli.ValidAlias(s.As) {
+		return "as must match [A-Za-z_][A-Za-z0-9_]*", "as", true
+	}
+	if s.Kind != "" && s.Kind != "connector" {
+		return "kind must be connector", "kind", true
+	}
+	if s.Geom != "" && !geomOK(s.Geom) {
+		return "geom must be rect or ellipse", "geom", true
+	}
+	if s.Master != "" && !masterOK(s.Master) {
+		return "master must be a master address or a master name", "master", true
+	}
+	if s.Geom != "" && s.Master != "" {
+		return "object.add takes master or geom, not both", "geom", true
+	}
+	if s.Kind == "connector" && s.Master != "" {
+		return "connector takes no master", "master", true
+	}
+	if s.Kind == "connector" && s.Geom != "" {
+		return "connector takes no geom", "geom", true
+	}
+	if s.Kind != "connector" && s.Master == "" && s.Geom == "" {
+		return "object.add needs master, geom or kind connector", "", true
+	}
+	if s.Kind == "connector" && s.Box != nil {
+		return "connector takes no box", "box", true
+	}
+	if s.Kind == "connector" && s.Pin != nil {
+		return "connector takes no pin", "pin", true
+	}
+	if s.Kind != "connector" {
+		if s.From != nil {
+			return "shape takes no from", "from", true
+		}
+		if s.To != nil {
+			return "shape takes no to", "to", true
+		}
+		if s.FromGlue != "" {
+			return "shape takes no from_glue", "from_glue", true
+		}
+		if s.ToGlue != "" {
+			return "shape takes no to_glue", "to_glue", true
+		}
+	}
+	if s.Kind != "connector" && s.Box == nil && s.Pin == nil {
+		return "shape needs box or pin", "box", true
+	}
+	if s.Kind != "connector" && s.Box != nil && s.Pin != nil {
+		return "shape takes box or pin, not both", "pin", true
+	}
+	if s.Box != nil && !boxOK(s.Box) {
+		return "box must be four numbers with positive width and height", "box", true
+	}
+	if s.Pin != nil && !pointOK2(s.Pin) {
+		return "pin must be two numbers", "pin", true
+	}
+	if s.From != nil && !pointOK2(s.From) {
+		return "from must be two numbers", "from", true
+	}
+	if s.To != nil && !pointOK2(s.To) {
+		return "to must be two numbers", "to", true
+	}
+	if s.Kind == "connector" && s.From == nil && s.FromGlue == "" {
+		return "connector needs from or from_glue", "from", true
+	}
+	if s.Kind == "connector" && s.To == nil && s.ToGlue == "" {
+		return "connector needs to or to_glue", "to", true
+	}
+	if s.Kind == "connector" && s.From != nil && s.FromGlue != "" {
+		return "connector takes from or from_glue, not both", "from_glue", true
+	}
+	if s.Kind == "connector" && s.To != nil && s.ToGlue != "" {
+		return "connector takes to or to_glue, not both", "to_glue", true
+	}
+	if s.FromGlue != "" && !glueOK(s.FromGlue, false) {
+		return "from_glue must name a shape or $name, with an optional point", "from_glue", true
+	}
+	if s.ToGlue != "" && !glueOK(s.ToGlue, false) {
+		return "to_glue must name a shape or $name, with an optional point", "to_glue", true
+	}
+	return "", "", false
+}
+
+// checkObjectSet reports the first rule object.set breaks: its
+// message and its field relative to the operation, or false.
+func checkObjectSet(s *ObjectSetSpec) (string, string, bool) {
+	if !addressOK(s.At, vsd.KindShape) {
+		return "at must be a shape address or $name", "at", true
+	}
+	if s.Box != nil && !boxOK(s.Box) {
+		return "box must be four numbers with positive width and height", "box", true
+	}
+	if s.From != nil && !pointOK2(s.From) {
+		return "from must be two numbers", "from", true
+	}
+	if s.To != nil && !pointOK2(s.To) {
+		return "to must be two numbers", "to", true
+	}
+	if s.FromGlue != nil && !glueOK(*s.FromGlue, true) {
+		return "from_glue must name a shape or $name, with an optional point, or none", "from_glue", true
+	}
+	if s.ToGlue != nil && !glueOK(*s.ToGlue, true) {
+		return "to_glue must name a shape or $name, with an optional point, or none", "to_glue", true
+	}
+	if s.Box == nil && s.Rot == nil && s.FlipH == nil && s.FlipV == nil && s.Name == nil && s.Fill == nil && s.Line == nil && s.From == nil && s.To == nil && s.FromGlue == nil && s.ToGlue == nil {
+		return "object.set needs a field to set", "", true
+	}
+	return "", "", false
+}
+
+// checkTextSet reports the first rule text.set breaks: its message
+// and its field relative to the operation, or false.
+func checkTextSet(s *TextSetSpec) (string, string, bool) {
+	if !addressOK(s.At, vsd.KindShape) {
+		return "at must be a shape address or $name", "at", true
+	}
+	return "", "", false
+}
+
+// checkPropAdd reports the first rule prop.add breaks: its message
+// and its field relative to the operation, or false.
+func checkPropAdd(s *PropAddSpec) (string, string, bool) {
+	if !addressOK(s.At, vsd.KindShape) {
+		return "at must be a shape address or $name", "at", true
+	}
+	if s.Name == "" {
+		return "name must not be empty", "name", true
+	}
+	return "", "", false
+}
+
+// checkPropSet reports the first rule prop.set breaks: its message
+// and its field relative to the operation, or false.
+func checkPropSet(s *PropSetSpec) (string, string, bool) {
+	if !addressOK(s.At, vsd.KindProp) {
+		return "at must name a shape data row or $name", "at", true
+	}
+	return "", "", false
+}
+
+// checkPageAdd reports the first rule page.add breaks: its message
+// and its field relative to the operation, or false.
+func checkPageAdd(s *PageAddSpec) (string, string, bool) {
+	if s.Name == "" {
+		return "name must not be empty", "name", true
+	}
+	if s.As != "" && !cli.ValidAlias(s.As) {
+		return "as must match [A-Za-z_][A-Za-z0-9_]*", "as", true
+	}
+	if s.At != "" && !addressOK(s.At, vsd.KindPage) {
+		return "at must be a page address or $name", "at", true
+	}
+	if s.Orientation != "" && !orientationOK(s.Orientation) {
+		return "orientation must be portrait or landscape", "orientation", true
+	}
+	if s.Size != nil && !sizeOK(s.Size) {
+		return "size must be two positive numbers", "size", true
+	}
+	return "", "", false
+}
+
+// checkPageRename reports the first rule page.rename breaks: its
+// message and its field relative to the operation, or false.
+func checkPageRename(s *PageRenameSpec) (string, string, bool) {
+	if !addressOK(s.At, vsd.KindPage) {
+		return "at must be a page address or $name", "at", true
+	}
+	if s.Name == "" {
+		return "name must not be empty", "name", true
+	}
+	return "", "", false
+}
+
+// checkPageSet reports the first rule page.set breaks: its message
+// and its field relative to the operation, or false.
+func checkPageSet(s *PageSetSpec) (string, string, bool) {
+	if !addressOK(s.At, vsd.KindPage) {
+		return "at must be a page address or $name", "at", true
+	}
+	if s.Orientation != "" && !orientationOK(s.Orientation) {
+		return "orientation must be portrait or landscape", "orientation", true
+	}
+	if s.Size != nil && !sizeOK(s.Size) {
+		return "size must be two positive numbers", "size", true
+	}
+	if s.Orientation == "" && s.Size == nil {
+		return "page.set needs orientation or size", "", true
+	}
+	return "", "", false
+}
+
+// checkSpec reports the first rule s breaks: its message and its
+// field relative to the operation, or false when s breaks none.
+func checkSpec(s Spec) (string, string, bool) {
+	switch v := s.(type) {
+	case *ObjectAddSpec:
+		return checkObjectAdd(v)
+	case *ObjectSetSpec:
+		return checkObjectSet(v)
+	case *TextSetSpec:
+		return checkTextSet(v)
+	case *PropAddSpec:
+		return checkPropAdd(v)
+	case *PropSetSpec:
+		return checkPropSet(v)
+	case *PageAddSpec:
+		return checkPageAdd(v)
+	case *PageRenameSpec:
+		return checkPageRename(v)
+	case *PageSetSpec:
+		return checkPageSet(v)
+	}
+	return "", "", false
+}
