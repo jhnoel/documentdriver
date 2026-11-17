@@ -50,9 +50,11 @@ type Formats struct {
 }
 
 // Render writes b as HTML in the pptx text grammar's subset: <p>, and
-// <ul><li> for bulleted paragraphs; <b>, <i>, <u>, <s>; <span style>
-// with font-weight:normal (and the other "off" forms), font-size, color
-// and font-family, in pptx's order and separators; <br/>; a field
+// <ul><li> for bulleted paragraphs; <b>, <i>, <u>, <s>; <span
+// style="..." data-color="..."> with font-weight:normal (and the other
+// "off" forms), font-size, color and font-family, in pptx's order and
+// separators (a colour is pptx's canonical form: data-color mirrors the
+// style's color:#RRGGBB); <br/>; a field
 // as <opaque data-ref="<shape>/field:<n>" data-kind="field"
 // data-text="cached text"></opaque> (n is 1-based in the shape). shape
 // is the shape's address. Text is escaped through xmlscan.EscapeText.
@@ -173,7 +175,13 @@ func renderRuns(w *strings.Builder, runs []Run, f Formats, shape string, fields 
 				span = true
 				w.WriteString(`<span style="`)
 				w.WriteString(xmlscan.EscapeAttr(sb.String(), '"'))
-				w.WriteString(`">`)
+				w.WriteString(`"`)
+				if cf.Color != "" {
+					w.WriteString(` data-color="`)
+					w.WriteString(xmlscan.EscapeAttr(cf.Color, '"'))
+					w.WriteString(`"`)
+				}
+				w.WriteString(`>`)
 			}
 			w.WriteString(xmlscan.EscapeText(r.Text))
 		}

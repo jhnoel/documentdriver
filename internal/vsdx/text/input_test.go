@@ -40,7 +40,13 @@ func TestParseHTMLRoundTrip(t *testing.T) {
 			name:    "bold italic size color",
 			body:    Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: 0, Text: "Hi", Field: -1}}}}},
 			formats: Formats{Char: map[int]CharFormat{0: {Bold: "on", Italic: "on", Size: "12", Color: "#FF0000"}}},
-			want:    `<p><b><i><span style="font-size:12pt;color:#FF0000">Hi</span></i></b></p>`,
+			want:    `<p><b><i><span style="font-size:12pt;color:#FF0000" data-color="#FF0000">Hi</span></i></b></p>`,
+		},
+		{
+			name:    "color alone",
+			body:    Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: -1, Text: "x", Field: -1}}}}},
+			formats: Formats{Char: map[int]CharFormat{0: {Color: "#00FF00"}}},
+			want:    `<p><span style="color:#00FF00" data-color="#00FF00">x</span></p>`,
 		},
 		{
 			name:    "bold off",
@@ -190,7 +196,7 @@ func TestParseHTMLRoundTrip(t *testing.T) {
 			name:    "char styles order",
 			body:    Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: -1, Text: "x", Field: -1}}}}},
 			formats: Formats{Char: map[int]CharFormat{0: {Bold: "off", Italic: "off", Underline: "off", Size: "12", Color: "#00FF00", Font: "Arial"}}},
-			want:    `<p><span style="font-weight:normal;font-style:normal;text-decoration:none;font-size:12pt;color:#00FF00;font-family:'Arial'">x</span></p>`,
+			want:    `<p><span style="font-weight:normal;font-style:normal;text-decoration:none;font-size:12pt;color:#00FF00;font-family:'Arial'" data-color="#00FF00">x</span></p>`,
 		},
 		{
 			name:    "field is bare under a format",
@@ -223,7 +229,7 @@ func TestParseHTMLRoundTrip(t *testing.T) {
 				Char: map[int]CharFormat{0: {}, 1: {Bold: "on", Color: "#FF0000"}, 2: {Size: "10", Font: "Arial"}},
 				Para: map[int]ParaFormat{0: {Align: "left"}, 1: {Bullet: true, BulletChar: "\u2022", MarginLeft: "18pt", Indent: "-18pt"}},
 			},
-			want: "<p style=\"text-align:left\">Title<b><span style=\"color:#FF0000\"> red</span></b></p><ul><li style=\"margin-left:18pt;text-indent:-18pt\" data-char=\"\u2022\"><span style=\"font-size:10pt;font-family:'Arial'\">item</span><br/><span style=\"font-size:10pt;font-family:'Arial'\">two\tend </span><opaque data-ref=\"page0/s1/field:1\" data-kind=\"field\" data-text=\"3\"></opaque></li></ul>",
+			want: "<p style=\"text-align:left\">Title<b><span style=\"color:#FF0000\" data-color=\"#FF0000\"> red</span></b></p><ul><li style=\"margin-left:18pt;text-indent:-18pt\" data-char=\"\u2022\"><span style=\"font-size:10pt;font-family:'Arial'\">item</span><br/><span style=\"font-size:10pt;font-family:'Arial'\">two\tend </span><opaque data-ref=\"page0/s1/field:1\" data-kind=\"field\" data-text=\"3\"></opaque></li></ul>",
 		},
 	}
 	for _, tc := range tests {
@@ -658,6 +664,83 @@ func TestParseHTMLErrors(t *testing.T) {
 			}
 			if !strings.Contains(err.Error(), tc.want) {
 				t.Errorf("ParseHTML(%q): %v; want it to mention %q", tc.html, err, tc.want)
+			}
+		})
+	}
+}
+
+// TestParseHTMLDataColor checks the chunk TXF rows: a span's data-color
+// accepts only #RRGGBB (any case, stored upper-case); with color present
+// the two must name the same colour; alone it sets the colour; any
+// other form is refused naming data-color.
+func TestParseHTMLDataColor(t *testing.T) {
+	tests := []struct {
+		name    string
+		html    string
+		want    Body
+		formats Formats
+		render  string
+	}{
+		{
+			name:    "agree with lower-case color",
+			html:    `<p><span style="color:#ff0000" data-color="#FF0000">r</span></p>`,
+			want:    Body{Paras: []Para{{PP: 0, Runs: []Run{{CP: 0, Text: "r", Field: -1}}}}, Terminated: true},
+			formats: Formats{Char: map[int]CharFormat{0: {Color: "#FF0000"}}, Para: map[int]ParaFormat{0: {}}},
+			render:  `<p><span style="color:#FF0000" data-color="#FF0000">r</span></p>`,
+		},
+		{
+			name:    "alone lower-case",
+			html:    `<p><span data-color="#00ff00">g</span></p>`,
+			want:    Body{Paras: []Para{{PP: 0, Runs: []Run{{CP: 0, Text: "g", Field: -1}}}}, Terminated: true},
+			formats: Formats{Char: map[int]CharFormat{0: {Color: "#00FF00"}}, Para: map[int]ParaFormat{0: {}}},
+			render:  `<p><span style="color:#00FF00" data-color="#00FF00">g</span></p>`,
+		},
+		{
+			name:    "agree with font-size",
+			html:    `<p><span style="font-size:12pt;color:#FF0000" data-color="#ff0000">x</span></p>`,
+			want:    Body{Paras: []Para{{PP: 0, Runs: []Run{{CP: 0, Text: "x", Field: -1}}}}, Terminated: true},
+			formats: Formats{Char: map[int]CharFormat{0: {Size: "12", Color: "#FF0000"}}, Para: map[int]ParaFormat{0: {}}},
+			render:  `<p><span style="font-size:12pt;color:#FF0000" data-color="#FF0000">x</span></p>`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, formats, err := ParseHTML(tc.html)
+			if err != nil {
+				t.Fatalf("ParseHTML(%q): %v", tc.html, err)
+			}
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("ParseHTML(%q) body = %#v; want %#v", tc.html, got, tc.want)
+			}
+			if !reflect.DeepEqual(formats, tc.formats) {
+				t.Errorf("ParseHTML(%q) formats = %#v; want %#v", tc.html, formats, tc.formats)
+			}
+			if rendered := Render(got, formats, "page0/s5"); rendered != tc.render {
+				t.Errorf("Render(ParseHTML(%q)) = %q; want %q", tc.html, rendered, tc.render)
+			}
+		})
+	}
+	bad := []struct {
+		name string
+		html string
+	}{
+		{"disagree", `<p><span style="color:#FF0000" data-color="#00FF00">x</span></p>`},
+		{"scheme form", `<p><span data-color="accent1 #4472C4">x</span></p>`},
+		{"scheme alone", `<p><span data-color="accent1">x</span></p>`},
+		{"unknown", `<p><span data-color="#?">x</span></p>`},
+		{"with modifier", `<p><span data-color="#FF0000 lumMod=50000">x</span></p>`},
+		{"name", `<p><span data-color="red">x</span></p>`},
+		{"empty", `<p><span data-color="">x</span></p>`},
+		{"on b", `<p><b data-color="#FF0000">x</b></p>`},
+	}
+	for _, tc := range bad {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, err := ParseHTML(tc.html)
+			if err == nil {
+				t.Fatalf("ParseHTML(%q): no error; want it to mention %q", tc.html, "data-color")
+			}
+			if !strings.Contains(err.Error(), "data-color") {
+				t.Errorf("ParseHTML(%q): %v; want it to mention %q", tc.html, err, "data-color")
 			}
 		})
 	}
