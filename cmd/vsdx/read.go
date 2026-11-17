@@ -3,7 +3,6 @@ package main
 import (
 	"io"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
@@ -59,17 +58,9 @@ func runRead(p *cli.Parsed, stdout io.Writer) error {
 	}
 	var region *[4]float64
 	if p.Has("region") {
-		fields := strings.Split(p.Get("region"), ",")
-		if len(fields) != 4 {
-			return cli.Errorf(cli.CodeUsage, "--region", "--region is x,y,w,h")
-		}
-		var box [4]float64
-		for i, s := range fields {
-			v, err := strconv.ParseFloat(strings.TrimSpace(s), 64)
-			if err != nil {
-				return cli.Errorf(cli.CodeUsage, "--region", "--region is four numbers: %q is not one", s)
-			}
-			box[i] = v
+		box, err := cli.ParseRegion(p.Get("region"))
+		if err != nil {
+			return cli.Wrap(cli.CodeUsage, "--region", err)
 		}
 		region = &box
 	}
