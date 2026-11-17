@@ -77,6 +77,94 @@ func TestRenderV1(t *testing.T) {
 	}
 }
 
+// TestRenderV17 checks the RN3 V17 row: at --scale 1, page1 (11 x 8.5
+// in) renders to a PNG of 792 x 612 px (within 1 px) and page0
+// (8.5 x 11 in) to 612 x 792, each the page's own size and not the
+// union of all pages, and --overlay ids on page0 puts s1's tag inside
+// s1's box [108,378,72,36] at that scale.
+func TestRenderV17(t *testing.T) {
+	needRenderer(t)
+	file := vsdxtest.Fixture(t, "v17-orientation")
+	input := fixtureBytes(t, "v17-orientation")
+	marks, err := pageMarks(input, "page0", nil, false)
+	if err != nil {
+		t.Fatalf("pageMarks(V17 page0): %v", err)
+	}
+	if len(marks) != 1 || marks[0].ID != "page0/s1" || marks[0].Box != [4]float64{108, 378, 72, 36} {
+		t.Fatalf("marks = %+v, want one mark for page0/s1 with box [108 378 72 36]", marks)
+	}
+	for _, tc := range []struct {
+		page string
+		w, h int
+		px   string
+		size string
+	}{
+		{page: "page1", w: 792, h: 612, px: `"px":[792,612]`, size: `"size":[792,612]`},
+		{page: "page0", w: 612, h: 792, px: `"px":[612,792]`, size: `"size":[612,792]`},
+	} {
+		out := filepath.Join(t.TempDir(), tc.page+".png")
+		var stdout, stderr bytes.Buffer
+		args := []string{"render", file, "--page", tc.page, "--scale", "1", "-o", out}
+		if code := run(args, &stdout, &stderr); code != 0 {
+			t.Fatalf("render %s: exit %d: %s", tc.page, code, stderr.String())
+		}
+		for _, want := range []string{tc.px, tc.size, `"scale":1`} {
+			if !strings.Contains(stdout.String(), want) {
+				t.Errorf("render %s stdout = %q, want it to contain %s", tc.page, stdout.String(), want)
+			}
+		}
+		w, h, _ := decodeRenderPNG(t, out)
+		if w < tc.w-1 || w > tc.w+1 || h < tc.h-1 || h > tc.h+1 {
+			t.Errorf("render %s PNG = %d x %d, want %d x %d within 1 px", tc.page, w, h, tc.w, tc.h)
+		}
+	}
+	out := filepath.Join(t.TempDir(), "over.png")
+	var stdout, stderr bytes.Buffer
+	args := []string{"render", file, "--page", "page0", "--overlay", "ids", "--scale", "1", "-o", out}
+	if code := run(args, &stdout, &stderr); code != 0 {
+		t.Fatalf("render overlay: exit %d: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"px":[612,792]`) {
+		t.Errorf("render overlay stdout = %q, want px [612,792]", stdout.String())
+	}
+	decodeOverlayTag(t, out, [4]float64{108, 378, 72, 36})
+}
+
+// decodeOverlayTag checks that the overlay tag (its yellow background,
+// 255,235,0) of a render with --overlay ids is drawn entirely inside
+// box at scale 1, so the overlay maps with the page's own size, not
+// the union's.
+func decodeOverlayTag(t *testing.T, path string, box [4]float64) {
+	t.Helper()
+	file, err := os.Open(path) //nolint:gosec // G304: a picture the test just wrote
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	img, err := png.Decode(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bounds := img.Bounds()
+	found := false
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			r, g, b, _ := img.At(x, y).RGBA()
+			if r>>8 == 255 && g>>8 == 235 && b>>8 == 0 {
+				found = true
+				fx, fy := float64(x-bounds.Min.X), float64(y-bounds.Min.Y)
+				if fx < box[0] || fy < box[1] || fx >= box[0]+box[2] || fy >= box[1]+box[3] {
+					t.Errorf("tag at %v,%v is outside s1's box %v, want it inside", fx, fy, box)
+					return
+				}
+			}
+		}
+	}
+	if !found {
+		t.Errorf("no tag background (255,235,0) found in %s, want s1's tag inside its box %v", path, box)
+	}
+}
+
 // TestRenderV8 checks the RN2 V8 row by measuring LibreOffice's PDF:
 // page0 is PDF page index 0 (its shape on its background), page1 is
 // index 1 (blank) and the background page3 is index 2 (its footer on
@@ -224,6 +312,8 @@ func TestRenderUsage(t *testing.T) {
 		{"no out", []string{"render", "x.vsdx", "--page", "page0"}},
 		{"bad overlay", []string{"render", "x.vsdx", "--page", "page0", "--overlay", "bogus", "-o", "x.png"}},
 		{"bad scale", []string{"render", "x.vsdx", "--page", "page0", "--scale", "0", "-o", "x.png"}},
+		{"scale inf", []string{"render", "x.vsdx", "--page", "page0", "--scale", "Inf", "-o", "x.png"}},
+		{"scale nan", []string{"render", "x.vsdx", "--page", "page0", "--scale", "NaN", "-o", "x.png"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var stdout, stderr bytes.Buffer

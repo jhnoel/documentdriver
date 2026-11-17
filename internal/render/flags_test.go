@@ -41,7 +41,7 @@ func TestParseOverlay(t *testing.T) {
 }
 
 // TestParseScale checks ParseScale: a positive number parses, and
-// zero, a negative, text and empty are the usage error.
+// zero, a negative, text, empty, Inf and NaN are the usage error.
 func TestParseScale(t *testing.T) {
 	for _, c := range []struct {
 		value string
@@ -57,7 +57,7 @@ func TestParseScale(t *testing.T) {
 			t.Errorf("ParseScale(%q) = %v, %v; want %v", c.value, got, err, c.want)
 		}
 	}
-	for _, value := range []string{"", "0", "-1", "bogus", "1x", " 1"} {
+	for _, value := range []string{"", "0", "-1", "bogus", "1x", " 1", "Inf", "+Inf", "inf", "Infinity", "NaN", "nan"} {
 		if _, err := ParseScale(value); err == nil || err.Error() != "--scale is a positive number" {
 			t.Errorf("ParseScale(%q) error = %v; want --scale is a positive number", value, err)
 		}
