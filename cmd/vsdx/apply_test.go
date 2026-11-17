@@ -129,8 +129,12 @@ func TestApplyEqualsLibrary(t *testing.T) {
 }
 
 // TestApplyErrors checks the apply plumbing: document-independent plan
-// faults come back together, a stale base is refused at base, and a
-// pending op is operation_failed at ops[0] with the file unchanged.
+// faults come back together, a stale base is refused at base, and an op
+// the document refuses is operation_failed at ops[0] with the file
+// unchanged. The refusal is page.delete of a drawing's only page (a
+// rule of the op, which stays true as other ops are implemented; an op
+// with no Run is covered by apply's TestUnimplementedOps, which reads
+// the table).
 func TestApplyErrors(t *testing.T) {
 	file := drawingFile(t)
 	data, err := os.ReadFile(file)
@@ -141,7 +145,7 @@ func TestApplyErrors(t *testing.T) {
 	unknownOp := planFile(t, `{"ops":[{"op":"object.zap","at":"page0"}]}`)
 	badOp := planFile(t, `{"ops":[{"op":"page.set","at":"page0"}]}`)
 	stale := planFile(t, `{"base":"sha256:`+strings.Repeat("0", 64)+`","ops":[{"op":"page.rename","at":"page0","name":"X"}]}`)
-	pending := planFile(t, `{"ops":[{"op":"object.set","at":"page0/s1","name":"X"}]}`)
+	refused := planFile(t, `{"ops":[{"op":"page.delete","at":"page0"}]}`)
 	for _, c := range []struct {
 		plan string
 		exit int
@@ -152,17 +156,17 @@ func TestApplyErrors(t *testing.T) {
 		{unknownOp, cli.ExitFailed, cli.CodeInvalidPlan, "ops[0].op"},
 		{badOp, cli.ExitFailed, cli.CodeInvalidOperation, "ops[0]"},
 		{stale, cli.ExitFailed, cli.CodeStaleBase, "base"},
-		{pending, cli.ExitFailed, cli.CodeOperationFailed, "ops[0]"},
+		{refused, cli.ExitFailed, cli.CodeOperationFailed, "ops[0].at"},
 	} {
 		code, _, errs := runCLI(t, "apply", file, c.plan)
 		if code != c.exit || len(errs) != 1 || errs[0].Code != c.code || errs[0].Path != c.path {
 			t.Errorf("apply %s: exit %d errors %+v; want exit %d %s at %q", c.plan, code, errs, c.exit, c.code, c.path)
 		}
 	}
-	if code, _, errs := runCLI(t, "apply", file, pending, "--seed", "bogus"); code != cli.ExitUsage || len(errs) != 1 || errs[0].Code != cli.CodeUsage || errs[0].Path != "--seed" {
+	if code, _, errs := runCLI(t, "apply", file, refused, "--seed", "bogus"); code != cli.ExitUsage || len(errs) != 1 || errs[0].Code != cli.CodeUsage || errs[0].Path != "--seed" {
 		t.Errorf("apply --seed bogus: exit %d errors %+v; want usage at --seed", code, errs)
 	}
-	if code, _, errs := runCLI(t, "apply", file, pending, "--clock", "bogus"); code != cli.ExitUsage || len(errs) != 1 || errs[0].Code != cli.CodeUsage || errs[0].Path != "--clock" {
+	if code, _, errs := runCLI(t, "apply", file, refused, "--clock", "bogus"); code != cli.ExitUsage || len(errs) != 1 || errs[0].Code != cli.CodeUsage || errs[0].Path != "--clock" {
 		t.Errorf("apply --clock bogus: exit %d errors %+v; want usage at --clock", code, errs)
 	}
 	after, err := os.ReadFile(file)
@@ -177,15 +181,16 @@ func TestApplyErrors(t *testing.T) {
 	}
 }
 
-// TestApplyDryRunWritesNothing checks --dry-run on an unimplemented
-// op: the refusal is the same as without it and no out file appears.
+// TestApplyDryRunWritesNothing checks --dry-run on a refused op (the
+// only page deleted): the refusal is the same as without it and no out
+// file appears. It names no op that might be implemented later.
 func TestApplyDryRunWritesNothing(t *testing.T) {
 	file := drawingFile(t)
-	plan := planFile(t, `{"ops":[{"op":"object.set","at":"page0/s1","name":"X"}]}`)
+	plan := planFile(t, `{"ops":[{"op":"page.delete","at":"page0"}]}`)
 	out := filepath.Join(t.TempDir(), "out.vsdx")
 	code, _, errs := runCLI(t, "apply", file, plan, "-o", out, "--dry-run")
-	if code != cli.ExitFailed || len(errs) != 1 || errs[0].Code != cli.CodeOperationFailed || errs[0].Path != "ops[0]" {
-		t.Errorf("apply --dry-run: exit %d errors %+v; want operation_failed at ops[0]", code, errs)
+	if code != cli.ExitFailed || len(errs) != 1 || errs[0].Code != cli.CodeOperationFailed || errs[0].Path != "ops[0].at" {
+		t.Errorf("apply --dry-run: exit %d errors %+v; want operation_failed at ops[0].at", code, errs)
 	}
 	if _, err := os.Stat(out); !errors.Is(err, os.ErrNotExist) {
 		t.Error("--dry-run wrote its out file")
