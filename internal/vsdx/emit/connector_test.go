@@ -1,6 +1,7 @@
 package emit
 
 import (
+	"math"
 	"strings"
 	"testing"
 )
@@ -63,5 +64,36 @@ func TestConnectorXMLFreeBegin(t *testing.T) {
 func TestConnectorXMLCoinciding(t *testing.T) {
 	if shape, connects, ok := ConnectorXML(3, End{X: 3, Y: 9.5}, End{X: 3, Y: 9.5}); ok {
 		t.Errorf("ConnectorXML(coinciding ends) = %s, %v, true; want ok false", shape, connects)
+	}
+}
+
+// TestConnectorXMLValidation checks that ConnectorXML returns ok false
+// with no bytes for a glued end with Point < 1 or Target 0, and for any
+// NaN or infinite end coordinate (chunk K4F rows).
+func TestConnectorXMLValidation(t *testing.T) {
+	cases := []struct {
+		name  string
+		begin End
+		end   End
+	}{
+		{"glued point 0", End{X: 3, Y: 9.5, Glued: true, Target: 1, Point: 0}, End{X: 5, Y: 9.5}},
+		{"glued point -1", End{X: 3, Y: 9.5, Glued: true, Target: 1, Point: -1}, End{X: 5, Y: 9.5}},
+		{"glued target 0", End{X: 3, Y: 9.5, Glued: true, Target: 0, Point: 2}, End{X: 5, Y: 9.5}},
+		{"begin x NaN", End{X: math.NaN(), Y: 9.5}, End{X: 5, Y: 9.5}},
+		{"end y +Inf", End{X: 3, Y: 9.5}, End{X: 5, Y: math.Inf(1)}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			shape, connects, ok := ConnectorXML(3, c.begin, c.end)
+			if ok {
+				t.Errorf("ConnectorXML(%v, %v) ok = true, want false", c.begin, c.end)
+			}
+			if len(shape) != 0 {
+				t.Errorf("ConnectorXML(%v, %v) shape = %s, want no bytes", c.begin, c.end, shape)
+			}
+			if len(connects) != 0 {
+				t.Errorf("ConnectorXML(%v, %v) connects = %v, want no bytes", c.begin, c.end, connects)
+			}
+		})
 	}
 }
