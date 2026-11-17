@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"io"
 	"os"
 	"strings"
@@ -54,7 +56,7 @@ func readInput(path string) ([]byte, error) {
 }
 
 // runRead is the read handler (chunk C1): the file read once, cli.Hash
-// for base, read.Document or read.Page; --page and --master exclusive
+// for base, read.Document or read.WritePage; --page and --master exclusive
 // (usage); the per-page flags only with one of them (usage, as pptx);
 // --region parsed as pptx parses it; errors mapped as pptx's openDeck
 // and readSlide map them.
@@ -103,14 +105,28 @@ func runRead(p *cli.Parsed, stdout io.Writer) error {
 	if p.Has("master") {
 		address = p.Get("master")
 	}
-	out, err := read.Page(input, base, address, read.Options{
+	opts := read.Options{
 		Units:  p.Get("units"),
 		Detail: p.Get("detail"),
 		IDs:    ids,
 		Region: region,
-	})
-	if err != nil {
+	}
+	// Without --pretty the page streams to stdout through a bufio
+	// writer (chunk RM3); with it the buffered path keeps the bytes
+	// cli.WriteJSON indents exactly as before.
+	if !p.Has("pretty") {
+		bw := bufio.NewWriter(stdout)
+		if err := read.WritePage(bw, input, base, address, opts); err != nil {
+			return cli.Wrap(cli.CodeInvalidDocument, "", err)
+		}
+		if err := bw.Flush(); err != nil {
+			return cli.Errorf(cli.CodeIO, "", "write the result: %v", err)
+		}
+		return nil
+	}
+	var buf bytes.Buffer
+	if err := read.WritePage(&buf, input, base, address, opts); err != nil {
 		return cli.Wrap(cli.CodeInvalidDocument, "", err)
 	}
-	return cli.WriteJSON(stdout, out, p.Has("pretty"))
+	return cli.WriteJSON(stdout, buf.Bytes(), true)
 }

@@ -27,11 +27,13 @@ import (
 // min(2 KB per object, 45 MB), and the 20k/5k peak ratio is at most
 // 5.5. The budgets are the designer's (RM1, restored after RM2; a
 // chunk does not loosen the checks that judge it). Allocation: page
-// default 96 MB at 5k and 388 MB at 20k, full 164 MB and 662 MB (RM1's
-// numbers); find 46 MB and 183 MB (lowered by RM2's streaming, kept).
-// Measured at 7d09f90: default 87.7 and 357.5 MB, full 150.2 and
-// 608.5 MB, find 38.1 and 152.4 MB; RM3 removes marshalPage's second
-// marshal and lowers the page budgets.
+// default 84 MB at 5k and 343 MB at 20k, full 123 MB and 551 MB
+// (RM3's numbers: the measured values after RM3 plus 15%); find
+// 46 MB and 183 MB (lowered by RM2's streaming, kept). Measured
+// after RM3: default 72.9 and 297.8 MB, full 106.3 and 479.1 MB,
+// find 38.1 and 152.4 MB (at 7d09f90, before RM3: default 87.7 and
+// 357.5 MB, full 150.2 and 608.5 MB); peak live is unchanged by
+// RM3 (walk 72.6 MB at 20k default, 95.3 MB full).
 
 // memoryCeiling is the peak-live ceiling for a page read with objects
 // objects and outBytes bytes of output: 2 KB per object plus 3 times
@@ -77,7 +79,7 @@ func peakRatio(t *testing.T, name string, run func(n int, mark func(string)) err
 // peak live heap at the "walk" and "link" checkpoints, and the peak ratio is
 // at most 5.5.
 func TestMemoryBudgetPageDefault(t *testing.T) {
-	alloc := map[int]uint64{5000: laws.MB(96), 20000: laws.MB(388)}
+	alloc := map[int]uint64{5000: laws.MB(84), 20000: laws.MB(343)}
 	for _, n := range []int{5000, 20000} {
 		data := generatedBytes(t, n)
 		out, err := Page(data, "B", "page0", Options{})
@@ -114,7 +116,7 @@ func TestMemoryBudgetPageDefault(t *testing.T) {
 // TestMemoryBudgetPageDefault for the full view: peak live heap at
 // the "walk" and "link" checkpoints is at most memoryCeiling.
 func TestMemoryBudgetPageFull(t *testing.T) {
-	alloc := map[int]uint64{5000: laws.MB(164), 20000: laws.MB(662)}
+	alloc := map[int]uint64{5000: laws.MB(123), 20000: laws.MB(551)}
 	for _, n := range []int{5000, 20000} {
 		data := generatedBytes(t, n)
 		out, err := Page(data, "B", "page0", Options{Detail: "full"})
