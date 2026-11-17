@@ -1,0 +1,2 @@
+go test fuzz v1
+string("page0/s5/prop:A/B")
