@@ -33,7 +33,13 @@ func TestRender(t *testing.T) {
 			name:    "bold italic size color",
 			body:    Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: 0, Text: "Hi", Field: -1}}}}},
 			formats: Formats{Char: map[int]CharFormat{0: {Bold: "on", Italic: "on", Size: "12", Color: "#FF0000"}}},
-			want:    `<p><b><i><span style="font-size:12pt;color:#FF0000">Hi</span></i></b></p>`,
+			want:    `<p><b><i><span style="font-size:12pt;color:#FF0000" data-color="#FF0000">Hi</span></i></b></p>`,
+		},
+		{
+			name:    "color alone",
+			body:    Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: -1, Text: "x", Field: -1}}}}},
+			formats: Formats{Char: map[int]CharFormat{0: {Color: "#00FF00"}}},
+			want:    `<p><span style="color:#00FF00" data-color="#00FF00">x</span></p>`,
 		},
 		{
 			name:    "bold off",
@@ -191,7 +197,7 @@ func TestRender(t *testing.T) {
 			name:    "char styles order",
 			body:    Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: -1, Text: "x", Field: -1}}}}},
 			formats: Formats{Char: map[int]CharFormat{0: {Bold: "off", Italic: "off", Underline: "off", Size: "12", Color: "#00FF00", Font: "Arial"}}},
-			want:    `<p><span style="font-weight:normal;font-style:normal;text-decoration:none;font-size:12pt;color:#00FF00;font-family:'Arial'">x</span></p>`,
+			want:    `<p><span style="font-weight:normal;font-style:normal;text-decoration:none;font-size:12pt;color:#00FF00;font-family:'Arial'" data-color="#00FF00">x</span></p>`,
 		},
 		{
 			name:    "field is bare under a format",
@@ -224,7 +230,7 @@ func TestRender(t *testing.T) {
 				Char: map[int]CharFormat{0: {}, 1: {Bold: "on", Color: "#FF0000"}, 2: {Size: "10", Font: "Arial"}},
 				Para: map[int]ParaFormat{0: {Align: "left"}, 1: {Bullet: true, BulletChar: "\u2022", MarginLeft: "18pt", Indent: "-18pt"}},
 			},
-			want: "<p style=\"text-align:left\">Title<b><span style=\"color:#FF0000\"> red</span></b></p><ul><li style=\"margin-left:18pt;text-indent:-18pt\" data-char=\"\u2022\"><span style=\"font-size:10pt;font-family:'Arial'\">item</span><br/><span style=\"font-size:10pt;font-family:'Arial'\">two\tend </span><opaque data-ref=\"page0/s1/field:1\" data-kind=\"field\" data-text=\"3\"></opaque></li></ul>",
+			want: "<p style=\"text-align:left\">Title<b><span style=\"color:#FF0000\" data-color=\"#FF0000\"> red</span></b></p><ul><li style=\"margin-left:18pt;text-indent:-18pt\" data-char=\"\u2022\"><span style=\"font-size:10pt;font-family:'Arial'\">item</span><br/><span style=\"font-size:10pt;font-family:'Arial'\">two\tend </span><opaque data-ref=\"page0/s1/field:1\" data-kind=\"field\" data-text=\"3\"></opaque></li></ul>",
 		},
 	}
 	for _, tc := range tests {

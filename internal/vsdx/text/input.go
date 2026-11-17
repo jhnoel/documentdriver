@@ -14,9 +14,11 @@ import (
 // set, one Character row per distinct CharFormat and one Paragraph row
 // per distinct ParaFormat, numbered from 0 in first use; Terminated is
 // true (Visio ends text with a line feed). A field placeholder is kept
-// by its data-ref. Anything outside the grammar is an error naming the
-// element or attribute. Render(ParseHTML(h)) == h for every h Render
-// writes. Chunk K5.
+// by its data-ref. A span's data-color accepts only #RRGGBB (any case,
+// stored upper-case) and, with color present, must name the same colour
+// as it; alone it sets the colour. Anything else outside the grammar is
+// an error naming the element or attribute. Render(ParseHTML(h)) == h
+// for every h Render writes. Chunk K5, amended by TXF.
 func ParseHTML(h string) (Body, Formats, error) {
 	root, err := htmlx.ParseHTML(h, htmlx.Options{
 		Strict:      true,
@@ -267,21 +269,29 @@ func inlineFormat(n *htmlx.Node, ctx CharFormat) (CharFormat, error) {
 		}
 		return f, nil
 	case "span":
-		if err := checkAttrs(n, map[string]bool{"style": true}); err != nil {
+		if err := checkAttrs(n, map[string]bool{"style": true, "data-color": true}); err != nil {
 			return f, err
 		}
-		v, ok := n.Attr("style")
-		if !ok {
-			return f, nil
-		}
-		decls, err := htmlx.StyleDecls(v)
-		if err != nil {
-			return f, fmt.Errorf("text: <span> style: %w", err)
-		}
-		for _, d := range decls {
-			if err := charDecl(&f, d); err != nil {
-				return f, err
+		if v, ok := n.Attr("style"); ok {
+			decls, err := htmlx.StyleDecls(v)
+			if err != nil {
+				return f, fmt.Errorf("text: <span> style: %w", err)
 			}
+			for _, d := range decls {
+				if err := charDecl(&f, d); err != nil {
+					return f, err
+				}
+			}
+		}
+		if v, ok := n.Attr("data-color"); ok {
+			hex, valid := vsd.Color(v)
+			if !valid {
+				return f, fmt.Errorf("text: data-color:%s: want #RRGGBB; Visio text has no theme colour references", v)
+			}
+			if f.Color != "" && f.Color != hex {
+				return f, fmt.Errorf("text: data-color:%s and the colour in force %s disagree; the two must name the same colour", v, f.Color)
+			}
+			f.Color = hex
 		}
 		return f, nil
 	}
