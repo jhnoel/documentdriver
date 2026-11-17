@@ -178,6 +178,13 @@ from the run or paragraph replaced. A grammar element vsdx cannot store
   values (after master and style inheritance), lengths in points on a
   page whose origin is the top-left corner, y down:
 
+  A master is shown in the frame of its own page sheet (the PageWidth
+  and PageHeight of its `Master` entry's PageSheet in masters.xml, as
+  Visio's master editing window shows it): origin at that sheet's
+  top-left corner, y down, so a master shape drawn on its 1 x 0.75 in
+  sheet has y between 0 and 54 pt. A master whose page sheet stores no
+  PageHeight shows no `box`, `from` or `to`, with a note.
+
 ```json
 {"base":"sha256:…","page":"page0","name":"Page-1","units":"pt","size":[612,792],"orientation":"portrait","print_orientation":"portrait",
  "layers":[{"id":"page0/layer:Flowchart","name":"Flowchart","index":0,"visible":true,"print":true}],
