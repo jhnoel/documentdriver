@@ -1,4 +1,4 @@
-.PHONY: build test vet fmt norequire wasip1 check corpus fuzz tools tool-golangci-lint tool-govulncheck lint vuln race repro release release-check release-smoke publish ship ci hooks powerpoint-smoke word-smoke excel-smoke conformance oracle-write-gen oracle-write-record oracle-write-compare oracle-write-gate vsdx-schema
+.PHONY: build test vet fmt norequire wasip1 check corpus fuzz tools tool-golangci-lint tool-govulncheck lint vuln race repro release release-check release-smoke publish ship ci hooks powerpoint-smoke word-smoke excel-smoke conformance oracle-write-gen oracle-write-record oracle-write-compare oracle-write-gate vsdx-schema vsdx-schema-check
 
 # Builds and tests are pure Go: no cgo. The one exception is `make race`,
 # because the race detector needs cgo on macOS and Linux (see below).
@@ -464,3 +464,16 @@ oracle-write-gate:
 # Neither check nor ci needs it.
 vsdx-schema:
 	eval/corpus/fetch-vsdx-schema.sh
+
+# vsdx-schema-check is the opt-in MS-VSDX schema check
+# (tools/conformance/vsdx-schema-check.py): it validates the Visio parts
+# of an input and its outputs against the gitignored schema cache
+# ($VSDX_SCHEMA, or the main checkout's corpus/vsdx-schema) and fails
+# only on error kinds an output has that its input did not. Without a
+# valid cache it prints "no schema cache: run make vsdx-schema" and
+# exits 0. Never part of check or ci. With no arguments it checks the
+# V1 fixture page as an input; pass INPUT=/OUTPUT=, ARGS, or
+# VSDX_SCHEMA_CHECK_ARGS, e.g.:
+#   make vsdx-schema-check INPUT=in.vsdx OUTPUT=out.vsdx
+vsdx-schema-check:
+	@uv run --script tools/conformance/vsdx-schema-check.py $(if $(INPUT),--input $(INPUT)) $(if $(OUTPUT),--output $(OUTPUT)) $(VSDX_SCHEMA_CHECK_ARGS) $(ARGS)
