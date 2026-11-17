@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
+	"github.com/jhnoel/documentdriver/internal/vsdx/apply"
 	"github.com/jhnoel/documentdriver/internal/vsdx/create"
 	"github.com/jhnoel/documentdriver/internal/vsdx/ops"
 )
@@ -67,7 +68,7 @@ func runCreate(p *cli.Parsed, stdout io.Writer) error {
 		}
 		return cli.WriteJSON(stdout, b, p.Has("pretty"))
 	}
-	b, err := res.JSON()
+	b, err := apply.ResultJSON(res, planArg.Units, true)
 	if err != nil {
 		return err
 	}

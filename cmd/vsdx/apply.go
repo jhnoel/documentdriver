@@ -64,7 +64,7 @@ func runApply(p *cli.Parsed, stdout io.Writer) error {
 	if err != nil {
 		return err
 	}
-	b, err := res.JSON()
+	b, err := apply.ResultJSON(res, plan.Units, false)
 	if err != nil {
 		return err
 	}
