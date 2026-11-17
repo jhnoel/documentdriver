@@ -74,6 +74,21 @@ func buildPageOf(t *testing.T, d *doc.Document, r *inherit.Resolver, id uint32) 
 	return p
 }
 
+// buildPageOpt builds page id of d through r with options o and fails
+// the test on an error.
+func buildPageOpt(t *testing.T, d *doc.Document, r *inherit.Resolver, id uint32, o Options) *Page {
+	t.Helper()
+	e, ok := d.Page(id)
+	if !ok {
+		t.Fatalf("Page(%d) not found, Pages = %v", id, d.Pages)
+	}
+	p, err := BuildPage(d, r, e, o)
+	if err != nil {
+		t.Fatalf("BuildPage(page%d): %v", id, err)
+	}
+	return p
+}
+
 // objectIDs returns the addresses of p's objects in order.
 func objectIDs(p *Page) []string {
 	ids := make([]string, len(p.Objects))
@@ -119,6 +134,52 @@ func TestBuildPageV1(t *testing.T) {
 	}
 	if p.ID != "page0" {
 		t.Errorf("page ID = %q, want page0", p.ID)
+	}
+}
+
+// TestOriginsFullDetail checks the M1F rows 1 to 5: the origins of
+// the shown properties, exactly, with Full and (for the properties
+// derived there) in the default view. Row 1 (V1): s1 box local,
+// fill style (FillForegnd local, FillPattern from StyleSheet 0),
+// html local, line style. Row 2 (V2): s1 box master, fill style,
+// html master, line style; s2 box master (Width inherited, Height
+// from the master, and master ranks above inherited), fill style,
+// html local, line style. Row 3 (V3): s4 (styles 2, fill and line
+// none) box local, fill style, line style. Row 4 (V5): s3 with
+// Full, box local, fill style, from local, line style, to local;
+// in the default view its box is not derived, so its default
+// origins are the same without box. Row 6 (the v1-page0-full
+// golden) is checked by R2.
+func TestOriginsFullDetail(t *testing.T) {
+	rows := []struct {
+		fixture, id string
+		full        map[string]inherit.Origin
+		def         map[string]inherit.Origin
+	}{
+		{"v1-minimal", "page0/s1",
+			map[string]inherit.Origin{"box": inherit.Local, "fill": inherit.Style, "html": inherit.Local, "line": inherit.Style},
+			map[string]inherit.Origin{"box": inherit.Local, "fill": inherit.Style, "html": inherit.Local, "line": inherit.Style}},
+		{"v2-master", "page0/s1",
+			map[string]inherit.Origin{"box": inherit.Master, "fill": inherit.Style, "html": inherit.Master, "line": inherit.Style},
+			map[string]inherit.Origin{"box": inherit.Master, "fill": inherit.Style, "html": inherit.Master, "line": inherit.Style}},
+		{"v2-master", "page0/s2",
+			map[string]inherit.Origin{"box": inherit.Master, "fill": inherit.Style, "html": inherit.Local, "line": inherit.Style},
+			map[string]inherit.Origin{"box": inherit.Master, "fill": inherit.Style, "html": inherit.Local, "line": inherit.Style}},
+		{"v3-styles", "page0/s4",
+			map[string]inherit.Origin{"box": inherit.Local, "fill": inherit.Style, "line": inherit.Style},
+			map[string]inherit.Origin{"box": inherit.Local, "fill": inherit.Style, "line": inherit.Style}},
+		{"v5-glue", "page0/s3",
+			map[string]inherit.Origin{"box": inherit.Local, "fill": inherit.Style, "from": inherit.Local, "line": inherit.Style, "to": inherit.Local},
+			map[string]inherit.Origin{"fill": inherit.Style, "from": inherit.Local, "line": inherit.Style, "to": inherit.Local}},
+	}
+	for _, row := range rows {
+		d, r := openFixture(t, row.fixture)
+		if got := byID(t, buildPageOpt(t, d, r, 0, Options{Full: true}), row.id).Origins; !maps.Equal(got, row.full) {
+			t.Errorf("%s %s origins with Full = %v, want %v", row.fixture, row.id, got, row.full)
+		}
+		if got := byID(t, buildPageOpt(t, d, r, 0, Options{}), row.id).Origins; !maps.Equal(got, row.def) {
+			t.Errorf("%s %s origins in the default view = %v, want %v", row.fixture, row.id, got, row.def)
+		}
 	}
 }
 

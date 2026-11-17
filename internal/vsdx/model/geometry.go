@@ -24,17 +24,13 @@ func geometry(o *Object, r *inherit.Resolver, s *inherit.Shape, f place.Frame, p
 			o.Omitted = append(o.Omitted, Omission{Prop: "from", Reason: reason})
 		} else {
 			o.From = from
-			if opt.Full {
-				setOrigin(o, "from", origin)
-			}
+			setOrigin(o, "from", origin)
 		}
 		if to, origin, reason := endPoint(r, s, f, pageH, vsd.CellEndX, vsd.CellEndY); reason != "" {
 			o.Omitted = append(o.Omitted, Omission{Prop: "to", Reason: reason})
 		} else {
 			o.To = to
-			if opt.Full {
-				setOrigin(o, "to", origin)
-			}
+			setOrigin(o, "to", origin)
 		}
 	}
 	t, missing, hasT := transformOf(r, s)
@@ -47,9 +43,7 @@ func geometry(o *Object, r *inherit.Resolver, s *inherit.Shape, f place.Frame, p
 				o.Omitted = append(o.Omitted, Omission{Prop: "box", Reason: err.Error()})
 			} else {
 				o.Box = &box
-				if opt.Full {
-					setOrigin(o, "box", transformOrigin(r, s))
-				}
+				setOrigin(o, "box", transformOrigin(r, s))
 			}
 		}
 	}
@@ -173,7 +167,7 @@ func endPoint(r *inherit.Resolver, s *inherit.Shape, f place.Frame, pageH float6
 		return nil, "", reason
 	}
 	pt := place.Point(f, x, y, pageH)
-	return &pt, mostInherited([]inherit.Origin{ox, oy}), ""
+	return &pt, boxOrigin(ox, oy), ""
 }
 
 // sitesOf returns the connection sites of s in row order: for each
@@ -222,7 +216,7 @@ func transformOrigin(r *inherit.Resolver, s *inherit.Shape) inherit.Origin {
 		_, origin, _ := r.Cell(s, sheet.ShapeCell(name))
 		origins = append(origins, origin)
 	}
-	return mostInherited(origins)
+	return boxOrigin(origins...)
 }
 
 // setOrigin records origin for prop on o, creating the origins map when
@@ -232,34 +226,4 @@ func setOrigin(o *Object, prop string, origin inherit.Origin) {
 		o.Origins = map[string]inherit.Origin{}
 	}
 	o.Origins[prop] = origin
-}
-
-// mostInherited returns the most inherited of origins, in the order
-// local < inherited < master < style (docs/vsdx-design.md, decision a),
-// or "" when origins holds none.
-func mostInherited(origins []inherit.Origin) inherit.Origin {
-	best := inherit.Origin("")
-	bestRank := -1
-	for _, origin := range origins {
-		if rank := originRank(origin); rank > bestRank {
-			best, bestRank = origin, rank
-		}
-	}
-	return best
-}
-
-// originRank ranks an origin for mostInherited: local 0, inherited 1,
-// master 2, style 3, and -1 for anything else.
-func originRank(origin inherit.Origin) int {
-	switch origin {
-	case inherit.Local:
-		return 0
-	case inherit.Inherited:
-		return 1
-	case inherit.Master:
-		return 2
-	case inherit.Style:
-		return 3
-	}
-	return -1
 }

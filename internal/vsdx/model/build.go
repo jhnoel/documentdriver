@@ -13,8 +13,8 @@ import (
 )
 
 // Options select what the builder derives beyond the default view:
-// Sites adds connection sites; Full adds origins, raw cells and
-// omissions.
+// Sites adds connection sites; Full adds raw cells (and, for a 1-D
+// shape, its box). Origins are derived in every view.
 type Options struct {
 	Sites, Full bool
 }
@@ -153,7 +153,6 @@ func (w *walker) step(fr frame) {
 	obj.Layers = layerMembers(w.p, layerValue)
 	if w.o.Full {
 		obj.Cells = rawCells(head.s.Sheet)
-		obj.Origins = map[string]inherit.Origin{"box": boxOrigin()}
 	}
 	t, _, ok := transformOf(w.r, head.s)
 	if _, dup := w.placed[head.id]; !dup {
