@@ -429,6 +429,80 @@ func TestScalingNextShapeID(t *testing.T) {
 	laws.TimeScales(t, "vsdx NextShapeID", setup)
 }
 
+// TestNextShapeIDAfterInserts checks the E1F row: NextShapeID after
+// k inserts on V2 is 6 + k (the largest ID and the index are kept
+// by InsertShape, with no walk of the page per call).
+func TestNextShapeIDAfterInserts(t *testing.T) {
+	w := mustBegin(t, vsdxtest.Fixture(t, "v2-master"))
+	rect := goldenEmit(t, "rect.xml")
+	for k := 1; k <= 3; k++ {
+		if _, err := w.InsertShape("page0", "", rect); err != nil {
+			t.Fatalf("InsertShape %d: %v", k, err)
+		}
+		id, err := w.NextShapeID("page0")
+		if err != nil {
+			t.Fatalf("NextShapeID after %d inserts: %v", k, err)
+		}
+		if id != uint32(6+k) {
+			t.Errorf("NextShapeID after %d inserts = %d, want %d", k, id, 6+k)
+		}
+	}
+}
+
+// TestInsertShapeIntoGroupTwice checks the E1F row: inserting into
+// V2's nested group s3 twice keeps the group index, returning
+// page0/s6 and then page0/s7.
+func TestInsertShapeIntoGroupTwice(t *testing.T) {
+	w := mustBegin(t, vsdxtest.Fixture(t, "v2-master"))
+	rect := goldenEmit(t, "rect.xml")
+	for i, want := range []string{"page0/s6", "page0/s7"} {
+		addr, err := w.InsertShape("page0", "page0/s3", rect)
+		if err != nil {
+			t.Fatalf("InsertShape %d: %v", i, err)
+		}
+		if addr != want {
+			t.Errorf("InsertShape %d returned %q, want %s", i, addr, want)
+		}
+	}
+	if err := w.Verify(); err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+}
+
+// TestScalingInsertShapeSetCells checks the E1F scaling row: setup
+// is Generated(n) plus 50 InsertShape and 50 SetCells on the new
+// shapes (n = laws.Small and laws.Large), through laws.Scales and
+// laws.TimeScales.
+func TestScalingInsertShapeSetCells(t *testing.T) {
+	rect := goldenEmit(t, "rect.xml")
+	setup := func(n int) (func() error, error) {
+		path := vsdxtest.Generated(t, n)
+		return func() error {
+			w, err := Begin(path)
+			if err != nil {
+				return err
+			}
+			defer w.Tx().Rollback()
+			addrs := make([]string, 0, 50)
+			for i := 0; i < 50; i++ {
+				addr, err := w.InsertShape("page0", "", rect)
+				if err != nil {
+					return err
+				}
+				addrs = append(addrs, addr)
+			}
+			for _, addr := range addrs {
+				if err := w.SetCells(addr, []Cell{{N: "PinX", V: "3"}}); err != nil {
+					return err
+				}
+			}
+			return w.Verify()
+		}, nil
+	}
+	laws.Scales(t, "vsdx InsertShape SetCells", setup)
+	laws.TimeScales(t, "vsdx InsertShape SetCells", setup)
+}
+
 // TestV11Namespace checks that a part in the 2011 namespace spelling
 // is edited in that spelling: an insert into V11 keeps NSCore2011.
 func TestV11Namespace(t *testing.T) {
