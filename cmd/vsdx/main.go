@@ -41,7 +41,8 @@ func app() *cli.App {
 		Version:  version,
 		Summary:  "vsdx reads, edits and creates Visio drawings: pages, shapes, connectors, groups, shape data and their text.",
 		Commands: []*cli.Command{readCommand, findCommand, xmlCommand, applyCommand, createCommand, renderCommand},
-		Topics:   map[string]func() string{"html": htmlHelp},
+		Topics:   map[string]func() string{"ops": opsHelp, "html": htmlHelp},
+		Topic:    opHelp,
 		Handlers: map[string]cli.Handler{
 			"read": runRead, "find": runFind, "xml": runXML, "apply": runApply, "create": runCreate, "render": runRender,
 		},
