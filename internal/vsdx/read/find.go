@@ -2,6 +2,7 @@ package read
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/casefold"
@@ -22,6 +23,10 @@ type FindRequest struct {
 	IgnoreCase bool // casefold.Simple on both sides
 	Page       string
 	Limit      int // 0: no limit
+	// Checkpoint, when not nil, is passed to model.VisitPage's
+	// Checkpoint: the memory gate's mark inside the streamed page
+	// walk (chunk RM2). The CLI leaves it nil.
+	Checkpoint func(name string)
 }
 
 // FindResult is find's output.
@@ -201,12 +206,34 @@ type finder struct {
 	cut    bool
 }
 
-// scanPage builds one page and matches its objects in paint order (a
-// shape before its shape data rows), dropping the page tree after.
-// With single set, a page that cannot be read is the command's error
-// (unreadable_target); otherwise it is skipped with a note.
+// scanPage streams one page through model.VisitPage and matches its
+// objects in paint order (a shape before its shape data rows),
+// dropping each object after it is visited: Find holds no page
+// tree and no model between pages, only the matches already
+// recorded. With single set, a page that cannot be read is the
+// command's error (unreadable_target); otherwise it is skipped
+// with a note. The page's notes are merged at the place the
+// --limit cut note (if any) was added, as the BuildPage scan
+// recorded them before matching.
 func (f *finder) scanPage(d *doc.Document, r *inherit.Resolver, e *doc.PageEntry, single bool) error {
-	p, err := model.BuildPage(d, r, e, model.Options{})
+	noteStart := len(f.res.Notes)
+	pageNotes, err := model.VisitPage(d, r, e, model.Options{Checkpoint: f.req.Checkpoint}, func(o *model.Object) bool {
+		if f.cut {
+			return false
+		}
+		if o.HasText && f.match(o.Text) && f.add(o.ID, o.Text) {
+			return false
+		}
+		for _, pr := range o.Props {
+			if f.cut {
+				return false
+			}
+			if text := propText(pr); text != "" && f.match(text) && f.add(pr.ID, text) {
+				return false
+			}
+		}
+		return true
+	})
 	if err != nil {
 		if single {
 			return &cli.Error{Code: cli.CodeUnreadableTarget, Path: "--page", Message: "the page cannot be read", Detail: err.Error(), Cause: err}
@@ -214,26 +241,14 @@ func (f *finder) scanPage(d *doc.Document, r *inherit.Resolver, e *doc.PageEntry
 		f.res.Notes = append(f.res.Notes, Note{At: model.PageSheet(d, r, e).ID, Reason: "unreadable: " + err.Error()})
 		return nil
 	}
-	for _, n := range p.Notes {
-		f.res.Notes = append(f.res.Notes, Note{At: n.At, Reason: n.Reason})
+	var notes []Note
+	for _, n := range pageNotes {
+		notes = append(notes, Note{At: n.At, Reason: n.Reason})
 	}
-	// The page model p is dropped when this call returns: Find holds
-	// no model between pages, only the matches already recorded.
-	for _, o := range p.Objects {
-		if f.cut {
-			return nil
-		}
-		if o.HasText && f.match(o.Text) && f.add(o.ID, o.Text) {
-			return nil
-		}
-		for _, pr := range o.Props {
-			if f.cut {
-				return nil
-			}
-			if text := propText(pr); text != "" && f.match(text) && f.add(pr.ID, text) {
-				return nil
-			}
-		}
+	if f.cut && len(f.res.Notes) > noteStart {
+		f.res.Notes = slices.Insert(f.res.Notes, noteStart, notes...)
+	} else {
+		f.res.Notes = append(f.res.Notes, notes...)
 	}
 	return nil
 }

@@ -2,7 +2,6 @@ package read
 
 import (
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
@@ -171,7 +170,11 @@ func Page(input []byte, base, address string, o Options) ([]byte, error) {
 		units = "in"
 	}
 	full := o.Detail == "full"
-	mo := model.Options{Sites: o.Detail == "sites" || full, Full: full}
+	// ReleaseNodes is set on this (the CLI) path: BuildPage drops
+	// every Object.Node once the glue pass is done, so the page tree
+	// is not held while the page is marshalled. read.XML, edit and
+	// the model tests keep the nodes.
+	mo := model.Options{Sites: o.Detail == "sites" || full, Full: full, ReleaseNodes: true, Checkpoint: o.Checkpoint}
 	a, err := vsd.Parse(address)
 	if err != nil {
 		return nil, cli.Errorf(cli.CodeNotFound, "", "%s", err)
@@ -239,9 +242,12 @@ func Page(input []byte, base, address string, o Options) ([]byte, error) {
 
 // marshalPage writes a page result into one buffer: the marshalled
 // head (without its closing brace), then the objects one by one,
-// then the marshalled tail (without its opening brace). No slice of
-// per-object copies is ever held: each object is marshalled and
-// appended before the next is converted, so the live set is the
+// then the marshalled tail (without its opening brace). A first
+// pass marshals every object to sum their lengths, so the buffer
+// is allocated exactly once at its final size and never grows by
+// copying; a second pass writes into it. No slice of per-object
+// copies is ever held: each object is marshalled and its length
+// counted before the next is converted, so the live set is the
 // model plus the output buffer.
 func marshalPage(head pageHeadJSON, tail pageTailJSON, objects []*model.Object, in, full bool) ([]byte, error) {
 	headB, err := cli.Marshal(head)
@@ -252,7 +258,18 @@ func marshalPage(head pageHeadJSON, tail pageTailJSON, objects []*model.Object, 
 	if err != nil {
 		return nil, err
 	}
-	out := make([]byte, 0, len(headB)+len(tailB)+len(objects)*384)
+	total := 0
+	for i, obj := range objects {
+		b, err := cli.Marshal(objectJSONOf(obj, in, full))
+		if err != nil {
+			return nil, err
+		}
+		if i > 0 {
+			total++
+		}
+		total += len(b)
+	}
+	out := make([]byte, 0, len(headB)-1+len(",\"objects\":[")+total+len("],")+len(tailB)-1+1)
 	out = append(out, headB[:len(headB)-1]...)
 	out = append(out, `,"objects":[`...)
 	for i, obj := range objects {
@@ -294,21 +311,14 @@ func pointJSON(p *geom.Pt, in bool) []json.Number {
 	return []json.Number{lengthNum(p.X, in), lengthNum(p.Y, in)}
 }
 
-// storedMaster returns the master address the shape element itself stores,
-// "" when it stores none.
+// storedMaster returns the master address the shape element itself
+// stores, "" when it stores none: the StoredMaster the walk set, so
+// it needs no node (Page releases the nodes before marshalling).
 func storedMaster(obj *model.Object) string {
-	if obj.Node == nil {
+	if obj == nil {
 		return ""
 	}
-	v, ok := obj.Node.Attr("Master")
-	if !ok {
-		return ""
-	}
-	u, err := strconv.ParseUint(v, 10, 32)
-	if err != nil {
-		return ""
-	}
-	return vsd.MasterID(uint32(u))
+	return obj.StoredMaster
 }
 
 // fillJSON shows a fill as read shows it.

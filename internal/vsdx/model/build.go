@@ -112,8 +112,25 @@ func build(p *Page, d *doc.Document, r *inherit.Resolver, contents *tree.Documen
 		w.stack = w.stack[:len(w.stack)-1]
 		w.step(fr)
 	}
+	if o.Checkpoint != nil {
+		o.Checkpoint("walk")
+	}
 	linkConnects(p, r, connects, w.placed, p.H)
 	offPage(p)
+	if o.ReleaseNodes {
+		for _, obj := range p.Objects {
+			obj.Node = nil
+		}
+		// The shapes and Connects locals and the contents document
+		// die with this branch (their last uses are the walk and
+		// the glue pass), so with the nodes gone the page tree
+		// itself can be collected before the caller marshals; the
+		// walker's stack is dropped with it.
+		w.stack = nil
+	}
+	if o.Checkpoint != nil {
+		o.Checkpoint("link")
+	}
 	return p, nil
 }
 
@@ -133,7 +150,12 @@ type frame struct {
 // allocation per shape.
 const placedBlockSize = 1024
 
-// walker walks one page or master contents into its Page.
+// walker walks one page or master contents into its Page. In a
+// VisitPage walk (visit non-nil) it builds no placed map and keeps
+// no objects: each built object goes to visit and is dropped, ids
+// records the stored IDs objects were built for (the Connects notes
+// pass), count is the next object's Z, and stop says visit returned
+// false and the walk must end.
 type walker struct {
 	p         *Page
 	d         *doc.Document
@@ -145,6 +167,10 @@ type walker struct {
 	blocks    [][]placed
 	poolUsed  int
 	stack     []frame
+	visit     func(*Object) bool
+	ids       map[uint32]bool
+	count     int
+	stop      bool
 }
 
 // place records obj in the placed map, taking its placed value from
@@ -192,6 +218,9 @@ func (w *walker) step(fr frame) {
 		obj.Master = vsd.MasterID(head.s.Master)
 		obj.MasterName = masterName(w.d, head.s.Master)
 	}
+	if head.hasStored {
+		obj.StoredMaster = vsd.MasterID(head.stored)
+	}
 	fillObject(obj, w.r, head.s, fr.f, w.p.H, w.o)
 	layerValue := ""
 	if cell, _, ok := w.r.Cell(head.s, sheet.ShapeCell(vsd.CellLayerMember)); ok {
@@ -202,14 +231,24 @@ func (w *walker) step(fr frame) {
 		obj.Cells = rawCells(head.s.Sheet)
 	}
 	t, _, ok := transformOf(w.r, head.s)
-	if _, dup := w.placed[head.id]; !dup {
+	if w.visit != nil {
+		w.ids[head.id] = true
+	} else if _, dup := w.placed[head.id]; !dup {
 		// placed keeps no indexed sheet: the walk releases head.s
 		// with this step, and linkConnects re-indexes on demand
 		// only the shapes a Connect names (indexShape of the
 		// placed node, with the effective master carried here).
 		w.place(obj, fr.f, head.s.Master, head.s.HasMaster, head.id)
 	}
-	w.p.Objects = append(w.p.Objects, obj)
+	if w.visit != nil {
+		obj.Z = w.count
+		w.count++
+		if !w.visit(obj) {
+			w.stop = true
+		}
+	} else {
+		w.p.Objects = append(w.p.Objects, obj)
+	}
 	childFrame := fr.f
 	if ok {
 		childFrame = fr.f.Child(t)
@@ -218,19 +257,25 @@ func (w *walker) step(fr frame) {
 	if head.s.HasMaster {
 		childMaster, childHasMaster = head.s.Master, true
 	}
-	w.stack = pushShapes(w.stack, shapes, addr, childFrame, childMaster, childHasMaster)
+	if !w.stop {
+		w.stack = pushShapes(w.stack, shapes, addr, childFrame, childMaster, childHasMaster)
+	}
 }
 
 // shapeHead is what the walk reads from a shape element's attributes:
 // its stored ID (ok false when it does not parse) and its resolver
-// shape, plus the attributes the object shows.
+// shape, plus the attributes the object shows. stored and hasStored
+// are the element's own Master attribute (never the master carried
+// from a group instance), for Object.StoredMaster.
 type shapeHead struct {
-	id    uint32
-	ok    bool
-	typ   string
-	name  string
-	nameU string
-	s     *inherit.Shape
+	id        uint32
+	ok        bool
+	stored    uint32
+	hasStored bool
+	typ       string
+	name      string
+	nameU     string
+	s         *inherit.Shape
 }
 
 // readShapeHead builds the shapeHead of one shape element: the shape
@@ -249,6 +294,7 @@ func readShapeHead(node *tree.Node, master uint32, hasMaster bool) shapeHead {
 		case "Master":
 			if u, err := strconv.ParseUint(value, 10, 32); err == nil {
 				head.s.Master, head.s.HasMaster = uint32(u), true
+				head.stored, head.hasStored = uint32(u), true
 			}
 		case "MasterShape":
 			if u, err := strconv.ParseUint(value, 10, 32); err == nil {
