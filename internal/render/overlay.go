@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-// Mark is one object to annotate. All coordinates are in points in slide
-// space (origin at the slide's top-left, y down), after any group transform
-// has been applied by the caller.
+// Mark is one object to annotate. All coordinates are in points in the
+// rendered page's coordinate system (origin at its top-left, y down), after
+// any group transform has been applied by the caller.
 type Mark struct {
 	ID    string       // label shown by the ids overlay
 	Box   [4]float64   // x, y, w, h of the unrotated box
@@ -27,7 +27,7 @@ type Overlay struct {
 }
 
 // KeyEntry maps a number drawn on the image to an object id. Draw returns
-// a key when the slide is too dense for id text.
+// a key when the page is too dense for id text.
 type KeyEntry struct {
 	N  int
 	ID string
@@ -45,14 +45,14 @@ var (
 	colGlue  = color.RGBA{255, 90, 0, 255}
 )
 
-// Draw paints the overlays onto img, which must show the whole slide of
-// slideW by slideH points. The point-to-pixel factor is taken from the
+// Draw paints the overlays onto img, which must show the whole page of
+// width by height points. The point-to-pixel factor is taken from the
 // image size, so it holds whatever the rasteriser rounded to. It returns
 // the number-to-id key when ids were drawn as numbers, else nil.
-func Draw(img *image.RGBA, slideW, slideH float64, marks []Mark, ov Overlay) []KeyEntry {
+func Draw(img *image.RGBA, width, height float64, marks []Mark, ov Overlay) []KeyEntry {
 	b := img.Bounds()
-	sx := float64(b.Dx()) / slideW
-	sy := float64(b.Dy()) / slideH
+	sx := float64(b.Dx()) / width
+	sy := float64(b.Dy()) / height
 	px := func(x, y float64) (float64, float64) { return float64(b.Min.X) + x*sx, float64(b.Min.Y) + y*sy }
 	var key []KeyEntry
 	if ov.IDs {
