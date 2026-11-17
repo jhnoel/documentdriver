@@ -12,8 +12,8 @@ CI.
 
 | File | What |
 | --- | --- |
-| `<cmd>-<version>-<os>-<arch>` | Every CLI under `cmd/` (today `docx`, `pptx` and `xlsx`) for `linux-amd64`, `linux-arm64` and `darwin-arm64`: static, `CGO_ENABLED=0 -trimpath`, with the version stamped into `--version` |
-| `documentdriver-<pep440>-py3-none-<tag>.whl` | One Python wheel per platform carrying that platform's `docx`, `pptx` and `xlsx`. The linux wheels use a compressed platform tag set (PEP 425: tags joined with `.`), so one file per architecture covers both libc families: `manylinux2014_x86_64.musllinux_1_1_x86_64` and `manylinux2014_aarch64.musllinux_1_1_aarch64`; darwin is `macosx_11_0_arm64`. The `WHEEL` file lists one `Tag:` line per expanded tag, in a fixed order |
+| `<cmd>-<version>-<os>-<arch>` | Every CLI under `cmd/` (today `docx`, `pptx`, `vsdx` and `xlsx`) for `linux-amd64`, `linux-arm64` and `darwin-arm64`: static, `CGO_ENABLED=0 -trimpath`, with the version stamped into `--version` |
+| `documentdriver-<pep440>-py3-none-<tag>.whl` | One Python wheel per platform carrying that platform's `docx`, `pptx`, `vsdx` and `xlsx`. The linux wheels use a compressed platform tag set (PEP 425: tags joined with `.`), so one file per architecture covers both libc families: `manylinux2014_x86_64.musllinux_1_1_x86_64` and `manylinux2014_aarch64.musllinux_1_1_aarch64`; darwin is `macosx_11_0_arm64`. The `WHEEL` file lists one `Tag:` line per expanded tag, in a fixed order |
 | `SHA256SUMS` | The SHA-256 of every file above, in `sha256sum -c` format |
 
 The wheel's import package (`packaging/python/documentdriver`, standard

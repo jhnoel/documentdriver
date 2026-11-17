@@ -1,6 +1,6 @@
 """The documentdriver command-line tools, as static binaries.
 
-This wheel carries the docx, pptx and xlsx binaries for one platform.
+This wheel carries the docx, pptx, vsdx and xlsx binaries for one platform.
 Their command line, results and errors follow the agent contract
 (docs/contract.md in the documentdriver repository). run() makes one call
 in a private directory and returns the parsed result, or raises
@@ -40,7 +40,7 @@ def names():
 
 
 def binary(name):
-    """Return the absolute path of the bundled binary `name` ("docx", "pptx", "xlsx").
+    """Return the absolute path of the bundled binary `name` ("docx", "pptx", "vsdx", "xlsx").
 
     The first call per binary hashes it and compares the digest recorded at
     build time; a mismatch raises RuntimeError. It also restores the
