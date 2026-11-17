@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/jhnoel/documentdriver/internal/ascii"
+	"github.com/jhnoel/documentdriver/internal/htmlx"
 )
 
 // The items of docxdriver's html/styles.rs the input path needs: the
@@ -51,43 +51,10 @@ func ParseFontFamily(value string) (FontFamily, error) {
 }
 
 // Decl is one CSS declaration.
-type Decl struct {
-	Name, Value string
-}
+type Decl = htmlx.StyleDecl
 
-// Declarations parses an inline style into declarations sorted by property
-// name (a later duplicate replaces an earlier one). Names are lowercased;
-// values may not hold control characters, < > { }, url( or !; "unset"
-// values are dropped.
-func Declarations(css string) ([]Decl, error) {
-	m := map[string]string{}
-	for part := range strings.SplitSeq(css, ";") {
-		part = strings.TrimSpace(part)
-		if part == "" {
-			continue
-		}
-		name, value, ok := strings.Cut(part, ":")
-		if !ok {
-			return nil, errorf("CSS declarations require property: value")
-		}
-		name = ascii.Lower(strings.TrimSpace(name))
-		value = strings.TrimSpace(value)
-		if value == "" || strings.ContainsFunc(value, func(r rune) bool {
-			return unicode.IsControl(r) || strings.ContainsRune("<>{}", r)
-		}) || strings.Contains(ascii.Lower(value), "url(") || strings.Contains(value, "!") {
-			return nil, errorf("unsupported CSS value")
-		}
-		if ascii.EqualFold(value, "unset") {
-			continue
-		}
-		m[name] = value
-	}
-	out := make([]Decl, 0, len(m))
-	for _, k := range slices.Sorted(maps.Keys(m)) {
-		out = append(out, Decl{k, m[k]})
-	}
-	return out, nil
-}
+// Declarations parses an inline style; it forwards to htmlx.StyleDecls.
+func Declarations(css string) ([]Decl, error) { return htmlx.StyleDecls(css) }
 
 // signedPoints parses a CSS point value that may carry a leading minus.
 func signedPoints(value string) (float64, error) {
