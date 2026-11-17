@@ -57,8 +57,8 @@ func Measure(runs int, f func() error) (Cost, error) {
 // Scales measures run on an input built for Small and for Large units
 // (setup returns the operation to time, which may reuse what setup
 // built) and fails t when the large run allocates more than MaxRatio
-// times the bytes or allocations of the small one. The time ratio is
-// logged only.
+// times the bytes or allocations of the small one, a measure under its
+// absolute floor excepted (verdict). The time ratio is logged only.
 func Scales(t *testing.T, name string, setup func(n int) (func() error, error)) {
 	t.Helper()
 	var costs [2]Cost
@@ -74,18 +74,50 @@ func Scales(t *testing.T, name string, setup func(n int) (func() error, error)) 
 			t.Fatalf("%s at %d: %v", name, n, err)
 		}
 	}
-	bytes := float64(costs[1].Bytes) / float64(max(costs[0].Bytes, 1))
-	mallocs := float64(costs[1].Mallocs) / float64(max(costs[0].Mallocs, 1))
-	tm := float64(costs[1].Time) / float64(max(costs[0].Time, 1))
-	t.Logf("%s: %d units %s %d allocs %s, %d units %s %d allocs %s: ratio bytes %.2f, allocs %.2f, time %.2f", name,
+	t.Logf("%s: %d units %s %d allocs %s, %d units %s %d allocs %s: ratio time %.2f", name,
 		Small, mb(costs[0].Bytes), costs[0].Mallocs, costs[0].Time.Round(time.Millisecond),
-		Large, mb(costs[1].Bytes), costs[1].Mallocs, costs[1].Time.Round(time.Millisecond), bytes, mallocs, tm)
-	if bytes > MaxRatio {
-		t.Errorf("%s allocates %.2f times the bytes for %d times the input (budget %.1f): super-linear", name, bytes, Large/Small, MaxRatio)
+		Large, mb(costs[1].Bytes), costs[1].Mallocs, costs[1].Time.Round(time.Millisecond),
+		float64(costs[1].Time)/float64(max(costs[0].Time, 1)))
+	for _, f := range verdict(name, costs[0], costs[1]) {
+		t.Error(f)
 	}
-	if mallocs > MaxRatio {
-		t.Errorf("%s makes %.2f times the allocations for %d times the input (budget %.1f): super-linear", name, mallocs, Large/Small, MaxRatio)
+}
+
+// The absolute floor: a ratio of two near-zero counts is noise (one
+// stray allocation under -race against none gave 16), so a measure whose
+// large run stays at or under its floor passes on that absolute bound
+// instead of the ratio. The floors are far below what super-linear work
+// costs at Large units: quadratic work makes Large*Large = 16M steps, so
+// staying under 64 allocations or 64 KiB would need under one allocation
+// per 250,000 steps. A large run over its floor is judged by the ratio,
+// however small the small run was.
+const (
+	FloorBytes   = 64 << 10
+	FloorMallocs = 64
+)
+
+// verdict returns the scaling failures of name measured at Small (small)
+// and Large (large) units, none when it scales: per measure, the large
+// run is at most its floor or at most MaxRatio times the small run.
+func verdict(name string, small, large Cost) []string {
+	var fails []string
+	for _, m := range []struct {
+		what         string
+		small, large uint64
+		floor        uint64
+	}{
+		{"bytes", small.Bytes, large.Bytes, FloorBytes},
+		{"allocations", small.Mallocs, large.Mallocs, FloorMallocs},
+	} {
+		if m.large <= m.floor {
+			continue
+		}
+		if r := float64(m.large) / float64(max(m.small, 1)); r > MaxRatio {
+			fails = append(fails, fmt.Sprintf("%s makes %.2f times the %s (%d against %d) for %d times the input (budget %.1f, floor %d): super-linear",
+				name, r, m.what, m.large, m.small, Large/Small, MaxRatio, m.floor))
+		}
 	}
+	return fails
 }
 
 // mb formats a byte count as megabytes with one decimal.
