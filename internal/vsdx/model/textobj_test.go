@@ -95,7 +95,7 @@ func TestTextNil(t *testing.T) {
 
 // TestScalingTextOf checks the scaling row: textOf over N and 4N
 // shapes (N = 1000) allocates at most 5.5 times as much (laws.Scales)
-// and the best-of-5 time ratio is at most 8, linear in the shapes.
+// and the laws.TimeScales time ratio is at most 8, linear in the shapes.
 func TestScalingTextOf(t *testing.T) {
 	setup := func(n int) (func() error, error) {
 		d, r := openFixture(t, "v1-minimal")
@@ -124,20 +124,5 @@ func TestScalingTextOf(t *testing.T) {
 		}, nil
 	}
 	laws.Scales(t, "vsdx model textOf", setup)
-	var costs [2]laws.Cost
-	for i, n := range []int{laws.Small, laws.Large} {
-		run, err := setup(n)
-		if err != nil {
-			t.Fatalf("setup at %d: %v", n, err)
-		}
-		if costs[i], err = laws.Measure(5, run); err != nil {
-			t.Fatalf("at %d: %v", n, err)
-		}
-	}
-	tm := float64(costs[1].Time) / float64(max(costs[0].Time, 1))
-	t.Logf("vsdx model textOf: %d shapes best time %s, %d shapes best time %s: time ratio %.2f",
-		laws.Small, costs[0].Time, laws.Large, costs[1].Time, tm)
-	if tm > 8 {
-		t.Errorf("vsdx model textOf time ratio %.2f for 4 times the input (budget 8): super-linear", tm)
-	}
+	laws.TimeScales(t, "vsdx model textOf", setup)
 }

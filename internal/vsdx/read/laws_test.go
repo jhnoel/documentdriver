@@ -266,7 +266,7 @@ func TestLawsHashUnchanged(t *testing.T) {
 // TestLawsScalingSubset checks the scaling row: Page plus the --ids
 // subset proof on Generated(1000) and Generated(4000) (N = 1000,
 // 4N = 4000 shapes) allocates at most 5.5 times as much (laws.Scales)
-// and the best-of-5 time ratio is at most 8.
+// and the laws.TimeScales time ratio is at most 8.
 func TestLawsScalingSubset(t *testing.T) {
 	setup := func(n int) (func() error, error) {
 		data, err := os.ReadFile(vsdxtest.Generated(t, n))
@@ -297,5 +297,5 @@ func TestLawsScalingSubset(t *testing.T) {
 		}, nil
 	}
 	laws.Scales(t, "vsdx laws subset", setup)
-	scalingTimeRatio(t, "vsdx laws subset", setup)
+	laws.TimeScales(t, "vsdx laws subset", setup)
 }

@@ -2,8 +2,12 @@ package read
 
 import (
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"maps"
 	"os"
+	"path/filepath"
 	"runtime"
 	"slices"
 	"strings"
@@ -12,6 +16,7 @@ import (
 	"github.com/jhnoel/documentdriver/internal/laws"
 	"github.com/jhnoel/documentdriver/internal/ooxml/ctypes"
 	"github.com/jhnoel/documentdriver/internal/opc"
+	"github.com/jhnoel/documentdriver/internal/repo"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsdxtest"
 )
@@ -110,34 +115,10 @@ func pageSheetOf(pages string) (string, bool) {
 	return pages[start : end+len("</PageSheet>")], true
 }
 
-// scalingTimeRatio measures setup at laws.Small and laws.Large with
-// laws.Measure over 5 runs each and fails t when the best time of the
-// large run is more than 8 times the best time of the small one (the
-// plan's scaling rule; linear work gives about 4).
-func scalingTimeRatio(t *testing.T, name string, setup func(n int) (func() error, error)) {
-	t.Helper()
-	var costs [2]laws.Cost
-	for i, n := range []int{laws.Small, laws.Large} {
-		run, err := setup(n)
-		if err != nil {
-			t.Fatalf("%s: setup at %d: %v", name, n, err)
-		}
-		if costs[i], err = laws.Measure(5, run); err != nil {
-			t.Fatalf("%s at %d: %v", name, n, err)
-		}
-	}
-	tm := float64(costs[1].Time) / float64(max(costs[0].Time, 1))
-	t.Logf("%s: %d units best time %s, %d units best time %s: time ratio %.2f",
-		name, laws.Small, costs[0].Time, laws.Large, costs[1].Time, tm)
-	if tm > 8 {
-		t.Errorf("%s time ratio %.2f for 4 times the input (budget 8): super-linear", name, tm)
-	}
-}
-
 // TestScalingReadPage checks the scaling row: Page on
 // Generated(1000) and Generated(4000) (N = 1000, 4N = 4000 shapes)
 // allocates at most 5.5 times as much (laws.Scales) and the
-// best-of-5 time ratio is at most 8.
+// laws.TimeScales time ratio is at most 8.
 func TestScalingReadPage(t *testing.T) {
 	setup := func(n int) (func() error, error) {
 		data, err := os.ReadFile(vsdxtest.Generated(t, n))
@@ -159,12 +140,12 @@ func TestScalingReadPage(t *testing.T) {
 		}, nil
 	}
 	laws.Scales(t, "vsdx Page shapes", setup)
-	scalingTimeRatio(t, "vsdx Page shapes", setup)
+	laws.TimeScales(t, "vsdx Page shapes", setup)
 }
 
 // TestScalingFindPages checks the scaling row: Find over 4 and 16
 // pages (1000 and 4000 shapes at shapesPerPage a page) allocates at
-// most 5.5 times as much (laws.Scales) and the best-of-5 time ratio
+// most 5.5 times as much (laws.Scales) and the laws.TimeScales time ratio
 // is at most 8.
 func TestScalingFindPages(t *testing.T) {
 	setup := func(n int) (func() error, error) {
@@ -184,7 +165,7 @@ func TestScalingFindPages(t *testing.T) {
 		}, nil
 	}
 	laws.Scales(t, "vsdx Find pages", setup)
-	scalingTimeRatio(t, "vsdx Find pages", setup)
+	laws.TimeScales(t, "vsdx Find pages", setup)
 }
 
 // TestMemoryBudget checks the memory row: a 10,000-shape page reads
@@ -235,4 +216,69 @@ func TestMemoryBudget(t *testing.T) {
 		}
 		return nil
 	})
+}
+
+// TestScalingUsesTimeScales checks the TSF row: no listed vsdx test
+// computes a time ratio except through laws.TimeScales, so a function
+// whose name starts with TestScaling (plus TestLawsScalingSubset)
+// over the listed files uses no time.Since and no laws.Measure
+// Cost.Time ratio.
+func TestScalingUsesTimeScales(t *testing.T) {
+	files := []string{
+		"cmd/vsdx/render_test.go",
+		"internal/vsdx/doc/contents_test.go",
+		"internal/vsdx/edit/edit_test.go",
+		"internal/vsdx/edit/pages_test.go",
+		"internal/vsdx/integrity/integrity_test.go",
+		"internal/vsdx/model/build_test.go",
+		"internal/vsdx/model/cells_test.go",
+		"internal/vsdx/model/connects_test.go",
+		"internal/vsdx/model/props_test.go",
+		"internal/vsdx/model/textobj_test.go",
+		"internal/vsdx/read/find_test.go",
+		"internal/vsdx/read/page_test.go",
+		"internal/vsdx/read/scaling_test.go",
+		"internal/vsdx/read/summary_test.go",
+		"internal/vsdx/read/xml_test.go",
+		"internal/vsdx/read/laws_test.go",
+	}
+	root, err := repo.Root()
+	if err != nil {
+		t.Fatalf("repo root: %v", err)
+	}
+	for _, rel := range files {
+		f, err := parser.ParseFile(token.NewFileSet(), filepath.Join(root, rel), nil, 0)
+		if err != nil {
+			t.Fatalf("ParseFile(%s): %v", rel, err)
+		}
+		for _, decl := range f.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok {
+				continue
+			}
+			if !strings.HasPrefix(fn.Name.Name, "TestScaling") && fn.Name.Name != "TestLawsScalingSubset" {
+				continue
+			}
+			ast.Inspect(fn, func(n ast.Node) bool {
+				sel, ok := n.(*ast.SelectorExpr)
+				if !ok {
+					return true
+				}
+				id, ok := sel.X.(*ast.Ident)
+				if !ok {
+					return true
+				}
+				if id.Name == "time" && sel.Sel.Name == "Since" {
+					t.Errorf("%s: %s uses time.Since, want laws.TimeScales", rel, fn.Name.Name)
+				}
+				if id.Name == "laws" && sel.Sel.Name == "Measure" {
+					t.Errorf("%s: %s uses laws.Measure, want laws.TimeScales", rel, fn.Name.Name)
+				}
+				if sel.Sel.Name == "Time" {
+					t.Errorf("%s: %s reads Cost.Time, want laws.TimeScales", rel, fn.Name.Name)
+				}
+				return true
+			})
+		}
+	}
 }
