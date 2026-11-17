@@ -131,7 +131,15 @@ FUZZ_TARGETS = \
 	./internal/xlsx/ops:FuzzDecodeValue \
 	./internal/xlsx/shift:FuzzSheetData \
 	./internal/xlsx/apply:FuzzApply \
-	./internal/ascii:FuzzLower
+	./internal/ascii:FuzzLower \
+	./internal/vsdx/vsd:FuzzNumber \
+	./internal/vsdx/vsd:FuzzParseAddress \
+	./internal/vsdx/sheet:FuzzIndex \
+	./internal/vsdx/text:FuzzText \
+	./internal/vsdx/read:FuzzRead \
+	./internal/vsdx/read:FuzzFind \
+	./internal/vsdx/ops:FuzzParsePlan \
+	./cmd/vsdx:FuzzCommandLine
 
 fuzz:
 	@set -e; log=$$(mktemp); trap 'rm -f "$$log"' EXIT; \

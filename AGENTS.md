@@ -202,7 +202,12 @@ hang or exhaust memory.
   writes: plans and values (`FuzzParsePlan`, `FuzzDecodeValue` in
   `internal/xlsx/ops`), formula storing (`FuzzStore`), the edit lexer
   (`FuzzLexNode`), structural shifts (`FuzzSheetData`) and apply
-  (`FuzzApply`). Each keeps a seed corpus in its package's
+  (`FuzzApply`), the vsdx number and address parsers (`FuzzNumber`,
+  `FuzzParseAddress` in `internal/vsdx/vsd`), the vsdx section index
+  (`FuzzIndex` in `internal/vsdx/sheet`), the vsdx text layout (`FuzzText` in
+  `internal/vsdx/text`), vsdx read and find (`FuzzRead`, `FuzzFind` in
+  `internal/vsdx/read`), vsdx plans (`FuzzParsePlan` in `internal/vsdx/ops`),
+  and the vsdx command line (`FuzzCommandLine` in `cmd/vsdx`). Each keeps a seed corpus in its package's
   `testdata/fuzz`, which `make check` runs as tests **[enforced for the
   seeds; `make fuzz` (FUZZTIME, default 10s per target) fuzzes them, to
   run on a schedule in CI; add a new parser's target to `FUZZ_TARGETS`
