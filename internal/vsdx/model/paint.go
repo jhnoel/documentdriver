@@ -25,7 +25,7 @@ func paint(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 // foreground, or a pattern that is not a number, leaves the fill out
 // with an omission; a foreground no sheet stores leaves it out
 // silently when no pattern is stored either. The fill's origin is the
-// foreground cell's origin.
+// most inherited of the pattern and foreground cells' origins.
 func paintFill(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 	pattern, patternOrigin, patternOk := r.Cell(s, sheet.ShapeCell(vsd.CellFillPattern))
 	if patternOk {
@@ -57,7 +57,7 @@ func paintFill(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 		return
 	}
 	o.Fill = &Paint{Hex: hex}
-	setOrigin(o, "fill", foreOrigin)
+	setOrigin(o, "fill", boxOrigin(patternOrigin, foreOrigin))
 }
 
 // paintLine sets o's line from the effective LinePattern, LineWeight
@@ -113,7 +113,7 @@ func paintLine(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 		origins = append(origins, patternOrigin)
 	}
 	o.Line = line
-	if origin := mostInherited(origins); origin != "" {
+	if origin := boxOrigin(origins...); origin != "" {
 		setOrigin(o, "line", origin)
 	}
 }

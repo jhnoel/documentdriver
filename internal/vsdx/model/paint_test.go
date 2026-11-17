@@ -26,8 +26,10 @@ func paintOf(t *testing.T, r *inherit.Resolver, xml string) *Object {
 	return o
 }
 
-// TestPaintV1 checks the V1 row: s1 fill #4472C4 with origin local,
-// line w 0.75 pt, colour #7F7F7F and dash "1" with origin style.
+// TestPaintV1 checks the V1 row: s1 fill #4472C4 with origin style
+// (FillForegnd local, but FillPattern from StyleSheet 0, and style
+// ranks above local), line w 0.75 pt, colour #7F7F7F and dash "1"
+// with origin style.
 func TestPaintV1(t *testing.T) {
 	d, r := openFixture(t, "v1-minimal")
 	p := buildPageOf(t, d, r, 0)
@@ -35,8 +37,8 @@ func TestPaintV1(t *testing.T) {
 	if o.Fill == nil || o.Fill.None || o.Fill.Hex != "#4472C4" {
 		t.Errorf("s1 Fill = %+v, want {Hex #4472C4}", o.Fill)
 	}
-	if got := o.Origins["fill"]; got != inherit.Local {
-		t.Errorf("s1 fill origin = %q, want local", got)
+	if got := o.Origins["fill"]; got != inherit.Style {
+		t.Errorf("s1 fill origin = %q, want style (FillPattern style ranks above FillForegnd local)", got)
 	}
 	if o.Line == nil || o.Line.None {
 		t.Fatalf("s1 Line = %+v, want a line", o.Line)
@@ -56,7 +58,9 @@ func TestPaintV1(t *testing.T) {
 }
 
 // TestPaintV2 checks the V2 rows: s1 fill #FFFFFF from its master, s2
-// fill #FF0000 local and s5 fill #0000FF from its master.
+// fill #FF0000 local and s5 fill #0000FF from its master, each with
+// fill origin style (FillPattern from StyleSheet 0 ranks above the
+// foreground's master or local origin).
 func TestPaintV2(t *testing.T) {
 	d, r := openFixture(t, "v2-master")
 	p := buildPageOf(t, d, r, 0)
@@ -65,9 +69,9 @@ func TestPaintV2(t *testing.T) {
 		hex  string
 		orig inherit.Origin
 	}{
-		{"page0/s1", "#FFFFFF", inherit.Master},
-		{"page0/s2", "#FF0000", inherit.Local},
-		{"page0/s5", "#0000FF", inherit.Master},
+		{"page0/s1", "#FFFFFF", inherit.Style},
+		{"page0/s2", "#FF0000", inherit.Style},
+		{"page0/s5", "#0000FF", inherit.Style},
 	} {
 		o := byID(t, p, tc.id)
 		if o.Fill == nil || o.Fill.None || o.Fill.Hex != tc.hex {
