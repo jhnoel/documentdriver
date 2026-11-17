@@ -1,0 +1,2 @@
+go test fuzz v1
+string("<Text><cp IX='x'/>a<foo/>b</Text>")

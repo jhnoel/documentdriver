@@ -1,0 +1,2 @@
+go test fuzz v1
+string("<Text><cp IX='0'/>Title<cp IX='1'/> red\n<pp IX='1'/>second <fld IX='0'>3</fld></Text>")
