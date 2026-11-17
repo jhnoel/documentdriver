@@ -2,6 +2,7 @@ package apply
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 	"github.com/jhnoel/documentdriver/internal/laws"
 	"github.com/jhnoel/documentdriver/internal/opc"
 	"github.com/jhnoel/documentdriver/internal/plan"
+	"github.com/jhnoel/documentdriver/internal/repo"
 	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/edit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/ops"
@@ -483,4 +485,63 @@ func equalHazardKinds(a, b []plan.Hazard) bool {
 		}
 	}
 	return true
+}
+
+// changedIDs returns the id of each changed entry of res, in order.
+func changedIDs(t *testing.T, res *plan.Result) []string {
+	t.Helper()
+	out := make([]string, 0, len(res.Changed))
+	for _, raw := range res.Changed {
+		var entry struct {
+			ID string `json:"id"`
+		}
+		if err := json.Unmarshal(raw, &entry); err != nil {
+			t.Fatalf("changed entry %s: %v", raw, err)
+		}
+		out = append(out, entry.ID)
+	}
+	return out
+}
+
+// TestChangedOnceFirstChangeOrder checks the APF row: c2 through
+// apply on the blank drawing (the create template) gives changed
+// [page0/s1, page0/s2, page0/s3, page0/s1/prop:Owner], each address
+// once and in first-change order, and a plan whose separate ops
+// repeat an address lists it once, at its first change and not
+// moved by the repeat.
+func TestChangedOnceFirstChangeOrder(t *testing.T) {
+	root, err := repo.Root()
+	if err != nil {
+		t.Fatalf("repo root: %v", err)
+	}
+	planText, err := os.ReadFile(filepath.Join(root, "testdata", "vsdx", "create", "plans", "c2-shapes.json"))
+	if err != nil {
+		t.Fatalf("read c2 plan: %v", err)
+	}
+	parsed, errs := ops.ParsePlan(planText)
+	if len(errs) != 0 {
+		t.Fatalf("ParsePlan(c2): %v", errs)
+	}
+	out := filepath.Join(t.TempDir(), "out.vsdx")
+	res, err := Run(vsdxtest.Blank(t), parsed, Options{Out: out})
+	if err != nil {
+		t.Fatalf("Run(c2): %v", err)
+	}
+	want := []string{"page0/s1", "page0/s2", "page0/s3", "page0/s1/prop:Owner"}
+	if got := changedIDs(t, res); !equalStrings(got, want) {
+		t.Errorf("c2 changed ids %v, want %v", got, want)
+	}
+	dupOut := filepath.Join(t.TempDir(), "dup.vsdx")
+	dupRes, err := Run(vsdxtest.Fixture(t, "v10-defects"), wirePlan(
+		&wireOp{Value: "2"},
+		&wireOp{ShapeValue: "2.5"},
+		&wireOp{Value: "1"},
+	), Options{Out: dupOut})
+	if err != nil {
+		t.Fatalf("Run(duplicate): %v", err)
+	}
+	wantDup := []string{"page0", "page0/s7"}
+	if got := changedIDs(t, dupRes); !equalStrings(got, wantDup) {
+		t.Errorf("duplicate changed ids %v, want %v", got, wantDup)
+	}
 }
