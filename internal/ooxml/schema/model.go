@@ -70,7 +70,7 @@ func ContentModel(ctype string) (Model, bool) {
 
 // RootType returns the complex type of the global element local of the
 // vocabulary with table prefix prefix ("w", "document"; "x",
-// "worksheet"), and whether there is one.
+// "worksheet"; "v", "PageContents"), and whether there is one.
 func RootType(prefix, local string) (string, bool) {
 	var t string
 	var ok bool
@@ -79,6 +79,8 @@ func RootType(prefix, local string) (string, bool) {
 		t, ok = wmlRoots[local]
 	case "x":
 		t, ok = smlRoots()[local]
+	case "v":
+		t, ok = vRootType(local)
 	}
 	return t, ok
 }
