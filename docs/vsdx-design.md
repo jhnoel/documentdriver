@@ -501,11 +501,19 @@ unless given:
 14. `from`, `to` or glue on a 2-D shape (`invalid_operation` when the
     op says it is a shape; `operation_failed` when the target is);
 15. object.move of a connector glued at both ends (CC2);
-16. `page.set` orientation or size when PageWidth or PageHeight has a
+16. whole-shape glue on a master-less connector (CC2; Fable's ruling:
+    all 17 corpus shapes with `_WALKGLUE` are Dynamic connector master
+    instances, so no Visio-authored file shows the cells on a
+    master-less shape), hint: add the connector from the Dynamic
+    connector master;
+17. deleting a sub-shape a master instance inherits (a shape with
+    `MasterShape` inside an instance; V2 page0/s4 is accepted today)
+    (CC6);
+18. `page.set` orientation or size when PageWidth or PageHeight has a
     formula outside the allow list.
 
-Not refused any more (Fable's review): whole-shape glue (every
-connector, CC2); free ends, point glue and move on Visio-drawn
+Not refused any more (Fable's review): whole-shape glue on connectors
+from a master that stores the dynamic glue cells (CC2, CC3); free ends, point glue and move on Visio-drawn
 connectors with the standard 1-D forms (CC1, CC2); object.add of a 1-D
 master (CC3); glue to a shape without connection points (whole-shape
 glue, CC2).
@@ -622,10 +630,11 @@ shapes:
   `formula.OneD`; a glued end `F="PAR(PNT(Sheet.N!Connections.Xk,
   Sheet.N!Connections.Yk))"` with the site's value; Geometry NoFill 1,
   MoveTo (0,0), LineTo (Width,0); Connect rows FromPart 9/12, ToPart
-  100+k-1. Whole-shape glue (`"$a"`) is written in Visio's stored
-  form (`_WALKGLUE`, triggers, Connect ToCell PinX ToPart 3) on a
-  master-less connector too (Fable's review, CC2; it was refused here
-  before), with RecalcDocument so Visio routes it.
+  100+k-1. Whole-shape glue (`"$a"`) stays refused on a master-less
+  connector (`operation_failed`, path `ops[n].to_glue`, hint: add the
+  connector from the Dynamic connector master): every corpus shape with
+  `_WALKGLUE` is a master instance (Fable's ruling, CC2). A new drawing
+  has no masters, so create offers point glue only.
 - `object.add` with `master` on a new drawing is `not_found` (no
   masters). Copying masters from another file is the master-import
   chunk of P3 (notes §7's checklist).
@@ -1074,29 +1083,36 @@ plan, rewrote the closed refusal list (decision g), and specified
 chunks CC1 to CC14 with rows and a coverage matrix in the chunk plan.
 Main does not move until they merge.
 
-Designer rulings in the chunks (Fable to confirm, as architect for
-contract questions):
+Designer rulings, and Fable's answers (2026-11-17; Fable is the
+architect for contract questions):
 
 - `from` with `from_glue` is accepted as pptx does; an end off its site
-  is stale-connector plus stale-values (CC10).
+  is stale-connector plus stale-values (CC10). Accepted.
 - object.move keeps glued ends where their glue puts them and refuses a
-  connector glued at both ends (CC2); pptx moves glued ends and
-  reports stale-connector, which in Visio would be undone by the glue
-  formula on recalculation.
-- Whole-shape glue writes Visio's stored form with the cached end at
-  the midpoint of the target's box edge facing the other end (decision
-  d); Visio re-walks it (VE13, unverified here).
-- A connector whose ends change gets decision (d)'s straight two-point
-  geometry; a dynamic connector also gets RecalcDocument and a
-  stale-values "route" entry, so Visio routes it (CC2).
-- Container members (`Relationships` with `DEPENDSON`) are refused for
-  geometry, move and delete, the structure shapes for every write
-  (CC6), as decision g said; the earlier draft named only the
-  structure shapes.
-- object.set stores a value equal to the inherited one (origin becomes
-  local); only text formats follow "equal to inherited is not stored"
-  (CC11, decision f).
-- prop.add names: `[A-Za-z_][A-Za-z0-9_]*` (all 98 corpus row names
-  match); non-ASCII names are refused in v1 (CC8).
-- page.add `before` the first page is allowed; the refusal had no
-  design source (CC13).
+  connector glued at both ends (CC2). Accepted.
+- Identity, changed by Fable: a value equal to the effective value read
+  shows writes nothing, for objects as well as text, so the identity
+  law holds; a different value is stored locally and its origin
+  becomes local. Pinning an inherited value is deferred (CC4, CC8,
+  CC11, CC14).
+- Container members are refused for geometry, move and delete; the
+  structure shapes for every write (CC6). Accepted.
+- Whole-shape glue and rerouting, changed by Fable: the contract marks
+  them "Visio unconfirmed (VE4, VE13)"; whole-shape glue on a
+  master-less connector is allowed only if every cell written has a
+  form cited from a Visio-authored corpus file. The corpus has none
+  (all 17 `_WALKGLUE` shapes are Dynamic connector instances, in
+  test4_connectors, test7_with_connector, 60489 and testVISIO_60489;
+  none stores WalkPreference locally), so it is refused, with a hint to
+  add from the Dynamic connector master (CC2).
+- prop.add names, accepted with a condition: non-ASCII names are
+  `invalid_operation` at `name` before the document opens; existing
+  non-ASCII rows stay readable, settable and deletable (CC8).
+- page.add `before` the first page is allowed (CC13). Accepted.
+- Sub-shape delete, changed by Fable: deleting a master-inherited
+  sub-shape is refused, listed in the contract's §3 refusals and in
+  `help object.delete` (CC6, CC7, CC14).
+- §9: RecalcDocument and `<?NewValue V?>` carry "Visio unconfirmed"
+  until VE2, VE3 and VE12 are recorded, as xlsx's §9 exception did.
+- Merge plan: Fable confirms the draft's section order matches its map;
+  Fable reviews the merged diff before main moves.
