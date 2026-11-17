@@ -1,0 +1,7 @@
+name	kind	url	commit	path	licence	licence_file	files	bytes	notes
+apache-poi	github-raw	https://github.com/apache/poi	8d9b40ac4cb62b1c61759c900fb422abfeac4367	test-data/diagram	Apache-2.0	legal/LICENSE,legal/NOTICE	14	973349	OOXML Visio files only; .vsd excluded
+libvisio	github-raw	https://github.com/LibreOffice/libvisio	35040e4a1cf45eff0be90e858c99f5d4f355fd94	src/test/data	MPL-2.0	COPYING.MPL	16	446839	OOXML Visio files only; .vsd excluded
+dave-howard-vsdx	github-raw	https://github.com/dave-howard/vsdx	6703e6c2c906bea4051f43525ec9af9dcf735c13	tests	BSD-3-Clause	LICENSE	21	372284	tests/ only; vsdx/media/media.vsdx (library template) not taken
+apache-tika	github-raw	https://github.com/apache/tika	3756dbd60d2e8552fd6c721d13f651cab07a5d12	tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents	Apache-2.0	LICENSE.txt,NOTICE.txt	6	196178	microsoft-module test-documents; .vsd excluded
+vsdx-js	github-raw	https://github.com/jgreywolf/vsdx-js	5679a299f735121e496061458795206c49cabc6b	tests	MIT	LICENSE	5	285770	canonical repo per npm vsdx-js package
+visio2img	github-raw	https://github.com/visio2img/visio2img	60a1359abd2e8cf0d7dfa340fc7c9ace5572b7ac	tests/examples	Apache-2.0	LICENSE	3	70298	.vsd excluded
