@@ -1,0 +1,6 @@
+{"ops":[
+ {"op":"page.set","at":"page0","orientation":"landscape"},
+ {"op":"page.add","name":"Wide","as":"p2","size":[1224,792]},
+ {"op":"page.rename","at":"page0","name":"Overview"},
+ {"op":"object.add","at":"$p2","geom":"rect","box":[0,0,72,72],"html":"<p>Corner</p>"}
+]}

@@ -1,0 +1,6 @@
+{"ops":[
+ {"op":"object.add","at":"page0","geom":"rect","as":"a","box":[72,72,144,72],"html":"<p>Start</p>"},
+ {"op":"object.add","at":"page0","geom":"ellipse","as":"b","box":[360,72,144,72],"html":"<p><b>End</b></p>"},
+ {"op":"object.add","at":"page0","kind":"connector","as":"c","from_glue":"$a:2","to_glue":"$b:4"},
+ {"op":"prop.add","at":"$a","name":"Owner","type":"string","value":"Ada"}
+]}

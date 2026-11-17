@@ -39,10 +39,12 @@ func app() *cli.App {
 	return &cli.App{
 		Tool:     "vsdx",
 		Version:  version,
-		Summary:  "vsdx reads Visio drawings: pages, shapes, connectors, groups, shape data and their text.",
-		Commands: []*cli.Command{readCommand, findCommand, xmlCommand},
+		Summary:  "vsdx reads, edits and creates Visio drawings: pages, shapes, connectors, groups, shape data and their text.",
+		Commands: []*cli.Command{readCommand, findCommand, xmlCommand, applyCommand, createCommand, renderCommand},
 		Topics:   map[string]func() string{"html": htmlHelp},
-		Handlers: map[string]cli.Handler{"read": runRead, "find": runFind, "xml": runXML},
+		Handlers: map[string]cli.Handler{
+			"read": runRead, "find": runFind, "xml": runXML, "apply": runApply, "create": runCreate, "render": runRender,
+		},
 	}
 }
 

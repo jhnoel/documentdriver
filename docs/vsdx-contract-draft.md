@@ -22,15 +22,21 @@ format-specific parts are marked **vsdx** as for the others.
 vsdx read  <file> [--page pageN | --master masterN] [--detail sites|full] [--ids ids] [--region x,y,w,h] [--units pt|in]
 vsdx find  <file> <query> [--ignore-case] [--page pageN] [--limit n]
 vsdx xml   <file> <address>
-vsdx apply <file> <plan.json|-> [--dry-run] [-o <out>] [--changed ids|full]     (P2)
+vsdx apply <file> <plan.json|-> [--dry-run] [-o <out>] [--changed ids|full]
+vsdx create [<plan.json|->] [--dry-run] -o <out>
+vsdx render <file> --page pageN -o <out.png> [--overlay ids,sites,glue] [--ids ids] [--scale n]
 vsdx help  [<command>|ops|<op>|html]
 vsdx --version
 ```
 
 - No `read --format svg` in v1 (pptx draws its SVG from its own
-  geometry model; vsdx has no Visio geometry renderer yet). `vsdx
-  render` through LibreOffice, as `pptx render`, is a recommended
-  option pending the owner (design decision 7). No `create` until P3.
+  geometry model; vsdx has no Visio geometry renderer yet).
+- `render` rasterises one page through headless LibreOffice, as `pptx
+  render` does a slide, with the same flags and result
+  (`saved`, `px`, `size`, `scale`, `key`); LibreOffice draws the values
+  the file caches, so the picture is for checking, not proof.
+- `create` writes a new drawing (section 4) and applies the plan to it
+  when one is given, as `xlsx create`.
 - Files: `.vsdx`, `.vsdm` (VBA copied through), `.vstx`, `.vstm` are
   read and edited; `.vssx`, `.vssm` (stencils) are read only (their
   masters; `pages` is `[]`). Legacy `.vsd`, `.vdx`, `.vsx` and anything
@@ -52,7 +58,7 @@ default, or `in`) as pptx's `units`.
 
 | Op | Fields |
 | --- | --- |
-| `object.add` | `at` (a page or group), `master` (`master2`, or the master's name as `read` shows it), `as`, `box` or `pin` (`[x, y]`, the shape's centre), `html`, `name`, and for a connector master `from`, `to`, `from_glue`, `to_glue` |
+| `object.add` | `at` (a page or group), `as`, `box` or `pin` (`[x, y]`, the shape's centre), `html`, `name`, `fill`, `line`, and one of: `master` (`master2`, or the master's name as `read` shows it); `geom` (`rect`, `ellipse`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left); `kind: "connector"` (a master-less straight connector) with `from`, `to`, `from_glue`, `to_glue` (point glue only: `"s3:2"`, `"$a:2"`; whole-shape glue is refused on a master-less connector) |
 | `object.set` | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `fill` (`"none"` or `{"hex":"#RRGGBB"}`), `line` (`"none"` or `{w, color, dash}`, `dash` the stored LinePattern number), `name`, `from`, `to`, `from_glue`, `to_glue` (`"s12"`, `"s12:3"`, `"$name"`, `"$name:3"`, `"none"`) |
 | `object.move` | `at`, `dx`, `dy` (as pptx) |
 | `object.delete` | `at`; its Connect rows go with it, and connectors glued to it become free |
@@ -62,11 +68,11 @@ default, or `in`) as pptx's `units`.
 | `prop.set` | `at` (`page0/s5/prop:Cost`), `value` (the form `read` shows: string, number, boolean, `{"date":"2024-03-01T00:00:00"}`) |
 | `prop.add` | `at` (a shape), `name` (the row name), `label`, `type` (`string`, `number`, `boolean`, `date`, `duration`, `currency`, `fixed_list`, `variable_list`), `value`, `format` |
 | `prop.delete` | `at` (a row); a row the master defines is hidden with `Del` (the instance stops inheriting it) |
-| `page.add` | `name`, `as`, `position` and `at` (another page; default: appended), `size`, `orientation` |
+| `page.add` | `name`, `as`, `position` and `at` (another page; default: appended), `size`, `orientation` (a new page is 8.5 x 11 in portrait unless given) |
 | `page.rename` | `at`, `name` |
 | `page.delete` | `at` |
 | `page.reorder` | `at`, `to` (another page), `position` |
-| `page.set` | `at`, `orientation` (`portrait`, `landscape`) and/or `size` (`[w, h]`) (pending owner decision 6) |
+| `page.set` | `at`, `orientation` (`portrait`, `landscape`) and/or `size` (`[w, h]`) |
 
 Rules specific to vsdx:
 
@@ -74,7 +80,7 @@ Rules specific to vsdx:
   `THEMEVAL()` or `THEMEGUARD(...)` is refused, `operation_failed`,
   `detail` naming the cell and formula (a group child's
   `Sheet.10!Width*0.25`, a `GUARD(...)`, a glued end's `PAR(PNT(...))`).
-- `page.set orientation` (pending owner decision 6): `orientation` is
+- `page.set orientation`: `orientation` is
   the page's shape (from its size). A different orientation swaps
   PageWidth and PageHeight; the same one leaves the size. Then the
   page sheet stores `PrintPageOrientation` equal to the orientation
@@ -95,7 +101,18 @@ Rules specific to vsdx:
 
 **vsdx** `apply` prints the edit result of section 4. `changed`:
 objects as `read` shows them (as pptx), a page as its summary entry, a
-shape data row as `{id, label, type, value}`. Hazard kinds: pptx's
+shape data row as `{id, label, type, value}`.
+
+**vsdx** `create` prints `{"dry_run","saved","new_base"}`, and with a
+plan also its `aliases`, `changed`, `deleted` and `hazards`, as xlsx
+create. The new drawing has one page, `page0` "Page-1", 8.5 x 11 in
+portrait, and no masters, so `object.add` with `master` is `not_found`
+in it; shapes come from `geom` and connectors from `kind: "connector"`.
+The plan must not have `base` (`invalid_plan`, path `base`). With
+`--dry-run` the plan is checked and applied in memory and nothing is
+written.
+
+Hazard kinds: pptx's
 `stale-connector` and `dangling-glue`, `off-page` (new: an object whose
 box lies wholly outside the page after `page.set`), and xlsx's
 `stale-values` (`id` `"document"`): the save left cached values that formulas would compute
@@ -181,7 +198,7 @@ from the run or paragraph replaced. A grammar element vsdx cannot store
 - `orientation` is the page's shape from its size (absent when square);
   `print_orientation` the printer orientation (PrintPageOrientation
   through the page sheet's styles), absent when not stored; they may
-  disagree (pending owner decision 6).
+  disagree.
 - A value stored as `Themed` (theme-derived, no cached value) is left
   out, with the reason under `--detail full` `omitted`. Colours stored
   as palette indexes are shown resolved (`#RRGGBB`).
@@ -206,7 +223,7 @@ Add the exception: **vsdx** a save that leaves cached values stale
 document property `RecalcDocument` true (creating `docProps/custom.xml`
 when absent), marks each changed cell with `<?NewValue V?>`, and
 reports `stale-values`. The tool never writes a value it computed except
-the dependents its closed evaluator handles (pending owner decision 3).
+the dependents its closed evaluator handles (owner decision 3, approved).
 
 ## 10. Documents with defects
 
@@ -226,7 +243,9 @@ is missing shows its own cells with a note.
 | --- | --- |
 | `--page pageN` where pptx has `--slide slideN`; `page0` is the stored page ID, not a part name | Visio pages carry stable IDs; Visio renumbers page parts on save |
 | `--master masterN` (read only) | Visio masters are first-class drawings that instances inherit from; PowerPoint layouts are not read as objects |
-| no `--format svg` | no Visio geometry renderer in v1 (`vsdx render` through LibreOffice is an option pending the owner; not forced) |
+| no `--format svg` | no Visio geometry renderer in v1 |
+| `create` takes a plan, not HTML | a drawing is not a flow of paragraphs (as xlsx); pptx has no create |
+| `object.add` `geom` and `kind: "connector"` are master-less, point glue only | a new drawing has no masters; whole-shape glue needs Visio's dynamic connector master |
 | `--units pt|in` (pptx `pt|emu`) | Visio's stored unit is the inch |
 | y down from the page's top-left (Visio stores y up from the bottom-left); shown y moves when page height changes | pptx's frame kept for agents; Visio's own frame would make the same `box` mean different places in the two tools |
 | `rot` from Visio's radians counter-clockwise about the pin | stored form |
@@ -235,7 +254,7 @@ is missing shows its own cells with a note.
 | `props` are shape data rows; `prop.*` ops | Visio Shape Data (`Prop.Name`); pptx has none |
 | `connections` graph on the page | Visio stores glue as page-level Connect rows |
 | glue `s12` (whole-shape) besides `s12:3`; `s12@Cell` read only | Visio dynamic glue has no site index |
-| `orientation`, `print_orientation` in read and `page.set orientation` (pending owner) | Visio pages have their own size and a printer orientation; a deck has one slide size |
+| `orientation`, `print_orientation` in read and `page.set orientation` | Visio pages have their own size and a printer orientation; a deck has one slide size |
 | "off" run forms only when they clear an inherited setting | Visio stores Style on most rows; pptx's literal rule would mark nearly every run |
 | `glued` (control-handle glue) | Visio Connect rows from control cells |
 | `off-page` hazard | Visio pages resize independently of their shapes |

@@ -1,0 +1,4 @@
+{"ops":[
+ {"op":"object.add","at":"page0","geom":"rect","as":"a","box":[72,72,144,72]},
+ {"op":"object.add","at":"page0","kind":"connector","from":[0,0],"to_glue":"$a"}
+]}
