@@ -1,4 +1,4 @@
-.PHONY: build test vet fmt norequire wasip1 check corpus fuzz tools tool-golangci-lint tool-govulncheck lint vuln race repro release release-check release-smoke publish ship ci hooks powerpoint-smoke word-smoke excel-smoke conformance oracle-write-gen oracle-write-record oracle-write-compare oracle-write-gate
+.PHONY: build test vet fmt norequire wasip1 check corpus fuzz tools tool-golangci-lint tool-govulncheck lint vuln race repro release release-check release-smoke publish ship ci hooks powerpoint-smoke word-smoke excel-smoke conformance oracle-write-gen oracle-write-record oracle-write-compare oracle-write-gate vsdx-schema
 
 # Builds and tests are pure Go: no cgo. The one exception is `make race`,
 # because the race detector needs cgo on macOS and Linux (see below).
@@ -456,3 +456,11 @@ oracle-write-compare:
 oracle-write-gate:
 	@[ -z "$(OPS)" ] || { echo "oracle-write-gate runs every operation; unset OPS"; exit 2; }
 	go run ./tools/oracle write compare -require-implemented
+
+# vsdx-schema fetches the Visio VSDX schema (MS-VSDX's XSD) into the
+# gitignored cache ($VSDX_SCHEMA, default corpus/vsdx-schema of the main
+# checkout), pinned by sha256. The schema is used, never committed (owner,
+# 2026-11-17); tools/vsdorder and the opt-in vsdx-schema-check read it.
+# Neither check nor ci needs it.
+vsdx-schema:
+	eval/corpus/fetch-vsdx-schema.sh
