@@ -372,6 +372,11 @@ func (s *PageSetSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 		desired = orientationInt(s.Orientation)
 	}
 	sizeChanged := newW != oldW || newH != oldH
+	if sizeChanged {
+		if err := scaledRefusal(r, d, a.Container, a.PageDup, addr, "size"); err != nil {
+			return "", nil, nil, "", err
+		}
+	}
 	var cells []edit.Cell
 	if sizeChanged {
 		if bad := unwritableCell(pageSheet, []string{vsd.CellPageWidth, vsd.CellPageHeight}); bad != "" {

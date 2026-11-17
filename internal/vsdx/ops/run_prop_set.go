@@ -18,6 +18,9 @@ func (s *PropSetSpec) Run(ws *edit.Workspace, aliases map[string]string, _ strin
 	if err != nil {
 		return "", nil, nil, "", err
 	}
+	if err := targetRefusal(ws, shapeAddr, "at", false); err != nil {
+		return "", nil, nil, "", err
+	}
 	state, err := ws.PropState(shapeAddr, rowName)
 	if err != nil {
 		if errors.Is(err, edit.ErrNotFound) {

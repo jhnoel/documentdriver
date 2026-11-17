@@ -110,6 +110,16 @@ func (s *ObjectAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units
 	if err != nil {
 		return "", nil, nil, "", err
 	}
+	if a.Kind == vsd.KindShape {
+		if node := findTextShape(pg.root, a.Shape, a.Dup); node != nil {
+			if err := nodeRefusal(r, node, at, "at", false); err != nil {
+				return "", nil, nil, "", err
+			}
+		}
+	}
+	if err := scaledRefusal(r, d, a.Container, a.PageDup, pageAddr, "at"); err != nil {
+		return "", nil, nil, "", err
+	}
 	if s.Kind == "connector" {
 		return s.addConnector(ws, aliases, r, pg, pageAddr, parent, a.Container, a.PageDup, scale)
 	}

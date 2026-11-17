@@ -28,6 +28,9 @@ func (s *ObjectDeleteSpec) Run(ws *edit.Workspace, aliases map[string]string, _ 
 	if d.Kind == doc.Stencil {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s is in a stencil: stencils cannot be edited", shapeAddr)
 	}
+	if err := targetRefusal(ws, shapeAddr, "at", true); err != nil {
+		return "", nil, nil, "", err
+	}
 	deleted, changed, err := ws.DeleteShape(shapeAddr)
 	if err != nil {
 		if errors.Is(err, edit.ErrNotFound) {

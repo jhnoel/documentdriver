@@ -201,6 +201,9 @@ func (s *TextReplaceSpec) replaceShape(ws *edit.Workspace, page *replacePage, a 
 	if node == nil {
 		return "", nil, nil, "", cli.Errorf(cli.CodeNotFound, "at", "no %s: not found", resolved)
 	}
+	if err := nodeRefusal(page.res, node, resolved, "at", false); err != nil {
+		return "", nil, nil, "", err
+	}
 	if typ, _ := node.Attr("Type"); typ == vsd.ShapeTypeForeign || typ == vsd.ShapeTypeGuide {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s is a %s shape: text cannot be replaced", resolved, typ)
 	}
@@ -226,6 +229,8 @@ func (s *TextReplaceSpec) replaceShape(ws *edit.Workspace, page *replacePage, a 
 // matches of every shape in paint order without writing anything, a
 // second walk collects the shapes the choice picks, and only then
 // are they written, so an ambiguous or missing match writes nothing.
+// A container, list or callout is skipped in both walks (chunk CC6),
+// like a Foreign or guide shape, and never counted.
 func (s *TextReplaceSpec) replacePage(ws *edit.Workspace, page *replacePage, _ string) (string, []string, []string, string, error) {
 	total := 0
 	var walkErr error
@@ -243,6 +248,9 @@ func (s *TextReplaceSpec) replacePage(ws *edit.Workspace, page *replacePage, _ s
 		}
 		seen[id]++
 		if typ, _ := n.Attr("Type"); typ == vsd.ShapeTypeForeign || typ == vsd.ShapeTypeGuide {
+			return true
+		}
+		if isContainerShape(page.res, n) {
 			return true
 		}
 		eff, _ := page.res.Text(textShapeOf(n))
@@ -282,6 +290,9 @@ func (s *TextReplaceSpec) replacePage(ws *edit.Workspace, page *replacePage, _ s
 		}
 		seen[id]++
 		if typ, _ := n.Attr("Type"); typ == vsd.ShapeTypeForeign || typ == vsd.ShapeTypeGuide {
+			return true
+		}
+		if isContainerShape(page.res, n) {
 			return true
 		}
 		sh := textShapeOf(n)

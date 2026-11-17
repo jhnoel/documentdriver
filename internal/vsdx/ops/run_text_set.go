@@ -38,6 +38,9 @@ func (s *TextSetSpec) Run(ws *edit.Workspace, aliases map[string]string, _ strin
 	if err != nil {
 		return "", nil, nil, "", err
 	}
+	if err := shapeRefusal(st.res, st.shape, resolved, "at", false); err != nil {
+		return "", nil, nil, "", err
+	}
 	if err := resolveTextFields(&body, st.fields, addr, resolved); err != nil {
 		return "", nil, nil, "", err
 	}

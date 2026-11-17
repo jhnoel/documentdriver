@@ -80,6 +80,12 @@ func setTransform(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]strin
 	if node == nil {
 		return nil, "", cli.Errorf(cli.CodeNotFound, "at", "no shape %s: not found", shapeAddr)
 	}
+	if err := nodeRefusal(r, node, shapeAddr, "at", true); err != nil {
+		return nil, "", err
+	}
+	if err := scaledRefusal(r, d, a.Container, a.PageDup, pageAddr, transformField(s)); err != nil {
+		return nil, "", err
+	}
 	h := textShapeOf(node)
 	if _, _, has := r.Cell(h, sheet.ShapeCell(vsd.CellBeginX)); has {
 		return nil, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s is a 1-D shape: box, rot and flips apply to a 2-D shape", shapeAddr)

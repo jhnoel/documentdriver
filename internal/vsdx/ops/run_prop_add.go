@@ -20,6 +20,9 @@ func (s *PropAddSpec) Run(ws *edit.Workspace, aliases map[string]string, _ strin
 	if err != nil {
 		return "", nil, nil, "", err
 	}
+	if err := targetRefusal(ws, shapeAddr, "at", false); err != nil {
+		return "", nil, nil, "", err
+	}
 	code, ok := edit.PropTypeCode(s.Type)
 	if !ok {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "type", "unknown type %q", s.Type)
