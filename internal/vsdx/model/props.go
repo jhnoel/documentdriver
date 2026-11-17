@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jhnoel/documentdriver/internal/vsdx/inherit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/sheet"
@@ -95,7 +96,8 @@ func propRowType(r *inherit.Resolver, s *inherit.Shape, key sheet.Key) (name str
 // date and the stored text for everything else. The unit is the Value
 // cell's U only for a number with a length unit; the value stays in
 // stored inches. A value that does not parse as its type comes back as
-// the stored text with an omission. Chunk M3.
+// the stored text with an omission, except a date, which comes back
+// with no value (nil) and an omission (chunk CC8). Chunk M3.
 func propRowValue(r *inherit.Resolver, s *inherit.Shape, key sheet.Key, code int, id string) (value any, unit string, origin inherit.Origin, omitted Omission) {
 	c, foundOrigin, ok := r.Cell(s, key.WithCell("Value"))
 	text, cellUnit := "", ""
@@ -121,10 +123,10 @@ func propRowValue(r *inherit.Resolver, s *inherit.Shape, key sheet.Key, code int
 		}
 		return text, "", origin, propOmission(id, fmt.Sprintf("value %q is not a boolean", text))
 	case 5: // date
-		if text != "" {
+		if validPropDate(text) {
 			return map[string]string{"date": text}, "", origin, Omission{}
 		}
-		return text, "", origin, propOmission(id, fmt.Sprintf("value %q is not a date", text))
+		return nil, "", origin, propOmission(id, fmt.Sprintf("date value %q is not a date", text))
 	default: // string, fixed_list, variable_list, duration: the stored text.
 		return text, "", origin, Omission{}
 	}
@@ -154,6 +156,29 @@ func propRowBool(r *inherit.Resolver, s *inherit.Shape, key sheet.Key, cell stri
 		return b, c.V, false
 	}
 	return false, c.V, true
+}
+
+// validPropDate reports whether s is a stored date in read's form,
+// YYYY-MM-DDThh:mm:ss with a valid calendar value and nothing else
+// (no zone, no fraction). Chunk CC8.
+func validPropDate(s string) bool {
+	if len(s) != 19 {
+		return false
+	}
+	if s[4] != '-' || s[7] != '-' || s[10] != 'T' || s[13] != ':' || s[16] != ':' {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		switch i {
+		case 4, 7, 10, 13, 16:
+			continue
+		}
+		if s[i] < '0' || s[i] > '9' {
+			return false
+		}
+	}
+	_, err := time.Parse("2006-01-02T15:04:05", s)
+	return err == nil
 }
 
 // propOmission returns one value that could not be derived faithfully,
