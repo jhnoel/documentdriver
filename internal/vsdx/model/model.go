@@ -59,26 +59,31 @@ type Object struct {
 	Type        string // the Type attribute as stored
 	Name, NameU string
 	Master      string // address of the master, "" when none
-	MasterName  string
-	Parent      string // the group's address, "" at the top level
-	Box         *geom.Box
-	From, To    *geom.Pt // 1-D ends in view space
-	FromGlue    string
-	ToGlue      string
-	Fill        *Paint
-	Line        *Line
-	HTML        string
-	HasText     bool
-	Text        string // plain text, as find matches it
-	Props       []Prop
-	Layers      []string // layer addresses
-	Sites       []Site
-	Glued       []Glued // Connects from this shape's non-end cells (Controls.Row_1)
-	Z           int
-	Origins     map[string]inherit.Origin
-	Cells       []RawCell // --detail full: the shape's own stored cells
-	Omitted     []Omission
-	Node        *tree.Node
+	// StoredMaster is the address of the master the shape element
+	// itself stores (its Master attribute), "" when it stores none or
+	// the value does not parse: read's storedMaster without the node.
+	// Set by the walk (chunk RM2; field landed by the designer).
+	StoredMaster string
+	MasterName   string
+	Parent       string // the group's address, "" at the top level
+	Box          *geom.Box
+	From, To     *geom.Pt // 1-D ends in view space
+	FromGlue     string
+	ToGlue       string
+	Fill         *Paint
+	Line         *Line
+	HTML         string
+	HasText      bool
+	Text         string // plain text, as find matches it
+	Props        []Prop
+	Layers       []string // layer addresses
+	Sites        []Site
+	Glued        []Glued // Connects from this shape's non-end cells (Controls.Row_1)
+	Z            int
+	Origins      map[string]inherit.Origin
+	Cells        []RawCell // --detail full: the shape's own stored cells
+	Omitted      []Omission
+	Node         *tree.Node
 }
 
 // Paint is a fill: None, or a colour "#RRGGBB" (Hex).

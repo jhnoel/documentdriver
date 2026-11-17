@@ -15,8 +15,19 @@ import (
 // Options select what the builder derives beyond the default view:
 // Sites adds connection sites; Full adds raw cells (and, for a 1-D
 // shape, its box). Origins are derived in every view.
+//
+// ReleaseNodes and Checkpoint are chunk RM2's (fields landed by the
+// designer so RM2 adds no field to a file it does not own). With
+// ReleaseNodes set, BuildPage sets every Object.Node to nil once the
+// glue pass is done, so the page tree can be collected before the
+// caller marshals; it is opt-in (read's CLI path sets it), and every
+// other caller (read.XML, edit, the model tests) keeps the nodes.
+// Checkpoint, when not nil, is called with "walk" after the walk and
+// "link" after the glue pass: the memory gate's mark.
 type Options struct {
-	Sites, Full bool
+	Sites, Full  bool
+	ReleaseNodes bool
+	Checkpoint   func(name string)
 }
 
 // BuildPage builds the model of page e of d. The page's contents are
