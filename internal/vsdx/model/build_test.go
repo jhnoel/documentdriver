@@ -23,16 +23,7 @@ import (
 // and a resolver over it.
 func openFixture(t *testing.T, name string) (*doc.Document, *inherit.Resolver) {
 	t.Helper()
-	p, err := opc.Open(vsdxtest.Fixture(t, name))
-	if err != nil {
-		t.Fatalf("opc.Open(%s): %v", name, err)
-	}
-	t.Cleanup(func() {
-		if err := p.Close(); err != nil {
-			t.Errorf("close %s: %v", name, err)
-		}
-	})
-	d, err := doc.Open(p)
+	d, err := doc.Open(vsdxtest.OpenPackage(t, name))
 	if err != nil {
 		t.Fatalf("doc.Open(%s): %v", name, err)
 	}

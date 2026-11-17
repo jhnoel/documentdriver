@@ -17,16 +17,7 @@ import (
 // openFixture opens the vsdx fixture name and returns its package.
 func openFixture(t *testing.T, name string) *opc.Package {
 	t.Helper()
-	p, err := opc.Open(vsdxtest.Fixture(t, name))
-	if err != nil {
-		t.Fatalf("opc.Open(%s): %v", name, err)
-	}
-	t.Cleanup(func() {
-		if err := p.Close(); err != nil {
-			t.Errorf("close %s: %v", name, err)
-		}
-	})
-	return p
+	return vsdxtest.OpenPackage(t, name)
 }
 
 // checkFixture checks the package of the fixture name.

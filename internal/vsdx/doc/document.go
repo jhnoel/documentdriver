@@ -10,6 +10,7 @@ package doc
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/ooxml/ctypes"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
@@ -105,15 +106,15 @@ func (d *Document) openDocument() (*tree.Node, error) {
 	d.Part = part
 	pt, err := d.Pkg.Part(part)
 	if err != nil {
-		return nil, fmt.Errorf("vsdx: document part %s: %w", part, err)
+		return nil, documentPartError(part, err)
 	}
 	ct, err := pt.ContentType()
 	if err != nil {
-		return nil, fmt.Errorf("vsdx: document part %s: %w", part, err)
+		return nil, documentPartError(part, err)
 	}
 	doc, err := partTree(d.Pkg, part)
 	if err != nil {
-		return nil, fmt.Errorf("vsdx: document part %s: %w", part, err)
+		return nil, documentPartError(part, err)
 	}
 	root := doc.Root()
 	if !isMain(root, vsd.ElemVisioDocument) {
@@ -137,6 +138,16 @@ func (d *Document) openDocument() (*tree.Node, error) {
 		_, d.Macro = relByType(docRels, ctypes.RelVbaProject)
 	}
 	return root, nil
+}
+
+// documentPartError wraps err naming the document part, unless err
+// already carries the "vsdx:" prefix (partTree's own message names
+// the part), so every error names its context once. Chunk MF6.
+func documentPartError(part string, err error) error {
+	if strings.HasPrefix(err.Error(), "vsdx:") {
+		return err
+	}
+	return fmt.Errorf("vsdx: document part %s: %w", part, err)
 }
 
 // partTree parses the part's original bytes with tree.ParseString,

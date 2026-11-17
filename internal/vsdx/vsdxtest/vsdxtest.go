@@ -40,6 +40,23 @@ func Fixture(t testing.TB, name string) string {
 	return writePackage(t, name+".vsdx", fixtureMembers(t, name))
 }
 
+// OpenPackage opens the built fixture testdata/vsdx/<name> with
+// opc.Open and returns its package, closing it in t.Cleanup.
+// Chunk MF6.
+func OpenPackage(t testing.TB, name string) *opc.Package {
+	t.Helper()
+	p, err := opc.Open(Fixture(t, name))
+	if err != nil {
+		t.Fatalf("vsdxtest.OpenPackage(%s): %v", name, err)
+	}
+	t.Cleanup(func() {
+		if err := p.Close(); err != nil {
+			t.Errorf("close %s: %v", name, err)
+		}
+	})
+	return p
+}
+
 // Generated builds a drawing of one page with n rectangles, each an
 // instance of one master with text and two shape data rows, every
 // second pair joined by a glued dynamic connector, and returns its
