@@ -25,6 +25,29 @@ const (
 // ShapeSheet reference); a cell not on it is NoStyle and never comes
 // from a style. Chunk V1 fills the table from the design note.
 func StyleCategory(section, cell string) Category {
-	_, _ = section, cell
+	switch section {
+	case SectionCharacter, SectionParagraph, "Tabs":
+		return TextCategory
+	case "":
+	default:
+		return NoStyle
+	}
+	switch cell {
+	case "LineWeight", "LineColor", "LinePattern", "Rounding", "EndArrowSize",
+		"BeginArrow", "EndArrow", "LineCap", "BeginArrowSize", "LineColorTrans",
+		"CompoundType":
+		return LineCategory
+	case "FillForegnd", "FillBkgnd", "FillPattern", "ShdwForegnd", "ShdwBkgnd",
+		"ShdwPattern", "FillForegndTrans", "FillBkgndTrans", "ShdwForegndTrans",
+		"ShdwBkgndTrans", "ShapeShdwType", "ShapeShdwOffsetX", "ShapeShdwOffsetY",
+		"ShapeShdwObliqueAngle", "ShapeShdwScaleFactor", "ShapeShdwBlur",
+		"ShapeShdwShow":
+		return FillCategory
+	case "LeftMargin", "RightMargin", "TopMargin", "BottomMargin", "VerticalAlign",
+		"TextBkgnd", "DefaultTabStop", "TextDirection", "TextBkgndTrans":
+		return TextCategory
+	case CellOrientation:
+		return PageCategory
+	}
 	return NoStyle
 }
