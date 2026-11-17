@@ -35,6 +35,9 @@ func PageXML(p Page) ([]byte, error) {
 	if math.IsNaN(p.Width) || math.IsInf(p.Width, 0) || math.IsNaN(p.Height) || math.IsInf(p.Height, 0) {
 		return nil, fmt.Errorf("vsdx emit: page size (%v, %v) inches is not finite", p.Width, p.Height)
 	}
+	if p.Width <= 0 || p.Height <= 0 {
+		return nil, fmt.Errorf("vsdx emit: page size (%v, %v) inches must be positive", p.Width, p.Height)
+	}
 	name := xmlscan.EscapeAttr(p.Name, '\'')
 	rel := xmlscan.EscapeAttr(p.RelID, '\'')
 
