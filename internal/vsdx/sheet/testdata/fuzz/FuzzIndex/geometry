@@ -1,0 +1,2 @@
+go test fuzz v1
+[]byte("<Shape ID='1'><Section N='Geometry' IX='0'><Cell N='NoFill' V='0'/><Row T='MoveTo' IX='1'><Cell N='X' V='0'/></Row></Section></Shape>")
