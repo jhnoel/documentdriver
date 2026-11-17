@@ -22,7 +22,8 @@ func TestDocumentMF6NonZip(t *testing.T) {
 }
 
 // TestDocumentMF6RecursionCycle checks the MF6 row: Document of
-// libvisio's recursion-cycle.vsdx (skipped without VSDX_CORPUS) is an
+// libvisio's recursion-cycle.vsdx (skipped without VSDX_CORPUS,
+// failed when VSDX_CORPUS is set but the file is missing) is an
 // error or notes naming the cycle's part (/visio/document.xml) once,
 // with no repeated "vsdx:" prefix.
 func TestDocumentMF6RecursionCycle(t *testing.T) {
@@ -42,7 +43,7 @@ func TestDocumentMF6RecursionCycle(t *testing.T) {
 		}
 	}
 	if path == "" {
-		t.Skipf("recursion-cycle.vsdx not found under %s", dir)
+		t.Fatalf("corpus file %s not found under VSDX_CORPUS %s", filepath.Join(dir, "repos", rel), dir)
 	}
 	data, err := os.ReadFile(path) //nolint:gosec // G304: corpus path from VSDX_CORPUS, never from a document
 	if err != nil {
