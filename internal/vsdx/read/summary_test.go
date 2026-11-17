@@ -233,7 +233,7 @@ func TestDocumentAllocationGenerated4000(t *testing.T) {
 
 // TestScalingDocument checks the scaling row: Document on
 // Generated(1000) and Generated(4000) (N = 1000, 4N = 4000) allocates
-// at most 5.5 times as much (laws.Scales) and the best-of-5 time ratio
+// at most 5.5 times as much (laws.Scales) and the laws.TimeScales time ratio
 // is at most 8.
 func TestScalingDocument(t *testing.T) {
 	setup := func(n int) (func() error, error) {
@@ -253,20 +253,5 @@ func TestScalingDocument(t *testing.T) {
 		}, nil
 	}
 	laws.Scales(t, "vsdx Document", setup)
-	var costs [2]laws.Cost
-	for i, n := range []int{laws.Small, laws.Large} {
-		run, err := setup(n)
-		if err != nil {
-			t.Fatalf("setup at %d: %v", n, err)
-		}
-		if costs[i], err = laws.Measure(5, run); err != nil {
-			t.Fatalf("at %d: %v", n, err)
-		}
-	}
-	tm := float64(costs[1].Time) / float64(max(costs[0].Time, 1))
-	t.Logf("vsdx Document: %d units best time %s, %d units best time %s: time ratio %.2f",
-		laws.Small, costs[0].Time, laws.Large, costs[1].Time, tm)
-	if tm > 8 {
-		t.Errorf("vsdx Document time ratio %.2f for 4 times the input (budget 8): super-linear", tm)
-	}
+	laws.TimeScales(t, "vsdx Document", setup)
 }

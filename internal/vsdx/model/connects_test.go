@@ -272,7 +272,7 @@ func TestConnectsResolverOnly(t *testing.T) {
 // TestScalingLinkConnects checks the scaling row: BuildPage (which
 // links the Connects) on Generated(1000) and Generated(4000), N and
 // 4N, allocates at most 5.5 times as much (laws.Scales) and the
-// best-of-5 time ratio is at most 8.
+// laws.TimeScales time ratio is at most 8.
 func TestScalingLinkConnects(t *testing.T) {
 	setup := func(n int) (func() error, error) {
 		d, r := openGenerated(t, n)
@@ -292,21 +292,5 @@ func TestScalingLinkConnects(t *testing.T) {
 		}, nil
 	}
 	laws.Scales(t, "vsdx linkConnects", setup)
-	times := make([]float64, 0, 2)
-	for _, n := range []int{laws.Small, laws.Large} {
-		run, err := setup(n)
-		if err != nil {
-			t.Fatalf("setup at %d: %v", n, err)
-		}
-		cost, err := laws.Measure(5, run)
-		if err != nil {
-			t.Fatalf("at %d: %v", n, err)
-		}
-		times = append(times, float64(cost.Time))
-	}
-	ratio := times[1] / max(times[0], 1)
-	t.Logf("vsdx linkConnects: best times %.3g, %.3g: time ratio %.2f", times[0], times[1], ratio)
-	if ratio > 8 {
-		t.Errorf("vsdx linkConnects time ratio %.2f for 4 times the input (budget 8): super-linear", ratio)
-	}
+	laws.TimeScales(t, "vsdx linkConnects", setup)
 }

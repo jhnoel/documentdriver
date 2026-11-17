@@ -361,7 +361,7 @@ func TestAddPageV11(t *testing.T) {
 
 // TestScalingPages checks the scaling row: AddPage and RenamePage on
 // a drawing of N and 4N pages (N = 1000, 4N = 4000 pages) allocates
-// at most 5.5 times as much (laws.Scales) and the best-of-5 time ratio
+// at most 5.5 times as much (laws.Scales) and the laws.TimeScales time ratio
 // is at most 8. The measured run holds one workspace per size (setup
 // builds it), so Begin's own cost is not measured: Begin on many pages
 // is doc.Open's, not this chunk's.
@@ -412,20 +412,5 @@ func TestScalingPages(t *testing.T) {
 		}, nil
 	}
 	laws.Scales(t, "vsdx AddPage", setup)
-	var costs [2]laws.Cost
-	for i, n := range []int{laws.Small, laws.Large} {
-		run, err := setup(n)
-		if err != nil {
-			t.Fatalf("setup at %d: %v", n, err)
-		}
-		if costs[i], err = laws.Measure(5, run); err != nil {
-			t.Fatalf("at %d: %v", n, err)
-		}
-	}
-	tm := float64(costs[1].Time) / float64(max(costs[0].Time, 1))
-	t.Logf("vsdx AddPage: %d pages best time %s, %d pages best time %s: time ratio %.2f",
-		laws.Small, costs[0].Time, laws.Large, costs[1].Time, tm)
-	if tm > 8 {
-		t.Errorf("vsdx AddPage time ratio %.2f for 4 times the input (budget 8): super-linear", tm)
-	}
+	laws.TimeScales(t, "vsdx AddPage", setup)
 }

@@ -405,7 +405,7 @@ func TestStepsErrors(t *testing.T) {
 // TestScalingNextShapeID checks the scaling row: NextShapeID (and
 // Verify) on Generated(1000) and Generated(4000) (N = 1000, 4N = 4000
 // shapes) allocates at most 5.5 times as much (laws.Scales) and the
-// best-of-5 time ratio is at most 8.
+// laws.TimeScales time ratio is at most 8.
 func TestScalingNextShapeID(t *testing.T) {
 	setup := func(n int) (func() error, error) {
 		path := vsdxtest.Generated(t, n)
@@ -426,22 +426,7 @@ func TestScalingNextShapeID(t *testing.T) {
 		}, nil
 	}
 	laws.Scales(t, "vsdx NextShapeID", setup)
-	var costs [2]laws.Cost
-	for i, n := range []int{laws.Small, laws.Large} {
-		run, err := setup(n)
-		if err != nil {
-			t.Fatalf("setup at %d: %v", n, err)
-		}
-		if costs[i], err = laws.Measure(5, run); err != nil {
-			t.Fatalf("at %d: %v", n, err)
-		}
-	}
-	tm := float64(costs[1].Time) / float64(max(costs[0].Time, 1))
-	t.Logf("vsdx NextShapeID: %d units best time %s, %d units best time %s: time ratio %.2f",
-		laws.Small, costs[0].Time, laws.Large, costs[1].Time, tm)
-	if tm > 8 {
-		t.Errorf("vsdx NextShapeID time ratio %.2f for 4 times the input (budget 8): super-linear", tm)
-	}
+	laws.TimeScales(t, "vsdx NextShapeID", setup)
 }
 
 // TestV11Namespace checks that a part in the 2011 namespace spelling
