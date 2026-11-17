@@ -297,7 +297,7 @@ Policy (the xlsx precedent made explicit for Visio):
        `CM`, `M`, `PT`, `DEG`, `RAD`, and none), each with its exact
        factor to internal units; any other unit makes the formula
        outside the grammar.
-     - *Acceptance requires a corpus sweep* (P2 chunk F4): over every
+     - *Acceptance requires a corpus sweep* (chunk FL4): over every
        cell of `VSDX_CORPUS` whose formula is in the closed grammar, the
        evaluator's result on the file's own cached inputs equals the
        cached `V` (within 1e-9 relative). Disagreements are classified
@@ -1013,7 +1013,7 @@ conclusion holds.
 | 9 | Disjointness | done (`read/page.go`, `inherit/styles.go`, `doc/contents.go`, `doc/colors.go` stubs; W4 owns FUZZ_TARGETS; dependency fixes in chunks.md) |
 | 10 | Signatures | done (`vsd.FieldID`, `KindField`, `PageID` dup; `ParaFormat.BulletChar`; `model.Site` with N; `linkConnects` with the Connects node, placed shapes and page height; M4 uses math.Hypot; T2 rows) |
 | 11 | Missing chunks; split M2 and L1; drop vsdxnaive | done (M5 formats, M6 page sheet and layers, M7 cells and origins, Glued in M4b; M2a-c; L1a-c; vsdxnaive dropped) |
-| 12 | R closure | recorded in decision c, binding at P2 (with F4 corpus sweep and `formula.OneD`) |
+| 12 | R closure | recorded in decision c, binding at P2 (with the FL4 corpus sweep and `formula.OneD`) |
 | 13 | Contract §13: find is an addition; render option | done (contract draft; decision 7) |
 | 14 | HTML rule for inherited character properties | done (decision f: own formatting only, as pptx; V7 to be re-derived in FX; V1/V2 rows on Visio-shaped fixtures) |
 | opt | off-page after page.set; `page0~2`; casefold messages; V4 s13 row | taken (off-page hazard in the orientation rule; `PageID(id, dup)`; casefold_test messages; P1 row 13); H1 presizing hint taken in H1's spec |
