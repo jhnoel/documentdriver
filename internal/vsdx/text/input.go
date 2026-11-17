@@ -152,32 +152,34 @@ func paraDecl(f *ParaFormat, d htmlx.StyleDecl) error {
 			return fmt.Errorf("text: text-align:%s: want left, center, right or justify", d.Value)
 		}
 	case "line-height":
-		if !validPoint(d.Value, false) && !validPercent(d.Value) {
+		_, pt := htmlx.Measure(d.Value, "pt", false)
+		_, pct := htmlx.Measure(d.Value, "%", false)
+		if !pt && !pct {
 			return fmt.Errorf("text: line-height:%s: want points (14pt) or a percentage (120%%)", d.Value)
 		}
 		f.LineHeight = d.Value
 	case "margin-top":
-		if !validPoint(d.Value, false) {
+		if _, ok := htmlx.Measure(d.Value, "pt", false); !ok {
 			return fmt.Errorf("text: margin-top:%s: want points, such as 6pt", d.Value)
 		}
 		f.SpaceBefore = d.Value
 	case "margin-bottom":
-		if !validPoint(d.Value, false) {
+		if _, ok := htmlx.Measure(d.Value, "pt", false); !ok {
 			return fmt.Errorf("text: margin-bottom:%s: want points, such as 3pt", d.Value)
 		}
 		f.SpaceAfter = d.Value
 	case "margin-left":
-		if !validPoint(d.Value, false) {
+		if _, ok := htmlx.Measure(d.Value, "pt", false); !ok {
 			return fmt.Errorf("text: margin-left:%s: want points, such as 18pt", d.Value)
 		}
 		f.MarginLeft = d.Value
 	case "margin-right":
-		if !validPoint(d.Value, false) {
+		if _, ok := htmlx.Measure(d.Value, "pt", false); !ok {
 			return fmt.Errorf("text: margin-right:%s: want points, such as 9pt", d.Value)
 		}
 		f.MarginRight = d.Value
 	case "text-indent":
-		if !validPoint(d.Value, true) {
+		if _, ok := htmlx.Measure(d.Value, "pt", true); !ok {
 			return fmt.Errorf("text: text-indent:%s: want points, such as -18pt", d.Value)
 		}
 		f.Indent = d.Value
@@ -314,7 +316,7 @@ func charDecl(f *CharFormat, d htmlx.StyleDecl) error {
 		}
 		f.Underline, f.Strike = "off", "off"
 	case "font-size":
-		if !validPoint(d.Value, false) {
+		if _, ok := htmlx.Measure(d.Value, "pt", false); !ok {
 			return fmt.Errorf("text: font-size:%s: want points, such as 12pt", d.Value)
 		}
 		size := strings.TrimSuffix(d.Value, "pt")
@@ -332,9 +334,9 @@ func charDecl(f *CharFormat, d htmlx.StyleDecl) error {
 		}
 		f.Color = hex
 	case "font-family":
-		font, err := parseFontFamily(d.Value)
+		font, err := htmlx.QuotedName(d.Value)
 		if err != nil {
-			return err
+			return fmt.Errorf("text: font-family:%s: %w", d.Value, err)
 		}
 		if f.Font != "" && f.Font != font {
 			return fmt.Errorf("text: font-family contradicts an enclosing one")
@@ -346,38 +348,10 @@ func charDecl(f *CharFormat, d htmlx.StyleDecl) error {
 	return nil
 }
 
-// parseFontFamily reads a font-family value: one quoted name, with a
-// backslash escaping the next character (Render's cssStr form).
-func parseFontFamily(v string) (string, error) {
-	v = strings.TrimSpace(v)
-	if len(v) < 2 || (v[0] != '\'' && v[0] != '"') {
-		return "", fmt.Errorf("text: font-family:%s: want one quoted name", v)
-	}
-	q := v[0]
-	var b strings.Builder
-	for i := 1; i < len(v); i++ {
-		c := v[i]
-		switch {
-		case c == '\\' && i+1 < len(v):
-			i++
-			b.WriteByte(v[i])
-		case c == q:
-			if i != len(v)-1 {
-				return "", fmt.Errorf("text: font-family:%s: one quoted name only", v)
-			}
-			if b.Len() == 0 {
-				return "", fmt.Errorf("text: font-family:%s: empty name", v)
-			}
-			return b.String(), nil
-		default:
-			b.WriteByte(c)
-		}
-	}
-	return "", fmt.Errorf("text: font-family:%s: one quoted name only", v)
-}
-
-// fieldRun reads an <opaque> field placeholder into a field run, kept
-// by the number in its data-ref (1-based there, 0-based in the body).
+// fieldRun reads an <opaque> field placeholder into a field run with
+// Ref set to its data-ref as written and Field -1: the writing op
+// checks the ref's shape part and maps its number to the N-th fld
+// (the K5F ruling: the N-1 remap is wrong).
 func fieldRun(n *htmlx.Node) (Run, error) {
 	if err := checkAttrs(n, map[string]bool{"data-ref": true, "data-kind": true, "data-text": true}); err != nil {
 		return Run{}, err
@@ -400,7 +374,7 @@ func fieldRun(n *htmlx.Node) (Run, error) {
 	if err := checkStorable(cached); err != nil {
 		return Run{}, err
 	}
-	return Run{Text: cached, Field: addr.N - 1}, nil
+	return Run{Text: cached, Field: -1, Ref: ref}, nil
 }
 
 // appendText appends s as a text run under f, merging it into a
@@ -411,7 +385,7 @@ func appendText(out []runTmp, f CharFormat, s string) []runTmp {
 	}
 	if len(out) > 0 {
 		last := &out[len(out)-1]
-		if !last.run.Br && last.run.Field < 0 && last.fmt == f {
+		if !last.run.Br && last.run.Field < 0 && last.run.Ref == "" && last.fmt == f {
 			last.run.Text += s
 			return out
 		}
@@ -440,47 +414,6 @@ func checkStorable(s string) error {
 		}
 	}
 	return nil
-}
-
-// validPoint reports whether v is a point length ("12pt", "-18pt" when
-// neg).
-func validPoint(v string, neg bool) bool {
-	return strings.HasSuffix(v, "pt") && validDecimal(strings.TrimSuffix(v, "pt"), neg)
-}
-
-// validPercent reports whether v is a non-negative percentage ("120%").
-func validPercent(v string) bool {
-	return strings.HasSuffix(v, "%") && validDecimal(strings.TrimSuffix(v, "%"), false)
-}
-
-// validDecimal reports whether s is a decimal number (digits with at
-// most one point, a leading minus only when neg).
-func validDecimal(s string, neg bool) bool {
-	if s == "" {
-		return false
-	}
-	if s[0] == '-' {
-		if !neg {
-			return false
-		}
-		s = s[1:]
-	}
-	dot, digit := false, false
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		switch {
-		case c == '.':
-			if dot {
-				return false
-			}
-			dot = true
-		case c >= '0' && c <= '9':
-			digit = true
-		default:
-			return false
-		}
-	}
-	return digit
 }
 
 // buildBody assigns one Character row per distinct character format
@@ -551,6 +484,7 @@ func buildBody(paras []paraTmp) (Body, Formats) {
 				Text:  r.run.Text,
 				Br:    r.run.Br,
 				Field: r.run.Field,
+				Ref:   r.run.Ref,
 			})
 		}
 		body.Paras[i] = para

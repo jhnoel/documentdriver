@@ -89,13 +89,11 @@ func TestParseHTMLRoundTrip(t *testing.T) {
 			body: Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: -1, Text: "a<b&c", Field: -1}}}}},
 			want: `<p>a&lt;b&amp;c</p>`,
 		},
-		// Index 11, the field row, is excluded from this round trip;
-		// fields are covered by TestParseHTMLField below.
 		{
 			name: "second field",
 			body: Body{Paras: []Para{{PP: -1, Runs: []Run{
-				{CP: -1, Text: "3", Field: 0},
-				{CP: -1, Text: "4", Field: 1},
+				{CP: -1, Text: "3", Field: -1, Ref: "page0/s5/field:1"},
+				{CP: -1, Text: "4", Field: -1, Ref: "page0/s5/field:2"},
 			}}}},
 			want: `<p><opaque data-ref="page0/s5/field:1" data-kind="field" data-text="3"></opaque><opaque data-ref="page0/s5/field:2" data-kind="field" data-text="4"></opaque></p>`,
 		},
@@ -196,7 +194,7 @@ func TestParseHTMLRoundTrip(t *testing.T) {
 		},
 		{
 			name:    "field is bare under a format",
-			body:    Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: 0, Text: "3", Field: 0}}}}},
+			body:    Body{Paras: []Para{{PP: -1, Runs: []Run{{CP: 0, Text: "3", Field: -1, Ref: "page0/s5/field:1"}}}}},
 			formats: Formats{Char: map[int]CharFormat{0: {Size: "10", Font: "Arial"}}},
 			want:    `<p><opaque data-ref="page0/s5/field:1" data-kind="field" data-text="3"></opaque></p>`,
 		},
@@ -218,7 +216,7 @@ func TestParseHTMLRoundTrip(t *testing.T) {
 					{CP: 2, Text: "item", Field: -1},
 					{CP: 2, Br: true, Field: -1},
 					{CP: 2, Text: "two\tend ", Field: -1},
-					{CP: 2, Text: "3", Field: 0},
+					{CP: 2, Text: "3", Field: -1, Ref: "page0/s1/field:1"},
 				}},
 			}, Terminated: true},
 			formats: Formats{
@@ -241,8 +239,14 @@ func TestParseHTMLRoundTrip(t *testing.T) {
 			if !got.Terminated {
 				t.Errorf("ParseHTML(%q): Terminated = false; want true", tc.want)
 			}
-			if rendered := Render(got, formats, shape); rendered != tc.want {
-				t.Errorf("Render(ParseHTML(%q)) = %q; want %q", tc.want, rendered, tc.want)
+			// Render numbers resolved fields (Field >= 0); ParseHTML
+			// leaves placeholders unresolved (Ref) for the writing op
+			// to map to a fld, so the Render round trip is checked only
+			// for field-free HTML.
+			if !hasRef(got) {
+				if rendered := Render(got, formats, shape); rendered != tc.want {
+					t.Errorf("Render(ParseHTML(%q)) = %q; want %q", tc.want, rendered, tc.want)
+				}
 			}
 			if plain := Plain(got); plain != Plain(tc.body) {
 				t.Errorf("Plain(ParseHTML(%q)) = %q; want %q", tc.want, plain, Plain(tc.body))
@@ -270,6 +274,19 @@ type canonRun struct {
 	text  string
 	br    bool
 	field int
+	ref   string
+}
+
+// hasRef reports whether b holds an unresolved field placeholder.
+func hasRef(b Body) bool {
+	for _, p := range b.Paras {
+		for _, r := range p.Runs {
+			if r.Ref != "" {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // canonBody returns b's paragraphs as canonPara values: paragraph and
@@ -282,15 +299,15 @@ func canonBody(b Body, f Formats) []canonPara {
 	for _, p := range b.Paras {
 		cp := canonPara{fmt: paraFormat(f, p.PP)}
 		for _, r := range p.Runs {
-			cr := canonRun{text: r.Text, br: r.Br, field: r.Field}
-			if !r.Br && r.Field < 0 {
+			cr := canonRun{text: r.Text, br: r.Br, field: r.Field, ref: r.Ref}
+			if !r.Br && r.Field < 0 && r.Ref == "" {
 				cr.fmt = canonChar(charFormat(f, r.CP))
 				if r.Text == "" && cr.fmt == (CharFormat{}) {
 					continue
 				}
 				if n := len(cp.runs); n > 0 {
 					last := &cp.runs[n-1]
-					if !last.br && last.field < 0 && last.fmt == cr.fmt {
+					if !last.br && last.field < 0 && last.ref == "" && last.fmt == cr.fmt {
 						last.text += r.Text
 						continue
 					}
@@ -439,8 +456,8 @@ func TestParseHTMLRows(t *testing.T) {
 }
 
 // TestParseHTMLField checks that an <opaque> placeholder is kept as a
-// field run with the number in its data-ref (1-based there, 0-based
-// in the body).
+// field run with Ref set to its data-ref as written and Field -1
+// (K5F: the writing op maps the number to the N-th fld).
 func TestParseHTMLField(t *testing.T) {
 	got, formats, err := ParseHTML(`<p>Page <opaque data-ref="page0/s5/field:1" data-kind="field" data-text="3"></opaque><opaque data-ref="page0/s5/field:2" data-kind="field" data-text="4"></opaque></p>`)
 	if err != nil {
@@ -448,8 +465,8 @@ func TestParseHTMLField(t *testing.T) {
 	}
 	want := Body{Paras: []Para{{PP: 0, Runs: []Run{
 		{CP: 0, Text: "Page ", Field: -1},
-		{CP: 0, Text: "3", Field: 0},
-		{CP: 0, Text: "4", Field: 1},
+		{CP: 0, Text: "3", Field: -1, Ref: "page0/s5/field:1"},
+		{CP: 0, Text: "4", Field: -1, Ref: "page0/s5/field:2"},
 	}}}, Terminated: true}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("ParseHTML(field) = %#v; want %#v", got, want)
@@ -461,8 +478,145 @@ func TestParseHTMLField(t *testing.T) {
 	if !reflect.DeepEqual(formats, wantFormats) {
 		t.Errorf("ParseHTML(field) formats = %#v; want %#v", formats, wantFormats)
 	}
-	if rendered := Render(got, formats, "page0/s5"); rendered != `<p>Page <opaque data-ref="page0/s5/field:1" data-kind="field" data-text="3"></opaque><opaque data-ref="page0/s5/field:2" data-kind="field" data-text="4"></opaque></p>` {
-		t.Errorf("Render(ParseHTML(field)) = %q", rendered)
+}
+
+// TestParseHTMLFieldRefs checks the chunk K5F rows 1 to 3: a
+// placeholder keeps its data-ref as written in order, and a data-ref
+// that is not a field address is refused.
+func TestParseHTMLFieldRefs(t *testing.T) {
+	tests := []struct {
+		name    string
+		html    string
+		want    Body
+		formats Formats
+	}{
+		{
+			name: "keep second field ref",
+			html: `<p>a <opaque data-ref="page0/s5/field:2" data-kind="field" data-text="x"></opaque></p>`,
+			want: Body{Paras: []Para{{PP: 0, Runs: []Run{
+				{CP: 0, Text: "a ", Field: -1},
+				{CP: 0, Text: "x", Field: -1, Ref: "page0/s5/field:2"},
+			}}}, Terminated: true},
+			formats: Formats{
+				Char: map[int]CharFormat{0: {}},
+				Para: map[int]ParaFormat{0: {}},
+			},
+		},
+		{
+			name: "keep refs in written order",
+			html: `<p><opaque data-ref="page0/s5/field:2" data-kind="field" data-text="b"></opaque><opaque data-ref="page0/s5/field:1" data-kind="field" data-text="a"></opaque></p>`,
+			want: Body{Paras: []Para{{PP: 0, Runs: []Run{
+				{CP: 0, Text: "b", Field: -1, Ref: "page0/s5/field:2"},
+				{CP: 0, Text: "a", Field: -1, Ref: "page0/s5/field:1"},
+			}}}, Terminated: true},
+			formats: Formats{
+				Char: map[int]CharFormat{0: {}},
+				Para: map[int]ParaFormat{0: {}},
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, formats, err := ParseHTML(tc.html)
+			if err != nil {
+				t.Fatalf("ParseHTML(%q): %v", tc.html, err)
+			}
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("ParseHTML(%q) body = %#v; want %#v", tc.html, got, tc.want)
+			}
+			if !reflect.DeepEqual(formats, tc.formats) {
+				t.Errorf("ParseHTML(%q) formats = %#v; want %#v", tc.html, formats, tc.formats)
+			}
+		})
+	}
+	bad := []struct {
+		name string
+		html string
+	}{
+		{"field zero", `<p><opaque data-ref="page0/s5/field:0" data-kind="field" data-text="x"></opaque></p>`},
+		{"shape not field", `<p><opaque data-ref="page0/s5" data-kind="field" data-text="x"></opaque></p>`},
+	}
+	for _, tc := range bad {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, _, err := ParseHTML(tc.html); err == nil {
+				t.Fatalf("ParseHTML(%q): no error", tc.html)
+			}
+		})
+	}
+}
+
+// TestParseHTMLCSSRows checks the chunk K5F row 4: font-family is one
+// quoted name, lengths are decimal points or percentages without an
+// exponent or a sign where they are not allowed, and a negative
+// text-indent keeps its sign.
+func TestParseHTMLCSSRows(t *testing.T) {
+	tests := []struct {
+		name    string
+		html    string
+		want    Body
+		formats Formats
+	}{
+		{
+			name: "escaped font quote",
+			html: `<p><span style="font-family:'O\'Neil'">x</span></p>`,
+			want: Body{Paras: []Para{{PP: 0, Runs: []Run{{CP: 0, Text: "x", Field: -1}}}}, Terminated: true},
+			formats: Formats{
+				Char: map[int]CharFormat{0: {Font: "O'Neil"}},
+				Para: map[int]ParaFormat{0: {}},
+			},
+		},
+		{
+			name: "negative indent",
+			html: `<p style="text-indent:-18pt">x</p>`,
+			want: Body{Paras: []Para{{PP: 0, Runs: []Run{{CP: 0, Text: "x", Field: -1}}}}, Terminated: true},
+			formats: Formats{
+				Char: map[int]CharFormat{0: {}},
+				Para: map[int]ParaFormat{0: {Indent: "-18pt"}},
+			},
+		},
+		{
+			name: "percent line height",
+			html: `<p style="line-height:120%">x</p>`,
+			want: Body{Paras: []Para{{PP: 0, Runs: []Run{{CP: 0, Text: "x", Field: -1}}}}, Terminated: true},
+			formats: Formats{
+				Char: map[int]CharFormat{0: {}},
+				Para: map[int]ParaFormat{0: {LineHeight: "120%"}},
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, formats, err := ParseHTML(tc.html)
+			if err != nil {
+				t.Fatalf("ParseHTML(%q): %v", tc.html, err)
+			}
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("ParseHTML(%q) body = %#v; want %#v", tc.html, got, tc.want)
+			}
+			if !reflect.DeepEqual(formats, tc.formats) {
+				t.Errorf("ParseHTML(%q) formats = %#v; want %#v", tc.html, formats, tc.formats)
+			}
+		})
+	}
+	bad := []struct {
+		name string
+		html string
+		want string
+	}{
+		{"unquoted font", `<p><span style="font-family:Arial">x</span></p>`, "font-family"},
+		{"negative font size", `<p><span style="font-size:-1pt">x</span></p>`, "font-size"},
+		{"exponent margin", `<p style="margin-left:1e3pt">x</p>`, "margin-left"},
+	}
+	for _, tc := range bad {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, err := ParseHTML(tc.html)
+			if err == nil {
+				t.Fatalf("ParseHTML(%q): no error; want it to mention %q", tc.html, tc.want)
+			}
+			if !strings.Contains(err.Error(), tc.want) {
+				t.Errorf("ParseHTML(%q): %v; want it to mention %q", tc.html, err, tc.want)
+			}
+		})
 	}
 }
 
