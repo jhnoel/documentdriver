@@ -312,9 +312,30 @@ func checkPageSet(s *PageSetSpec) (string, string, bool) {
 	return "", "", false
 }
 
+// extraRules are document-independent rules that chunks add in files
+// of their own (rules_<topic>.go, each appending in an init function),
+// checked after the op's own rules in the order they were added: the
+// extension rule for this file (contract-review chunks CC5, CC8, CC10,
+// CC13). A rule returns false for a spec it does not apply to.
+var extraRules []func(Spec) (msg, field string, broken bool)
+
 // checkSpec reports the first rule s breaks: its message and its
-// field relative to the operation, or false when s breaks none.
+// field relative to the operation, or false when s breaks none. The
+// op's own rules come first, then extraRules.
 func checkSpec(s Spec) (string, string, bool) {
+	if msg, field, bad := checkOwn(s); bad {
+		return msg, field, true
+	}
+	for _, rule := range extraRules {
+		if msg, field, bad := rule(s); bad {
+			return msg, field, true
+		}
+	}
+	return "", "", false
+}
+
+// checkOwn reports the first of the op's own rules s breaks.
+func checkOwn(s Spec) (string, string, bool) {
 	switch v := s.(type) {
 	case *ObjectAddSpec:
 		return checkObjectAdd(v)
