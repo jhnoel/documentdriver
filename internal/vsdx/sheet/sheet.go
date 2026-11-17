@@ -24,25 +24,57 @@ type Cell struct {
 // Inherited reports whether the cell's formula is inherited (F="Inh").
 func (c Cell) Inherited() bool { return c.HasF && c.F == "Inh" }
 
+// cellEntry is one stored cell and the key it is stored under, in
+// document order.
+type cellEntry struct {
+	key  Key
+	cell Cell
+}
+
+// mapThreshold is the number of cells or rows above which a sheet
+// builds a lookup map for them; at or below it Cell scans the entries
+// and row listing scans the rows of the section.
+const mapThreshold = 48
+
+// rowGroup is the row keys of one section name, in stored order.
+type rowGroup struct {
+	section string
+	keys    []Key
+}
+
 // Sheet is the index of one sheet element.
 type Sheet struct {
 	Node     *tree.Node
-	cells    map[Key]Cell
+	entries  []cellEntry
+	cells    map[Key]Cell // lookup, built only when the sheet holds more than mapThreshold cells
 	deleted  map[Key]bool // sections and rows with Del="1", keyed with Cell ""
-	rows     map[string][]Key
-	seenRows map[Key]bool // row keys already listed in rows, built once per Index
+	rows     []rowGroup
+	seenRows map[Key]bool // row keys already listed in rows, built once per Index when the sheet holds more than mapThreshold rows
 }
 
 // Index walks the direct children of el (a Shape, PageSheet or
 // StyleSheet) and their Sections and Rows, and returns its sheet. A
 // Section or Row without the attributes its key needs, and a repeated
 // key (the first one wins), are skipped and reported in skipped, which
-// the caller turns into notes. Allocation is one map entry per cell.
-// Chunk H1.
+// the caller turns into notes. The cells are kept in a slice in
+// document order, sized from one count of the element's Cell and
+// Section/Row children; a lookup map is built only when that count
+// holds more than mapThreshold cells, and below that Cell scans the
+// slice. Chunk H1, MF5.
 func Index(el *tree.Node) (s *Sheet, skipped []string) {
-	s = &Sheet{Node: el, cells: make(map[Key]Cell, 32)}
+	s = &Sheet{Node: el}
 	if el == nil {
 		return s, nil
+	}
+	cells, rows := countSheet(el)
+	if cells > 0 {
+		s.entries = make([]cellEntry, 0, cells)
+	}
+	if cells > mapThreshold {
+		s.cells = make(map[Key]Cell, cells)
+	}
+	if rows > mapThreshold {
+		s.seenRows = make(map[Key]bool, rows)
 	}
 	for child := range el.ElementsSeq() {
 		switch child.Local() {
@@ -57,6 +89,7 @@ func Index(el *tree.Node) (s *Sheet, skipped []string) {
 			skipped = s.indexSection(child, skipped)
 		}
 	}
+	s.seenRows = nil // duplicate rows are listed for good now
 	return s, skipped
 }
 
@@ -114,16 +147,7 @@ func (s *Sheet) indexRow(row *tree.Node, section string, secIX int, skipped []st
 		}
 		s.deleted[rowKey] = true
 	}
-	if s.seenRows == nil {
-		s.seenRows = make(map[Key]bool)
-	}
-	if !s.seenRows[rowKey] {
-		s.seenRows[rowKey] = true
-		if s.rows == nil {
-			s.rows = make(map[string][]Key)
-		}
-		s.rows[section] = append(s.rows[section], rowKey)
-	}
+	s.addRow(section, rowKey)
 	for child := range row.ElementsSeq() {
 		if child.Local() != vsd.ElemCell {
 			continue
@@ -141,11 +165,89 @@ func (s *Sheet) indexRow(row *tree.Node, section string, secIX int, skipped []st
 // addCell inserts cell at key into s, keeping the first cell stored at
 // a key and reporting a repeated key in skipped.
 func (s *Sheet) addCell(cell Cell, key Key, skipped []string) []string {
-	if _, dup := s.cells[key]; dup {
-		return append(skipped, "duplicate cell "+key.Section+"/"+strconv.Itoa(key.SectionIX)+"/"+key.Row+"/"+strconv.Itoa(key.RowIX)+"/"+key.Cell)
+	if s.cells != nil {
+		if _, dup := s.cells[key]; dup {
+			return append(skipped, "duplicate cell "+key.Section+"/"+strconv.Itoa(key.SectionIX)+"/"+key.Row+"/"+strconv.Itoa(key.RowIX)+"/"+key.Cell)
+		}
+		s.cells[key] = cell
+	} else {
+		for _, e := range s.entries {
+			if e.key == key {
+				return append(skipped, "duplicate cell "+key.Section+"/"+strconv.Itoa(key.SectionIX)+"/"+key.Row+"/"+strconv.Itoa(key.RowIX)+"/"+key.Cell)
+			}
+		}
 	}
-	s.cells[key] = cell
+	s.entries = append(s.entries, cellEntry{key: key, cell: cell})
 	return skipped
+}
+
+// addRow records rowKey under section in s, unless that row is
+// already listed in it.
+func (s *Sheet) addRow(section string, rowKey Key) {
+	if s.seenRows != nil {
+		if s.seenRows[rowKey] {
+			return
+		}
+		s.seenRows[rowKey] = true
+		for i := range s.rows {
+			if s.rows[i].section == section {
+				s.rows[i].keys = append(s.rows[i].keys, rowKey)
+				return
+			}
+		}
+		s.rows = append(s.rows, rowGroup{section: section, keys: []Key{rowKey}})
+		return
+	}
+	for i := range s.rows {
+		if s.rows[i].section != section {
+			continue
+		}
+		for _, k := range s.rows[i].keys {
+			if k == rowKey {
+				return
+			}
+		}
+		s.rows[i].keys = append(s.rows[i].keys, rowKey)
+		return
+	}
+	s.rows = append(s.rows, rowGroup{section: section, keys: []Key{rowKey}})
+}
+
+// countSheet counts the Cell elements at the shape, section and row
+// level of el and the Row elements at the section level: upper bounds
+// on the cells and the rows Index holds (it counts repeated and
+// skipped ones too). It sizes the entries slice, the lookup map and
+// the row duplicate map once, in one walk of the element's own
+// children.
+func countSheet(el *tree.Node) (cells, rows int) {
+	cells, rows = 0, 0
+	for child := el.FirstChild(); child != nil; child = child.NextSibling() {
+		if child.Kind() != tree.ElementNode {
+			continue
+		}
+		switch child.Local() {
+		case vsd.ElemCell:
+			cells++
+		case vsd.ElemSection:
+			for sub := child.FirstChild(); sub != nil; sub = sub.NextSibling() {
+				if sub.Kind() != tree.ElementNode {
+					continue
+				}
+				switch sub.Local() {
+				case vsd.ElemCell:
+					cells++
+				case vsd.ElemRow:
+					rows++
+					for cell := sub.FirstChild(); cell != nil; cell = cell.NextSibling() {
+						if cell.Kind() == tree.ElementNode && cell.Local() == vsd.ElemCell {
+							cells++
+						}
+					}
+				}
+			}
+		}
+	}
+	return cells, rows
 }
 
 // readCell returns the cell stored by node and whether it has a name. An
@@ -200,8 +302,16 @@ func parseIX(v string) (int, bool) {
 
 // Cell returns the stored cell at k.
 func (s *Sheet) Cell(k Key) (Cell, bool) {
-	c, ok := s.cells[k]
-	return c, ok
+	if s.cells != nil {
+		c, ok := s.cells[k]
+		return c, ok
+	}
+	for _, e := range s.entries {
+		if e.key == k {
+			return e.cell, true
+		}
+	}
+	return Cell{}, false
 }
 
 // Deleted reports whether the section or row of k is stored with
@@ -216,4 +326,11 @@ func (s *Sheet) Deleted(k Key) bool {
 // Rows returns the row keys (Cell "") of every section of that name in
 // stored order, so Geometry rows of different section IX are mixed; each
 // key carries its SectionIX.
-func (s *Sheet) Rows(section string) []Key { return s.rows[section] }
+func (s *Sheet) Rows(section string) []Key {
+	for i := range s.rows {
+		if s.rows[i].section == section {
+			return s.rows[i].keys
+		}
+	}
+	return nil
+}

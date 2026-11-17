@@ -317,12 +317,11 @@ func TestRowsDuplicateRow(t *testing.T) {
 	}
 }
 
-// TestScalingIndexGeometryRows checks that Index scales linearly with
-// Geometry rows: 20,000 rows cost at most 8 times the time and 5.5
-// times the bytes and allocations of 5,000 rows.
-func TestScalingIndexGeometryRows(t *testing.T) {
-	measure := func(n int) laws.Cost {
-		t.Helper()
+// setupIndexGeometryRows returns a laws setup that builds a Shape
+// with a Geometry section of n rows and indexes it.
+func setupIndexGeometryRows(t *testing.T) func(n int) (func() error, error) {
+	t.Helper()
+	return func(n int) (func() error, error) {
 		var b strings.Builder
 		b.WriteString(`<Shape><Section N='Geometry' IX='0'>`)
 		for i := range n {
@@ -333,33 +332,127 @@ func TestScalingIndexGeometryRows(t *testing.T) {
 		b.WriteString(`</Section></Shape>`)
 		doc, err := tree.ParseString(b.String())
 		if err != nil {
-			t.Fatalf("ParseString: %v", err)
+			return nil, err
 		}
 		root := doc.Root()
-		run := func() error {
+		return func() error {
 			Index(root)
 			return nil
-		}
-		if err := run(); err != nil {
-			t.Fatalf("Index warm: %v", err)
-		}
-		cost, err := laws.Measure(5, run)
-		if err != nil {
-			t.Fatalf("Measure: %v", err)
-		}
-		return cost
+		}, nil
 	}
-	small := measure(5000)
-	large := measure(20000)
-	t.Logf("Index Geometry rows: 5000 rows %d bytes %d allocs %s, 20000 rows %d bytes %d allocs %s", small.Bytes, small.Mallocs, small.Time, large.Bytes, large.Mallocs, large.Time)
+}
+
+// measureIndexGeometryRows measures Index on a shape with n
+// Geometry rows, with laws.Measure. It is used only for the
+// 5000/20000 pair, which laws.Scales cannot name (it runs at
+// laws.Small and laws.Large).
+func measureIndexGeometryRows(t *testing.T, n int) laws.Cost {
+	t.Helper()
+	setup := setupIndexGeometryRows(t)
+	run, err := setup(n)
+	if err != nil {
+		t.Fatalf("setupIndexGeometryRows(%d): %v", n, err)
+	}
+	if err := run(); err != nil {
+		t.Fatalf("Index warm: %v", err)
+	}
+	cost, err := laws.Measure(5, run)
+	if err != nil {
+		t.Fatalf("Measure: %v", err)
+	}
+	return cost
+}
+
+// TestScalingIndexGeometryRows checks that Index scales linearly with
+// Geometry rows: 20,000 rows cost at most 5.5 times the bytes and
+// allocations of 5,000 rows, and laws.TimeScales checks the time
+// ratio (at most 8) at laws.Small and laws.Large with interleaved
+// pairs.
+func TestScalingIndexGeometryRows(t *testing.T) {
+	small := measureIndexGeometryRows(t, 5000)
+	large := measureIndexGeometryRows(t, 20000)
+	t.Logf("Index Geometry rows: 5000 rows %d bytes %d allocs, 20000 rows %d bytes %d allocs", small.Bytes, small.Mallocs, large.Bytes, large.Mallocs)
 	if ratio := float64(large.Bytes) / float64(max(small.Bytes, 1)); ratio > 5.5 {
 		t.Errorf("Index allocates %.2f times the bytes for 4 times the rows (budget 5.5)", ratio)
 	}
 	if ratio := float64(large.Mallocs) / float64(max(small.Mallocs, 1)); ratio > 5.5 {
 		t.Errorf("Index makes %.2f times the allocations for 4 times the rows (budget 5.5)", ratio)
 	}
-	if ratio := float64(large.Time) / float64(max(small.Time, 1)); ratio > 8 {
-		t.Errorf("Index takes %.2f times the time for 4 times the rows (budget 8)", ratio)
+	laws.TimeScales(t, "vsdx Index Geometry rows", setupIndexGeometryRows(t))
+}
+
+// setupIndexCells returns a laws setup that builds a Shape with n
+// shape-level cells and indexes it.
+func setupIndexCells(t *testing.T) func(n int) (func() error, error) {
+	t.Helper()
+	return func(n int) (func() error, error) {
+		var b strings.Builder
+		b.WriteString(`<Shape ID='1'>`)
+		for i := range n {
+			b.WriteString(`<Cell N='C`)
+			b.WriteString(strconv.Itoa(i))
+			b.WriteString(`' V='`)
+			b.WriteString(strconv.Itoa(i))
+			b.WriteString(`'/>`)
+		}
+		b.WriteString(`</Shape>`)
+		doc, err := tree.ParseString(b.String())
+		if err != nil {
+			return nil, err
+		}
+		root := doc.Root()
+		return func() error {
+			Index(root)
+			return nil
+		}, nil
+	}
+}
+
+// measureIndexCells measures Index on a shape with n shape-level
+// cells, with laws.Measure. It is used only for the 60/240 pair,
+// which laws.Scales and laws.TimeScales cannot name (they run at
+// laws.Small and laws.Large).
+func measureIndexCells(t *testing.T, n int) laws.Cost {
+	t.Helper()
+	setup := setupIndexCells(t)
+	run, err := setup(n)
+	if err != nil {
+		t.Fatalf("setupIndexCells(%d): %v", n, err)
+	}
+	if err := run(); err != nil {
+		t.Fatalf("Index warm: %v", err)
+	}
+	cost, err := laws.Measure(5, run)
+	if err != nil {
+		t.Fatalf("Measure: %v", err)
+	}
+	return cost
+}
+
+// TestScalingIndexCells checks the MF5 scaling row at N = 1,000 and
+// 4N = 4,000 cells: Index (with its lookup map) scales linearly.
+// laws.Scales checks bytes and allocations at most 5.5 times for 4
+// times the cells, and laws.TimeScales checks the time ratio.
+func TestScalingIndexCells(t *testing.T) {
+	setup := setupIndexCells(t)
+	laws.Scales(t, "vsdx Index cells", setup)
+	laws.TimeScales(t, "vsdx Index cells", setup)
+}
+
+// TestScalingIndexCellsThreshold checks the MF5 scaling row at 60
+// and 240 cells, crossing the 48-cell threshold for the lookup map:
+// bytes and allocations at most 5.5 times for 4 times the cells.
+// Time on both sides of the threshold is checked by the
+// laws.TimeScales run in TestScalingIndexCells.
+func TestScalingIndexCellsThreshold(t *testing.T) {
+	small := measureIndexCells(t, 60)
+	large := measureIndexCells(t, 240)
+	t.Logf("Index cells: 60 cells %d bytes %d allocs, 240 cells %d bytes %d allocs", small.Bytes, small.Mallocs, large.Bytes, large.Mallocs)
+	if ratio := float64(large.Bytes) / float64(max(small.Bytes, 1)); ratio > 5.5 {
+		t.Errorf("Index allocates %.2f times the bytes for 4 times the cells across the threshold (budget 5.5)", ratio)
+	}
+	if ratio := float64(large.Mallocs) / float64(max(small.Mallocs, 1)); ratio > 5.5 {
+		t.Errorf("Index makes %.2f times the allocations for 4 times the cells across the threshold (budget 5.5)", ratio)
 	}
 }
 
