@@ -23,6 +23,9 @@ func spin(n int, quadratic bool) int {
 // bound for quadratic work at the gate's sizes (scaled up so the runs
 // last long enough to time).
 func TestTimeRatio(t *testing.T) {
+	if RaceEnabled {
+		t.Skip("time ratios are not measured under -race (TimeScales)")
+	}
 	sink := 0
 	mk := func(quadratic bool, scale int) [2]func() error {
 		var r [2]func() error

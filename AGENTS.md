@@ -1,9 +1,9 @@
 # Agent notes
 
-documentdriver is one Go module, standard library only, that ships two CLIs
-on one OOXML engine: `pptx` (moved in from pptxdriver) and `docx` (a port of
-docxdriver 0.5.2: reading, the plan grammar and the integrity checks are in;
-the operations are being ported, see `docs/plan.md`). Agents run these
+documentdriver is one Go module, standard library only, that ships four CLIs
+on one OOXML engine: `pptx` (moved in from pptxdriver), `docx` (a port of
+docxdriver 0.5.2; see `docs/plan.md`), `xlsx` and `vsdx` (Visio; design in
+`docs/vsdx-design.md`, agent surface drafted in `docs/vsdx-contract-draft.md`). Agents run these
 binaries on documents they did not write, so every input is untrusted.
 
 Read before changing anything:
@@ -289,7 +289,7 @@ All **[enforced: `internal/archtest`]** unless marked.
 - Never serialise a read model back into OOXML.
 - `internal/pptx` may be imported only from inside `internal/pptx`, from
   `cmd/pptx`, and from the dev-only `eval/` and `tools/`; likewise for
-  `internal/docx` with `cmd/docx` and `internal/xlsx` with `cmd/xlsx`. The shared engine (`internal/opc`,
+  `internal/docx` with `cmd/docx`, `internal/xlsx` with `cmd/xlsx` and `internal/vsdx` with `cmd/vsdx`. The shared engine (`internal/opc`,
   `internal/ooxml/...` including the edit core, `internal/plan`,
   `internal/ids`, `internal/ascii`, `internal/geom`, `internal/casefold`, the HTML front end `internal/htmlx`, and the test-only law
   harness `internal/laws`) never depends on a format, not even through
