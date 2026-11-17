@@ -26,10 +26,11 @@ func (c Cell) Inherited() bool { return c.HasF && c.F == "Inh" }
 
 // Sheet is the index of one sheet element.
 type Sheet struct {
-	Node    *tree.Node
-	cells   map[Key]Cell
-	deleted map[Key]bool // sections and rows with Del="1", keyed with Cell ""
-	rows    map[string][]Key
+	Node     *tree.Node
+	cells    map[Key]Cell
+	deleted  map[Key]bool // sections and rows with Del="1", keyed with Cell ""
+	rows     map[string][]Key
+	seenRows map[Key]bool // row keys already listed in rows, built once per Index
 }
 
 // Index walks the direct children of el (a Shape, PageSheet or
@@ -79,7 +80,7 @@ func (s *Sheet) indexSection(section *tree.Node, skipped []string) []string {
 		if s.deleted == nil {
 			s.deleted = make(map[Key]bool)
 		}
-		s.deleted[Key{Section: name, SectionIX: secIX}] = true
+		s.deleted[Key{Section: name, SectionIX: secIX, RowIX: -1}] = true
 	}
 	for child := range section.ElementsSeq() {
 		switch child.Local() {
@@ -113,17 +114,14 @@ func (s *Sheet) indexRow(row *tree.Node, section string, secIX int, skipped []st
 		}
 		s.deleted[rowKey] = true
 	}
-	if s.rows == nil {
-		s.rows = make(map[string][]Key)
+	if s.seenRows == nil {
+		s.seenRows = make(map[Key]bool)
 	}
-	dup := false
-	for _, existing := range s.rows[section] {
-		if existing == rowKey {
-			dup = true
-			break
+	if !s.seenRows[rowKey] {
+		s.seenRows[rowKey] = true
+		if s.rows == nil {
+			s.rows = make(map[string][]Key)
 		}
-	}
-	if !dup {
 		s.rows[section] = append(s.rows[section], rowKey)
 	}
 	for child := range row.ElementsSeq() {
@@ -208,12 +206,14 @@ func (s *Sheet) Cell(k Key) (Cell, bool) {
 
 // Deleted reports whether the section or row of k is stored with
 // Del="1" here, which blocks inheritance of it (format notes section 2).
+// A section deletion is keyed with RowIX -1, so it never collides with
+// row zero.
 func (s *Sheet) Deleted(k Key) bool {
-	return s.deleted[Key{Section: k.Section, SectionIX: k.SectionIX}] ||
+	return s.deleted[Key{Section: k.Section, SectionIX: k.SectionIX, RowIX: -1}] ||
 		s.deleted[Key{Section: k.Section, SectionIX: k.SectionIX, Row: k.Row, RowIX: k.RowIX}]
 }
 
-// Rows returns the row keys (Cell "") of a section in stored order, for
-// sections whose rows are enumerated (Property, Character, Paragraph,
-// Connection, Layer, Field).
+// Rows returns the row keys (Cell "") of every section of that name in
+// stored order, so Geometry rows of different section IX are mixed; each
+// key carries its SectionIX.
 func (s *Sheet) Rows(section string) []Key { return s.rows[section] }

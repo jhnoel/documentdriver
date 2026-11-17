@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jhnoel/documentdriver/internal/laws"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 )
 
@@ -218,6 +219,147 @@ func TestIndexNil(t *testing.T) {
 	}
 	if s.Deleted(ShapeCell("PinX")) || s.Rows("Property") != nil {
 		t.Error("empty sheet reports a deletion or rows, want none")
+	}
+}
+
+// TestDeletedRowZero checks that a deleted row IX 0 does not delete row 1.
+func TestDeletedRowZero(t *testing.T) {
+	s, skipped := indexXML(t, `<Shape><Section N='Character'><Row IX='0' Del='1'/><Row IX='1'><Cell N='Size' V='1'/></Row></Section></Shape>`)
+	if len(skipped) != 0 {
+		t.Fatalf("skipped = %v, want none", skipped)
+	}
+	if s.Deleted(IndexedRowCell("Character", -1, 1, "Size")) {
+		t.Error("Deleted(Character row 1 Size) = true, want false")
+	}
+	if !s.Deleted(IndexedRowCell("Character", -1, 0, "Size")) {
+		t.Error("Deleted(Character row 0 Size) = false, want true")
+	}
+	cell, ok := s.Cell(IndexedRowCell("Character", -1, 1, "Size"))
+	if !ok {
+		t.Fatal("Character row 1 Size absent")
+	}
+	if cell.V != "1" {
+		t.Errorf("Character row 1 Size V = %q, want %q", cell.V, "1")
+	}
+}
+
+// TestDeletedSectionCharacter checks that a deleted Character section
+// deletes its rows.
+func TestDeletedSectionCharacter(t *testing.T) {
+	s, skipped := indexXML(t, `<Shape><Section N='Character' Del='1'/></Shape>`)
+	if len(skipped) != 0 {
+		t.Fatalf("skipped = %v, want none", skipped)
+	}
+	if !s.Deleted(IndexedRowCell("Character", -1, 0, "Size")) {
+		t.Error("Deleted(Character row 0 Size) = false, want true")
+	}
+	if !s.Deleted(IndexedRowCell("Character", -1, 5, "Size")) {
+		t.Error("Deleted(Character row 5 Size) = false, want true")
+	}
+}
+
+// TestDeletedGeometrySectionIX checks that a deleted Geometry section
+// deletes only its own section IX.
+func TestDeletedGeometrySectionIX(t *testing.T) {
+	s, skipped := indexXML(t, `<Shape><Section N='Geometry' IX='0'><Row IX='1'><Cell N='X' V='0'/></Row></Section><Section N='Geometry' IX='1' Del='1'/></Shape>`)
+	if len(skipped) != 0 {
+		t.Fatalf("skipped = %v, want none", skipped)
+	}
+	if !s.Deleted(IndexedRowCell("Geometry", 1, 3, "X")) {
+		t.Error("Deleted(Geometry IX 1 row 3 X) = false, want true")
+	}
+	if s.Deleted(IndexedRowCell("Geometry", 0, 1, "X")) {
+		t.Error("Deleted(Geometry IX 0 row 1 X) = true, want false")
+	}
+}
+
+// TestDeletedNamedPropertyRow checks that a deleted Property row deletes
+// only that named row.
+func TestDeletedNamedPropertyRow(t *testing.T) {
+	s, skipped := indexXML(t, `<Shape><Section N='Property'><Row N='A' Del='1'/></Section></Shape>`)
+	if len(skipped) != 0 {
+		t.Fatalf("skipped = %v, want none", skipped)
+	}
+	if !s.Deleted(NamedRowCell("Property", "A", "Value")) {
+		t.Error("Deleted(Property A Value) = false, want true")
+	}
+	if s.Deleted(NamedRowCell("Property", "B", "Value")) {
+		t.Error("Deleted(Property B Value) = true, want false")
+	}
+}
+
+// TestRowsGeometryMixedSections checks that Rows mixes the Geometry
+// sections in stored order with each key carrying its SectionIX.
+func TestRowsGeometryMixedSections(t *testing.T) {
+	s, skipped := indexXML(t, `<Shape><Section N='Geometry' IX='0'><Row IX='1'/><Row IX='2'/></Section><Section N='Geometry' IX='1'><Row IX='1'/></Section></Shape>`)
+	if len(skipped) != 0 {
+		t.Fatalf("skipped = %v, want none", skipped)
+	}
+	want := []Key{IndexedRowCell("Geometry", 0, 1, ""), IndexedRowCell("Geometry", 0, 2, ""), IndexedRowCell("Geometry", 1, 1, "")}
+	if got := s.Rows("Geometry"); !slices.Equal(got, want) {
+		t.Errorf("Rows(Geometry) = %v, want %v", got, want)
+	}
+}
+
+// TestRowsDuplicateRow checks that a repeated row is listed once and
+// its second cells are skipped, one entry per cell.
+func TestRowsDuplicateRow(t *testing.T) {
+	s, skipped := indexXML(t, `<Shape><Section N='Character'><Row IX='3'><Cell N='Size' V='1'/><Cell N='Style' V='0'/></Row><Row IX='3'><Cell N='Size' V='9'/><Cell N='Style' V='9'/></Row></Section></Shape>`)
+	want := []Key{IndexedRowCell("Character", -1, 3, "")}
+	if got := s.Rows("Character"); !slices.Equal(got, want) {
+		t.Errorf("Rows(Character) = %v, want %v", got, want)
+	}
+	if len(skipped) != 2 {
+		t.Errorf("skipped = %v, want one entry per repeated cell (2)", skipped)
+	}
+	if cell, ok := s.Cell(IndexedRowCell("Character", -1, 3, "Size")); !ok || cell.V != "1" {
+		t.Errorf("Character row 3 Size = %+v, %v; want first V 1", cell, ok)
+	}
+}
+
+// TestScalingIndexGeometryRows checks that Index scales linearly with
+// Geometry rows: 20,000 rows cost at most 8 times the time and 5.5
+// times the bytes and allocations of 5,000 rows.
+func TestScalingIndexGeometryRows(t *testing.T) {
+	measure := func(n int) laws.Cost {
+		t.Helper()
+		var b strings.Builder
+		b.WriteString(`<Shape><Section N='Geometry' IX='0'>`)
+		for i := range n {
+			b.WriteString(`<Row T='LineTo' IX='`)
+			b.WriteString(strconv.Itoa(i))
+			b.WriteString(`'/>`)
+		}
+		b.WriteString(`</Section></Shape>`)
+		doc, err := tree.ParseString(b.String())
+		if err != nil {
+			t.Fatalf("ParseString: %v", err)
+		}
+		root := doc.Root()
+		run := func() error {
+			Index(root)
+			return nil
+		}
+		if err := run(); err != nil {
+			t.Fatalf("Index warm: %v", err)
+		}
+		cost, err := laws.Measure(5, run)
+		if err != nil {
+			t.Fatalf("Measure: %v", err)
+		}
+		return cost
+	}
+	small := measure(5000)
+	large := measure(20000)
+	t.Logf("Index Geometry rows: 5000 rows %d bytes %d allocs %s, 20000 rows %d bytes %d allocs %s", small.Bytes, small.Mallocs, small.Time, large.Bytes, large.Mallocs, large.Time)
+	if ratio := float64(large.Bytes) / float64(max(small.Bytes, 1)); ratio > 5.5 {
+		t.Errorf("Index allocates %.2f times the bytes for 4 times the rows (budget 5.5)", ratio)
+	}
+	if ratio := float64(large.Mallocs) / float64(max(small.Mallocs, 1)); ratio > 5.5 {
+		t.Errorf("Index makes %.2f times the allocations for 4 times the rows (budget 5.5)", ratio)
+	}
+	if ratio := float64(large.Time) / float64(max(small.Time, 1)); ratio > 8 {
+		t.Errorf("Index takes %.2f times the time for 4 times the rows (budget 8)", ratio)
 	}
 }
 
