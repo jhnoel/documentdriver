@@ -3,11 +3,9 @@ package main
 import (
 	"io"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
-	"github.com/jhnoel/documentdriver/internal/ids"
 	"github.com/jhnoel/documentdriver/internal/vsdx/apply"
 	"github.com/jhnoel/documentdriver/internal/vsdx/ops"
 )
@@ -24,7 +22,20 @@ var applyCommand = &cli.Command{
 		{Name: "seed", Value: "n", Hidden: true},
 		{Name: "clock", Value: "rfc3339", Hidden: true},
 	},
-	Help: "Applies a plan to the drawing and prints the edit result (docs/vsdx-contract-draft.md, section 4).",
+	Help: `Applies a plan (a JSON file, or - for stdin) to the drawing and prints
+the edit result: base and new_base (the drawing's hash before and after),
+the addresses given to aliases, every changed object as vsdx read shows
+it, deleted addresses, the hazards on the drawing after the plan (new
+marks those the plan introduced) and the parts touched. Without -o the
+drawing is replaced in place, atomically; --dry-run prints the result
+and writes nothing. A plan that fails changes no file.
+
+plan: {"ops":[{"op":"object.move","at":"page0/s5","dx":10,"dy":0}]}
+optional plan fields: base (the hash vsdx read shows: the plan is refused
+if the drawing has changed), units (pt, the default, or in).
+
+` + "`vsdx help ops`" + ` lists the operations; ` + "`vsdx help <op>`" + ` gives one.
+See the contract: docs/contract.md and docs/vsdx-contract-draft.md.`,
 }
 
 // defaultClock is the fixed clock of deterministic mode when --seed is
@@ -36,24 +47,11 @@ var defaultClock = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 func runApply(p *cli.Parsed, stdout io.Writer) error {
 	opt := apply.Options{DryRun: p.Has("dry-run"), Out: p.Get("out"), ChangedIDs: p.Get("changed") == "ids"}
 	// Hidden: deterministic mode, as pptx apply's.
-	if p.Has("seed") || p.Has("clock") {
-		seed, clock := int64(0), defaultClock
-		if p.Has("seed") {
-			n, err := strconv.ParseInt(p.Get("seed"), 10, 64)
-			if err != nil {
-				return cli.Errorf(cli.CodeUsage, "--seed", "--seed is a whole number")
-			}
-			seed = n
-		}
-		if p.Has("clock") {
-			c, err := time.Parse(time.RFC3339, p.Get("clock"))
-			if err != nil {
-				return cli.Errorf(cli.CodeUsage, "--clock", "--clock is an RFC 3339 time")
-			}
-			clock = c
-		}
-		opt.IDs = ids.Fixed(seed, clock)
+	src, err := cli.SeedClock(p)
+	if err != nil {
+		return err
 	}
+	opt.IDs = src
 	text, err := cli.ReadPlan(p.Args[1], os.Stdin)
 	if err != nil {
 		return err

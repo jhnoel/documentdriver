@@ -4,11 +4,8 @@ import (
 	"io"
 	"os"
 	"reflect"
-	"strconv"
-	"time"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
-	"github.com/jhnoel/documentdriver/internal/ids"
 	"github.com/jhnoel/documentdriver/internal/pptx/apply"
 	"github.com/jhnoel/documentdriver/internal/pptx/ops"
 )
@@ -89,35 +86,17 @@ func opsHelp() string { return cli.OpsHelp("pptx", opsIntro, opDocs()) + opsNote
 // opHelp returns the help text for one named operation and whether it exists.
 func opHelp(name string) (string, bool) { return cli.FindOpHelp(opDocs(), name) }
 
-// defaultClock is the fixed clock of deterministic mode when --seed is
-// given without --clock.
-var defaultClock = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
-
 // runApply applies the parsed plan to the deck and writes its JSON result.
 func runApply(p *cli.Parsed, stdout io.Writer) error {
 	opt := apply.Options{ChangedIDs: p.Get("changed") == "ids"}
 	opt.DryRun = p.Has("dry-run")
 	opt.Out = p.Get("out")
 	// Hidden: deterministic mode for evals and the parity oracle.
-	if p.Has("seed") || p.Has("clock") {
-		var seed int64
-		clock := defaultClock
-		if p.Has("seed") {
-			n, err := strconv.ParseInt(p.Get("seed"), 10, 64)
-			if err != nil {
-				return cli.Errorf(cli.CodeUsage, "--seed", "--seed is a whole number")
-			}
-			seed = n
-		}
-		if p.Has("clock") {
-			c, err := time.Parse(time.RFC3339, p.Get("clock"))
-			if err != nil {
-				return cli.Errorf(cli.CodeUsage, "--clock", "--clock is an RFC 3339 time")
-			}
-			clock = c
-		}
-		opt.IDs = ids.Fixed(seed, clock)
+	src, err := cli.SeedClock(p)
+	if err != nil {
+		return err
 	}
+	opt.IDs = src
 	text, err := cli.ReadPlan(p.Args[1], os.Stdin)
 	if err != nil {
 		return err
