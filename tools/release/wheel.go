@@ -133,8 +133,8 @@ func metadata(pyVersion string, bins map[string][]byte) []byte {
 	return []byte("Metadata-Version: 2.4\n" +
 		"Name: " + distName + "\n" +
 		"Version: " + pyVersion + "\n" +
-		"Summary: Read and edit Word, PowerPoint and Excel files from agents: the " + names + " CLIs as static binaries\n" +
-		"Keywords: docx,pptx,xlsx,ooxml,office,agents\n" +
+		"Summary: Read and edit Word, PowerPoint, Excel and Visio files from agents: the " + names + " CLIs as static binaries\n" +
+		"Keywords: docx,pptx,vsdx,xlsx,ooxml,office,agents\n" +
 		"License-Expression: Apache-2.0\n" +
 		"License-File: " + licenseFile + "\n" +
 		"Project-URL: Source, " + projectURL + "\n" +

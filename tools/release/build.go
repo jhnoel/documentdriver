@@ -30,7 +30,7 @@ var targets = []target{
 
 // wheelCommands are the CLIs the Python wheel carries, sorted: every CLI
 // with real commands.
-var wheelCommands = []string{"docx", "pptx", "xlsx"}
+var wheelCommands = []string{"docx", "pptx", "vsdx", "xlsx"}
 
 // binaryName is the release file name of a CLI for a target, e.g.
 // docx-0.1.0-linux-amd64.

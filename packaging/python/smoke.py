@@ -22,7 +22,7 @@ def main():
     got = metadata.version("documentdriver")
     assert got == py_version, "installed version %s, want %s" % (got, py_version)
     assert documentdriver.__version__ == py_version, documentdriver.__version__
-    assert documentdriver.names() == ["docx", "pptx", "xlsx"], documentdriver.names()
+    assert documentdriver.names() == ["docx", "pptx", "vsdx", "xlsx"], documentdriver.names()
     for name in documentdriver.names():
         path = documentdriver.binary(name)
         out = subprocess.run([path, "--version"], capture_output=True, check=True).stdout
