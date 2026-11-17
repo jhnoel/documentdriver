@@ -24,6 +24,9 @@ func (s *ObjectReorderSpec) Run(ws *edit.Workspace, aliases map[string]string, _
 	if err := reorderShapeAddr(at, "at"); err != nil {
 		return "", nil, nil, "", err
 	}
+	if err := targetRefusal(ws, at, "at", false); err != nil {
+		return "", nil, nil, "", err
+	}
 	to := s.To
 	if to != "front" && to != "back" {
 		resolved, err := addAddr(s.To, aliases, "to")

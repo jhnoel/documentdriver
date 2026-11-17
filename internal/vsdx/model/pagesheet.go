@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jhnoel/documentdriver/internal/geom"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/inherit"
@@ -133,12 +134,8 @@ func pageFacts(p *Page, d *doc.Document, r *inherit.Resolver, e *doc.PageEntry) 
 		}
 	}
 	if pageScale, _, ok := r.Cell(pageShape, sheet.ShapeCell("PageScale")); ok {
-		if drawingScale, _, ok := r.Cell(pageShape, sheet.ShapeCell("DrawingScale")); ok {
-			if ps, ok := vsd.Number(pageScale.V); ok {
-				if ds, ok := vsd.Number(drawingScale.V); ok && ps != ds {
-					p.Notes = append(p.Notes, doc.Note{At: p.ID, Reason: "drawing scale 1 in = 10 ft: lengths are stored drawing units"})
-				}
-			}
+		if drawingScale, _, ok := r.Cell(pageShape, sheet.ShapeCell("DrawingScale")); ok && scaled(pageScale, drawingScale) {
+			p.Notes = append(p.Notes, doc.Note{At: p.ID, Reason: "drawing scale " + scaleText(pageScale, drawingScale) + ": lengths are stored drawing units"})
 		}
 	}
 	if pageSheet != nil {
@@ -170,6 +167,66 @@ func pageFacts(p *Page, d *doc.Document, r *inherit.Resolver, e *doc.PageEntry) 
 			})
 		}
 	}
+}
+
+// scaleText returns the drawing scale of two scale cells as
+// "<PageScale> = <DrawingScale>", each as its stored value (geom.FormatNum)
+// and unit abbreviation as stored (IN_F and FT_I as in and ft), which
+// chunk CC6 derives the page note and the scaled-page refusal from.
+// It reports "" when either cell is not a number.
+func scaleText(pageScale, drawingScale sheet.Cell) string {
+	ps := scalePair(pageScale)
+	ds := scalePair(drawingScale)
+	if ps == "" || ds == "" {
+		return ""
+	}
+	return ps + " = " + ds
+}
+
+// scaled reports whether two scale cells differ, as numbers or in
+// unit (IN and IN_F are the same unit, FT and FT_I likewise): a page
+// whose PageScale and DrawingScale differ is a scaled page, whose
+// geometry v1 does not edit. A cell that is not a number is never
+// scaled.
+func scaled(pageScale, drawingScale sheet.Cell) bool {
+	ps, psOK := vsd.Number(pageScale.V)
+	ds, dsOK := vsd.Number(drawingScale.V)
+	if !psOK || !dsOK {
+		return false
+	}
+	return ps != ds || scaleUnit(pageScale.U) != scaleUnit(drawingScale.U)
+}
+
+// scalePair returns one scale cell as "<number> <unit>" (the number
+// alone when the unit is empty), or "" when the cell is not a number.
+func scalePair(cell sheet.Cell) string {
+	n, ok := vsd.Number(cell.V)
+	if !ok {
+		return ""
+	}
+	if u := scaleUnit(cell.U); u != "" {
+		return geom.FormatNum(n) + " " + u
+	}
+	return geom.FormatNum(n)
+}
+
+// scaleUnit returns Visio's abbreviation for a stored unit U: IN,
+// IN_F to in, FT, FT_I to ft, MM to mm, CM to cm, M to m, and any
+// other unit as stored.
+func scaleUnit(u string) string {
+	switch u {
+	case "IN", "IN_F":
+		return "in"
+	case "FT", "FT_I":
+		return "ft"
+	case "MM":
+		return "mm"
+	case "CM":
+		return "cm"
+	case "M":
+		return "m"
+	}
+	return u
 }
 
 // layerMembers returns the layer addresses of a LayerMember value

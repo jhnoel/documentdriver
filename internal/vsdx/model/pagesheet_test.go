@@ -7,6 +7,7 @@ import (
 
 	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/inherit"
+	"github.com/jhnoel/documentdriver/internal/vsdx/sheet"
 )
 
 // TestPageSheetV1 checks the V1 row: page0 W 8.5, H 11, Orientation
@@ -163,7 +164,7 @@ func TestPageSheetV13ScaleNote(t *testing.T) {
 	p := PageSheet(d, r, e)
 	found := false
 	for _, n := range p.Notes {
-		if n.At == "page0" && n.Reason == "drawing scale 1 in = 10 ft: lengths are stored drawing units" {
+		if n.At == "page0" && n.Reason == "drawing scale 1 in = 120 ft: lengths are stored drawing units" {
 			found = true
 		}
 	}
@@ -221,5 +222,31 @@ func TestPageSheetOf(t *testing.T) {
 	d, r := openFixture(t, "v1-minimal")
 	if p := pageSheetOf(t, d, r, 0); p.ID != "page0" || p.W != 8.5 {
 		t.Errorf("pageSheetOf(0) = %+v, want page0 with W 8.5", p)
+	}
+}
+
+// TestScaleText checks the CC6 rows: each scale cell shows as its
+// number (geom.FormatNum) and unit abbreviation as stored (IN_F and
+// FT_I as in and ft), and a non-number gives "".
+func TestScaleText(t *testing.T) {
+	for _, tc := range []struct {
+		page, drawing sheet.Cell
+		want          string
+		scaled        bool
+	}{
+		{sheet.Cell{V: "1", U: "IN"}, sheet.Cell{V: "120", U: "FT"}, "1 in = 120 ft", true},
+		{sheet.Cell{V: "1", U: "IN_F"}, sheet.Cell{V: "1", U: "IN_F"}, "1 in = 1 in", false},
+		{sheet.Cell{V: "1", U: "IN"}, sheet.Cell{V: "1", U: "IN_F"}, "1 in = 1 in", false},
+		{sheet.Cell{V: "2", U: "CM"}, sheet.Cell{V: "0.5", U: "M"}, "2 cm = 0.5 m", true},
+		{sheet.Cell{V: "1", U: "MM"}, sheet.Cell{V: "25.4", U: "MM"}, "1 mm = 25.4 mm", true},
+		{sheet.Cell{V: "", U: "IN"}, sheet.Cell{V: "1", U: "FT"}, "", false},
+	} {
+		ps, ds := tc.page, tc.drawing
+		if got := scaleText(ps, ds); got != tc.want {
+			t.Errorf("scaleText(%+v, %+v) = %q, want %q", tc.page, tc.drawing, got, tc.want)
+		}
+		if got := scaled(ps, ds); got != tc.scaled {
+			t.Errorf("scaled(%+v, %+v) = %v, want %v", tc.page, tc.drawing, got, tc.scaled)
+		}
 	}
 }

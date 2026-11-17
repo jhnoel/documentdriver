@@ -95,6 +95,18 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 	if node == nil {
 		return nil, "", cli.Errorf(cli.CodeNotFound, "at", "no shape %s: not found", shapeAddr)
 	}
+	if err := nodeRefusal(r, node, shapeAddr, "at", false); err != nil {
+		return nil, "", err
+	}
+	if s.From != nil || s.To != nil {
+		field := "from"
+		if s.From == nil {
+			field = "to"
+		}
+		if err := scaledRefusal(r, d, a.Container, a.PageDup, pageAddr, field); err != nil {
+			return nil, "", err
+		}
+	}
 	h := addHead(node, 0, false)
 	if _, _, has := r.Cell(h, sheet.ShapeCell(vsd.CellBeginX)); !has {
 		return nil, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s is not a 1-D shape: from/to and glue apply to a connector", shapeAddr)

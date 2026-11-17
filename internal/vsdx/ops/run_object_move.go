@@ -79,6 +79,12 @@ func (s *ObjectMoveSpec) Run(ws *edit.Workspace, aliases map[string]string, unit
 	if node == nil {
 		return "", nil, nil, "", cli.Errorf(cli.CodeNotFound, "at", "no shape %s: not found", shapeAddr)
 	}
+	if err := nodeRefusal(r, node, shapeAddr, "at", true); err != nil {
+		return "", nil, nil, "", err
+	}
+	if err := scaledRefusal(r, d, a.Container, a.PageDup, pageAddr, "at"); err != nil {
+		return "", nil, nil, "", err
+	}
 	if !moveAncestorsOK(r, node) {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s has no readable transform", shapeAddr)
 	}

@@ -67,6 +67,9 @@ func setStyle(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, u
 	if err != nil {
 		return nil, "", err
 	}
+	if err := shapeRefusal(st.res, st.shape, addr, "at", false); err != nil {
+		return nil, "", err
+	}
 	cells, err := styleCells(st, s, hex, color, scale)
 	if err != nil {
 		return nil, "", err
