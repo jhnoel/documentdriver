@@ -44,9 +44,13 @@ check: norequire vet test fmt
 # corpora set, PPTX_CORPUS (default: the repository's corpus/, from a
 # worktree too, via tools/corpusdir) and DOCX_CORPUS (default: corpus/lo
 # of DOCXDRIVER_REPO, which defaults to the docxdriver checkout beside the
-# main checkout), and XLSX_CORPUS (default: the xlsx/ directory of the
+# main checkout), XLSX_CORPUS (default: the xlsx/ directory of the
 # pptx corpus, where eval/corpus/fetch-xlsx.sh puts it; passed through
-# only when it exists, and an error when set to a missing directory). The
+# only when it exists, and an error when set to a missing directory),
+# and VSDX_CORPUS (default: the vsdx/ directory of the pptx corpus,
+# files under repos/<source>/, where eval/corpus/fetch-vsdx.sh puts it;
+# passed through only when it exists, and an error when set to a
+# missing directory). The
 # corpus suites check their files in parallel
 # (internal/corpustest): CORPUS_PARALLEL files at once per suite (default
 # GOMAXPROCS). SHARD=i/n (1 <= i <= n) runs only shard i of n of every
@@ -72,8 +76,12 @@ corpus:
 	if [ -n "$$xlsx" ]; then \
 		[ -d "$$xlsx" ] || { echo "corpus: XLSX_CORPUS=$$xlsx is not a directory"; exit 2; }; \
 	elif [ -d "$$main/xlsx" ]; then xlsx="$$main/xlsx"; fi; \
-	echo "corpus: PPTX_CORPUS=$$pptx DOCX_CORPUS=$$docx XLSX_CORPUS=$${xlsx:-(none)} shard $${SHARD:-all}, CORPUS_PARALLEL=$${CORPUS_PARALLEL:-GOMAXPROCS}, -p $(CORPUS_P)"; \
-	PPTX_CORPUS="$$pptx" DOCX_CORPUS="$$docx" XLSX_CORPUS="$$xlsx" CORPUS_SHARD="$(SHARD)" \
+	vsdx="$${VSDX_CORPUS:-}"; \
+	if [ -n "$$vsdx" ]; then \
+		[ -d "$$vsdx" ] || { echo "corpus: VSDX_CORPUS=$$vsdx is not a directory"; exit 2; }; \
+	elif [ -d "$$main/vsdx" ]; then vsdx="$$main/vsdx"; fi; \
+	echo "corpus: PPTX_CORPUS=$$pptx DOCX_CORPUS=$$docx XLSX_CORPUS=$${xlsx:-(none)} VSDX_CORPUS=$${vsdx:-(none)} shard $${SHARD:-all}, CORPUS_PARALLEL=$${CORPUS_PARALLEL:-GOMAXPROCS}, -p $(CORPUS_P)"; \
+	PPTX_CORPUS="$$pptx" DOCX_CORPUS="$$docx" XLSX_CORPUS="$$xlsx" VSDX_CORPUS="$$vsdx" CORPUS_SHARD="$(SHARD)" \
 		go test -count=1 -timeout $(CORPUS_TIMEOUT) -p $(CORPUS_P) ./...
 
 # Native Go fuzzing, FUZZTIME per target (go test fuzzes one target per
@@ -189,13 +197,13 @@ race:
 # checks are deterministic, so they hold on a loaded machine. It runs in
 # seconds; make test runs it too, this target runs it alone and uncached.
 scaling:
-	go test -count=1 -run '^(TestScaling|TestMemoryBudget)' ./internal/docx/apply ./internal/docx/create ./internal/pptx/apply ./internal/xlsx/read ./internal/xlsx/apply ./internal/xlsx/shift
+	go test -count=1 -run '^(TestScaling|TestMemoryBudget)' ./internal/docx/apply ./internal/docx/create ./internal/pptx/apply ./internal/xlsx/read ./internal/xlsx/apply ./internal/xlsx/shift ./internal/vsdx/read
 
 # repro builds each CLI of REPRO_CMDS twice from `git archive HEAD` in two
 # separate clean directories (fresh build caches, different paths) with
 # CGO_ENABLED=0 -trimpath and fails if any binary differs. It checks the
 # committed HEAD, not uncommitted changes.
-REPRO_CMDS = pptx docx xlsx
+REPRO_CMDS = pptx docx xlsx vsdx
 
 repro:
 	@set -e; \
