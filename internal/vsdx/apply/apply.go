@@ -192,6 +192,27 @@ func Run(path string, p *ops.Plan, opt Options) (*plan.Result, error) {
 	return &res, nil
 }
 
+// ResultJSON writes res as the vsdx apply or create result JSON (chunk
+// CC9, contract section 4): when units is the plan's units it is
+// echoed after base, and for a create result (whose Base is empty)
+// after new_base, as pptx does; with empty units it is res.JSON().
+func ResultJSON(res *plan.Result, units string, create bool) ([]byte, error) {
+	if units == "" {
+		return res.JSON()
+	}
+	if !create || res.NewBase == "" {
+		return res.JSON(plan.Field{Key: "units", Value: units})
+	}
+	// plan.Result.JSON puts head fields before new_base, so a create
+	// result's new_base is handed back as the first head field and
+	// its own is cleared for the call, then restored.
+	newBase := res.NewBase
+	res.NewBase = ""
+	b, err := res.JSON(plan.Field{Key: "new_base", Value: newBase}, plan.Field{Key: "units", Value: units})
+	res.NewBase = newBase
+	return b, err
+}
+
 // inputFacts returns whether the input asks Visio to recalculate on
 // open and every integrity finding in it, opening input with the safety
 // limits.
