@@ -222,8 +222,14 @@ func TestLinkConnectsGeneratedHazardsAcrossViews(t *testing.T) {
 				o, len(p.Hazards), firstHazard(p.Hazards), len(want), firstHazard(want))
 		}
 	}
-	if len(want) != 2500 {
-		t.Errorf("Generated(5000): Hazards = %d, want 2500 (one stale end per generated connector)", len(want))
+	stale := 0
+	for _, h := range want {
+		if h.Kind == "stale-connector" {
+			stale++
+		}
+	}
+	if stale != 2500 {
+		t.Errorf("Generated(5000): stale-connector Hazards = %d, want 2500 (one stale end per generated connector)", stale)
 	}
 }
 

@@ -106,8 +106,11 @@ func idList(value string) []string {
 }
 
 // renderPage converts the drawing at file and rasterises the PDF page
-// info.Index+1 at scale pixels per point, refusing when the PDF page
-// count is known and differs from the drawing's page count.
+// info.Index+1 at scale pixels per point, returning only that page's
+// own size: LibreOffice sizes every PDF page to the union of all pages,
+// so the raster of a smaller page is cut to info.W by info.H (see
+// render.CropToPage). It refuses when the PDF page count is known and
+// differs from the drawing's page count.
 func renderPage(renderer *render.Renderer, file string, info read.PageInfo, scale float64) (*image.RGBA, error) {
 	pdf, err := renderer.Convert(file, "drawing.vsdx", "", render.DefaultTimeout)
 	if err != nil {
@@ -116,7 +119,11 @@ func renderPage(renderer *render.Renderer, file string, info read.PageInfo, scal
 	if n := render.CountPages(pdf); n > 0 && n != info.Count {
 		return nil, fmt.Errorf("render: LibreOffice exported %d pages for a %d-page drawing; cannot map %s to a page", n, info.Count, info.Page)
 	}
-	return renderer.Rasterise(pdf, info.Index+1, 72*scale, render.DefaultTimeout)
+	img, err := renderer.Rasterise(pdf, info.Index+1, 72*scale, render.DefaultTimeout)
+	if err != nil {
+		return nil, err
+	}
+	return render.CropToPage(img, info.W, info.H, scale), nil
 }
 
 // pageMarks reads page of input through read.PageModel and turns its

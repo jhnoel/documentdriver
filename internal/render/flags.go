@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -72,10 +73,11 @@ func ParseOverlay(s string) (Overlay, error) {
 // ParseScale parses a --scale value as a positive number, for the
 // caller to wrap as a usage error on the flag. The caller supplies
 // DefaultScale when the flag is absent; an empty value is not a
-// positive number.
+// positive number. Infinity and NaN (which ParseFloat accepts) are
+// not a positive number either.
 func ParseScale(s string) (float64, error) {
 	n, err := strconv.ParseFloat(s, 64)
-	if err != nil || n <= 0 {
+	if err != nil || n <= 0 || math.IsNaN(n) || math.IsInf(n, 0) {
 		return 0, errors.New("--scale is a positive number")
 	}
 	return n, nil

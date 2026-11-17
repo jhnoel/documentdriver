@@ -2,6 +2,9 @@ package render
 
 import (
 	"errors"
+	"image"
+	"image/color"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -115,5 +118,59 @@ func TestConvertNamesWorkFiles(t *testing.T) {
 				t.Errorf("Conversions() = %d after the same file again, want 1", r.Conversions())
 			}
 		})
+	}
+}
+
+// TestCropToPage checks CropToPage: the union raster is cut to one
+// page's own size at the scale, keeping the top-left content, and a
+// page that already fills the raster, or a page with no positive
+// finite size or scale, leaves the raster unchanged.
+func TestCropToPage(t *testing.T) {
+	// pattern holds a distinct colour at each of 8 by 6 pixels.
+	pattern := func() *image.RGBA {
+		img := image.NewRGBA(image.Rect(0, 0, 8, 6))
+		for y := 0; y < 6; y++ {
+			for x := 0; x < 8; x++ {
+				img.SetRGBA(x, y, color.RGBA{uint8(x), uint8(y), 0, 255})
+			}
+		}
+		return img
+	}
+	for _, tc := range []struct {
+		w, h, scale   float64
+		width, height int
+	}{
+		{w: 5, h: 4, scale: 1, width: 5, height: 4},
+		{w: 5, h: 2, scale: 2, width: 8, height: 4}, // at the raster, clamped
+		{w: 2.5, h: 1.5, scale: 2, width: 5, height: 3},
+		{w: 3.6, h: 3.4, scale: 1, width: 4, height: 3}, // rounded to a pixel
+		{w: 8, h: 6, scale: 1, width: 8, height: 6},     // already its size
+		{w: 100, h: 100, scale: 1, width: 8, height: 6}, // larger than the raster, clamped
+		{w: 0, h: 4, scale: 1, width: 8, height: 6},
+		{w: -5, h: 4, scale: 1, width: 8, height: 6},
+		{w: 5, h: 4, scale: 0, width: 8, height: 6},
+		{w: 5, h: 4, scale: -1, width: 8, height: 6},
+		{w: math.NaN(), h: 4, scale: 1, width: 8, height: 6},
+		{w: 5, h: math.Inf(1), scale: 1, width: 8, height: 6},
+		{w: 5, h: 4, scale: math.Inf(1), width: 8, height: 6},
+	} {
+		img := pattern()
+		got := CropToPage(img, tc.w, tc.h, tc.scale)
+		if got.Bounds().Dx() != tc.width || got.Bounds().Dy() != tc.height {
+			t.Errorf("CropToPage(%v, %v, %v) = %d x %d, want %d x %d",
+				tc.w, tc.h, tc.scale, got.Bounds().Dx(), got.Bounds().Dy(), tc.width, tc.height)
+			continue
+		}
+		for y := 0; y < tc.height; y++ {
+			for x := 0; x < tc.width; x++ {
+				if got.RGBAAt(x, y) != img.RGBAAt(x, y) {
+					t.Fatalf("CropToPage(%v, %v, %v) pixel %d,%d = %v, want %v (top-left content kept)",
+						tc.w, tc.h, tc.scale, x, y, got.RGBAAt(x, y), img.RGBAAt(x, y))
+				}
+			}
+		}
+	}
+	if CropToPage(nil, 5, 4, 1) != nil {
+		t.Error("CropToPage(nil) is not nil")
 	}
 }

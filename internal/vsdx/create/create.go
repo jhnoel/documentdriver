@@ -53,6 +53,12 @@ func Run(p *ops.Plan, opt Options) (*plan.Result, error) {
 	if err := f.Close(); err != nil {
 		return nil, cli.Errorf(cli.CodeIO, "", "close temporary drawing: %v", err)
 	}
+	// The saves below preserve their source file's mode, as apply does
+	// for its input, so the template must carry the drawing's mode:
+	// os.CreateTemp's 0600 would otherwise become the output's mode.
+	if err := os.Chmod(f.Name(), 0o644); err != nil { //nolint:gosec // G302: a drawing for the caller, as any tool would write it
+		return nil, cli.Errorf(cli.CodeIO, "", "set temporary drawing mode: %v", err)
+	}
 	if p == nil {
 		return blank(f.Name(), template, opt)
 	}
