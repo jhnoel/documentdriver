@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/png"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -186,6 +187,49 @@ func decodeRGBA(rd io.Reader) (*image.RGBA, error) {
 		}
 	}
 	return out, nil
+}
+
+// CropToPage returns a new image holding only one page's own size from
+// img, the raster of a LibreOffice PDF page. LibreOffice exports
+// every PDF page with one uniform size, the union of all pages'
+// sizes, and draws each page's content at the top-left, so img can
+// be wider or taller than the page it shows; the pages' own width
+// and height w and h (points, the read view's size) at scale pixels
+// per point are that page's size at the scale, and the extra right
+// and bottom margins are cut away. The crop is rounded to a pixel
+// and clamped to the raster (never padded or stretched: a page
+// nearer than a pixel to the raster's edge still gives the raster's
+// size). When w, h and scale are not positive, finite numbers the
+// page has no size to crop to, and img itself is returned.
+func CropToPage(img *image.RGBA, w, h, scale float64) *image.RGBA {
+	if img == nil {
+		return img
+	}
+	for _, v := range [3]float64{w, h, scale} {
+		if v <= 0 || math.IsNaN(v) || math.IsInf(v, 0) {
+			return img
+		}
+	}
+	b := img.Bounds()
+	wpx, hpx := b.Dx(), b.Dy()
+	if fw := math.Round(w * scale); fw < float64(wpx) {
+		wpx = int(fw)
+	}
+	if fh := math.Round(h * scale); fh < float64(hpx) {
+		hpx = int(fh)
+	}
+	if wpx <= 0 || hpx <= 0 {
+		return img
+	}
+	if wpx == b.Dx() && hpx == b.Dy() {
+		return img
+	}
+	out := image.NewRGBA(image.Rect(0, 0, wpx, hpx))
+	for y := range hpx {
+		src := img.PixOffset(b.Min.X, b.Min.Y+y)
+		copy(out.Pix[y*out.Stride:y*out.Stride+wpx*4], img.Pix[src:src+wpx*4])
+	}
+	return out
 }
 
 // EncodePNG writes img as a PNG.
