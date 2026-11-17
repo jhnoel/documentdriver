@@ -1,6 +1,7 @@
 package emit
 
 import (
+	"math"
 	"strconv"
 	"strings"
 
@@ -28,8 +29,17 @@ type End struct {
 // Sheet.N!Connections.Yn))"), a Geometry section with NoFill 1, MoveTo
 // (0,0) and LineTo (Width,0) (X with F="Width*1"), styles 3, and the
 // Connect rows of its glued ends (FromPart 9 or 12, ToPart 100+n-1).
-// ok is false when the ends coincide. Chunk K4.
+// ok is false (no bytes) when the ends coincide (OneD refuses), when any
+// end coordinate is NaN or infinite, or when a glued end has Point < 1
+// (it would write Connections.X0 and ToPart 99) or Target 0. Chunk K4,
+// K4F.
 func ConnectorXML(id uint32, begin, end End) (shape []byte, connects [][]byte, ok bool) {
+	if math.IsNaN(begin.X) || math.IsInf(begin.X, 0) || math.IsNaN(begin.Y) || math.IsInf(begin.Y, 0) || math.IsNaN(end.X) || math.IsInf(end.X, 0) || math.IsNaN(end.Y) || math.IsInf(end.Y, 0) {
+		return nil, nil, false
+	}
+	if (begin.Glued && (begin.Point < 1 || begin.Target == 0)) || (end.Glued && (end.Point < 1 || end.Target == 0)) {
+		return nil, nil, false
+	}
 	pinX, pinY, width, angle, oneDOK := formula.OneD(begin.X, begin.Y, end.X, end.Y)
 	if !oneDOK {
 		return nil, nil, false
