@@ -115,15 +115,12 @@ func (w *Workspace) AddPage(entry func(relID string) ([]byte, error), after stri
 	}
 	name, _ := pageNode.Attr("Name")
 	nameU, _ := pageNode.Attr("NameU")
-	w.core.DeclarePart(partName)
-	w.core.DeclarePart(opc.ContentTypesName)
-	w.core.DeclarePart(rels.Name())
-	if _, err := w.pkg.AddPart(partName, emit.PageContentsXML(), ctypes.CTMsVisioPage); err != nil {
-		return "", fmt.Errorf("vsdx edit: %w", err)
+	if err := w.AddPart(partName, emit.PageContentsXML(), ctypes.CTMsVisioPage); err != nil {
+		return "", err
 	}
-	gotID, err := rels.Add(ctypes.RelPage, path.Base(partName), false)
+	gotID, err := w.AddRel(w.pagesPart, ctypes.RelPage, path.Base(partName))
 	if err != nil {
-		return "", fmt.Errorf("vsdx edit: %w", err)
+		return "", err
 	}
 	if gotID != relID {
 		return "", fmt.Errorf("vsdx edit: relationship %q, want %q", gotID, relID)
