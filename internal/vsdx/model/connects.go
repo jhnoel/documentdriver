@@ -7,7 +7,6 @@ import (
 
 	"github.com/jhnoel/documentdriver/internal/geom"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
-	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/inherit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/place"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
@@ -119,32 +118,15 @@ func linkConnects(p *Page, r *inherit.Resolver, connects *tree.Node, byID map[ui
 		if gluedOf(p, c, byID) {
 			continue
 		}
-		var fromID, toID uint32
-		var fromOK bool
-		fromCell, toCell := "", ""
-		for name, value := range c.AttrsSeq() {
-			switch name {
-			case "FromSheet":
-				if u, err := strconv.ParseUint(value, 10, 32); err == nil {
-					fromID, fromOK = uint32(u), true
-				}
-			case "ToSheet":
-				if u, err := strconv.ParseUint(value, 10, 32); err == nil {
-					toID = uint32(u)
-				}
-			case "FromCell":
-				fromCell = value
-			case "ToCell":
-				toCell = value
-			}
-		}
+		cr := readConnect(c)
+		fromID, toID, fromCell, toCell := cr.fromID, cr.toID, cr.fromCell, cr.toCell
 		begin := fromCell == vsd.FromCellBegin
 		if !begin && fromCell != vsd.FromCellEnd {
 			continue
 		}
 		fromPl, found := byID[fromID]
-		if !fromOK || fromID == 0 || !found || fromPl == nil || fromPl.obj == nil {
-			p.Notes = append(p.Notes, doc.Note{At: p.ID, Reason: "connect from sheet names no shape"})
+		if !cr.fromOK || fromID == 0 || !found || fromPl == nil || fromPl.obj == nil {
+			p.Notes = append(p.Notes, noShapeNote(p))
 			continue
 		}
 		toPl, found := byID[toID]

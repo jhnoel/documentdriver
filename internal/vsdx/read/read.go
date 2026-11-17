@@ -27,6 +27,10 @@ type Options struct {
 	IDs []string
 	// Region keeps objects whose box intersects x, y, w, h (view units).
 	Region *[4]float64
+	// Checkpoint, when not nil, is passed to model.Options.Checkpoint:
+	// the memory gate's mark inside the page build (chunk RM2; field
+	// landed by the designer). The CLI leaves it nil.
+	Checkpoint func(name string)
 }
 
 // Summary is read without --page or --master.
