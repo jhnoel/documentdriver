@@ -155,8 +155,34 @@ func TestSlideHiddenAndOrder(t *testing.T) {
 	if !isBackground(res2.Image, x, y) {
 		t.Errorf("slide 2 has paint at slide 1's box position")
 	}
-	if len(r.pdf) != 1 {
-		t.Errorf("%d conversions for one deck, want 1", len(r.pdf))
+	if r.Conversions() != 1 {
+		t.Errorf("%d conversions for one deck, want 1", r.Conversions())
+	}
+}
+
+func TestSlideWorkDir(t *testing.T) {
+	r := needRenderer(t)
+	deck := testdeck.Minimal(t)
+	if _, err := r.Slide(deck, "slide1", Options{}); err != nil {
+		t.Fatal(err)
+	}
+	// Slide converted the deck once, under the name deck.pptx, so the
+	// cached PDF sits beside the deck.pptx copy in the work directory.
+	pdf, err := r.Convert(deck, "deck.pptx", "", DefaultTimeout)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if filepath.Base(pdf) != "deck.pdf" {
+		t.Errorf("pdf = %s, want base deck.pdf", pdf)
+	}
+	work := filepath.Dir(pdf)
+	for _, want := range []string{"deck.pptx", "deck.pdf"} {
+		if _, err := os.Stat(filepath.Join(work, want)); err != nil {
+			t.Errorf("work directory lacks %s: %v", want, err)
+		}
+	}
+	if r.Conversions() != 1 {
+		t.Errorf("Conversions() = %d, want 1", r.Conversions())
 	}
 }
 

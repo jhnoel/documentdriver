@@ -60,7 +60,6 @@ type Result struct {
 // is not safe for concurrent use. Call Close to remove the temporary files.
 type Renderer struct {
 	*sharedrender.Renderer
-	pdf map[string]string // deck sha256 -> pdf path (the shared cache, mirrored)
 }
 
 // New returns a Renderer. It reads PPTX_SOFFICE for the soffice path and
@@ -74,7 +73,7 @@ func New() (*Renderer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Renderer{Renderer: r, pdf: map[string]string{}}, nil
+	return &Renderer{Renderer: r}, nil
 }
 
 // Slide renders one slide of the deck at path. slide is a part name such as
@@ -97,11 +96,10 @@ func (r *Renderer) Slide(deck, slide string, opt Options) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	pdf, err := r.Convert(deck, impressFilter, opt.Timeout)
+	pdf, err := r.Convert(deck, "deck.pptx", impressFilter, opt.Timeout)
 	if err != nil {
 		return nil, err
 	}
-	r.pdf = r.PDFs()
 	if n := sharedrender.CountPages(pdf); n > 0 && n != info.Count {
 		return nil, fmt.Errorf("render: LibreOffice exported %d pages for a %d-slide deck (%d hidden); cannot map %s to a page",
 			n, info.Count, info.Hiddens, slide)
