@@ -177,13 +177,26 @@ func scaledRefusal(r *inherit.Resolver, d *doc.Document, container uint32, dup i
 // it. A missing shape or page, or an unreadable page part, gives
 // nil, so the op's own error for the target stands.
 func targetRefusal(ws *edit.Workspace, addr, field string, member bool) error {
+	d, node, _, ok := targetNode(ws, addr)
+	if !ok {
+		return nil
+	}
+	return nodeRefusal(inherit.New(d), node, addr, field, member)
+}
+
+// targetNode returns the document and the node of the shape at addr
+// in its page's working tree, and the parsed address. It reports
+// false when addr is not a page shape, the page or shape is missing,
+// or the page part is unreadable, so the caller's own error for the
+// target stands.
+func targetNode(ws *edit.Workspace, addr string) (*doc.Document, *tree.Node, vsd.Address, bool) {
 	a, err := vsd.Parse(addr)
 	if err != nil || a.Kind != vsd.KindShape || a.InMaster {
-		return nil
+		return nil, nil, vsd.Address{}, false
 	}
 	d, err := doc.Open(ws.Package())
 	if err != nil {
-		return nil
+		return nil, nil, vsd.Address{}, false
 	}
 	var entry *doc.PageEntry
 	seen := 0
@@ -199,19 +212,57 @@ func targetRefusal(ws *edit.Workspace, addr, field string, member bool) error {
 		}
 	}
 	if entry == nil || entry.Part == "" {
-		return nil
+		return nil, nil, vsd.Address{}, false
 	}
 	working, err := ws.Core().Tree(entry.Part)
 	if err != nil {
-		return nil
+		return nil, nil, vsd.Address{}, false
 	}
 	root := working.Root()
 	if root == nil || !vsd.IsMain(root.Space()) || root.Local() != vsd.ElemPageContents {
-		return nil
+		return nil, nil, vsd.Address{}, false
 	}
 	node := findTextShape(root, a.Shape, a.Dup)
 	if node == nil {
+		return nil, nil, vsd.Address{}, false
+	}
+	return d, node, a, true
+}
+
+// inheritedSubShapeRefusal reports the refusal of deleting the shape
+// at addr when it is a master-inherited sub-shape: the shape stores
+// MasterShape and sits inside a master instance (an enclosing shape
+// that stores Master). Deleting the instance deletes its sub-shapes
+// with it; deleting one sub-shape alone would strand the instance.
+// It returns nil for every other shape, including the instance
+// itself and a plain group child with no MasterShape.
+func inheritedSubShapeRefusal(ws *edit.Workspace, addr, field string) error {
+	_, node, a, ok := targetNode(ws, addr)
+	if !ok {
 		return nil
 	}
-	return nodeRefusal(inherit.New(d), node, addr, field, member)
+	sh := textShapeOf(node)
+	if sh == nil || !sh.HasMShape || !sh.HasMaster {
+		return nil
+	}
+	var instance *tree.Node
+	for p := node.Parent(); p != nil; p = p.Parent() {
+		if p.Kind() != tree.ElementNode || !vsd.IsMain(p.Space()) || p.Local() != vsd.ElemShape {
+			continue
+		}
+		if _, ok := p.Attr("Master"); ok {
+			instance = p
+			break
+		}
+	}
+	if instance == nil {
+		return nil
+	}
+	raw, ok := instance.Attr("ID")
+	id, err := strconv.ParseUint(raw, 10, 32)
+	if !ok || err != nil {
+		return nil
+	}
+	at := vsd.ShapeID(vsd.PageID(a.Container, a.PageDup), uint32(id), 1)
+	return cli.Errorf(cli.CodeOperationFailed, field, "%s is inherited from %s (master shape %d): delete the instance %s, or edit the master in Visio", addr, vsd.MasterID(sh.Master), sh.MasterShape, at)
 }
