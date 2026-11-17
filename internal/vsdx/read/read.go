@@ -6,6 +6,7 @@ package read
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/geom"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
@@ -77,7 +78,7 @@ func Document(input []byte, base string) (*Summary, error) {
 	defer pkg.Close()
 	d, err := doc.Open(pkg)
 	if err != nil {
-		return nil, fmt.Errorf("vsdx: %w", err)
+		return nil, err // doc.Open's errors already carry one "vsdx:" prefix
 	}
 	r := inherit.New(d)
 	sum := &Summary{Base: base, Pages: []PageEntry{}, Masters: []MasterEntry{}, Notes: []Note{}}
@@ -127,17 +128,27 @@ func Document(input []byte, base string) (*Summary, error) {
 	return sum, nil
 }
 
+// wrapPart names part in err's context without adding a second
+// "vsdx:" when err already carries one: the part context alone is
+// wrapped as "<part>: <err>" then. Chunk MF6.
+func wrapPart(part string, err error) error {
+	if strings.HasPrefix(err.Error(), "vsdx:") {
+		return fmt.Errorf("%s: %w", part, err)
+	}
+	return fmt.Errorf("vsdx: %s: %w", part, err)
+}
+
 // countObjects counts the Shape elements of the part at part in pkg
 // with a streaming tree.ScanString, dropping the part's cached bytes
 // after (Part.Forget) so one page is held at a time. Chunk R1.
 func countObjects(pkg *opc.Package, part string) (int, error) {
 	pt, err := pkg.Part(part)
 	if err != nil {
-		return 0, fmt.Errorf("vsdx: %s: %w", part, err)
+		return 0, wrapPart(part, err)
 	}
 	s, ok, err := pt.OriginalString()
 	if err != nil {
-		return 0, fmt.Errorf("vsdx: %s: %w", part, err)
+		return 0, wrapPart(part, err)
 	}
 	if !ok {
 		return 0, fmt.Errorf("vsdx: %s has no original bytes", part)
@@ -146,7 +157,7 @@ func countObjects(pkg *opc.Package, part string) (int, error) {
 	err = tree.ScanString(s, c)
 	pt.Forget()
 	if err != nil {
-		return 0, fmt.Errorf("vsdx: %s: %w", part, err)
+		return 0, wrapPart(part, err)
 	}
 	return c.count, nil
 }
