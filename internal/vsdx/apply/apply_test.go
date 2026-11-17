@@ -61,16 +61,6 @@ func (o *wireOp) Run(ws *edit.Workspace, _ map[string]string, _ string, _ ids.So
 	return "", changed, nil, o.Stale, nil
 }
 
-// parsePlan decodes the plan JSON text, failing the test on any fault.
-func parsePlan(t *testing.T, text string) *ops.Plan {
-	t.Helper()
-	p, errs := ops.ParsePlan([]byte(text))
-	if len(errs) != 0 || p == nil {
-		t.Fatalf("ParsePlan(%s): %v errors %v", text, p, errs)
-	}
-	return p
-}
-
 // wirePlan builds a plan holding specs, with no base.
 func wirePlan(specs ...ops.Spec) *ops.Plan {
 	return &ops.Plan{Ops: specs}
@@ -86,42 +76,46 @@ func readFile(t *testing.T, path string) []byte {
 	return b
 }
 
-// TestPendingOps checks the A1 row: a plan of only pending ops refuses
-// with operation_failed at ops[0], naming the op.
-func TestPendingOps(t *testing.T) {
-	for _, tc := range []struct {
-		text string
-		name string
-	}{
-		{`{"ops":[{"op":"object.add","at":"page0","geom":"rect","box":[0,0,10,10]}]}`, "object.add"},
-		{`{"ops":[{"op":"object.set","at":"page0/s1","box":[0,0,10,10]}]}`, "object.set"},
-		{`{"ops":[{"op":"text.set","at":"page0/s1","html":"<p>x</p>"}]}`, "text.set"},
-		{`{"ops":[{"op":"prop.add","at":"page0/s1","name":"Cost","type":"number"}]}`, "prop.add"},
-		{`{"ops":[{"op":"prop.set","at":"page0/s1/prop:Cost","value":1}]}`, "prop.set"},
-		{`{"ops":[{"op":"page.add","name":"Wide"}]}`, "page.add"},
-		{`{"ops":[{"op":"page.rename","at":"page0","name":"View"}]}`, "page.rename"},
-		{`{"ops":[{"op":"page.set","at":"page0","orientation":"landscape"}]}`, "page.set"},
-	} {
-		path := vsdxtest.Fixture(t, "v1-minimal")
-		before := readFile(t, path)
-		_, err := Run(path, parsePlan(t, tc.text), Options{})
-		var ce *cli.Error
-		if !errors.As(err, &ce) {
-			t.Errorf("%s: error %v, want *cli.Error", tc.name, err)
+// TestUnimplementedOps checks the A1 row for whichever ops of the table
+// have no Run yet (ops.OpDef.Implemented): a plan of one refuses with
+// operation_failed at ops[0], naming the op, and leaves the file as it
+// was. The plans are built from the table's zero specs, so this test
+// needs no edit as ops land; when every op is implemented it checks
+// nothing and says so.
+func TestUnimplementedOps(t *testing.T) {
+	n := 0
+	for i := range ops.Ops {
+		def := &ops.Ops[i]
+		if def.Implemented() {
 			continue
 		}
-		if ce.Code != cli.CodeOperationFailed || ce.Path != "ops[0]" || !strings.Contains(ce.Message, tc.name) {
-			t.Errorf("%s: got %v at %q, want operation_failed at ops[0] naming %s", tc.text, ce.Code, ce.Path, tc.name)
+		n++
+		path := vsdxtest.Fixture(t, "v1-minimal")
+		before := readFile(t, path)
+		_, err := Run(path, &ops.Plan{Ops: []ops.Spec{def.New()}}, Options{})
+		var ce *cli.Error
+		if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "ops[0]" || !strings.Contains(ce.Message, def.Name) {
+			t.Errorf("%s: got %v, want operation_failed at ops[0] naming it", def.Name, err)
 		}
 		if got := readFile(t, path); !bytes.Equal(got, before) {
-			t.Errorf("%s: a refused plan changed the file", tc.name)
+			t.Errorf("%s: a refused plan changed the file", def.Name)
 		}
 	}
-	path := vsdxtest.Fixture(t, "v1-minimal")
-	_, err := Run(path, parsePlan(t, `{"ops":[{"op":"page.rename","at":"page0","name":"View"},{"op":"object.add","at":"page0","geom":"rect","box":[0,0,10,10]}]}`), Options{})
-	var ce *cli.Error
-	if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "ops[0]" {
-		t.Errorf("two pending ops: got %v, want operation_failed at ops[0]", err)
+	if n == 0 {
+		t.Log("every op of the table is implemented")
+	}
+}
+
+// TestImplementedDerived checks that Implemented follows the spec's Run
+// method and nothing else: a spec type with Run is implemented, the
+// table's entries agree with a type assertion on their specs.
+func TestImplementedDerived(t *testing.T) {
+	for i := range ops.Ops {
+		def := &ops.Ops[i]
+		_, runs := def.New().(ops.Runner)
+		if def.Implemented() != runs {
+			t.Errorf("%s: Implemented %v, spec Runner %v", def.Name, def.Implemented(), runs)
+		}
 	}
 }
 

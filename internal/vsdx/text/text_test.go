@@ -178,9 +178,10 @@ func TestParsePlain(t *testing.T) {
 // holding N = 50,000 and 4N = 200,000 separators (newlines, U+2028
 // line separators, and alternating "x\n" pairs) costs, at four
 // times the units, at most 5.5 times the bytes and allocations
-// and at most 8 times the time (the minimum of 5 runs, measured
-// through laws.Measure); a quadratic scan for U+2028 after each
-// newline would cost about 16 times the time.
+// (laws.Measure), and the time through laws.TimeScales (50 separators
+// per unit, so laws.Small and laws.Large units are 50,000 and 200,000);
+// a quadratic scan for U+2028 after each newline would cost about 16
+// times the time.
 func TestParseScaling(t *testing.T) {
 	cases := []struct {
 		name string
@@ -210,18 +211,21 @@ func TestParseScaling(t *testing.T) {
 			}
 			bytes := float64(costs[1].Bytes) / float64(max(costs[0].Bytes, 1))
 			mallocs := float64(costs[1].Mallocs) / float64(max(costs[0].Mallocs, 1))
-			tm := float64(costs[1].Time) / float64(max(costs[0].Time, 1))
-			t.Logf("%s: 50000 units %d bytes %d allocs, 200000 units %d bytes %d allocs: ratio bytes %.2f, allocs %.2f, time %.2f",
-				tc.name, costs[0].Bytes, costs[0].Mallocs, costs[1].Bytes, costs[1].Mallocs, bytes, mallocs, tm)
+			t.Logf("%s: 50000 units %d bytes %d allocs, 200000 units %d bytes %d allocs: ratio bytes %.2f, allocs %.2f",
+				tc.name, costs[0].Bytes, costs[0].Mallocs, costs[1].Bytes, costs[1].Mallocs, bytes, mallocs)
 			if bytes > 5.5 {
 				t.Errorf("%s allocates %.2f times the bytes for 4 times the input (budget 5.5): super-linear", tc.name, bytes)
 			}
 			if mallocs > 5.5 {
 				t.Errorf("%s makes %.2f times the allocations for 4 times the input (budget 5.5): super-linear", tc.name, mallocs)
 			}
-			if tm > 8 {
-				t.Errorf("%s takes %.2f times the time for 4 times the input (budget 8): super-linear", tc.name, tm)
-			}
+			laws.TimeScales(t, tc.name, func(n int) (func() error, error) {
+				root := parseRoot(t, "<Text>"+strings.Repeat(tc.unit, n*50)+"</Text>")
+				return func() error {
+					_, _ = Parse(root)
+					return nil
+				}, nil
+			})
 		})
 	}
 }

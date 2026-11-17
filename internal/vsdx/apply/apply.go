@@ -33,20 +33,6 @@ type Options struct {
 	IDs        ids.Source
 }
 
-// opRunner is implemented by a non-pending op's Spec. Run applies the
-// op to ws, with aliases (each `as` name without $ to its address) for
-// $name resolution, units the plan's units ("pt" or "in"), and ids the
-// transaction's id source. It returns the address its `as` names (""
-// when none), the changed addresses (objects, pages or props, in
-// report order), the addresses that no longer exist, the stale detail
-// naming the cells left stale ("" when the write left cached values
-// fresh), and an error. Errors are *cli.Error with Path the field (""
-// for the operation), an edit error (mapped by apply), or another
-// error (internal).
-type opRunner interface {
-	Run(ws *edit.Workspace, aliases map[string]string, units string, ids ids.Source) (as string, changed []string, deleted []string, stale string, err error)
-}
-
 // Run runs plan p (from ops.ParsePlan) against the drawing at path and
 // returns the edit result. Errors are *cli.Error with the contract's
 // codes.
@@ -86,7 +72,7 @@ func Run(path string, p *ops.Plan, opt Options) (*plan.Result, error) {
 		var name string
 		if ok {
 			name = def.Name
-			if def.Pending {
+			if !def.Implemented() {
 				return nil, cli.Errorf(cli.CodeOperationFailed, cli.Index("ops", i), "%s is not implemented", name)
 			}
 		} else {
@@ -98,7 +84,7 @@ func Run(path string, p *ops.Plan, opt Options) (*plan.Result, error) {
 				return nil, cli.Errorf(cli.CodeOperationFailed, cli.Join(cli.Index("ops", i), "as"), "the alias $%s is already defined by an earlier operation", alias)
 			}
 		}
-		runner, ok := spec.(opRunner)
+		runner, ok := spec.(ops.Runner)
 		if !ok {
 			return nil, cli.Errorf(cli.CodeInternal, cli.Index("ops", i), "%s does not run", name)
 		}
