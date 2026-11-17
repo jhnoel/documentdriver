@@ -8,6 +8,15 @@
 // template uses the page forms.
 package emit
 
+import (
+	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/jhnoel/documentdriver/internal/ooxml/xmlscan"
+	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
+)
+
 // Shape is a new master-less 2-D shape: its ID, optional name, kind
 // ("rect" or "ellipse"), stored transform (inches, radians), fill and
 // line ("" keeps the style's) and the style IDs (3, Normal, as the
@@ -35,6 +44,146 @@ type Shape struct {
 // Ellipse row (centre W/2,H/2, A,B the right point, C,D the top point,
 // with formulas). Numbers through vsd.FormatInches. Chunk K3.
 func ShapeXML(s Shape) ([]byte, error) {
-	_ = s
-	return nil, nil
+	if s.Geom != "rect" && s.Geom != "ellipse" {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: unknown geom %q (want rect or ellipse)", s.Geom)
+	}
+	if !(s.Width > 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: width must be positive, got %v", s.Width)
+	}
+	if !(s.Height > 0) {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: height must be positive, got %v", s.Height)
+	}
+	var b strings.Builder
+	b.Grow(1024)
+	b.WriteString("<Shape ID='")
+	b.WriteString(strconv.FormatUint(uint64(s.ID), 10))
+	b.WriteByte('\'')
+	if s.Name != "" {
+		name := xmlscan.EscapeAttr(s.Name, '\'')
+		b.WriteString(" NameU='")
+		b.WriteString(name)
+		b.WriteString("' Name='")
+		b.WriteString(name)
+		b.WriteByte('\'')
+	}
+	b.WriteString(" Type='Shape'")
+	if s.Style != 0 {
+		style := strconv.FormatUint(uint64(s.Style), 10)
+		b.WriteString(" LineStyle='")
+		b.WriteString(style)
+		b.WriteString("' FillStyle='")
+		b.WriteString(style)
+		b.WriteString("' TextStyle='")
+		b.WriteString(style)
+		b.WriteByte('\'')
+	}
+	b.WriteByte('>')
+	writeCell(&b, vsd.CellPinX, vsd.FormatInches(s.PinX))
+	writeCell(&b, vsd.CellPinY, vsd.FormatInches(s.PinY))
+	writeCell(&b, vsd.CellWidth, vsd.FormatInches(s.Width))
+	writeCell(&b, vsd.CellHeight, vsd.FormatInches(s.Height))
+	writeFormulaCell(&b, vsd.CellLocPinX, vsd.FormatInches(s.LocPinX), "Width*"+vsd.FormatInches(s.LocPinX/s.Width))
+	writeFormulaCell(&b, vsd.CellLocPinY, vsd.FormatInches(s.LocPinY), "Height*"+vsd.FormatInches(s.LocPinY/s.Height))
+	writeCell(&b, vsd.CellAngle, vsd.FormatInches(s.Angle))
+	writeCell(&b, vsd.CellFlipX, flipBool(s.FlipX))
+	writeCell(&b, vsd.CellFlipY, flipBool(s.FlipY))
+	if s.FillHex != "" {
+		writeCell(&b, vsd.CellFillForegnd, xmlscan.EscapeAttr(s.FillHex, '\''))
+		writeCell(&b, vsd.CellFillPattern, one)
+	}
+	if s.LineHex != "" {
+		writeCell(&b, vsd.CellLineColor, xmlscan.EscapeAttr(s.LineHex, '\''))
+	}
+	if s.LineWeight != 0 {
+		writeCell(&b, vsd.CellLineWeight, vsd.FormatInches(s.LineWeight))
+	}
+	b.WriteString("<Section N='Connection'>")
+	writeConnectionRow(&b, 0, s.Width*0.5, "Width*0.5", s.Height, "Height*1")
+	writeConnectionRow(&b, 1, s.Width, "Width*1", s.Height*0.5, "Height*0.5")
+	writeConnectionRow(&b, 2, s.Width*0.5, "Width*0.5", 0, "Height*0")
+	writeConnectionRow(&b, 3, 0, "Width*0", s.Height*0.5, "Height*0.5")
+	b.WriteString("</Section>")
+	b.WriteString("<Section N='Geometry' IX='0'>")
+	writeCell(&b, "NoFill", zero)
+	writeCell(&b, "NoLine", zero)
+	writeCell(&b, "NoShow", zero)
+	writeCell(&b, "NoSnap", zero)
+	writeCell(&b, "NoQuickDrag", zero)
+	if s.Geom == "rect" {
+		writePointRow(&b, "RelMoveTo", 1, zero, zero)
+		writePointRow(&b, "RelLineTo", 2, one, zero)
+		writePointRow(&b, "RelLineTo", 3, one, one)
+		writePointRow(&b, "RelLineTo", 4, zero, one)
+		writePointRow(&b, "RelLineTo", 5, zero, zero)
+	} else {
+		b.WriteString("<Row T='Ellipse' IX='1'>")
+		writeFormulaCell(&b, "X", vsd.FormatInches(s.Width*0.5), "Width*0.5")
+		writeFormulaCell(&b, "Y", vsd.FormatInches(s.Height*0.5), "Height*0.5")
+		writeFormulaCell(&b, "A", vsd.FormatInches(s.Width), "Width*1")
+		writeFormulaCell(&b, "B", vsd.FormatInches(s.Height*0.5), "Height*0.5")
+		writeFormulaCell(&b, "C", vsd.FormatInches(s.Width*0.5), "Width*0.5")
+		writeFormulaCell(&b, "D", vsd.FormatInches(s.Height), "Height*1")
+		b.WriteString("</Row>")
+	}
+	b.WriteString("</Section></Shape>")
+	return []byte(b.String()), nil
+}
+
+// zero and one are the stored boolean and unit-square values ("0", "1").
+const (
+	zero = "0"
+	one  = "1"
+)
+
+// writeCell writes one value cell: <Cell N='name' V='value'/>.
+func writeCell(b *strings.Builder, name, value string) {
+	b.WriteString("<Cell N='")
+	b.WriteString(name)
+	b.WriteString("' V='")
+	b.WriteString(value)
+	b.WriteString("'/>")
+}
+
+// writeFormulaCell writes one cell with a formula:
+// <Cell N='name' V='value' F='formula'/>.
+func writeFormulaCell(b *strings.Builder, name, value, formula string) {
+	b.WriteString("<Cell N='")
+	b.WriteString(name)
+	b.WriteString("' V='")
+	b.WriteString(value)
+	b.WriteString("' F='")
+	b.WriteString(formula)
+	b.WriteString("'/>")
+}
+
+// writeConnectionRow writes one Connection row at IX ix: the point at
+// (xVal, yVal) with the Width*/Height* formulas xFormula and yFormula.
+func writeConnectionRow(b *strings.Builder, ix int, xVal float64, xFormula string, yVal float64, yFormula string) {
+	b.WriteString("<Row T='Connection' IX='")
+	b.WriteString(strconv.Itoa(ix))
+	b.WriteString("'>")
+	writeFormulaCell(b, "X", vsd.FormatInches(xVal), xFormula)
+	writeFormulaCell(b, "Y", vsd.FormatInches(yVal), yFormula)
+	b.WriteString("</Row>")
+}
+
+// writePointRow writes one unit-square corner row: <Row T='typ' IX='ix'>
+// with unit cells X xVal and Y yVal.
+func writePointRow(b *strings.Builder, typ string, ix int, xVal, yVal string) {
+	b.WriteString("<Row T='")
+	b.WriteString(typ)
+	b.WriteString("' IX='")
+	b.WriteString(strconv.Itoa(ix))
+	b.WriteString("'>")
+	writeCell(b, "X", xVal)
+	writeCell(b, "Y", yVal)
+	b.WriteString("</Row>")
+}
+
+// flipBool writes a flip flag as Visio stores it ("0" or "1").
+func flipBool(flip bool) string {
+	if flip {
+		return one
+	}
+	return zero
 }
