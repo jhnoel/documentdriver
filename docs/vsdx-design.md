@@ -843,7 +843,7 @@ Run over the cached XSD and the 53 Visio-authored corpus files, the
 another namespace for a child of a Visio element):
 
 - **Disagreements (2), the corpus wins:** `Trigger` appears as a child
-  of `PageSheet` in 33 files but the XSD admits it only through the
+  of 33 `PageSheet` elements (in 32 files) but the XSD admits it only through the
   ShapeSheet `xsd:any` wildcard; `Trigger` itself is not declared, so
   its own children (36 occurrences) have no schema order. S3 places
   Trigger in PageSheet's Cell slot (the corpus shows both orders, 352

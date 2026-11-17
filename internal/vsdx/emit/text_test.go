@@ -1,6 +1,7 @@
 package emit
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
@@ -108,12 +109,6 @@ func TestTextXMLParseHTML(t *testing.T) {
 			wantText:     "<Text><pp IX='0'/>x\n</Text>",
 		},
 		{
-			name:         "field",
-			html:         "<p>Page <opaque data-ref=\"page0/s5/field:1\" data-kind=\"field\" data-text=\"3\"></opaque></p>",
-			wantSections: "",
-			wantText:     "<Text>Page <fld IX='0'>3</fld>\n</Text>",
-		},
-		{
 			name:         "empty",
 			html:         "",
 			wantSections: "",
@@ -189,5 +184,24 @@ func TestTextXMLErrors(t *testing.T) {
 				t.Errorf("TextXML: no error, want one")
 			}
 		})
+	}
+}
+
+// TestTextXMLFields checks field runs: a resolved run (Field set by the
+// writing op) is written as its fld element; an unresolved placeholder
+// (Ref set, Field -1, as ParseHTML leaves it) is refused, never
+// guessed (designer ruling on field:N, docs/vsdx-design.md).
+func TestTextXMLFields(t *testing.T) {
+	resolved := text.Body{Paras: []text.Para{{PP: -1, Runs: []text.Run{{CP: -1, Text: "Page ", Field: -1}, {CP: -1, Text: "3", Field: 2, Ref: "page0/s5/field:1"}}}}, Terminated: true}
+	_, got, err := TextXML(resolved, text.Formats{})
+	if err != nil {
+		t.Fatalf("resolved field: %v", err)
+	}
+	if want := "<Text>Page <fld IX='2'>3</fld>\n</Text>"; string(got) != want {
+		t.Errorf("resolved field: got %q, want %q", got, want)
+	}
+	unresolved := text.Body{Paras: []text.Para{{PP: -1, Runs: []text.Run{{CP: -1, Text: "3", Field: -1, Ref: "page0/s5/field:1"}}}}}
+	if _, _, err := TextXML(unresolved, text.Formats{}); err == nil || !strings.Contains(err.Error(), "page0/s5/field:1") {
+		t.Errorf("unresolved field: err %v, want an error naming the ref", err)
 	}
 }
