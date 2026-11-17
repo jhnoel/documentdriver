@@ -103,6 +103,11 @@ type frame struct {
 	hasMaster bool
 }
 
+// placedBlockSize is how many placed values one pool block holds:
+// a block is one allocation for that many shapes, instead of one
+// allocation per shape.
+const placedBlockSize = 1024
+
 // walker walks one page or master contents into its Page.
 type walker struct {
 	p         *Page
@@ -112,7 +117,24 @@ type walker struct {
 	o         Options
 	seen      map[uint32]int
 	placed    map[uint32]*placed
+	blocks    [][]placed
+	poolUsed  int
 	stack     []frame
+}
+
+// place records obj in the placed map, taking its placed value from
+// the walker's pool blocks so placing a page costs one allocation
+// per block rather than one per shape. A block's array never moves
+// once taken, so the pointers stay valid for the glue pass.
+func (w *walker) place(obj *Object, f place.Frame, master uint32, hasMaster bool, id uint32) {
+	if w.poolUsed == 0 || w.poolUsed == len(w.blocks[len(w.blocks)-1]) {
+		w.blocks = append(w.blocks, make([]placed, placedBlockSize))
+		w.poolUsed = 0
+	}
+	pl := &w.blocks[len(w.blocks)-1][w.poolUsed]
+	*pl = placed{obj: obj, frame: f, master: master, hasMaster: hasMaster}
+	w.poolUsed++
+	w.placed[id] = pl
 }
 
 // step builds the object of one shape frame and pushes its nested
@@ -156,7 +178,11 @@ func (w *walker) step(fr frame) {
 	}
 	t, _, ok := transformOf(w.r, head.s)
 	if _, dup := w.placed[head.id]; !dup {
-		w.placed[head.id] = &placed{obj: obj, s: head.s, frame: fr.f}
+		// placed keeps no indexed sheet: the walk releases head.s
+		// with this step, and linkConnects re-indexes on demand
+		// only the shapes a Connect names (indexShape of the
+		// placed node, with the effective master carried here).
+		w.place(obj, fr.f, head.s.Master, head.s.HasMaster, head.id)
 	}
 	w.p.Objects = append(w.p.Objects, obj)
 	childFrame := fr.f
@@ -345,4 +371,32 @@ func pageDup(d *doc.Document, e *doc.PageEntry) int {
 		}
 	}
 	return 1
+}
+
+// indexShape indexes node once and builds its resolver shape with
+// the master the walk carried (master, hasMaster) as the default,
+// then the Master, MasterShape and style attributes the node stores
+// itself: the same shape readShapeHead builds, without the display
+// attributes the glue pass never reads.
+func indexShape(node *tree.Node, master uint32, hasMaster bool) *inherit.Shape {
+	s := &inherit.Shape{Master: master, HasMaster: hasMaster}
+	s.Sheet, _ = sheet.Index(node)
+	if v, ok := node.Attr("Master"); ok {
+		if u, err := strconv.ParseUint(v, 10, 32); err == nil {
+			s.Master, s.HasMaster = uint32(u), true
+		}
+	}
+	if v, ok := node.Attr("MasterShape"); ok {
+		if u, err := strconv.ParseUint(v, 10, 32); err == nil {
+			s.MasterShape, s.HasMShape = uint32(u), true
+		}
+	}
+	for i, name := range [...]string{"LineStyle", "FillStyle", "TextStyle"} {
+		if v, ok := node.Attr(name); ok {
+			if u, err := strconv.ParseUint(v, 10, 32); err == nil {
+				s.Styles[i], s.HasStyle[i] = uint32(u), true
+			}
+		}
+	}
+	return s
 }

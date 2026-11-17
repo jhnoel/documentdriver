@@ -15,22 +15,90 @@ import (
 )
 
 // placed is what the walk keeps of each shape for the glue pass: its
-// object, its resolver shape, and the frame it sits in.
+// object, the frame it sits in, and the effective master it carries
+// for a later re-index. It keeps no indexed sheet: the walk releases
+// each shape's sheet once its object is built, and the glue pass
+// indexes on demand only the shapes a Connect names. The s field is
+// kept for the unit tests, which build placed values by hand with a
+// sheet already indexed; the walk never sets it.
 type placed struct {
-	obj   *Object
-	s     *inherit.Shape
-	frame place.Frame
+	obj       *Object
+	s         *inherit.Shape
+	frame     place.Frame
+	master    uint32
+	hasMaster bool
 }
 
 // linker carries one linkConnects pass: the page, the resolver, the
-// placed shapes by stored ID, the page height and the index of each
-// connector's connection.
+// placed shapes by stored ID, the page height, the index of each
+// connector's connection, memo, which holds a re-indexed sheet per
+// named shape, each indexed at most once for the pass, and left,
+// which counts how many remaining Connect rows still name a shape,
+// so a memoised sheet is released as soon as its last use is done.
 type linker struct {
 	p     *Page
 	r     *inherit.Resolver
 	byID  map[uint32]*placed
 	pageH float64
 	index map[uint32]int
+	memo  map[uint32]*inherit.Shape
+	left  map[uint32]int
+}
+
+// release drops the memoised sheet of id once its last naming
+// Connect row has been handled, so the pass holds only the sheets
+// of shapes still to come.
+func (l *linker) release(id uint32) {
+	if l.left[id] > 0 {
+		l.left[id]--
+	}
+	if l.left[id] == 0 {
+		delete(l.memo, id)
+	}
+}
+
+// countNames counts, for every Connect row of connects, how often a
+// stored shape ID is named as FromSheet or ToSheet: the release
+// schedule of one linkConnects pass.
+func countNames(connects *tree.Node) map[uint32]int {
+	left := map[uint32]int{}
+	for c := range connects.ElementsSeq() {
+		if c.Local() != vsd.ElemConnect {
+			continue
+		}
+		for name, value := range c.AttrsSeq() {
+			if name != "FromSheet" && name != "ToSheet" {
+				continue
+			}
+			if u, err := strconv.ParseUint(value, 10, 32); err == nil && u != 0 {
+				left[uint32(u)]++
+			}
+		}
+	}
+	return left
+}
+
+// shapeOf returns the resolver shape of pl, indexing its node on
+// first use and memoising it for the pass: a placed shape the walk
+// already indexed (s non-nil, the unit tests) is used as-is, and a
+// shape with no node has no sheet. Each shape is indexed at most
+// once per pass.
+func (l *linker) shapeOf(id uint32, pl *placed) *inherit.Shape {
+	if pl == nil {
+		return nil
+	}
+	if pl.s != nil {
+		return pl.s
+	}
+	if s, ok := l.memo[id]; ok {
+		return s
+	}
+	if pl.obj == nil || pl.obj.Node == nil {
+		return nil
+	}
+	s := indexShape(pl.obj.Node, pl.master, pl.hasMaster)
+	l.memo[id] = s
+	return s
 }
 
 // linkConnects reads the page's Connects element (nil when none) into
@@ -44,7 +112,7 @@ func linkConnects(p *Page, r *inherit.Resolver, connects *tree.Node, byID map[ui
 	if p == nil || connects == nil {
 		return
 	}
-	l := &linker{p: p, r: r, byID: byID, pageH: pageH, index: map[uint32]int{}}
+	l := &linker{p: p, r: r, byID: byID, pageH: pageH, index: map[uint32]int{}, memo: map[uint32]*inherit.Shape{}, left: countNames(connects)}
 	for c := range connects.ElementsSeq() {
 		if c.Local() != vsd.ElemConnect {
 			continue
@@ -112,7 +180,9 @@ func linkConnects(p *Page, r *inherit.Resolver, connects *tree.Node, byID map[ui
 				Detail: fmt.Sprintf("%s names shape %d, which is not on the page", glueName, toID)})
 			continue
 		}
-		l.stale(fromPl, begin, which, toPl, toCell, glue)
+		l.stale(fromID, fromPl, begin, which, toID, toPl, toCell, glue)
+		l.release(fromID)
+		l.release(toID)
 	}
 }
 
@@ -120,24 +190,21 @@ func linkConnects(p *Page, r *inherit.Resolver, connects *tree.Node, byID map[ui
 // when its begin (begin true, which "from") or end (which "to") is
 // farther than place.GlueTolerance from its point-glue site or outside
 // its whole-shape target's box. An end or site that cannot be derived
-// is left unreported: staleness is unknown, not false.
-func (l *linker) stale(fromPl *placed, begin bool, which string, toPl *placed, toCell, glue string) {
-	xName, yName := vsd.CellEndX, vsd.CellEndY
-	if begin {
-		xName, yName = vsd.CellBeginX, vsd.CellBeginY
-	}
-	pt, _, reason := endPoint(l.r, fromPl.s, fromPl.frame, l.pageH, xName, yName)
-	if reason != "" || pt == nil {
-		return
-	}
-	end := *pt
-	t, _, ok := transformOf(l.r, toPl.s)
+// is left unreported: staleness is unknown, not false. The end, the
+// target's box and its sites are read from the objects the walk
+// already derived (From, To, Box, Sites, computed from the same
+// cells in the same frame); only when a value was not derived there
+// is the shape re-indexed on demand (shapeOf) and recomputed as
+// before, so a shape a Connect names is indexed only when the
+// staleness check truly needs it.
+func (l *linker) stale(fromID uint32, fromPl *placed, begin bool, which string, toID uint32, toPl *placed, toCell, glue string) {
+	end, ok := l.endOf(fromID, fromPl, begin)
 	if !ok {
 		return
 	}
 	if toCell == vsd.ToCellPin {
-		box, err := place.Box(toPl.frame, t, l.pageH)
-		if err != nil {
+		box, ok := l.boxOf(toID, toPl)
+		if !ok {
 			return
 		}
 		inv, ok := box.Matrix().Invert()
@@ -167,7 +234,7 @@ func (l *linker) stale(fromPl *placed, begin bool, which string, toPl *placed, t
 		return
 	}
 	var site *geom.Pt
-	for _, s := range sitesOf(l.r, toPl.s, toPl.frame, t, l.pageH) {
+	for _, s := range l.targetSites(toID, toPl) {
 		if s.N == n {
 			pt := s.Pt
 			site = &pt
@@ -181,6 +248,62 @@ func (l *linker) stale(fromPl *placed, begin bool, which string, toPl *placed, t
 		l.p.Hazards = append(l.p.Hazards, Hazard{Kind: "stale-connector", ID: fromPl.obj.ID,
 			Detail: fmt.Sprintf("%s end is %s pt from site %s", which, geom.FormatNum(d), glue)})
 	}
+}
+
+// endOf returns the connector's begin (begin true) or end view point:
+// the From or To the walk derived, or, when that was not derived,
+// the end recomputed from the shape indexed on demand. It reports
+// false when the end cannot be derived.
+func (l *linker) endOf(fromID uint32, fromPl *placed, begin bool) (geom.Pt, bool) {
+	obj := fromPl.obj
+	if begin && obj.From != nil {
+		return *obj.From, true
+	}
+	if !begin && obj.To != nil {
+		return *obj.To, true
+	}
+	xName, yName := vsd.CellEndX, vsd.CellEndY
+	if begin {
+		xName, yName = vsd.CellBeginX, vsd.CellBeginY
+	}
+	pt, _, reason := endPoint(l.r, l.shapeOf(fromID, fromPl), fromPl.frame, l.pageH, xName, yName)
+	if reason != "" || pt == nil {
+		return geom.Pt{}, false
+	}
+	return *pt, true
+}
+
+// boxOf returns the target's view box: the Box the walk derived, or,
+// when that was not derived, the box of the shape indexed on demand.
+// It reports false when the box cannot be derived.
+func (l *linker) boxOf(toID uint32, toPl *placed) (geom.Box, bool) {
+	if toPl.obj.Box != nil {
+		return *toPl.obj.Box, true
+	}
+	t, _, ok := transformOf(l.r, l.shapeOf(toID, toPl))
+	if !ok {
+		return geom.Box{}, false
+	}
+	box, err := place.Box(toPl.frame, t, l.pageH)
+	if err != nil {
+		return geom.Box{}, false
+	}
+	return box, true
+}
+
+// targetSites returns the target's connection sites: the Sites the walk
+// derived (with Sites or Full), or, when they were not derived, the
+// sites of the shape indexed on demand. A nil result means the
+// target has no Connection rows to glue to.
+func (l *linker) targetSites(toID uint32, toPl *placed) []Site {
+	if toPl.obj.Sites != nil {
+		return toPl.obj.Sites
+	}
+	t, _, ok := transformOf(l.r, l.shapeOf(toID, toPl))
+	if !ok {
+		return nil
+	}
+	return sitesOf(l.r, l.shapeOf(toID, toPl), toPl.frame, t, l.pageH)
 }
 
 // siteNumber returns the 1-based point number of a Connections.Xn
