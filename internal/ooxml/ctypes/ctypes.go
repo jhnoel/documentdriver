@@ -1,11 +1,11 @@
 // Package ctypes is the one table of OPC content types and relationship
 // types the engine writes and checks. Every entry was observed in
-// Office-authored files (docProps/app.xml names Word, PowerPoint or
-// Excel), never written from memory: provenance.json names, per entry, the
-// file it was first seen in and how many Word, PowerPoint and Excel files
-// use it. The
-// constants and tables in table_gen.go are generated from it by
-// tools/ctypesgen (go generate); a drift test fails when they differ.
+// Office-authored files (docProps/app.xml names Word, PowerPoint, Excel
+// or Visio), never written from memory: provenance.json names, per
+// entry, the file it was first seen in and how many Word, PowerPoint,
+// Excel and Visio files use it. The constants and tables in
+// table_gen.go are generated from it by tools/ctypesgen (go generate);
+// a drift test fails when they differ.
 //
 // The package knows nothing about a document format; every format imports
 // it. Code outside this package, its generator and tests must not
@@ -23,9 +23,9 @@ type Entry struct {
 	Name string
 	// Value is the content type or relationship type URI.
 	Value string
-	// Files counts the Office-authored files using it; Word, PowerPoint and
-	// Excel split the count by product.
-	Files, Word, PowerPoint, Excel int
+	// Files counts the Office-authored files using it; Word, PowerPoint,
+	// Excel and Visio split the count by product.
+	Files, Word, PowerPoint, Excel, Visio int
 	// External counts files where a relationship of this type was
 	// TargetMode="External" (relationship types only).
 	External int
@@ -38,9 +38,9 @@ type Entry struct {
 type Target struct {
 	Rel, ContentType string
 	// Files counts the Office-authored files with such a relationship;
-	// Word, PowerPoint and Excel split it by product.
-	Files, Word, PowerPoint, Excel int
-	Source                         string
+	// Word, PowerPoint, Excel and Visio split it by product.
+	Files, Word, PowerPoint, Excel, Visio int
+	Source                                string
 }
 
 // ContentTypes returns a copy of the content-type table.
