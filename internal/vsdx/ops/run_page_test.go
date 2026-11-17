@@ -390,10 +390,15 @@ func TestPageAddAfterBefore(t *testing.T) {
 	if addr != "page4" {
 		t.Errorf("D address = %q, want page4 (max+1)", addr)
 	}
-	_, _, _, _, err = (&ops.PageAddSpec{Name: "E", At: "page0", Position: "before", Size: []float64{612, 792}}).Run(w, map[string]string{}, "pt", nil)
-	var ce *cli.Error
-	if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed {
-		t.Errorf("before first page: %v, want operation_failed", err)
+	addr, _, _, _, err = (&ops.PageAddSpec{Name: "E", At: "page0", Position: "before", Size: []float64{612, 792}}).Run(w, map[string]string{}, "pt", nil)
+	if err != nil {
+		t.Fatalf("add E before page0: %v", err)
+	}
+	if addr != "page5" {
+		t.Errorf("E address = %q, want page5 (max+1)", addr)
+	}
+	if pages := readSummary(t, w); len(pages) == 0 || pages[0].ID != "page5" || pages[0].Name != "E" {
+		t.Errorf("first page after E = %+v, want page5 E (before the first page, CC13)", pages)
 	}
 }
 

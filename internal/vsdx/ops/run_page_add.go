@@ -47,14 +47,17 @@ func duplicateName(pages []pageInfo, name string) bool {
 	return false
 }
 
-// afterFor returns the after address for a page.add.
-func afterFor(pages []pageInfo, at, position string) (string, error) {
+// afterFor returns the after address for a page.add, and the page
+// the new page is moved before when it goes before the first page:
+// AddPage only appends or inserts after a page, so a page before
+// the first is appended and then reordered before at, the first page.
+func afterFor(pages []pageInfo, at, position string) (after, beforeFirst string, err error) {
 	if at == "" || position != "before" {
-		return at, nil
+		return at, "", nil
 	}
 	a, err := vsd.Parse(at)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	idx := -1
 	seen := 0
@@ -69,10 +72,10 @@ func afterFor(pages []pageInfo, at, position string) (string, error) {
 		}
 	}
 	if idx < 0 {
-		return "", fmt.Errorf("%w: %s", edit.ErrNotFound, at)
+		return "", "", fmt.Errorf("%w: %s", edit.ErrNotFound, at)
 	}
 	if idx == 0 {
-		return "", cli.Errorf(cli.CodeOperationFailed, "position", "cannot add before the first page")
+		return "", at, nil
 	}
 	prev := pages[idx-1]
 	dup := 1
@@ -81,7 +84,7 @@ func afterFor(pages []pageInfo, at, position string) (string, error) {
 			dup++
 		}
 	}
-	return vsd.PageID(prev.id, dup), nil
+	return vsd.PageID(prev.id, dup), "", nil
 }
 
 // addSize returns a new page's size in inches and its print value.
@@ -116,6 +119,12 @@ func (s *PageAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 			return "", nil, nil, "", cli.Errorf(cli.CodeInvalidOperation, "orientation", "size [%v %v] is %s, not %s", s.Size[0], s.Size[1], orientationOf(wIn, hIn), s.Orientation)
 		}
 	}
+	// at and position go together (chunk CC13), as the plan rules
+	// refuse a lone one before the drawing is opened: a direct
+	// caller gets the same refusal here, before any page is added.
+	if msg, field, bad := checkPageAddTogether(s); bad {
+		return "", nil, nil, "", cli.Errorf(cli.CodeInvalidOperation, field, "%s", msg)
+	}
 	var atAddr string
 	if s.At != "" {
 		addr, err := resolvePage(s.At, aliases)
@@ -140,7 +149,7 @@ func (s *PageAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 	if duplicateName(pages, s.Name) {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "name", "page name %q is already used", s.Name)
 	}
-	after, err := afterFor(pages, atAddr, s.Position)
+	after, beforeFirst, err := afterFor(pages, atAddr, s.Position)
 	if err != nil {
 		return "", nil, nil, "", err
 	}
@@ -154,6 +163,15 @@ func (s *PageAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 	}, after)
 	if err != nil {
 		return "", nil, nil, "", err
+	}
+	if beforeFirst != "" {
+		moved, err := ws.ReorderPage(addr, beforeFirst, "before")
+		if err != nil {
+			return "", nil, nil, "", err
+		}
+		if !moved {
+			return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "position", "the new page could not be placed before the first page")
+		}
 	}
 	return addr, []string{addr}, nil, "", nil
 }
