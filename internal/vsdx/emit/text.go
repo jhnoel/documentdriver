@@ -71,6 +71,8 @@ func TextXML(b text.Body, f text.Formats) (sections, textEl []byte, err error) {
 			switch {
 			case run.Br:
 				out.WriteString("\u2028")
+			case run.Field < 0 && run.Ref != "":
+				return nil, nil, fmt.Errorf("vsdx emit: TextXML: paragraph %d run %d: field %s is not resolved to a Field row (the writing op maps it first)", i, j, run.Ref)
 			case run.Field >= 0:
 				out.WriteString("<" + vsd.ElemField + " IX='" + strconv.Itoa(run.Field) + "'>")
 				out.WriteString(xmlscan.EscapeText(run.Text))
