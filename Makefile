@@ -204,8 +204,14 @@ race:
 # and bytes allocated of each docx command at 4,000 paragraphs. The
 # checks are deterministic, so they hold on a loaded machine. It runs in
 # seconds; make test runs it too, this target runs it alone and uncached.
+# With it runs the vsdx process-memory gate (tools/memgate, RSS1):
+# each of cmd/vsdx's read --page page0, read --detail full and find
+# runs 3 times on Generated(20000) and 3 on Generated(5000),
+# interleaved, every run at most twice the RM1 live-heap ceiling of
+# the same command, and the 20k/5k ratio of the largest runs at most 5.5 (darwin and linux; other platforms skip).
 scaling:
 	go test -count=1 -run '^(TestScaling|TestMemoryBudget)' ./internal/docx/apply ./internal/docx/create ./internal/pptx/apply ./internal/xlsx/read ./internal/xlsx/apply ./internal/xlsx/shift ./internal/vsdx/read
+	go test -count=1 -run '^TestMemGate$' ./tools/memgate
 
 # repro builds each CLI of REPRO_CMDS twice from `git archive HEAD` in two
 # separate clean directories (fresh build caches, different paths) with
