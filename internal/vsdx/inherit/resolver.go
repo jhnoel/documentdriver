@@ -88,13 +88,10 @@ func (r *Resolver) MasterShape(s *Shape) (*Shape, bool) {
 	return nil, false
 }
 
+// Doc returns the document the resolver reads, for colour and face
+// resolution by the model.
+func (r *Resolver) Doc() *doc.Document { return r.doc }
+
 // Notes returns what the resolver could not read (a master part, a
 // style cycle), each once.
 func (r *Resolver) Notes() []doc.Note { return r.notes }
-
-// styleCell walks the style chain of category c from style id, at most
-// MaxStyleDepth steps. Chunk H3.
-func (r *Resolver) styleCell(c vsd.Category, id uint32, k sheet.Key) (sheet.Cell, bool) {
-	_, _, _ = c, id, k
-	return sheet.Cell{}, false
-}

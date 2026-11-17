@@ -15,8 +15,10 @@ type StyleSheet struct {
 	Node                      *tree.Node
 }
 
-// readStyles reads document.xml's StyleSheets and FaceNames. A
-// StyleSheet whose ID repeats is left out with a note. Chunk D3.
+// readStyles reads document.xml's StyleSheets, FaceNames (NameU in
+// order) and Colors (ColorEntry IX and RGB). A StyleSheet whose ID
+// repeats, or a ColorEntry whose IX repeats or is below 24, is left out
+// with a note. Chunk D3.
 func (d *Document) readStyles(root *tree.Node) {
 	_ = root
 }

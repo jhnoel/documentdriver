@@ -16,7 +16,7 @@ func TestSimple(t *testing.T) {
 			t.Errorf("Simple(%q) %q != Simple(%q) %q", tc.a, Simple(tc.a), tc.b, Simple(tc.b))
 		}
 		if !strings.EqualFold(tc.a, tc.b) {
-			t.Errorf("EqualSimple(%q, %q) is false: the test is wrong", tc.a, tc.b)
+			t.Errorf("strings.EqualFold(%q, %q) is false: the test is wrong", tc.a, tc.b)
 		}
 	}
 	for _, tc := range []struct{ a, b string }{{"ß", "ss"}, {"ı", "i"}, {"a", "b"}} {
@@ -31,6 +31,6 @@ func TestSimple(t *testing.T) {
 		t.Errorf("invalid UTF-8: %q", got)
 	}
 	if n := testing.AllocsPerRun(10, func() { _ = Simple("lower case text") }); n != 0 {
-		t.Errorf("Fold of folded text allocates %v", n)
+		t.Errorf("Simple of folded text allocates %v", n)
 	}
 }

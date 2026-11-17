@@ -20,13 +20,23 @@ type CharFormat struct {
 type ParaFormat struct {
 	Align                   string
 	Bullet                  bool
+	BulletChar              string // BulletStr as stored; "" when not stored
 	MarginLeft, MarginRight string
 	Indent, SpaceBefore     string
 	SpaceAfter, LineHeight  string
 }
 
-// Formats gives the resolved formats of the shape's rows by IX; a row
-// it has no entry for shows no formatting.
+// Formats gives the formats of the shape's rows by IX; a row it has no
+// entry for shows no formatting. As pptx shows only an object's own run
+// and paragraph properties, never inherited ones, a format holds only
+// the cells stored on the sheet that owns the shown Text: the shape's
+// own rows when it has its own Text, the master shape's rows when it
+// shows the master's Text. Values from style sheets, and master rows
+// under a shape's own Text, are not shown. An "off" (Bold "off") is
+// shown only when that sheet stores the bit cleared and the next sheet
+// on the chain sets it; a stored cell equal to what it inherits shows
+// nothing (Visio stores Style and Size on most rows). Built by
+// model.formats (chunk M5).
 type Formats struct {
 	Char map[int]CharFormat
 	Para map[int]ParaFormat

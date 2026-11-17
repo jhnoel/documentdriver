@@ -5,10 +5,12 @@ import (
 	"github.com/jhnoel/documentdriver/internal/vsdx/place"
 )
 
-// fillObject derives one object's box or ends, fill, line, text and
-// layers from its effective cells, each omitted with a reason when it
-// cannot be derived (a non-numeric cell, a themed value with no cached
-// colour, a skewed box). Chunk M2.
+// fillObject derives one object's values: geometry (box, ends, sites),
+// paint (fill, line), text (html, plain text) and shape data, each
+// omitted with a reason when it cannot be derived.
 func fillObject(o *Object, r *inherit.Resolver, s *inherit.Shape, f place.Frame, pageH float64, opt Options) {
-	_, _, _, _, _, _ = o, r, s, f, pageH, opt
+	geometry(o, r, s, f, pageH, opt)
+	paint(o, r, s)
+	textOf(o, r, s)
+	o.Props, o.Omitted = readProps(o.ID, r, s)
 }

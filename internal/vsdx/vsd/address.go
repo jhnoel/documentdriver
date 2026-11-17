@@ -10,26 +10,31 @@ const (
 	KindShape
 	KindProp
 	KindLayer
+	KindField
 	KindAlias
 )
 
 // Address is a parsed agent address. Container is the page or master
-// id; Shape the shape id and Dup its ~n (1 when absent); Name the row
-// name of a prop or the layer name.
+// id and PageDup its ~n (1 when absent); Shape the shape id and Dup its
+// ~n (1 when absent); Name the row name of a prop or the layer name; N
+// the 1-based number of a field.
 type Address struct {
 	Kind      Kind
 	InMaster  bool
 	Container uint32
+	PageDup   int
 	Shape     uint32
 	Dup       int
 	Name      string
+	N         int
 	Alias     string
 }
 
 // PageID returns the address of a page: "page" and its stored ID
-// ("page0"). Chunk V2.
-func PageID(id uint32) string {
-	_ = id
+// ("page0"), and "page0~2" for the second page sharing ID 0 (dup 2;
+// Visio never writes one, but a file may hold one). Chunk V2.
+func PageID(id uint32, dup int) string {
+	_, _ = id, dup
 	return ""
 }
 
@@ -58,6 +63,13 @@ func PropID(shape, row string) string {
 // "page0/layer:Connector". Chunk V2.
 func LayerID(page, name string) string {
 	_, _ = page, name
+	return ""
+}
+
+// FieldID returns the address of the n-th field (1-based, in text
+// order) of a shape's text: "page0/s5/field:1". Chunk V2.
+func FieldID(shape string, n int) string {
+	_, _ = shape, n
 	return ""
 }
 

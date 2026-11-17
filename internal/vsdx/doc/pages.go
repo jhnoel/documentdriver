@@ -22,12 +22,3 @@ type PageEntry struct {
 func (d *Document) readPages() error {
 	return nil
 }
-
-// PageContents parses the page's part and returns its tree; it is not
-// kept, and the part's cached bytes are dropped (Part.Forget) once
-// parsed. A missing or malformed part is an error the caller turns into
-// unreadable_target. Chunk D2.
-func (d *Document) PageContents(e *PageEntry) (*tree.Document, error) {
-	_ = e
-	return nil, nil
-}

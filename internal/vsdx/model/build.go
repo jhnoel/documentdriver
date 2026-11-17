@@ -19,14 +19,20 @@ type Options struct {
 // depth is the tokenizer's cap, never the Go stack); each shape is
 // indexed once and resolved through r. An object the builder cannot
 // model is kept with Kind other and an omission; it never fails the
-// page. Chunk M1 (walk, kinds, addresses, z), M2 (per-object values).
+// page. Chunk M1 (walk, kinds, addresses, z, the placed map); the
+// per-object values are M2a to M2c, M3, M5 to M7; glue is M4.
 func BuildPage(d *doc.Document, r *inherit.Resolver, e *doc.PageEntry, o Options) (*Page, error) {
-	_, _ = d, e
 	p := &Page{}
+	pageFacts(p, d, r, e)
 	o1 := &Object{}
 	fillObject(o1, r, &inherit.Shape{}, place.Page, 0, o)
-	o1.Props, o1.Omitted = readProps(o1.ID, r, &inherit.Shape{})
-	linkConnects(p, map[uint32]*Object{})
+	o1.Layers = layerMembers(p, "")
+	if o.Full {
+		o1.Cells = rawCells(nil)
+		o1.Origins = map[string]inherit.Origin{"box": boxOrigin()}
+	}
+	t, _, ok := transformOf(r, &inherit.Shape{})
+	linkConnects(p, nil, map[uint32]*placed{1: {obj: o1, frame: place.Page, t: t, hasT: ok, sites: o1.Sites}}, 0)
 	return nil, vsd.ErrNotImplemented
 }
 

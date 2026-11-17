@@ -20,19 +20,20 @@ func Bool(v string) (b, ok bool) {
 	return false, false
 }
 
-// Color parses a stored colour V: "#RRGGBB" gives the upper-case hex
-// form "#RRGGBB"; an index into the document's Colors table, "themed"
-// and anything else give ok false (the caller resolves indexes, chunk
-// D3). Chunk V1.
+// Color parses a stored colour V written as "#RRGGBB" into the
+// upper-case form "#RRGGBB". An index ("0", "24"), "Themed" and anything
+// else give ok false: indexes are resolved by doc.Document.Color, which
+// uses the document's Colors and BuiltinColor. Chunk V1.
 func Color(v string) (hex string, ok bool) {
 	_ = v
 	return "", false
 }
 
-// FormatInches writes an inch value as Visio stores numbers: the
-// shortest decimal that reads back to the same double, at most 15
-// significant digits, no exponent. Used by --units in and by P2
-// writes. Chunk V1.
+// FormatInches writes an inch value as the shortest decimal that reads
+// back to the same double, with no exponent:
+// strconv.FormatFloat(f, 'f', -1, 64), with "-0" written "0". Visio
+// writes up to 17 significant digits (0.01041666666666667), so no digit
+// cap applies. Used by --units in and by P2 writes. Chunk V1.
 func FormatInches(f float64) string {
 	_ = f
 	return ""

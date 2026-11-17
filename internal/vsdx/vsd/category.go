@@ -11,6 +11,12 @@ const (
 	LineCategory
 	FillCategory
 	TextCategory
+	// PageCategory is a page-sheet cell a style sheet may hold
+	// (PrintPageOrientation: 55 of 57 corpus documents store it only in
+	// StyleSheet 0). Which style attribute governs it is not confirmed;
+	// the resolver tries the line, fill and text chains in that order
+	// (every corpus page sheet uses style 0 for all three).
+	PageCategory
 )
 
 // StyleCategory returns the category of a shape-level cell, or of a

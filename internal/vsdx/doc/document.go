@@ -28,14 +28,20 @@ const (
 // are parsed on first use and kept (they are small and shared by every
 // page); page trees are not kept.
 type Document struct {
-	Pkg       *opc.Package
-	Kind      Kind
-	Macro     bool
-	Part      string // the document part, /visio/document.xml
-	Pages     []PageEntry
-	Masters   []MasterEntry
-	Styles    map[uint32]*StyleSheet
-	FaceNames map[string]string // Font cell value -> face name
+	Pkg     *opc.Package
+	Kind    Kind
+	Macro   bool
+	Part    string // the document part, /visio/document.xml
+	Pages   []PageEntry
+	Masters []MasterEntry
+	Styles  map[uint32]*StyleSheet
+	// FaceNames are the NameU of document.xml's FaceName elements in
+	// stored order. A Font cell stores the face name itself ("Calibri",
+	// "Themed"), never an index; FaceName elements carry no ID.
+	FaceNames []string
+	// Colors are document.xml's ColorEntry RGB values by IX (24 and up;
+	// 0 to 23 are vsd.BuiltinColor and never stored).
+	Colors map[int]string
 	// Recalc is true when docProps/custom.xml holds RecalcDocument true
 	// (read shows values_stale).
 	Recalc  bool

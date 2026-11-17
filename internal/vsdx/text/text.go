@@ -3,16 +3,23 @@
 // A Text element is mixed content: characters, with cp, pp and tp
 // markers that start a character, paragraph or tab run (by the IX of a
 // Character, Paragraph or Tabs row) and fld elements whose content is a
-// field's cached text. A line feed ends a paragraph; U+2028 is a line
-// break. Parse and Plain are pure over the tree; Render is pure over
-// Body and the resolved row formats.
+// field's cached text. A line feed (\n) terminates a paragraph: a
+// trailing \n adds no empty paragraph, so "A\n" is one paragraph "A"
+// and "A\n\n" is "A" then an empty one (257 of the 285 page Text
+// elements of the corpus, and 95 of 144 master ones, end in \n).
+// U+2028 (\u2028) is a line break inside a paragraph. Parse and Plain
+// are pure over the tree; Render is pure over Body and the resolved row
+// formats.
 package text
 
 import "github.com/jhnoel/documentdriver/internal/ooxml/tree"
 
-// Body is a text body: its paragraphs in order.
+// Body is a text body: its paragraphs in order, and whether the stored
+// text ended in \n (Terminated), which a P2 write reproduces as Visio
+// writes it.
 type Body struct {
-	Paras []Para
+	Paras      []Para
+	Terminated bool
 }
 
 // Para is one paragraph and the Paragraph row (pp IX) in force at its
@@ -46,8 +53,10 @@ func Parse(el *tree.Node) (b Body, skipped int) {
 }
 
 // Plain returns the body's text as find matches it and read's text
-// shows it: paragraphs joined by "\n", a break as "\n", a tab as
-// "\t", a field as its cached text. Chunk T1.
+// shows it: each paragraph followed by "\n" except the last, a break as
+// "\n", a tab as "\t", a field as its cached text. It does not restore
+// a trailing "\n" the stored text had (the model has no paragraph for
+// it). Chunk T1.
 func Plain(b Body) string {
 	_ = b
 	return ""

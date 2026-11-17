@@ -30,7 +30,7 @@ const (
 	ElemField           = "fld"
 	FormulaInherited    = "Inh"
 	FormulaNone         = "No Formula"
-	ValueThemed         = "themed"
+	ValueThemed         = "Themed"
 	ShapeTypeGroup      = "Group"
 	ShapeTypeForeign    = "Foreign"
 	ShapeTypeGuide      = "Guide"

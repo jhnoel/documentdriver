@@ -34,14 +34,21 @@ type Page struct {
 	BackPage    string // address of the background page, "" when none
 	// W and H are PageWidth and PageHeight in inches; HasSize false
 	// (and a note) when they are not derived.
-	W, H        float64
-	HasSize     bool
-	Orientation string // "portrait", "landscape" or "" (PrintPageOrientation not stored)
-	Layers      []Layer
-	Objects     []*Object
-	Connections []Connection
-	Hazards     []Hazard
-	Notes       []doc.Note
+	W, H    float64
+	HasSize bool
+	// Orientation is derived from the size: "portrait" when H > W,
+	// "landscape" when W > H, "" when square or not derived.
+	// PrintOrientation is the printer paper orientation,
+	// PrintPageOrientation 1 or 2 from the page sheet or its style chain
+	// (55 corpus documents store it only in StyleSheet 0), "" otherwise.
+	// Pending owner decision 6.
+	Orientation      string
+	PrintOrientation string
+	Layers           []Layer
+	Objects          []*Object
+	Connections      []Connection
+	Hazards          []Hazard
+	Notes            []doc.Note
 }
 
 // Object is one shape.
@@ -65,7 +72,8 @@ type Object struct {
 	Text        string // plain text, as find matches it
 	Props       []Prop
 	Layers      []string // layer addresses
-	Sites       []geom.Pt
+	Sites       []Site
+	Glued       []Glued // Connects from this shape's non-end cells (Controls.Row_1)
 	Z           int
 	Origins     map[string]inherit.Origin
 	Cells       []RawCell // --detail full: the shape's own stored cells
@@ -122,6 +130,20 @@ type Connection struct {
 // section 4): stale-connector, dangling-glue.
 type Hazard struct {
 	Kind, ID, Detail string
+}
+
+// Site is a connection point in the view: its 1-based number (the n of
+// Connections.Xn, row IX + 1) and position.
+type Site struct {
+	N  int
+	Pt geom.Pt
+}
+
+// Glued is one Connect row whose FromCell is not BeginX or EndX (a
+// control handle glued to a shape, 48 in the corpus): the cell as
+// stored and the glue as vsd.Glue shows it. Read only.
+type Glued struct {
+	Cell, To string
 }
 
 // RawCell is a stored cell as --detail full shows it.

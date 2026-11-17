@@ -15,7 +15,10 @@ behaviour below that the notes mark [K] or UNCONFIRMED is an experiment
 xlsx did with E1 to E13.
 
 Status: P0 skeleton and the shared promotions are on `wt/vsdx-design`
-(see "What landed with this design"). Nothing reads a file yet.
+(see "What landed with this design"). Nothing reads a file yet. The
+Fable advisor approved the design on 2026-11-17 with amendments; they
+are applied here (section 11 lists them). Owner decisions 1 to 7
+(section 10) are pending; R (decision c) is the working assumption.
 
 ## 1. Principles
 
@@ -48,7 +51,7 @@ Status: P0 skeleton and the shared promotions are on `wt/vsdx-design`
 ## 2. Capability inventory
 
 Counts: REUSE 26, PROMOTE 3 (2 done with this design, 1 for P2), NEW
-SHARED 3, NEW vsdx-only 14.
+SHARED 3, NEW vsdx-only 15.
 
 | # | Capability | Category | Helper | Justification |
 |---|---|---|---|---|
@@ -92,7 +95,8 @@ SHARED 3, NEW vsdx-only 14.
 | 38 | Text mixed content (cp/pp/tp/fld) to HTML | NEW vsdx-only | `internal/vsdx/text` | Visio text model; renders the pptx grammar's subset (law X1) |
 | 39 | Read model | NEW vsdx-only | `internal/vsdx/model` | objects, glue graph, props, layers, hazards |
 | 40 | read, find, xml results | NEW vsdx-only | `internal/vsdx/read` | contract shapes |
-| 41 | Fixture builder | NEW vsdx-only (tests) | `internal/vsdx/vsdxtest` on `opc.BuildZip` | V1 to V17 |
+| 41 | Fixture builder | NEW vsdx-only (tests) | `internal/vsdx/vsdxtest` on `opc.BuildZip` | builds V1 to V17; the fixture XML and goldens are designer-authored, the implementer writes only the builder |
+| 41a | Colour indexes: built-in palette 0 to 23 and the document's Colors | NEW vsdx-only | `vsd.BuiltinColor`, `doc.Document.Color` | 2,347 corpus colour cells are indexes; 0 to 23 are never stored |
 | 42 | ShapeSheet formula lexer, constant check, closed evaluator (P2) | NEW vsdx-only | `internal/vsdx/formula` | decision c; xlsx's `formula` is Excel's grammar |
 | 43 | Edit layer (P2) | NEW vsdx-only | `internal/vsdx/edit` | handles on Shape/Cell/Row through the core |
 | 44 | Op table and kernels (P2) | NEW vsdx-only | `internal/vsdx/ops`, `internal/vsdx/apply` | as xlsx's layering |
@@ -157,15 +161,23 @@ cell's category (LineStyle for line cells, FillStyle for fill and
 shadow, TextStyle for text block, Character, Paragraph and Tabs), notes
 §2 step 1 to 3. A cell no sheet stores is **absent** (left out of the
 object; with `--detail full` listed in `omitted` with the reason), never
-a Visio default. A value stored as `themed` with no cached colour is
-omitted with reason `themed value not derived` (theme resolution is not
-in v1).
+a Visio default. A value stored as `Themed` (12,058 corpus cells, always
+with a capital T; no cached value) is omitted with reason `themed value
+not derived` (theme resolution is not in v1). StyleSheet 0 ("No Style")
+stores nearly every cell in every corpus document (line, fill, text
+block, locks, events, a Character and a Paragraph row, and in 55
+documents PrintPageOrientation), so most effective values of a
+master-less shape have origin `style`. Only the cells of the style
+category table (V1) are looked up in styles; other cells StyleSheet 0
+stores (locks, events) are not shown.
 
 How the agent tells them apart: `--detail full` adds, as pptx does,
 `origins` (`{"box":"local","fill":"inherited","html":"master","line":"style"}`)
 and `cells`, the shape's own stored cells (`[{"n":"PinX","v":"2.5","f":"..."}]`,
-key spelled as the ShapeSheet spells it: `PinX`, `Prop.Cost.Value`,
-`Geometry1.X2`, `Char.Size` rows as `Character[0].Size`). Origins:
+key spelled in ShapeSheet reference syntax where Visio has one:
+`PinX`, `Prop.Cost.Value`, `Geometry1.X2`, `Connections.X1`,
+`Char.Size[1]`, `Para.HorzAlign[1]`; layers, which formulas cannot
+name, `Layer[1].Name`; `model.CellKey`, chunk M7). Origins:
 
 | Origin | Meaning |
 |---|---|
@@ -253,6 +265,33 @@ Policy (the xlsx precedent made explicit for Visio):
      result reports `stale-values` (`new` true) naming the first few
      cells. A resize then renders right in LibreOffice and Visio
      recalculates the rest.
+     **R closure (recorded now, binding at P2):**
+     - *All or nothing per shape.* For each shape an op changes, R
+       collects the shape's dependents of the changed cells (the
+       transitive closure over same-shape references). If every one is
+       in the closed grammar, R rewrites them all; if any is outside it,
+       R rewrites **none** of that shape's dependents and the shape
+       falls back to S. A shape is never left half recomputed.
+     - *Dependents held in a master.* A dependent the shape does not
+       store (its formula lives on the master shape, often as the
+       instance's `F="Inh"`) is materialised locally as
+       `<Cell N=.. V=.. F="Inh"/>` (the form Visio writes for an
+       inherited formula with a recomputed value), or R does not apply
+       to it and the shape falls back to S.
+     - *Units are a closed list:* the grammar accepts the unit suffixes
+       of lengths, angles and plain numbers only (`IN`, `FT`, `MM`,
+       `CM`, `M`, `PT`, `DEG`, `RAD`, and none), each with its exact
+       factor to internal units; any other unit makes the formula
+       outside the grammar.
+     - *Acceptance requires a corpus sweep* (P2 chunk F4): over every
+       cell of `VSDX_CORPUS` whose formula is in the closed grammar, the
+       evaluator's result on the file's own cached inputs equals the
+       cached `V` (within 1e-9 relative). Disagreements are classified
+       before R ships; an unexplained one blocks R.
+     - *Connector transforms* (a 1-D shape's PinX, PinY, Width, Angle
+       from BeginX/Y and EndX/Y: `SQRT`, `ATAN2`) are not in the closed
+       grammar; they are one named kernel, `formula.OneD`, with its own
+       rows, used by the glue and 1-D move ops.
    - **(S, xlsx-strict)** the tool never evaluates: every changed cell
      with dependents gets `<?NewValue V?>`, `RecalcDocument` is set,
      and `stale-values` is reported. A resize then renders with the old
@@ -325,11 +364,32 @@ The number is not a position: `read` lists pages in order.
 
 Visio's `Text` is mixed content with run markers (notes §4 [C]): `cp IX`
 (Character row), `pp IX` (Paragraph row), `tp IX` (Tabs row), `fld IX`
-(Field row; content is the cached display text). LF ends a paragraph,
-U+2028 is a line break (VE7), TAB is a tab.
+(Field row; content is the cached display text). A line feed (`\n`)
+**terminates** a paragraph: a trailing `\n` adds no empty paragraph
+(257 of the 285 page Text elements of the corpus, and 95 of 144 master
+ones, end in `\n`), and `Body.Terminated` records it so a P2 write
+reproduces it. `\u2028` is a line break inside a paragraph (VE7), `\t`
+a tab. Text before any `cp` uses Character row 0, before any `pp`
+Paragraph row 0, as Visio does (`CP -1` and `PP -1` in the model mean
+row 0).
 
-Mapping to the contract's HTML (the pptx grammar's subset, section 7 of
-the draft), each property resolved through (a) for the row's cells:
+**Which formatting the HTML shows (matching pptx).** pptx's HTML shows
+only an object's own run and paragraph properties, never inherited ones
+(`internal/pptx/ops/text`, `Body`: "only the object's own paragraph and
+run formatting, never inherited values"). vsdx does the same: a format
+holds only the cells stored on the sheet that owns the shown Text (the
+shape's own Character and Paragraph rows when it has its own Text; the
+master shape's rows when it shows the master's Text). Style sheets'
+rows (StyleSheet 0 sets Calibri 12 pt centred on every document) and
+master rows under a shape's own Text are not shown, so a plain shape's
+text is `<p>Hello</p>`, not wrapped in a 12 pt span. The "off" forms
+(`font-weight:normal`, `font-style:normal`, `text-decoration:none`) are
+shown only when the owning sheet stores a Style bit cleared that the
+next sheet on the chain sets; pptx shows `b="0"` whenever stored, but
+Visio stores Style on most rows, so the literal rule would put an off
+form on almost every run. This is the one difference from pptx's rule
+and is in the differs list. Formats are built by `model.formats`
+(chunk M5).
 
 | Visio | HTML (pptx form) |
 |---|---|
@@ -338,21 +398,37 @@ the draft), each property resolved through (a) for the row's cells:
 | `IndLeft`, `IndRight`, `IndFirst` | `margin-left`, `margin-right`, `text-indent` in pt |
 | `SpBefore`, `SpAfter` | `margin-top`, `margin-bottom` in pt |
 | `SpLine` (negative: a multiple) | `line-height` (`120%` or `14pt`) |
-| `Style` bits 1, 2, 4 | `<b>`, `<i>`, `<u>`; a row that clears a bit the style sets: `font-weight:normal` etc. |
+| `Style` bits 1, 2, 4 | `<b>`, `<i>`, `<u>` |
 | `Strikethru` | `<s>` |
 | `Size` (inches) | `font-size` in pt |
-| `Color` | `color:#RRGGBB` |
-| `Font` (index into FaceNames) | `font-family:'Name'` |
-| U+2028 | `<br/>` |
+| `Color` (`#RRGGBB` or an index, resolved by `doc.Document.Color`) | `color:#RRGGBB` |
+| `Font` (the face name as stored: `Calibri`, `Arial`; `Themed` omitted) | `font-family:'Calibri'` |
+| `\u2028` | `<br/>` |
 | `fld` | `<opaque data-ref="page0/s5/field:1" data-kind="field" data-text="cached"></opaque>` (contract placeholder; `data-text` derived, ignored on input) |
 | `tp`, `Pos`, `Case`, small caps, `DblUnderline`, `Letterspace`, `LangID`, `FontScale`, Asian and complex-script fonts | not shown; kept on write from the run or paragraph replaced (as pptx keeps east Asian fonts) |
+
+**Fonts.** A `Font` cell stores the face name itself (corpus: Calibri
+260, Themed 185, Arial 36, ...), never an index; `FaceName` elements
+have `NameU` and no ID. `doc.Document.FaceNames` is the list of
+declared faces, for information only.
+
+**Colours.** A colour cell stores `#RRGGBB` or a decimal index (2,347
+corpus colour cells outside layers are indexes: 0 1,706, 1 553, 4 56,
+15 18, 2 9, 6 4, 255 1). A document's `Colors` element lists
+`ColorEntry IX RGB` from IX 24 (54 of 57 documents have one; none has
+an IX below 24). Indexes 0 to 23 are Visio's built-in palette, never
+stored: `vsd.BuiltinColor`, a designer-owned table whose provenance
+(the MS-VSDX ColorEntry/Colors description and libvisio's built-in
+palette) chunk V3 records. `doc.Document.Color` resolves a cell value:
+hex, then Colors, then the built-in table; an index neither holds (255)
+is omitted with a note.
 
 Adjacent runs that show the same formatting are merged (pptx's
 `canonical`). A shape without its own `Text` shows its master shape's
 (origin `master`); `text.set` on it writes local Text and local
 Character/Paragraph rows only for what the HTML sets differently from
-the inherited rows. `text` (plain, `find`'s haystack) joins paragraphs
-with `\n`, a break as `\n`, a field as its cached text.
+the inherited rows. `text` (plain, `find`'s haystack) puts `\n` between
+paragraphs, a break as `\n`, a field as its cached text.
 
 ### (g) Opaque and refused in v1 (closed list)
 
@@ -380,35 +456,52 @@ Refused by P2 ops, `operation_failed` with `detail` naming the construct:
 Everything else no op targets is copied byte for byte, unknown parts and
 `v:` extensions included; `.vsdm` VBA copied through.
 
-### Page orientation (owner ruling 1)
+### Page orientation (owner ruling 1; PENDING OWNER, decision 6)
 
-Read: the summary's page entries and the page result show `size [w, h]`
-(PageWidth, PageHeight) and `orientation`: `"portrait"` or
-`"landscape"` from `PrintPageOrientation` (1, 2) when the page sheet (or
-the document's default page sheet through its styles) stores it, left
-out otherwise (never guessed from the size).
+Corpus facts (verified): `PrintPageOrientation` is the **printer paper
+orientation** (1 portrait, 2 landscape), not the page's shape. It is
+stored on 34 of the 86 corpus page sheets; 55 of 57 documents store it
+in StyleSheet 0 (which page sheets inherit through their style
+attributes), and 85 master page sheets carry it. A page's shape is its
+size.
 
-Write (P2): `page.set` with `orientation` and/or `size`. The rule:
+**Recommendation (Fable's proposal), pending the owner:**
 
-1. `orientation` different from the stored one swaps PageWidth and
-   PageHeight (when they differ) and sets `PrintPageOrientation` (1
-   portrait, 2 landscape). Equal to the stored one: nothing changes.
-   `orientation` with `size` sets the size as given and the orientation
-   as given (no swap); a size whose shape contradicts the orientation
-   (wider than high for portrait) is `invalid_operation`.
-2. No shape cell changes: stored pins stay measured from the page's
-   lower-left corner, as Visio keeps them (VE10). Because the view is
-   y down from the top, every shown `y` moves by the change in height;
-   `changed` lists the page and every top-level object (read back), so
-   the agent sees the new coordinates.
-3. Cells whose formulas reference the page size (`ThePage!PageWidth`,
-   `PageHeight`, title blocks, backgrounds): on the page sheet itself,
-   the closed evaluator (decision c-R) rewrites its own dependents
-   (margins are constants; `DrawingSizeType` auto-size is left to
-   Visio); dependents on shapes (`ThePage!...`) are left stale, with
-   RecalcDocument set and `stale-values` reported naming them.
-   Under c-S all of them are stale.
-4. Refused: a page whose PageWidth or PageHeight formula is outside the
+Read: each page (summary and page result) shows `size [w, h]`
+(PageWidth, PageHeight), `orientation` derived from the size
+(`"portrait"` when height > width, `"landscape"` when width > height,
+absent when square or the size is not derived), and
+`print_orientation`, the effective `PrintPageOrientation` of the page
+sheet through its style chain (`"portrait"` 1, `"landscape"` 2, absent
+when nothing on the chain stores 1 or 2), with its origin under
+`--detail full`. The two may disagree (a landscape page printed
+portrait); read shows both as stored and derived, never reconciled.
+
+Write (P2): `page.set` with `orientation` and/or `size`:
+
+1. `orientation` equal to the derived one: the size does not change.
+   Different: PageWidth and PageHeight are swapped. A square page's size
+   never changes.
+2. The print orientation follows: after the size is settled, the page
+   sheet stores `PrintPageOrientation` equal to the new orientation
+   (1 or 2) **when** the effective print orientation is absent or
+   differs from it (whether it came from the page sheet or a style);
+   when it already agrees nothing is written. A local cell is written
+   on the page sheet; StyleSheet 0 is never edited.
+3. `size` alone sets PageWidth and PageHeight and then applies rule 2
+   for the orientation the new size implies; `size` with `orientation`
+   that contradicts it (wider than high with `portrait`) is
+   `invalid_operation`.
+4. No shape cell changes: stored pins stay measured from the page's
+   lower-left corner (VE10). Every shown `y` moves by the change in
+   height; `changed` lists the page and every top-level object.
+5. Dependents of the page size (`ThePage!PageHeight*0.5` on a shape,
+   page-sheet cells): per decision c (R rewrites those in the closed
+   grammar on the page sheet; shape dependents on `ThePage!` are other
+   sheets, so they stay stale with RecalcDocument and `stale-values`).
+6. Objects whose box ends up wholly outside the new page are reported
+   as a new hazard `off-page` (`id` the object), not moved.
+7. Refused: a page whose PageWidth or PageHeight formula is outside the
    allow list (rule g9).
 
 pptx has no orientation (a deck has one slide size); this is in the
@@ -426,19 +519,33 @@ the most corruption-prone path per notes §9). Recommendation: defer
 `create` to P3 and decide its template only after a real-Visio check is
 available (owner decision 5); nothing in P0 to P2 depends on it.
 
+### Render (option, pending owner decision 7)
+
+`pptx render` draws slides through LibreOffice headless; vsdx can do the
+same, so "no render" is not forced by the format. Recommended option:
+`vsdx render <file> --page pageN -o out.png`, as `pptx render` does it:
+headless LibreOffice to PDF (through `internal/soffice`), then the
+rasteriser, one page. The format-neutral part of `internal/pptx/render`
+(finding soffice and the rasteriser, the PDF cache, the page
+rasterisation) would be promoted to a shared package first, not copied.
+Caveat as for the render check: LibreOffice draws cached values and
+ignores Visio-only behaviour. Not scheduled until the owner decides; a
+P1.5 promotion chunk plus a cmd chunk.
+
 ## 5. Phases
 
 Each phase merges on its own with main green (`make ci`), archtest rules
 in force, and its own laws.
 
-- **P0 skeleton (this branch + S0, W1, W2, F1, F2):** shared promotions
+- **P0 skeleton (this branch + S0, W1, W2, F1, FX):** shared promotions
   (done), packages and signatures (done), `cmd/vsdx` wired (done),
   archtest `formats` (done), vocabulary rule, Makefile (`build` done;
   `REPRO_CMDS`, `FUZZ_TARGETS`, `scaling`, `corpus` with `VSDX_CORPUS`),
   ctypes from Visio-authored files (S0, blocked on owner decision 1),
   the corpus suites against `VSDX_CORPUS` (fetch script and manifest are on wt/vsdx-corpus), fixtures V1 to V17.
-- **P1 read/find/xml:** chunks V1, V2, H1, P1, T1 (pure, parallel), then
-  D1 to D3, H2, H3, T2, M1 to M4, R1 to R3, C1, L1, X1. Release wiring
+- **P1 read/find/xml:** chunks V1, V2, V3, H1, P1, T1 (pure, parallel),
+  then D1 to D4, H2, H3, T2, M1, M2a to M2c, M3 to M7, R1 to R3, C1,
+  L1a to L1c, X1, and W4 (every FUZZ_TARGETS line) last. Release wiring
   (wheel, release-smoke, RELEASING.md) when P1 merges (W3).
 - **P2 apply:** S2 (CSS promotion), S3 (schema table, owner decision 2),
   formula, edit, integrity, op table with all ops pending, apply on
@@ -481,7 +588,7 @@ Hot paths and how they stay linear:
 - **Summary** counts objects with `tree.ScanString` (memory in the
   depth).
 
-Budgets (L1 measures, then fixes with about 20% margin, as xlsx did):
+Budgets (L1b measures, then fixes with about 20% margin, as xlsx did):
 `laws.Scales` for `read --page` on 1,000 and 4,000 shapes and for `find`
 on 4 and 16 pages (ratios at most 5.5, in `make scaling`);
 `TestMemoryBudget`: a 10,000-shape page (about 30 MB of XML) reads with
@@ -499,6 +606,8 @@ corpus page exceeds 50 MB we revisit with the xlsx splice design.
 - `cmd/vsdx` with `read`, `find`, `xml`, `help html`, `--version`;
   commands refuse with `operation_failed` until C1.
 - archtest `formats` includes `vsdx`; Makefile `build`; `.gitignore`.
+- Designer-authored fixtures `testdata/vsdx/common`, `v1-minimal`,
+  `v2-master`, `v5-glue` (each with PROVENANCE.md and its cells).
 
 ## 8. Verification
 
@@ -552,10 +661,10 @@ every result below says what it proves instead.
    resolves, one Override per part and one rel per (source, target,
    type), document content type matches the kind. Refuses only what a
    plan introduces (contract section 10).
-7. **Cross-reader** (`eval/vsdxnaive`): an independent naive Go reader
-   (local cells only, no inheritance) compared with `read` on the corpus
-   for local-origin values; Apache POI XDGF or python-vsdx as optional
-   second parsers if the owner wants a JVM or uv tool (not planned).
+7. **Cross-reader**: none is planned in P1 (an independent naive reader
+   was dropped: it had no chunk). LibreOffice (item 4) is the
+   independent reader; Apache POI XDGF or python-vsdx stay options if
+   the owner wants a JVM or uv tool.
 8. **Corpus sweeps** (`VSDX_CORPUS`, `corpustest`): read summary and
    every page of every file with no panic, hang or limit trip; counts of
    notes and `invalid_document` (each one inspected and classified, as
@@ -570,32 +679,42 @@ every result below says what it proves instead.
    panics), `FuzzApply`.
 10. **Scaling and memory** (section 6) in `make scaling`.
 
-### Fixtures (hand-written XML under testdata/vsdx/, F1 and F2)
+### Fixtures (designer-authored XML under testdata/vsdx/; builder F1)
 
 Each is a directory of zip members plus `PROVENANCE.md` ("written by
-hand for documentdriver; not Visio-authored"). They prove what our code
+hand for documentdriver; not Visio-authored"), with shared members in
+`testdata/vsdx/common/` (`document.xml`, `app.xml`). **The designer
+authors every fixture's XML and every golden output; implementers write
+only the builder (F1).** V1, V2 and V5 are committed with this design;
+the others are authored before the chunks that read them are dispatched
+(chunk FX, designer). Fixtures mirror real structure from the corpus:
+single-quoted attributes, `xml:space='preserve'`, StyleSheet 0 holding
+line, fill, text and PrintPageOrientation cells with a Character and a
+Paragraph row, colour indexes, `Colors` from IX 24, `FaceName` by
+`NameU`, Text ending in a line feed, a group master whose instance
+children carry only `MasterShape`. They prove what our code
 does with the structures the notes describe; they do not prove Visio
 writes them that way (that is the corpus's and VE's job).
 
 | # | Content | Proves |
 |---|---|---|
-| V1 | one page `Page-1` (ID 0, 8.5 x 11 in, orientation 1), one rectangle s1: PinX 2, PinY 9, Width 1, Height 0.5, LocPin 0.5/0.25, Geometry rectangle, Text `<cp IX="0"/>Hello`, FillForegnd `#4472C4`, LineWeight 0.01041666666667 | navigation, summary, y-flip box `[108,126,72,36]`, fill `{"hex":"#4472C4"}`, line w 0.75, html `<p>Hello</p>` |
-| V2 | master2 "Process" (one shape ID 5: Width 1, Height 0.75, LocPin formulas, Text `Process`, FillForegnd `#FFFFFF`); page shapes s1 (Master 2, PinX 2 PinY 9 only), s2 (Master 2, PinX 4 PinY 9, own Text `Review`, FillForegnd `#FF0000`, Width 1 F="Inh") | inheritance: s1 box `[108,117,72,54]` origin master, html `<p>Process</p>` origin master; s2 html local, fill local, width inherited |
+| V1 | **designer-authored, committed** (`testdata/vsdx/v1-minimal`, with `common/`): page0 "Page-1" 8.5 x 11 in, no local PrintPageOrientation (StyleSheet 0 has 1); s1 PinX 2, PinY 9, 1 x 0.5, LocPin 0.5/0.25 (formulas), styles 3 -> 6 -> 0, FillForegnd `#4472c4`, no local line cells, local Character row 0 Style 1, Text `<cp IX='0'/>Hello\n` | box `[108,126,72,36]`; fill `{"hex":"#4472C4"}` local; line w 0.75 (StyleSheet 0) color `#7F7F7F` (StyleSheet 6, index 24) origin style; html `<p><b>Hello</b></p>`; text "Hello"; orientation and print_orientation "portrait" |
+| V2 | **designer-authored, committed** (`testdata/vsdx/v2-master`): master2 "Process" (shape 5: 1 x 0.75, LocPin formulas, FillForegnd `#FFFFFF`, Character row 0 Style 2, Text `Process\n`, shape data Cost Type 7, a Connection row); master3 "Pair" (group shape 5, 2 x 1, children 6 "Left" with Text `Left\n` and 7 "Right" with FillForegnd 4, cells as `Sheet.5!` formulas); page s1 (Master 2, PinX 2 PinY 9 only), s2 (Master 2, PinX 4 PinY 9, Width F="Inh", FillForegnd 2, Cost 12.5, own Text `Review\n`), s3 (Master 3 group, PinX 6 PinY 6) holding s4 (MasterShape 6, no cells) and s5 (MasterShape 7, own Text `Right\n`) | s1 box `[108,117,72,54]` origin master, html `<p><i>Process</i></p>` origin master, fill `#FFFFFF` master; s2 box `[252,117,72,54]` (width inherited), fill `#FF0000` (built-in 2) local, html `<p>Review</p>`, Cost 12.5 currency; s3 box `[360,324,144,72]`; s4 box `[360,324,72,72]` html `<p>Left</p>` origin master; s5 box `[432,324,72,72]` fill `#0000FF` (built-in 4) origin master, html `<p>Right</p>` local |
 | V3 | style sheets 0 "No Style", 1 "Normal" (LineWeight 0.01388888888889 = 1 pt, LineColor `#000000`), 3 "Thick" (LineStyle parent 1, LineWeight 0.04166666666667 = 3 pt), 5 and 6 with LineStyle parents pointing at each other; s1 LineStyle 3 (no local line), s2 LineStyle 1, s3 LineStyle 5 | style chain: s1 line w 3 color from 1 (origin style), s2 w 1, s3 line omitted + one note "style cycle 5 -> 6 -> 5" |
 | V4 | group s10 (PinX 4, PinY 5, 2 x 2, LocPin 1/1) holding s11 (PinX 0.5, PinY 0.5, 1 x 1) and a nested group s12 (PinX 1.5 PinY 1.5, 1 x 1, Angle 0.5235987755983 (30 deg)) holding s13; group s20 with FlipY 1 holding s21 | composition: s11 box `[216,432,72,72]` parent `page0/s10`; s13 rotated; s21 flip_v true; addresses of nested ids; depth |
-| V5 | boxes s1 (PinX 2, PinY 9), s2 (PinX 5, PinY 9) with Connection rows (X 0.5 Y 0.25 / 0 0.125 / 1 0.125 ...); connector s3 (BeginX 2.5 BeginY 9, EndX 4.5 EndY 9) glued begin to s1 PinX, end to s2 Connections.X2; s4 glued end to s9 (absent); s5 point-glued to s1 Connections.X1 with BeginX 3 (off site) | `from_glue "s1"`, `to_glue "s2:2"`, connections graph, `dangling-glue` on s4 (`#9`), `stale-connector` on s5 |
+| V5 | **designer-authored, committed** (`testdata/vsdx/v5-glue`; the full cell table is its PROVENANCE.md): s1 (PinX 2, PinY 9; sites X1 (1, 0.25), X2 (0, 0.25)), s2 (PinX 5, PinY 9; sites X1 (0, 0.25), X2 (1, 0.25)); connector s3 Begin (2.5, 9) glued to s1 PinX, End (4.5, 9) glued to s2 Connections.X1; s4 End glued to s9 (absent); s5 Begin (3, 8) glued to s1 Connections.X1; s6 with a Control row glued Controls.Row_1 to s2 | s3 from `[180,144]` to `[324,144]`, `from_glue "s1"`, `to_glue "s2:1"`, no hazard; s4 `to_glue "#9"` and dangling-glue; s5 from `[216,216]` to `[216,288]`, `from_glue "s1:1"`, stale-connector (80.5 pt); s6 `glued [{"cell":"Controls.Row_1","to":"s2"}]` |
 | V6 | shape data on master and instance: rows Cost (Type 2, Value 12.5, U CY), Owner (Type 0 "Ada"), Done (Type 3 per VE9, Value 1), Due (Type 5, date), Hidden (Invisible 1), Linked (DataLinked 1), a master row the instance deletes (Row Del 1), a master-only row | prop types and values, origin master for master-only, deleted row absent, hidden and linked flags, ids `page0/s1/prop:Cost` |
 | V7 | text formatting: Character rows 0 (Size 0.1666666666667 = 12 pt), 1 (Style 1, Color `#FF0000`), 2 (Style 0 on a style that sets bold); Paragraph rows 0 (HorzAlign 1), 1 (Bullet 1, BulletStr "•"); text `<pp IX="0"/><cp IX="0"/>Title<cp IX="1"/> red\n<pp IX="1"/>item<U+2028>two\tend <fld IX="0">3</fld>` | the T1/T2 rows on a real page; field placeholder `page0/s1/field:1` |
 | V8 | pages 0 (BackPage 3), 1, 3 (Background 1); page 0 Layer rows 0 "Flowchart", 1 "Connector" (Visible 0); s1 LayerMember "0;1" | summary order 0,1,3; background flags; layers and object `layers` |
-| V9 | rotation/flip matrix: s1 Angle 1.5707963267949 LocPin 0/0 (box `[90,90,72,36]` rot 270); s2 FlipX; s3 Angle -0.5235987755983 | rot 30 and 270, flips, LocPin off centre |
-| V10 | defects: page 2 malformed XML, page 4 Rel to a missing part, a shape with Master 99 (absent), a cell `V="themed"`, an unknown Section, duplicate shape ID 7 twice, a Connect with FromSheet 0 | notes not failures; `page0/s7` and `page0/s7~2`; unreadable_target for `--page page2` only |
+| V9 | rotation/flip matrix: s1 PinX 2, PinY 9, 1 x 0.5, Angle 1.570796326794897, LocPin 0/0 (box `[90,90,72,36]` rot 270); s2 FlipX; s3 Angle -0.5235987755983 | rot 30 and 270, flips, LocPin off centre |
+| V10 | defects: page 2 malformed XML, page 4 Rel to a missing part, a shape with Master 99 (absent), a FillForegnd `V="Themed"` with F="THEMEVAL()", an unknown Section, duplicate shape ID 7 twice, a Connect with FromSheet 0 | notes not failures; `page0/s7` and `page0/s7~2`; unreadable_target for `--page page2` only |
 | V11 | V1 in the 2011/1/core namespace | same read as V1 |
 | V12 | V1 as .vsdm with a `vbaProject.bin` member and macro content type; a .vssx stencil with masters only | kinds; stencil summary has no pages; read only |
 | V13 | page with PageScale 1 in, DrawingScale 120 in | the scale note (VE11) |
 | V14 | (generated, not committed) `vsdxtest.Generated(n)` | scaling and memory |
 | V15 | Foreign image shape (PNG member via page rels), an OLE Foreign, a Guide | kinds picture and other; read only |
 | V16 | group nesting 600 deep (generated in the test) | the tokenizer cap: `--page` of it is unreadable_target, the summary still lists the page with a note (as pptx TestDeepGroups); no stack growth |
-| V17 | page 0 portrait 8.5 x 11 (PrintPageOrientation 1), page 1 landscape 11 x 8.5 (2), page 2 with no PrintPageOrientation; a shape on page 0 with PinY referencing `ThePage!PageHeight*0.5` | read orientation and size; P2: `page.set orientation landscape` on page 0 swaps size, keeps PinY stored, rewrites or reports the dependent per decision c |
+| V17 | page 0 8.5 x 11 with local PrintPageOrientation 1; page 1 11 x 8.5 with local 2; page 2 11 x 8.5 with none stored locally (StyleSheet 0 has 1); page 3 8 x 8 (square); a shape on page 0 with PinY V 5.5 F `ThePage!PageHeight*0.5` | read: page0 orientation portrait, print_orientation portrait (local); page1 landscape, landscape (local); page2 landscape, print_orientation portrait (style: the two disagree); page3 no orientation, print_orientation portrait (style). P2 (pending decision 6): `page.set orientation landscape` on page0 gives size `[792,612]` and local PrintPageOrientation 2, PinY stored unchanged, the `ThePage!` dependent left stale with `stale-values`; on page2 `orientation landscape` changes no size and writes local PrintPageOrientation 2; on page3 it changes nothing but writes 2 |
 
 ### Corpus (owner ruling 2; fetched on wt/vsdx-corpus, 91c1072)
 
@@ -623,7 +742,6 @@ path, sharded and parallel as every corpus suite:
   or if one of the 8 is ever read (the table is reviewed, as xlsx's 42).
 - `tools/vsdxgrammar` X1 over every page's html.
 - `TestCorpusLibreOffice` (skips without soffice; every non-fuzz file).
-- `eval/vsdxnaive` cross-reader comparison.
 - P2 `TestApplyCorpus` (each op on the first page of each file).
 
 S0's ctypes extraction runs over the Visio-authored subset
@@ -709,3 +827,50 @@ ci`; the maintainer approves every run.
 4. **`stale-values` and `RecalcDocument` as the third exception** to
    untouched bytes (contract draft section 9). Recommend: accept.
 5. **create**: defer to P3 until a Visio check exists. Recommend: defer.
+6. **Page orientation** (ruling 1, refined): `orientation` derived from
+   the page's size, `print_orientation` shown separately from
+   PrintPageOrientation through the page sheet's style chain, and
+   `page.set` as specified in "Page orientation" (swap only when the
+   derived orientation changes; write a local PrintPageOrientation only
+   when the effective one is absent or disagrees). Recommend: Fable's
+   proposal as drafted.
+7. **`vsdx render`** through LibreOffice as pptx render does (promoting
+   pptx render's format-neutral plumbing). Recommend: yes, as P1.5,
+   after P1 merges.
+
+## 11. Fable review amendments (2026-11-17)
+
+Corpus figures re-checked by the designer over the 57 non-fuzz files
+(scripted with `uv run`; counts by part):
+
+| Claim | Fable | Re-check |
+|---|---|---|
+| Text ending in LF | 257 of 285 | 257 of 285 page Text elements (95 of 144 in masters) |
+| V with 16+ significant digits | 7,346 | 21,124 numeric V values with 16 or more significant digits (3,766 distinct): the 15-digit rule is wrong either way |
+| Font cells hold names | Calibri, Themed, Arial | Calibri 260, Themed 185, Arial 36, others; FaceName has NameU and no ID (61 of 61) |
+| "Themed" capitalised | 12,058 | 12,058, never lower case |
+| Indexed colours | 1,003 | 2,347 colour cells (FillForegnd, FillBkgnd, LineColor, Color, ShdwForegnd, ShdwBkgnd, TextBkgnd, outside Layer rows) hold an index; Colors entries start at IX 24 |
+| PrintPageOrientation in StyleSheet 0 | 55 documents | 55 of 57; stored on 34 of 86 page sheets |
+| Non-end Connects | 48 Controls.Row_N | 48 (FromCell Controls.Row_N, FromPart 100+N-1); ToCell PinX 26, Connections.Xn 132 |
+
+The counts differ where the scope of the count differs; every
+conclusion holds.
+
+| # | Amendment | Status |
+|---|---|---|
+| 1 | Trailing LF terminates; T1 row 3 and Plain | done (text package doc, `Body.Terminated`, T1 rows) |
+| 2 | FormatInches shortest round trip | done (doc comment, V1 rows) |
+| 3 | Font by name; FaceNames; D3; F1 | done (`Document.FaceNames []string`, decision f, D3 row, fixtures) |
+| 4 | "Themed" capitalised | done (`vsd.ValueThemed`, V10, M2b) |
+| 5 | Colour indexes with a built-in 0-23 table | done (`vsd.BuiltinColor`, `doc.Document.Color`, `Document.Colors`; chunks V3, D4 with rows; table provenance is V3's first task) |
+| 6 | Orientation held for the owner | done (proposal drafted, decision 6; V1, V17, R1 rows) |
+| 7 | V5 consistent cell table; V9 cells | done (V5 committed with PROVENANCE table; s3 glued to s2:1; V9 cells stated) |
+| 8 | Designer authors fixtures and goldens; real structure | V1, V2, V5 and `common/` committed; the rest are chunk FX (designer) before the chunks that read them; goldens are designer-authored in R2's spec |
+| 9 | Disjointness | done (`read/page.go`, `inherit/styles.go`, `doc/contents.go`, `doc/colors.go` stubs; W4 owns FUZZ_TARGETS; dependency fixes in chunks.md) |
+| 10 | Signatures | done (`vsd.FieldID`, `KindField`, `PageID` dup; `ParaFormat.BulletChar`; `model.Site` with N; `linkConnects` with the Connects node, placed shapes and page height; M4 uses math.Hypot; T2 rows) |
+| 11 | Missing chunks; split M2 and L1; drop vsdxnaive | done (M5 formats, M6 page sheet and layers, M7 cells and origins, Glued in M4b; M2a-c; L1a-c; vsdxnaive dropped) |
+| 12 | R closure | recorded in decision c, binding at P2 (with F4 corpus sweep and `formula.OneD`) |
+| 13 | Contract §13: find is an addition; render option | done (contract draft; decision 7) |
+| 14 | HTML rule for inherited character properties | done (decision f: own formatting only, as pptx; V7 to be re-derived in FX; V1/V2 rows on Visio-shaped fixtures) |
+| opt | off-page after page.set; `page0~2`; casefold messages; V4 s13 row | taken (off-page hazard in the orientation rule; `PageID(id, dup)`; casefold_test messages; P1 row 13); H1 presizing hint taken in H1's spec |
+

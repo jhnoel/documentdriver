@@ -27,8 +27,10 @@ vsdx help  [<command>|ops|<op>|html]
 vsdx --version
 ```
 
-- No `render` and no `read --format svg` in v1 (pptx has both): the tool
-  has no Visio geometry renderer yet. No `create` until P3.
+- No `read --format svg` in v1 (pptx draws its SVG from its own
+  geometry model; vsdx has no Visio geometry renderer yet). `vsdx
+  render` through LibreOffice, as `pptx render`, is a recommended
+  option pending the owner (design decision 7). No `create` until P3.
 - Files: `.vsdx`, `.vsdm` (VBA copied through), `.vstx`, `.vstm` are
   read and edited; `.vssx`, `.vssm` (stencils) are read only (their
   masters; `pages` is `[]`). Legacy `.vsd`, `.vdx`, `.vsx` and anything
@@ -64,7 +66,7 @@ default, or `in`) as pptx's `units`.
 | `page.rename` | `at`, `name` |
 | `page.delete` | `at` |
 | `page.reorder` | `at`, `to` (another page), `position` |
-| `page.set` | `at`, `orientation` (`portrait`, `landscape`) and/or `size` (`[w, h]`) |
+| `page.set` | `at`, `orientation` (`portrait`, `landscape`) and/or `size` (`[w, h]`) (pending owner decision 6) |
 
 Rules specific to vsdx:
 
@@ -72,10 +74,15 @@ Rules specific to vsdx:
   `THEMEVAL()` or `THEMEGUARD(...)` is refused, `operation_failed`,
   `detail` naming the cell and formula (a group child's
   `Sheet.10!Width*0.25`, a `GUARD(...)`, a glued end's `PAR(PNT(...))`).
-- `page.set orientation`: a change swaps PageWidth and PageHeight and
-  sets PrintPageOrientation; no shape's stored position changes, so
-  every shown `y` moves by the change in height; `changed` lists the
-  page and its top-level objects.
+- `page.set orientation` (pending owner decision 6): `orientation` is
+  the page's shape (from its size). A different orientation swaps
+  PageWidth and PageHeight; the same one leaves the size. Then the
+  page sheet stores `PrintPageOrientation` equal to the orientation
+  when the effective print orientation is absent or differs (never in a
+  style sheet). No shape's stored position changes, so every shown `y`
+  moves by the change in height; `changed` lists the page and its
+  top-level objects; an object now wholly off the page is an `off-page`
+  hazard.
 - The closed refusal list (`help <op>` gives each op's): containers,
   lists and callouts; data-linked shape data; masters and stencils;
   text and fill on pictures and other read-only kinds; glue to a cell
@@ -89,8 +96,9 @@ Rules specific to vsdx:
 **vsdx** `apply` prints the edit result of section 4. `changed`:
 objects as `read` shows them (as pptx), a page as its summary entry, a
 shape data row as `{id, label, type, value}`. Hazard kinds: pptx's
-`stale-connector` and `dangling-glue`, and xlsx's `stale-values` (`id`
-`"document"`): the save left cached values that formulas would compute
+`stale-connector` and `dangling-glue`, `off-page` (new: an object whose
+box lies wholly outside the page after `page.set`), and xlsx's
+`stale-values` (`id` `"document"`): the save left cached values that formulas would compute
 differently, and asked Visio to recalculate on open (section 9);
 `detail` names up to ten cells.
 
@@ -119,7 +127,12 @@ html`), a subset of it: `<p>`, `<ul><li>` (`data-char`), `<b> <i> <u>
 `margin-right`, `text-indent`, `margin-top`, `margin-bottom`,
 `line-height`. Fields are placeholders:
 `<opaque data-ref="page0/s5/field:1" data-kind="field" data-text="3"></opaque>`
-(`data-text`, the cached display text, is derived). What the HTML does
+(`data-text`, the cached display text, is derived). As in pptx, the
+HTML shows only the text's own formatting, never what it inherits from
+style sheets or (under a shape's own text) from its master; vsdx shows
+an "off" form (`font-weight:normal`) only when it clears what the next
+sheet sets. A trailing line feed of the stored text adds no empty
+paragraph. What the HTML does
 not show (tab runs, sub/superscript position, case, small caps, double
 underline, letter spacing, language, Asian fonts, force-justify) is kept
 from the run or paragraph replaced. A grammar element vsdx cannot store
@@ -131,7 +144,7 @@ from the run or paragraph replaced. A grammar element vsdx cannot store
 
 ```json
 {"base":"sha256:…",
- "pages":[{"id":"page0","name":"Page-1","size":[612,792],"orientation":"portrait","background_page":"page3","objects":12},
+ "pages":[{"id":"page0","name":"Page-1","size":[612,792],"orientation":"portrait","print_orientation":"portrait","background_page":"page3","objects":12},
           {"id":"page3","name":"Background-1","background":true,"size":[612,792],"objects":2}],
  "masters":[{"id":"master2","name":"Process","name_u":"Process","objects":1}],
  "notes":[]}
@@ -143,7 +156,7 @@ from the run or paragraph replaced. A grammar element vsdx cannot store
   page whose origin is the top-left corner, y down:
 
 ```json
-{"base":"sha256:…","page":"page0","name":"Page-1","units":"pt","size":[612,792],"orientation":"portrait",
+{"base":"sha256:…","page":"page0","name":"Page-1","units":"pt","size":[612,792],"orientation":"portrait","print_orientation":"portrait",
  "layers":[{"id":"page0/layer:Flowchart","name":"Flowchart","index":0,"visible":true,"print":true}],
  "objects":[
   {"id":"page0/s1","kind":"shape","name":"Process","master":"master2","box":[108,117,72,54],"fill":{"hex":"#FFFFFF"},"line":{"w":0.75,"color":{"hex":"#000000"}},"html":"<p>Process</p>","text":"Process",
@@ -165,6 +178,16 @@ from the run or paragraph replaced. A grammar element vsdx cannot store
   `picture`, `other`.
 - `origins` values: `local`, `inherited` (stored value, inherited
   formula), `master`, `style`.
+- `orientation` is the page's shape from its size (absent when square);
+  `print_orientation` the printer orientation (PrintPageOrientation
+  through the page sheet's styles), absent when not stored; they may
+  disagree (pending owner decision 6).
+- A value stored as `Themed` (theme-derived, no cached value) is left
+  out, with the reason under `--detail full` `omitted`. Colours stored
+  as palette indexes are shown resolved (`#RRGGBB`).
+- `glued` lists the Connect rows of an object's non-end cells
+  (`[{"cell":"Controls.Row_1","to":"s2"}]`), read only.
+- A duplicated page ID is addressed `page0~2`, as objects.
 - `values_stale: true` on the summary and the page when the document asks
   Visio to recalculate on open.
 - **vsdx** `find` gives `{"base","matches":[{"at","text"}],"notes"}`:
@@ -203,8 +226,7 @@ is missing shows its own cells with a note.
 | --- | --- |
 | `--page pageN` where pptx has `--slide slideN`; `page0` is the stored page ID, not a part name | Visio pages carry stable IDs; Visio renumbers page parts on save |
 | `--master masterN` (read only) | Visio masters are first-class drawings that instances inherit from; PowerPoint layouts are not read as objects |
-| `find` exists (pptx has none) | Visio drawings hold text across pages and shape data; contract `find` is docx/xlsx's |
-| no `render`, no `--format svg` | no Visio geometry renderer in v1 |
+| no `--format svg` | no Visio geometry renderer in v1 (`vsdx render` through LibreOffice is an option pending the owner; not forced) |
 | `--units pt|in` (pptx `pt|emu`) | Visio's stored unit is the inch |
 | y down from the page's top-left (Visio stores y up from the bottom-left); shown y moves when page height changes | pptx's frame kept for agents; Visio's own frame would make the same `box` mean different places in the two tools |
 | `rot` from Visio's radians counter-clockwise about the pin | stored form |
@@ -213,7 +235,10 @@ is missing shows its own cells with a note.
 | `props` are shape data rows; `prop.*` ops | Visio Shape Data (`Prop.Name`); pptx has none |
 | `connections` graph on the page | Visio stores glue as page-level Connect rows |
 | glue `s12` (whole-shape) besides `s12:3`; `s12@Cell` read only | Visio dynamic glue has no site index |
-| `orientation` in read and `page.set orientation` | Visio pages have their own size and print orientation; a deck has one slide size |
+| `orientation`, `print_orientation` in read and `page.set orientation` (pending owner) | Visio pages have their own size and a printer orientation; a deck has one slide size |
+| "off" run forms only when they clear an inherited setting | Visio stores Style on most rows; pptx's literal rule would mark nearly every run |
+| `glued` (control-handle glue) | Visio Connect rows from control cells |
+| `off-page` hazard | Visio pages resize independently of their shapes |
 | `page.*` ops | Visio pages are independent drawings; pptx has no slide ops in v1 |
 | `layers`, `layer:` addresses | Visio layers |
 | `stale-values` hazard | Visio caches every computed value and does not recalculate on open |
@@ -222,3 +247,7 @@ is missing shows its own cells with a note.
 | field placeholders `<opaque data-kind="field">` | Visio text fields with cached values |
 | no `<a href>`, `<ol>`, `data-level` in HTML | Visio text has no hyperlink runs (hyperlinks are shape-level) or list levels |
 | no `group.*`, `object.duplicate` in v1 | scope (P3) |
+
+Additions that are not forced differences (pptx could have them too):
+`find` (the contract's docx/xlsx command, useful on multi-page
+drawings).
