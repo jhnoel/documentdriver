@@ -1,6 +1,7 @@
 package emit
 
 import (
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -140,6 +141,49 @@ func TestShapeXMLFlip(t *testing.T) {
 		if !strings.Contains(s, want) {
 			t.Errorf("ShapeXML(flip) = %s, want it to contain %s", s, want)
 		}
+	}
+}
+
+// TestShapeXMLValues checks chunk K3F rows: ShapeXML refuses a
+// non-finite PinX, PinY, Width, Height, LocPinX, LocPinY, Angle or
+// LineWeight and a negative LineWeight, naming the field, while a
+// zero LineWeight is allowed (keeps the style's).
+func TestShapeXMLValues(t *testing.T) {
+	base := Shape{ID: 1, Geom: "rect", PinX: 2, PinY: 9.5, Width: 2, Height: 1,
+		LocPinX: 1, LocPinY: 0.5, Style: 3}
+	tests := []struct {
+		name  string
+		shape Shape
+		field string
+	}{
+		{name: "width-inf", shape: Shape{ID: 1, Geom: "rect", Width: math.Inf(1), Height: 1, Style: 3}, field: "Width"},
+		{name: "pinx-nan", shape: Shape{ID: 1, Geom: "rect", PinX: math.NaN(), Width: 2, Height: 1, Style: 3}, field: "PinX"},
+		{name: "angle-neg-inf", shape: Shape{ID: 1, Geom: "rect", Width: 2, Height: 1, Angle: math.Inf(-1), Style: 3}, field: "Angle"},
+		{name: "locpiny-nan", shape: Shape{ID: 1, Geom: "rect", Width: 2, Height: 1, LocPinY: math.NaN(), Style: 3}, field: "LocPinY"},
+		{name: "lineweight-negative", shape: Shape{ID: 1, Geom: "rect", Width: 2, Height: 1, LineWeight: -0.01, Style: 3}, field: "LineWeight"},
+		{name: "piny-inf", shape: Shape{ID: 1, Geom: "rect", PinY: math.Inf(1), Width: 2, Height: 1, Style: 3}, field: "PinY"},
+		{name: "height-nan", shape: Shape{ID: 1, Geom: "rect", Width: 2, Height: math.NaN(), Style: 3}, field: "Height"},
+		{name: "locpinx-neg-inf", shape: Shape{ID: 1, Geom: "rect", Width: 2, Height: 1, LocPinX: math.Inf(-1), Style: 3}, field: "LocPinX"},
+		{name: "lineweight-nan", shape: Shape{ID: 1, Geom: "rect", Width: 2, Height: 1, LineWeight: math.NaN(), Style: 3}, field: "LineWeight"},
+		{name: "lineweight-inf", shape: Shape{ID: 1, Geom: "rect", Width: 2, Height: 1, LineWeight: math.Inf(1), Style: 3}, field: "LineWeight"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := ShapeXML(tc.shape); err == nil {
+				t.Errorf("ShapeXML(%s) error = nil, want an error naming %s", tc.name, tc.field)
+			} else if !strings.Contains(err.Error(), tc.field) {
+				t.Errorf("ShapeXML(%s) error = %v, want it to name %s", tc.name, err, tc.field)
+			}
+		})
+	}
+	lineZero := base
+	lineZero.LineWeight = 0
+	got, err := ShapeXML(lineZero)
+	if err != nil {
+		t.Fatalf("ShapeXML(lineweight 0) error = %v, want it allowed", err)
+	}
+	if strings.Contains(string(got), "LineWeight") {
+		t.Errorf("ShapeXML(lineweight 0) = %s, want no LineWeight cell (keeps the style's)", got)
 	}
 }
 
