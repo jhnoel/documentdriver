@@ -261,8 +261,8 @@ func TestTextSetRefuses(t *testing.T) {
 		{name: "guide", fixture: "v15-foreign", at: "page0/s3", html: `<p>x</p>`, code: cli.CodeOperationFailed, path: "ops[0].at"},
 		{name: "missing shape", fixture: "v1-minimal", at: "page0/s99", html: `<p>x</p>`, code: cli.CodeNotFound, path: "ops[0].at"},
 		{name: "unknown alias", fixture: "v1-minimal", at: "$nope", html: `<p>x</p>`, code: cli.CodeNotFound, path: "ops[0].at"},
-		{name: "bad html", fixture: "v1-minimal", at: "page0/s1", html: `<ol><li>x</li></ol>`, code: cli.CodeInvalidOperation, path: "ops[0].html"},
-		{name: "bad html link", fixture: "v1-minimal", at: "page0/s1", html: `<p><a href="https://example.com">x</a></p>`, code: cli.CodeInvalidOperation, path: "ops[0].html"},
+		{name: "bad html", fixture: "v1-minimal", at: "page0/s1", html: `<ol><li>x</li></ol>`, code: cli.CodeInvalidOperation, path: "ops[0].html<ol>"},
+		{name: "bad html link", fixture: "v1-minimal", at: "page0/s1", html: `<p><a href="https://example.com">x</a></p>`, code: cli.CodeInvalidOperation, path: "ops[0].html<a>"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			path := vsdxtest.Fixture(t, tc.fixture)
