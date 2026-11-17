@@ -17,17 +17,19 @@ import (
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
 
-// resolvePage returns the page address at names, resolving $alias.
+// resolvePage returns the page address at names, resolving $alias
+// (with what may follow it) through ResolveAlias: a resolved
+// address that is no page (a shape, layer, prop or field suffix
+// that names one) is operation_failed at at.
 func resolvePage(at string, aliases map[string]string) (string, error) {
-	if !strings.HasPrefix(at, "$") {
-		return at, nil
+	resolved, err := ResolveAlias(at, aliases, "at")
+	if err != nil {
+		return "", err
 	}
-	name := at[1:]
-	addr, ok := aliases[name]
-	if !ok {
-		return "", fmt.Errorf("%w: $%s", edit.ErrNotFound, name)
+	if a, err := vsd.Parse(resolved); err != nil || a.Kind != vsd.KindPage || a.InMaster {
+		return "", cli.Errorf(cli.CodeOperationFailed, "at", "%s is not a page address", resolved)
 	}
-	return addr, nil
+	return resolved, nil
 }
 
 // sizeInches returns the plan size in inches (units pt or in).

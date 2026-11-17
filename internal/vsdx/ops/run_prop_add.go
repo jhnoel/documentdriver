@@ -64,15 +64,11 @@ func (s *PropAddSpec) Run(ws *edit.Workspace, aliases map[string]string, _ strin
 }
 
 // resolveShape resolves At to a canonical page shape address, through
-// a $name alias when At is one.
+// a $name alias (with what may follow it, $p/s5) when At is one.
 func resolveShape(at string, aliases map[string]string) (string, error) {
-	rc := at
-	if strings.HasPrefix(rc, "$") {
-		hit, ok := aliases[rc[1:]]
-		if !ok {
-			return "", cli.Errorf(cli.CodeNotFound, "at", "no alias $%s", rc[1:])
-		}
-		rc = hit
+	rc, err := ResolveAlias(at, aliases, "at")
+	if err != nil {
+		return "", err
 	}
 	a, err := vsd.Parse(rc)
 	if err != nil {
@@ -85,45 +81,21 @@ func resolveShape(at string, aliases map[string]string) (string, error) {
 }
 
 // resolveProp resolves At to the shape address and row name of a shape
-// data row, through a $name alias (or $name with a /prop suffix) when
-// At is one.
+// data row, through a $name alias (bare, or with what may follow it:
+// $r/prop:Cost, $p/s5/prop:Cost) when At is one.
 func resolveProp(at string, aliases map[string]string) (string, string, error) {
-	if strings.HasPrefix(at, "$") {
-		head, suffix, hasSuffix := strings.Cut(at[1:], "/")
-		if !hasSuffix {
-			hit, ok := aliases[head]
-			if !ok {
-				return "", "", cli.Errorf(cli.CodeNotFound, "at", "no alias $%s", head)
-			}
-			a, err := vsd.Parse(hit)
-			if err != nil {
-				return "", "", cli.Errorf(cli.CodeNotFound, "at", "%s", err)
-			}
-			if a.Kind != vsd.KindProp || a.InMaster {
-				return "", "", cli.Errorf(cli.CodeOperationFailed, "at", "at must name a shape data row or $name")
-			}
-			return canonicalShape(a), a.Name, nil
-		}
-		hit, ok := aliases[head]
-		if !ok {
-			return "", "", cli.Errorf(cli.CodeNotFound, "at", "no alias $%s", head)
-		}
-		shape, err := resolveShape(hit, nil)
-		if err != nil {
-			return "", "", err
-		}
-		joined := shape + "/" + suffix
-		a, err := vsd.Parse(joined)
-		if err != nil || a.Kind != vsd.KindProp || a.InMaster || a.Name == "" {
+	resolved, err := ResolveAlias(at, aliases, "at")
+	if err != nil {
+		return "", "", err
+	}
+	a, err := vsd.Parse(resolved)
+	if err != nil {
+		if _, suffix, ok := splitAlias(at); ok && suffix != "" {
 			return "", "", cli.Errorf(cli.CodeOperationFailed, "at", "at must name a shape data row or $name")
 		}
-		return shape, a.Name, nil
-	}
-	a, err := vsd.Parse(at)
-	if err != nil {
 		return "", "", cli.Errorf(cli.CodeNotFound, "at", "%s", err)
 	}
-	if a.Kind != vsd.KindProp || a.InMaster {
+	if a.Kind != vsd.KindProp || a.InMaster || a.Name == "" {
 		return "", "", cli.Errorf(cli.CodeOperationFailed, "at", "at must name a shape data row or $name")
 	}
 	return canonicalShape(a), a.Name, nil
