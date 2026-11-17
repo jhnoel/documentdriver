@@ -1,7 +1,8 @@
 # vsdx contract amendments (draft for sign-off)
 
 Status: **draft, revision 2 (2026-11-17), after Fable's review for the
-owner: APPROVE-WITH-AMENDMENTS.** Not merged into `docs/contract.md`,
+owner: APPROVE-WITH-AMENDMENTS; Fable's rulings on the designer's eight
+questions folded in the same day.** Not merged into `docs/contract.md`,
 which stays the agent surface. Every promise below either holds in the
 binary at 9a57372 or is marked with the chunk that delivers it
 ("(CC2)"); the chunks, their rows and the coverage matrix that maps
@@ -101,14 +102,14 @@ closing fence)
 
 > | Op | Fields |
 > | --- | --- |
-> | `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector (CC3); `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector. No `rot`, `flip_h`, `flip_v` (set them with object.set) |
+> | `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector (CC3); `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector, point glue only (whole-shape glue needs the Dynamic connector master). No `rot`, `flip_h`, `flip_v` (set them with object.set) |
 > | `object.set` (vsdx) | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `name`, `fill` (`"none"` or `{"hex":"#RRGGBB"}`), `line` (`"none"` or `{w, color, dash}`; `dash` the LinePattern number, as a number or the string `read` shows), and for a connector `from`, `to`, `from_glue`, `to_glue`. No `html` (use text.set) |
 > | `object.move` (vsdx) | `at`, `dx`, `dy` |
 > | `object.delete` (vsdx) | `at` |
 > | `object.reorder` (vsdx) | `at`, `to` (`front`, `back`, or an object of the same parent with `position`) |
 > | `text.set` (vsdx) | `at` (a shape), `html`, `delete` (field addresses, §7) (CC11) |
 > | `text.replace` (vsdx) | `at` (a shape or a page), `select`, `with`, `occurrence` or `all` |
-> | `prop.add` | `at` (a shape), `name` (the row name: letters, digits and `_`, not starting with a digit, CC8), `type` (`string`, `number`, `boolean`, `date`, `duration`, `currency`, `fixed_list`, `variable_list`), `label`, `value`, `format` |
+> | `prop.add` | `at` (a shape), `name` (the row name: ASCII letters, digits and `_`, not starting with a digit; anything else is `invalid_operation` at `name` before the document opens, CC8; rows a file already has with other names are read, set and deleted by their address), `type` (`string`, `number`, `boolean`, `date`, `duration`, `currency`, `fixed_list`, `variable_list`), `label`, `value`, `format` |
 > | `prop.set` | `at` (`page0/s5/prop:Cost`), `value` |
 > | `prop.delete` | `at` (a row) |
 > | `page.add` | `name`, `as`, `size`, `orientation`, and `at` (another page) with `position` (`before`, `after`): the two go together (CC13); neither appends. A new page is 8.5 x 11 in portrait unless `size` or `orientation` says otherwise |
@@ -122,8 +123,16 @@ closing fence)
 > - **Glue.** `from_glue`/`to_glue` is `"s12:3"` (connection point 3 of
 >   object 12), `"s12"` (the whole shape: Visio's dynamic glue, which
 >   needs only the target's pin, so any shape can be glued to), an
->   alias with or without a point (`"$box:2"`), or `"none"`. Every
->   connector takes both forms, master-less ones included (CC2).
+>   alias with or without a point (`"$box:2"`), or `"none"`. Point glue
+>   works on every connector. Whole-shape glue works on a connector
+>   from a master that stores Visio's dynamic glue cells (Dynamic
+>   connector, CC2, CC3); on a master-less connector it is refused
+>   (`operation_failed` at the glue field, hint: add the connector from
+>   the Dynamic connector master), because no Visio-authored file
+>   shows those cells on a master-less shape. Whole-shape glue is
+>   written in the form Visio stores; that Visio re-walks it when a
+>   glued shape moves, and reroutes a dynamic connector whose ends
+>   changed, is **Visio unconfirmed (VE4, VE13)**.
 >   `from` with `from_glue` is accepted, as pptx: the end is written at
 >   `from` and glued; an end off its site is reported as
 >   `stale-connector` and `stale-values` (Visio moves it to the site
@@ -132,7 +141,9 @@ closing fence)
 >   constants, inherited, or Visio's standard 1-D forms (`GUARD(...)`,
 >   `SQRT`, `ATAN2` of the ends), and their ends are constants or glue
 >   (CC1, CC2). A free end is placed where asked and the connector's
->   width, pin and stored route follow it.
+>   width, pin and stored geometry (a straight line) follow it; a
+>   dynamic connector's route is left for Visio to redraw (Visio
+>   unconfirmed, VE4).
 > - **object.move** moves a 2-D object, or a connector's free ends; a
 >   glued end keeps its glue and position. A connector glued at both
 >   ends is refused (set one end's glue to `none` first) (CC2).
@@ -143,15 +154,15 @@ closing fence)
 >   evaluable formula from the master and depend on a written cell are
 >   stored with the master's formula reference (`F="Inh"`) and the new
 >   value, so a resized instance reads back the box asked for (CC4).
-> - **Equal to inherited is not stored.** A text format the `html` sets
->   equal to what the shape inherits (master, then style sheets) is not
->   written, and a stored one equal to it is removed; `read` shows the
->   same either way (CC11). Object values differ: `object.set` stores
->   the value on the object even when it equals the inherited one (the
->   object then stops following its master for that cell, and
->   `origins` shows `local`); a value the object already stores as
->   asked writes nothing, and a plan whose ops all write nothing is a
->   no-op.
+> - **A value equal to what `read` shows writes nothing**, for object
+>   values, shape data, page values and text formats alike, whether
+>   the shown value is stored on the object or inherited (master, then
+>   style sheets): `read`'s output sent back is a no-op (CC4, CC8,
+>   CC11). A different value is stored on the object, and its origin
+>   becomes `local`. A text format equal to the inherited one is never
+>   stored, and a stored one equal to it is removed when the text is
+>   set (decision f). Pinning an inherited value locally (storing it
+>   unchanged so the object stops following its master) is deferred.
 > - **Value forms** are `read`'s: string, number and currency numbers,
 >   boolean, date `{"date":"YYYY-MM-DDThh:mm:ss"}` (anything else in it
 >   is `invalid_operation` at `value`, CC8), duration the stored text
@@ -185,7 +196,10 @@ closing fence)
 >   duplicate shape data row (prop.add); reorder relative to an object
 >   of another parent; a connector whose ends coincide; `from`/`to` or
 >   glue on a 2-D shape; move of a connector glued at both ends (CC2);
->   `page.set` when PageWidth or PageHeight is bound to a formula.
+>   whole-shape glue on a master-less connector (CC2); deleting a
+>   sub-shape a master instance inherits (a shape with `MasterShape`
+>   inside an instance), `ops[n].at` (CC6); `page.set` when PageWidth
+>   or PageHeight is bound to a formula.
 
 ## §4. Results
 
@@ -345,10 +359,14 @@ hazard and `read` shows `values_stale`.")
 >     a cell other cells' formulas read, when vsdx does not evaluate
 >     them) sets the custom document property `RecalcDocument` true
 >     (creating `docProps/custom.xml` when absent) and marks each
->     changed cell with `<?NewValue V?>`, so Visio recalculates on
->     open. vsdx writes computed values only for the formulas its
->     closed evaluator handles (decision c of the design). The result
->     reports `stale-values`.
+>     changed cell with `<?NewValue V?>`, so that Visio recalculates on
+>     open. That Visio does so, and opens a created
+>     `docProps/custom.xml` cleanly, is **Visio unconfirmed** until
+>     experiments VE2, VE3 and VE12 are recorded in
+>     `docs/vsdx-design.md`; this exception must not be signed off as
+>     confirmed before then. vsdx writes computed values only for the
+>     formulas its closed evaluator handles (decision c of the design).
+>     The result reports `stale-values`.
 
 ## §10. Documents with defects
 
@@ -402,6 +420,7 @@ hazard and `read` shows `values_stale`.")
 | no `--format svg` | no Visio geometry renderer in v1 |
 | `create` takes a plan, not HTML | a drawing is not a flow of paragraphs (as xlsx) |
 | `object.add` `geom` and `kind: "connector"` make master-less shapes and connectors; with `master` it instantiates a master (2-D or 1-D) | a new drawing has no masters; pptx has no masters to instantiate |
+| whole-shape glue only on connectors from the Dynamic connector master | every Visio-authored whole-shape glue in the corpus is on such an instance; the cells it needs are not cited on a master-less shape |
 | `--units pt|in` (pptx `pt|emu`) | Visio's stored unit is the inch |
 | y down from the page's top-left (Visio stores y up) | pptx's frame for agents |
 | `origins` values `local`, `inherited`, `master`, `style` | Visio's inheritance chain |
@@ -423,9 +442,8 @@ hazard and `read` shows `values_stale`.")
 
 ## Merge plan
 
-Fable's section map was not forwarded to the designer with the review;
-this plan follows `docs/contract.md`'s sections as above and must be
-checked against Fable's map before the merge.
+Fable confirmed (2026-11-17) that this draft's section order matches
+its section map; steps 1 to 4 stand.
 
 1. When every CC chunk has merged and `make ci` passes on wt/vsdx-int,
    the coverage matrix has no row without a passing test, and the
