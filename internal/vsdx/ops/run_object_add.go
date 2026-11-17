@@ -117,15 +117,10 @@ func (s *ObjectAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units
 }
 
 // addAddr resolves one address field through aliases: a $name becomes
-// the address an earlier op named, anything else is kept.
+// the address an earlier op named, with any suffix that may follow
+// it, anything else is kept.
 func addAddr(raw string, aliases map[string]string, field string) (string, error) {
-	if !strings.HasPrefix(raw, "$") {
-		return raw, nil
-	}
-	if hit, ok := aliases[raw[1:]]; ok {
-		return hit, nil
-	}
-	return "", cli.Errorf(cli.CodeNotFound, field, "alias %s is not defined", raw)
+	return ResolveAlias(raw, aliases, field)
 }
 
 // addMaster resolves one master reference to its stored ID: a master
@@ -340,9 +335,9 @@ func addParseGlue(raw string, aliases map[string]string, pageAddr string, contai
 		point = n
 	}
 	if strings.HasPrefix(head, "$") {
-		target, ok := aliases[head[1:]]
-		if !ok {
-			return addGlue{}, cli.Errorf(cli.CodeNotFound, field, "alias %s is not defined", head)
+		target, err := ResolveAlias(head, aliases, field)
+		if err != nil {
+			return addGlue{}, err
 		}
 		a, err := vsd.Parse(target)
 		if err != nil || a.Kind != vsd.KindShape || a.InMaster {

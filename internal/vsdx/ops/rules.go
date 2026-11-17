@@ -9,17 +9,24 @@ import (
 )
 
 // addressOK reports whether s parses as an address whose kind is one
-// of allowed, or as an alias, which any op may name.
+// of allowed, or as an alias (bare $name, or $name with a suffix
+// that could follow a page or shape address), which any op may
+// name; the op's resolver refuses a suffix that names a kind it
+// does not take.
 func addressOK(s string, allowed ...vsd.Kind) bool {
 	if s == "" {
 		return false
 	}
+	if strings.HasPrefix(s, "$") {
+		_, suffix, ok := splitAlias(s)
+		if !ok {
+			return false
+		}
+		return suffixValid(suffix)
+	}
 	a, err := vsd.Parse(s)
 	if err != nil {
 		return false
-	}
-	if a.Kind == vsd.KindAlias {
-		return true
 	}
 	for _, k := range allowed {
 		if k == a.Kind {
@@ -47,9 +54,10 @@ func masterOK(s string) bool {
 	return true
 }
 
-// glueOK reports whether s is a glue reference: a shape or an alias,
-// with an optional colon and a point number, and "none" only on the
-// ops that disconnect.
+// glueOK reports whether s is a glue reference: a shape or an alias
+// (with what may follow a shape, such as a page alias's /s5),
+// with an optional colon and a point number, and "none" only on
+// the ops that disconnect.
 func glueOK(s string, allowNone bool) bool {
 	if s == "" {
 		return false
@@ -58,11 +66,15 @@ func glueOK(s string, allowNone bool) bool {
 		return allowNone
 	}
 	if strings.HasPrefix(s, "$") {
-		head, point, hasPoint := strings.Cut(s[1:], ":")
-		if !cli.ValidAlias(head) {
+		head, point, hasPoint := strings.Cut(s, ":")
+		if hasPoint && !pointOK(point) {
 			return false
 		}
-		return !hasPoint || pointOK(point)
+		_, suffix, ok := splitAlias(head)
+		if !ok {
+			return false
+		}
+		return suffixShapeValid(suffix)
 	}
 	if strings.HasPrefix(s, "s") {
 		head, point, hasPoint := strings.Cut(s[1:], ":")

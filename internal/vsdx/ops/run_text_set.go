@@ -56,19 +56,14 @@ func (s *TextSetSpec) Run(ws *edit.Workspace, aliases map[string]string, _ strin
 }
 
 // textSetAddress resolves an `at` of text.set to a shape address and
-// its parsed form: an alias is looked up in aliases, a master shape
-// and a stencil are refused here (the edit layer would otherwise have
-// no master to check against), and anything else is not_found at at.
+// its parsed form: an alias is looked up in aliases (with what may
+// follow it, $p/s5), a master shape and a stencil are refused here
+// (the edit layer would otherwise have no master to check against),
+// and anything else is not_found at at.
 func textSetAddress(at string, aliases map[string]string) (string, vsd.Address, error) {
-	resolved := at
-	if strings.HasPrefix(at, "$") {
-		name := at[1:]
-		addr, ok := aliases[name]
-		if !ok {
-			e := cli.Errorf(cli.CodeNotFound, "at", "no $%s: not found", name)
-			return "", vsd.Address{}, e
-		}
-		resolved = addr
+	resolved, err := ResolveAlias(at, aliases, "at")
+	if err != nil {
+		return "", vsd.Address{}, err
 	}
 	a, err := vsd.Parse(resolved)
 	if err != nil || a.Kind != vsd.KindShape {

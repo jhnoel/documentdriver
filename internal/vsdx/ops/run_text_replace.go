@@ -61,18 +61,13 @@ func (s *TextReplaceSpec) Run(ws *edit.Workspace, aliases map[string]string, _ s
 }
 
 // replaceAddress resolves s.At through aliases to a shape or page
-// address: an unknown alias is not_found at at, a master address is
-// operation_failed at at, and anything else is not a shape or page
-// address at at.
+// address (with what may follow them, $p/s5): an unknown alias is
+// not_found at at, a master address is operation_failed at at, and
+// anything else is not a shape or page address at at.
 func replaceAddress(at string, aliases map[string]string) (string, vsd.Address, error) {
-	resolved := at
-	if strings.HasPrefix(at, "$") {
-		name := at[1:]
-		addr, ok := aliases[name]
-		if !ok {
-			return "", vsd.Address{}, cli.Errorf(cli.CodeNotFound, "at", "no $%s: not found", name)
-		}
-		resolved = addr
+	resolved, err := ResolveAlias(at, aliases, "at")
+	if err != nil {
+		return "", vsd.Address{}, err
 	}
 	a, err := vsd.Parse(resolved)
 	if err != nil || (a.Kind != vsd.KindShape && a.Kind != vsd.KindPage) {
