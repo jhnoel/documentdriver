@@ -55,6 +55,30 @@ type hazardJSON struct {
 	Detail string `json:"detail"`
 }
 
+// pageHeadJSON is a page result up to and including its layers:
+// the head of the streamed page output, marshalled on its own so
+// the objects can be written one by one into the same buffer.
+type pageHeadJSON struct {
+	Base             string        `json:"base"`
+	Page             string        `json:"page"`
+	Name             string        `json:"name"`
+	Units            string        `json:"units"`
+	Size             []json.Number `json:"size,omitempty"`
+	Orientation      string        `json:"orientation,omitempty"`
+	PrintOrientation string        `json:"print_orientation,omitempty"`
+	Background       bool          `json:"background,omitempty"`
+	BackgroundPage   string        `json:"background_page,omitempty"`
+	Layers           []layerJSON   `json:"layers"`
+}
+
+// pageTailJSON is a page result's connections, hazards and notes:
+// the tail of the streamed page output, marshalled on its own.
+type pageTailJSON struct {
+	Connections []connectionJSON `json:"connections"`
+	Hazards     []hazardJSON     `json:"hazards"`
+	Notes       []Note           `json:"notes"`
+}
+
 // hexJSON is a colour as read shows it.
 type hexJSON struct {
 	Hex string `json:"hex"`
@@ -153,7 +177,7 @@ func Page(input []byte, base, address string, o Options) ([]byte, error) {
 		return nil, cli.Errorf(cli.CodeNotFound, "", "%s", err)
 	}
 	if a.Kind != vsd.KindPage && a.Kind != vsd.KindMaster {
-		return nil, cli.Errorf(cli.CodeNotFound, "", "no page %s: not found", address)
+		return nil, cli.Errorf(cli.CodeNotFound, "", "no page %q in the drawing's page list", address)
 	}
 	pkg, d, r, err := openDoc(input)
 	if err != nil {
@@ -173,51 +197,77 @@ func Page(input []byte, base, address string, o Options) ([]byte, error) {
 	} else {
 		e, ok := pageEntry(d, a.Container, a.PageDup)
 		if !ok {
-			return nil, cli.Errorf(cli.CodeNotFound, "--page", "no page %s: not found", address)
+			return nil, cli.Errorf(cli.CodeNotFound, "--page", "no page %q in the drawing's page list", address)
 		}
 		p, err = model.BuildPage(d, r, e, mo)
 		if err != nil {
 			return nil, &cli.Error{Code: cli.CodeUnreadableTarget, Path: "--page", Message: "the page cannot be read", Detail: err.Error(), Cause: err}
 		}
 	}
-	out := pageJSON{Base: base, Page: p.ID, Name: p.Name, Units: units,
+	head := pageHeadJSON{Base: base, Page: p.ID, Name: p.Name, Units: units,
 		Orientation: p.Orientation, PrintOrientation: p.PrintOrientation,
 		Background: p.Background, BackgroundPage: p.BackPage,
-		Layers: []layerJSON{}, Objects: []objectJSON{}, Connections: []connectionJSON{},
-		Hazards: []hazardJSON{}, Notes: []Note{}}
+		Layers: []layerJSON{}}
 	if p.HasSize {
 		if in {
-			out.Size = []json.Number{json.Number(vsd.FormatInches(p.W)), json.Number(vsd.FormatInches(p.H))}
+			head.Size = []json.Number{json.Number(vsd.FormatInches(p.W)), json.Number(vsd.FormatInches(p.H))}
 		} else {
-			out.Size = []json.Number{json.Number(geom.FormatNum(p.W * vsd.PointsPerInch)), json.Number(geom.FormatNum(p.H * vsd.PointsPerInch))}
+			head.Size = []json.Number{json.Number(geom.FormatNum(p.W * vsd.PointsPerInch)), json.Number(geom.FormatNum(p.H * vsd.PointsPerInch))}
 		}
 	}
 	for _, l := range p.Layers {
-		out.Layers = append(out.Layers, layerJSON{ID: l.ID, Name: l.Name, Index: l.Index, Visible: l.Visible, Print: l.Print, Lock: l.Lock})
+		head.Layers = append(head.Layers, layerJSON{ID: l.ID, Name: l.Name, Index: l.Index, Visible: l.Visible, Print: l.Print, Lock: l.Lock})
 	}
-	for _, obj := range selectObjects(p, o) {
-		out.Objects = append(out.Objects, objectJSONOf(obj, in, full))
-	}
+	tail := pageTailJSON{Connections: []connectionJSON{}, Hazards: []hazardJSON{}, Notes: []Note{}}
 	for _, c := range p.Connections {
-		out.Connections = append(out.Connections, connectionJSON{Connector: c.Connector, From: c.From, To: c.To, FromGlue: c.FromGlue, ToGlue: c.ToGlue})
+		tail.Connections = append(tail.Connections, connectionJSON{Connector: c.Connector, From: c.From, To: c.To, FromGlue: c.FromGlue, ToGlue: c.ToGlue})
 	}
 	for _, h := range p.Hazards {
-		out.Hazards = append(out.Hazards, hazardJSON{Kind: h.Kind, ID: h.ID, Detail: h.Detail})
+		tail.Hazards = append(tail.Hazards, hazardJSON{Kind: h.Kind, ID: h.ID, Detail: h.Detail})
 	}
 	for _, n := range d.Notes {
-		out.Notes = append(out.Notes, Note{At: n.At, Reason: n.Reason})
+		tail.Notes = append(tail.Notes, Note{At: n.At, Reason: n.Reason})
 	}
 	for _, n := range p.Notes {
-		out.Notes = append(out.Notes, Note{At: n.At, Reason: n.Reason})
+		tail.Notes = append(tail.Notes, Note{At: n.At, Reason: n.Reason})
 	}
 	for _, n := range r.Notes() {
-		out.Notes = append(out.Notes, Note{At: n.At, Reason: n.Reason})
+		tail.Notes = append(tail.Notes, Note{At: n.At, Reason: n.Reason})
 	}
-	b, err := cli.Marshal(out)
+	return marshalPage(head, tail, selectObjects(p, o), in, full)
+}
+
+// marshalPage writes a page result into one buffer: the marshalled
+// head (without its closing brace), then the objects one by one,
+// then the marshalled tail (without its opening brace). No slice of
+// per-object copies is ever held: each object is marshalled and
+// appended before the next is converted, so the live set is the
+// model plus the output buffer.
+func marshalPage(head pageHeadJSON, tail pageTailJSON, objects []*model.Object, in, full bool) ([]byte, error) {
+	headB, err := cli.Marshal(head)
 	if err != nil {
 		return nil, err
 	}
-	return append(b, '\n'), nil
+	tailB, err := cli.Marshal(tail)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]byte, 0, len(headB)+len(tailB)+len(objects)*384)
+	out = append(out, headB[:len(headB)-1]...)
+	out = append(out, `,"objects":[`...)
+	for i, obj := range objects {
+		if i > 0 {
+			out = append(out, ',')
+		}
+		b, err := cli.Marshal(objectJSONOf(obj, in, full))
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, b...)
+	}
+	out = append(out, ']', ',')
+	out = append(out, tailB[1:]...)
+	return append(out, '\n'), nil
 }
 
 // lengthNum formats a length in view points in the selected units.

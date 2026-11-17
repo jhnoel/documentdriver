@@ -94,7 +94,7 @@ func XML(input []byte, address string) ([]byte, error) {
 		return nil, cli.Errorf(cli.CodeNotFound, "", "%s", err)
 	}
 	if a.Kind != vsd.KindShape {
-		return nil, cli.Errorf(cli.CodeNotFound, "", "no shape %s: not found", address)
+		return nil, noObject(address)
 	}
 	pkg, d, r, err := openDoc(input)
 	if err != nil {
@@ -105,7 +105,7 @@ func XML(input []byte, address string) ([]byte, error) {
 	if a.InMaster {
 		m, ok := d.Master(a.Container)
 		if !ok {
-			return nil, cli.Errorf(cli.CodeNotFound, "", "no shape %s: not found", address)
+			return nil, noObject(address)
 		}
 		page, err = model.BuildMaster(d, r, m, model.Options{})
 		if err != nil {
@@ -114,7 +114,7 @@ func XML(input []byte, address string) ([]byte, error) {
 	} else {
 		e, ok := pageEntry(d, a.Container, a.PageDup)
 		if !ok {
-			return nil, cli.Errorf(cli.CodeNotFound, "", "no shape %s: not found", address)
+			return nil, noObject(address)
 		}
 		page, err = model.BuildPage(d, r, e, model.Options{})
 		if err != nil {
@@ -126,7 +126,18 @@ func XML(input []byte, address string) ([]byte, error) {
 			return o.Node.Bytes(), nil
 		}
 	}
-	return nil, cli.Errorf(cli.CodeNotFound, "", "no shape %s: not found", address)
+	return nil, noObject(address)
+}
+
+// noObject reports that address names no object, in pptx's form: the
+// short id and the page or master it sits on ("no object s9999 on
+// page0"), or the plain not-found form when the address has no
+// container to name.
+func noObject(address string) error {
+	if i := strings.LastIndex(address, "/"); i > 0 {
+		return cli.Errorf(cli.CodeNotFound, "", "no object %s on %s", address[i+1:], address[:i])
+	}
+	return cli.Errorf(cli.CodeNotFound, "", "no object %s: not found", address)
 }
 
 // openDoc opens the package in input, its document structure and the
@@ -140,7 +151,7 @@ func openDoc(input []byte) (*opc.Package, *doc.Document, *inherit.Resolver, erro
 	d, err := doc.Open(pkg)
 	if err != nil {
 		_ = pkg.Close()
-		return nil, nil, nil, fmt.Errorf("vsdx: %w", err)
+		return nil, nil, nil, err // doc.Open's errors already carry one "vsdx:" prefix
 	}
 	return pkg, d, inherit.New(d), nil
 }
@@ -155,11 +166,11 @@ func findPage(d *doc.Document, page string) (*doc.PageEntry, error) {
 		return nil, cli.Errorf(cli.CodeNotFound, "--page", "%s", err)
 	}
 	if a.Kind != vsd.KindPage {
-		return nil, cli.Errorf(cli.CodeNotFound, "--page", "no page %s: not found", page)
+		return nil, cli.Errorf(cli.CodeNotFound, "--page", "no page %q in the drawing's page list", page)
 	}
 	e, ok := pageEntry(d, a.Container, a.PageDup)
 	if !ok {
-		return nil, cli.Errorf(cli.CodeNotFound, "--page", "no page %s: not found", page)
+		return nil, cli.Errorf(cli.CodeNotFound, "--page", "no page %q in the drawing's page list", page)
 	}
 	return e, nil
 }
@@ -206,6 +217,8 @@ func (f *finder) scanPage(d *doc.Document, r *inherit.Resolver, e *doc.PageEntry
 	for _, n := range p.Notes {
 		f.res.Notes = append(f.res.Notes, Note{At: n.At, Reason: n.Reason})
 	}
+	// The page model p is dropped when this call returns: Find holds
+	// no model between pages, only the matches already recorded.
 	for _, o := range p.Objects {
 		if f.cut {
 			return nil
