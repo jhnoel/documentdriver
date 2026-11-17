@@ -99,14 +99,17 @@ func paintLine(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 		return
 	}
 	line := &Line{}
-	var origins []inherit.Origin
+	// best folds the origins of the parts that are shown, one at a
+	// time (boxOrigin is the maximum over its arguments, so a fold
+	// equals the fold of the whole list), rather than building a list.
+	var best inherit.Origin
 	if weightOk {
 		if weight.V == vsd.ValueThemed {
 			o.Omitted = append(o.Omitted, Omission{Prop: "line", Reason: "themed value not derived"})
 		} else if n, ok := vsd.Number(weight.V); ok {
 			line.W = n * vsd.PointsPerInch
 			line.HasW = true
-			origins = append(origins, weightOrigin)
+			best = boxOrigin(best, weightOrigin)
 		} else {
 			o.Omitted = append(o.Omitted, Omission{Prop: "line", Reason: vsd.CellLineWeight + " not a number"})
 		}
@@ -116,18 +119,18 @@ func paintLine(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 			o.Omitted = append(o.Omitted, Omission{Prop: "line", Reason: "themed value not derived"})
 		} else if hex, ok := paintColor(r, color.V); ok {
 			line.Color = hex
-			origins = append(origins, colorOrigin)
+			best = boxOrigin(best, colorOrigin)
 		} else {
 			o.Omitted = append(o.Omitted, Omission{Prop: "line", Reason: "colour " + color.V + " not resolved"})
 		}
 	}
 	if patternOk {
 		line.Dash = pattern.V
-		origins = append(origins, patternOrigin)
+		best = boxOrigin(best, patternOrigin)
 	}
 	o.Line = line
-	if origin := boxOrigin(origins...); origin != "" {
-		setOrigin(o, "line", origin)
+	if best != "" {
+		setOrigin(o, "line", best)
 	}
 }
 
