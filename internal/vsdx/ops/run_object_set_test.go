@@ -1,9 +1,11 @@
 package ops_test
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/jhnoel/documentdriver/internal/vsdx/apply"
 	"github.com/jhnoel/documentdriver/internal/vsdx/edit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/ops"
+	"github.com/jhnoel/documentdriver/internal/vsdx/read"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsdxtest"
 )
 
@@ -111,6 +114,303 @@ func TestObjectSetIdentity(t *testing.T) {
 	}
 	if len(res.Hazards) != 0 {
 		t.Errorf("identity hazards %+v, want none", res.Hazards)
+	}
+}
+
+// TestObjectSetIdentityFields checks the CC4 identity rows: each
+// plan sets a field of an object to the value read shows it (in
+// read's form), and each is a no-op (new_base = base, no saved
+// file, changed empty).
+func TestObjectSetIdentityFields(t *testing.T) {
+	for _, tc := range []struct {
+		fixture string
+		plan    string
+	}{
+		{"v2-master", `{"ops":[{"op":"object.set","at":"page0/s2","fill":{"hex":"#FF0000"}}]}`},
+		{"v2-master", `{"ops":[{"op":"object.set","at":"page0/s1","fill":{"hex":"#FFFFFF"}}]}`},
+		{"v2-master", `{"ops":[{"op":"object.set","at":"page0/s1","line":{"w":0.75}}]}`},
+		{"v2-master", `{"ops":[{"op":"object.set","at":"page0/s1","line":{"w":0.75,"color":{"hex":"#7F7F7F"},"dash":"1"}}]}`},
+		{"v2-master", `{"ops":[{"op":"object.set","at":"page0/s1","box":[108,117,72,54]}]}`},
+		{"v2-master", `{"ops":[{"op":"object.set","at":"page0/s2","box":[252,117,72,54]}]}`},
+		{"v2-master", `{"ops":[{"op":"object.set","at":"page0/s1","name":"Process"}]}`},
+		{"v2-master", `{"ops":[{"op":"object.set","at":"page0/s5","fill":{"hex":"#0000FF"}}]}`},
+		{"v2-master", `{"ops":[{"op":"object.set","at":"page0/s4","fill":{"hex":"#5B9BD5"}}]}`},
+		{"v1-minimal", `{"ops":[{"op":"object.set","at":"page0/s1","fill":{"hex":"#4472C4"}}]}`},
+		{"v9-rotation", `{"ops":[{"op":"object.set","at":"page0/s1","rot":270}]}`},
+		{"v9-rotation", `{"ops":[{"op":"object.set","at":"page0/s1","box":[90,90,72,36],"rot":270,"flip_h":false,"flip_v":false}]}`},
+		{"v9-rotation", `{"ops":[{"op":"object.set","at":"page0/s3","box":[396,126,72,36],"rot":30}]}`},
+		{"v4-groups", `{"ops":[{"op":"object.set","at":"page0/s12","box":[288,360,72,72],"rot":330}]}`},
+		{"v5-glue", `{"ops":[{"op":"object.set","at":"page0/s4","from":[396,144]}]}`},
+		{"v5-glue", `{"ops":[{"op":"object.set","at":"page0/s1","fill":{"hex":"#5B9BD5"}}]}`},
+	} {
+		t.Run(tc.plan, func(t *testing.T) {
+			path := vsdxtest.Fixture(t, tc.fixture)
+			out := filepath.Join(t.TempDir(), "out.vsdx")
+			res, err := apply.Run(path, parsePlan(t, tc.plan), apply.Options{Out: out})
+			if err != nil {
+				t.Fatalf("Run: %v", err)
+			}
+			if res.Base != res.NewBase {
+				t.Errorf("new_base = %s, want base %s", res.NewBase, res.Base)
+			}
+			if _, err := os.Stat(out); !errors.Is(err, os.ErrNotExist) {
+				t.Error("identity object.set wrote its out file")
+			}
+			if len(res.Parts) != 0 || len(res.Changed) != 0 || len(res.Hazards) != 0 {
+				t.Errorf("identity result parts %v changed %v hazards %+v, want empty", res.Parts, res.Changed, res.Hazards)
+			}
+		})
+	}
+}
+
+// TestObjectSetDifferentFill checks the CC4 different-value row:
+// V2 s2 fill #FFFFFF (was stored #FF0000) writes, changed
+// [page0/s2], read shows #FFFFFF and the stored FillForegnd cell
+// is V '#FFFFFF'.
+func TestObjectSetDifferentFill(t *testing.T) {
+	path := vsdxtest.Fixture(t, "v2-master")
+	out := filepath.Join(t.TempDir(), "out.vsdx")
+	res, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.set","at":"page0/s2","fill":{"hex":"#FFFFFF"}}]}`), apply.Options{Out: out})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if len(res.Changed) != 1 || !strings.Contains(string(res.Changed[0]), "page0/s2") {
+		t.Fatalf("changed = %v, want [page0/s2]", res.Changed)
+	}
+	page := readPage(t, out)
+	i := findObject(t, page, "page0/s2")
+	if string(page.Objects[i].Fill) != `{"hex":"#FFFFFF"}` {
+		t.Errorf("fill = %s, want {\"hex\":\"#FFFFFF\"}", page.Objects[i].Fill)
+	}
+	xml := connectorPartXML(t, out, "/visio/pages/page1.xml")
+	if !strings.Contains(xml, "FillForegnd") || !strings.Contains(xml, "#FFFFFF") {
+		t.Errorf("sealed page has no stored FillForegnd #FFFFFF: %s", xml)
+	}
+	if strings.Contains(xml, "FillForegnd' V='2'") || strings.Contains(xml, `FillForegnd" V="2"`) {
+		t.Errorf("sealed page still stores FillForegnd V '2': %s", xml)
+	}
+}
+
+// TestObjectSetIdentityFixtureLoop is the CC4 fixture loop: for
+// every object of every V1 to V17 fixture, object.set with each
+// field as read shows it (box, rot, flips, name, fill, line, and
+// for connectors from/to with their glue) is a no-op. A field the
+// tool legitimately refuses (a scaled page, a Foreign shape, a
+// 1-D box, a container member, an unreadable transform) is
+// skipped and logged, never a write.
+func TestObjectSetIdentityFixtureLoop(t *testing.T) {
+	type loopObject struct {
+		ID       string          `json:"id"`
+		Kind     string          `json:"kind"`
+		Name     string          `json:"name"`
+		Box      []float64       `json:"box"`
+		Rot      *float64        `json:"rot"`
+		FlipH    bool            `json:"flip_h"`
+		FlipV    bool            `json:"flip_v"`
+		Fill     json.RawMessage `json:"fill"`
+		Line     json.RawMessage `json:"line"`
+		From     []float64       `json:"from"`
+		To       []float64       `json:"to"`
+		FromGlue string          `json:"from_glue"`
+		ToGlue   string          `json:"to_glue"`
+	}
+	checked, skipped := 0, 0
+	for _, fixture := range htmlFixtures {
+		path := vsdxtest.Fixture(t, fixture)
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("ReadFile: %v", err)
+		}
+		raw, err := read.Page(data, "base", "page0", read.Options{Units: "pt"})
+		if err != nil {
+			t.Logf("%s: no page0 (%v), skipped", fixture, err)
+			continue
+		}
+		var page struct {
+			Objects []loopObject `json:"objects"`
+		}
+		if err := json.Unmarshal(raw, &page); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		for _, o := range page.Objects {
+			var plans []string
+			if o.Kind != "connector" && len(o.Box) == 4 {
+				plans = append(plans,
+					`{"ops":[{"op":"object.set","at":"`+o.ID+`","box":[`+jsonNumber(o.Box[0])+`,`+jsonNumber(o.Box[1])+`,`+jsonNumber(o.Box[2])+`,`+jsonNumber(o.Box[3])+`]}]}`,
+					`{"ops":[{"op":"object.set","at":"`+o.ID+`","rot":`+jsonNumber(float64Value(o.Rot))+`,"flip_h":`+jsonBool(o.FlipH)+`,"flip_v":`+jsonBool(o.FlipV)+`}]}`)
+			}
+			if o.Name != "" {
+				plans = append(plans, `{"ops":[{"op":"object.set","at":"`+o.ID+`","name":`+jsonString(o.Name)+`} ]}`)
+			}
+			if len(o.Fill) > 0 {
+				plans = append(plans, `{"ops":[{"op":"object.set","at":"`+o.ID+`","fill":`+string(o.Fill)+`} ]}`)
+			}
+			if len(o.Line) > 0 {
+				plans = append(plans, `{"ops":[{"op":"object.set","at":"`+o.ID+`","line":`+string(o.Line)+`} ]}`)
+			}
+			if o.Kind == "connector" {
+				// A free end sent back at its point is a no-op; a
+				// glued end sent back as point+glue is not for
+				// V5 connectors, which store no end formula
+				// (set_glue's identity check), so glued ends are
+				// skipped and logged, not asserted.
+				if len(o.From) == 2 && o.FromGlue == "" {
+					plans = append(plans, `{"ops":[{"op":"object.set","at":"`+o.ID+`","from":[`+jsonNumber(o.From[0])+`,`+jsonNumber(o.From[1])+`]}]}`)
+				}
+				if len(o.To) == 2 && o.ToGlue == "" {
+					plans = append(plans, `{"ops":[{"op":"object.set","at":"`+o.ID+`","to":[`+jsonNumber(o.To[0])+`,`+jsonNumber(o.To[1])+`]}]}`)
+				}
+			}
+			for _, plan := range plans {
+				parsed, parseErrs := ops.ParsePlan([]byte(plan))
+				if len(parseErrs) != 0 || parsed == nil {
+					skipped++
+					t.Logf("%s %s plan refused (skipped): %v", fixture, o.ID, parseErrs)
+					continue
+				}
+				out := filepath.Join(t.TempDir(), "out.vsdx")
+				res, err := apply.Run(path, parsed, apply.Options{Out: out})
+				if err != nil {
+					skipped++
+					t.Logf("%s %s refused (skipped): %v", fixture, o.ID, err)
+					continue
+				}
+				checked++
+				if len(res.Changed) != 0 || len(res.Parts) != 0 {
+					t.Errorf("%s %s plan %s: changed %v parts %v, want no-op", fixture, o.ID, plan, res.Changed, res.Parts)
+				}
+				if res.Base != res.NewBase {
+					t.Errorf("%s %s plan %s: new_base %s, want base %s", fixture, o.ID, plan, res.NewBase, res.Base)
+				}
+			}
+		}
+	}
+	t.Logf("fixture loop: %d checked, %d refused and skipped", checked, skipped)
+	if checked == 0 {
+		t.Fatal("fixture loop checked nothing")
+	}
+}
+
+// jsonNumber formats f as a JSON number.
+func jsonNumber(f float64) string {
+	return strconv.FormatFloat(f, 'g', -1, 64)
+}
+
+// jsonBool formats b as a JSON boolean.
+func jsonBool(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
+// jsonString formats s as a JSON string.
+func jsonString(s string) string {
+	b, _ := json.Marshal(s)
+	return string(b)
+}
+
+// float64Value returns the value of p, or 0 when p is nil.
+func float64Value(p *float64) float64 {
+	if p == nil {
+		return 0
+	}
+	return *p
+}
+
+// TestObjectSetBoxCorpus checks the CC4 corpus rows: object.set
+// box [40,20,100,100] reads back exactly [40,20,100,100] for the
+// 11 shapes whose master-held LocPin is an evaluable dependent
+// (test, testVISIO and testVISIO.vstx page0/s5; office_varient4,
+// testfile3 and testfile5 page0/s1; BasicShapes page0/s20, s21,
+// s23, s25 and s26), and the 4 container members (test,
+// testVISIO and testVISIO.vstx page0/s8, tdf154379 page0/s317)
+// are refused at at by the container rule. It skips only when
+// VSDX_CORPUS is unset and fails naming the path when a corpus
+// file is missing.
+func TestObjectSetBoxCorpus(t *testing.T) {
+	if os.Getenv("VSDX_CORPUS") == "" {
+		t.Skip("no vsdx corpus (set VSDX_CORPUS)")
+	}
+	dir := corpusDir(t)
+	tika := filepath.Join("apache-tika", "tika-parsers", "tika-parsers-standard", "tika-parsers-standard-modules", "tika-parser-microsoft-module", "src", "test", "resources", "test-documents")
+	for _, tc := range []struct {
+		rel     string
+		at      string
+		refused bool
+	}{
+		{filepath.Join("apache-poi", "test-data", "diagram", "test.vsdx"), "page0/s5", false},
+		{filepath.Join("apache-poi", "test-data", "diagram", "test.vsdx"), "page0/s8", true},
+		{filepath.Join(tika, "testVISIO.vsdx"), "page0/s5", false},
+		{filepath.Join(tika, "testVISIO.vsdx"), "page0/s8", true},
+		{filepath.Join(tika, "testVISIO.vstx"), "page0/s5", false},
+		{filepath.Join(tika, "testVISIO.vstx"), "page0/s8", true},
+		{filepath.Join("libvisio", "src", "test", "data", "office_varient4.vsdx"), "page0/s1", false},
+		{filepath.Join("libvisio", "src", "test", "data", "testfile3.vsdx"), "page0/s1", false},
+		{filepath.Join("libvisio", "src", "test", "data", "testfile5.vsdx"), "page0/s1", false},
+		{filepath.Join("vsdx-js", "tests", "BasicShapes.vsdx"), "page0/s20", false},
+		{filepath.Join("vsdx-js", "tests", "BasicShapes.vsdx"), "page0/s21", false},
+		{filepath.Join("vsdx-js", "tests", "BasicShapes.vsdx"), "page0/s23", false},
+		{filepath.Join("vsdx-js", "tests", "BasicShapes.vsdx"), "page0/s25", false},
+		{filepath.Join("vsdx-js", "tests", "BasicShapes.vsdx"), "page0/s26", false},
+		{filepath.Join("libvisio", "src", "test", "data", "tdf154379-QuickStyleFillMatrix.vsdx"), "page0/s317", true},
+	} {
+		t.Run(tc.rel+"/"+tc.at, func(t *testing.T) {
+			path := filepath.Join(dir, "repos", tc.rel)
+			if _, err := os.Stat(path); err != nil {
+				t.Fatalf("corpus file %s not found under VSDX_CORPUS %s", path, dir)
+			}
+			out := filepath.Join(t.TempDir(), "out.vsdx")
+			res, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.set","at":"`+tc.at+`","box":[40,20,100,100]}]}`), apply.Options{Out: out})
+			if tc.refused {
+				var ce *cli.Error
+				if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "ops[0].at" {
+					t.Fatalf("Run: got %v, want operation_failed at ops[0].at", err)
+				}
+				if !strings.Contains(ce.Message, "container or list") {
+					t.Errorf("refusal = %q, want the container or list message", ce.Message)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Run: %v", err)
+			}
+			if len(res.Changed) != 1 {
+				t.Fatalf("changed = %v, want one entry", res.Changed)
+			}
+			page := readPage(t, out)
+			i := findObject(t, page, tc.at)
+			checkBox(t, tc.at, page.Objects[i].Box, [4]float64{40, 20, 100, 100})
+		})
+	}
+}
+
+// TestObjectSetBoxCorpusLocPinRefusal checks the CC4 dependents
+// refusal: 60489 page0/s116 has a master-held LocPinX formula
+// Width*IF(PinX<User.Con1X,1,0) that vsdx does not evaluate, so
+// a box write is refused at box in the formula refusal form
+// naming LocPinX, never left stale. It skips only when
+// VSDX_CORPUS is unset.
+func TestObjectSetBoxCorpusLocPinRefusal(t *testing.T) {
+	if os.Getenv("VSDX_CORPUS") == "" {
+		t.Skip("no vsdx corpus (set VSDX_CORPUS)")
+	}
+	dir := corpusDir(t)
+	path := filepath.Join(dir, "repos", "apache-poi", "test-data", "diagram", "60489.vsdx")
+	if _, err := os.Stat(path); err != nil {
+		t.Fatalf("corpus file %s not found under VSDX_CORPUS %s", path, dir)
+	}
+	out := filepath.Join(t.TempDir(), "out.vsdx")
+	_, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.set","at":"page0/s116","box":[40,20,100,100]}]}`), apply.Options{Out: out})
+	var ce *cli.Error
+	if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "ops[0].box" {
+		t.Fatalf("Run: got %v, want operation_failed at ops[0].box", err)
+	}
+	if ce.Detail != "LocPinX F=Width*IF(PinX<User.Con1X,1,0)" {
+		t.Errorf("detail = %q, want LocPinX F=Width*IF(PinX<User.Con1X,1,0)", ce.Detail)
+	}
+	if _, statErr := os.Stat(out); !errors.Is(statErr, os.ErrNotExist) {
+		t.Error("a refused object.set wrote its out file")
 	}
 }
 

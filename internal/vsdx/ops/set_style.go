@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
+	"github.com/jhnoel/documentdriver/internal/geom"
 	core "github.com/jhnoel/documentdriver/internal/ooxml/edit"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
@@ -266,9 +267,8 @@ func styleLineCells(st *styleShape, s *ObjectSetSpec, color string, scale float6
 // s already equals the effective line of st.
 func styleLineMatches(st *styleShape, s *ObjectSetSpec, color string, scale float64) bool {
 	if s.Line.W != nil {
-		want := *s.Line.W * scale / vsd.PointsPerInch
 		got, ok := styleNumberCell(st, vsd.CellLineWeight)
-		if !ok || math.Abs(got-want) > 1e-12 {
+		if !ok || geom.FormatNum(got*vsd.PointsPerInch) != geom.FormatNum(*s.Line.W*scale) {
 			return false
 		}
 	}

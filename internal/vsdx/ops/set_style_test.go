@@ -247,6 +247,38 @@ func TestSetStyleIdentity(t *testing.T) {
 	}
 }
 
+// TestSetStyleIdentityInherited checks the CC4 rows for inherited
+// values: V2 s1 fill #FFFFFF (from master2), line w 0.75 and the
+// full line (style-inherited), and name Process, each write
+// nothing; V2 s2 fill #FF0000 (stored) and V2 s5 fill #0000FF and
+// V2 s4 fill #5B9BD5 and V1 s1 fill #4472C4 write nothing.
+func TestSetStyleIdentityInherited(t *testing.T) {
+	w := float64(0.75)
+	name := "Process"
+	for _, tc := range []struct {
+		fixture string
+		spec    *ObjectSetSpec
+	}{
+		{"v2-master", &ObjectSetSpec{At: "page0/s1", Fill: &PaintSpec{Hex: "#FFFFFF"}}},
+		{"v2-master", &ObjectSetSpec{At: "page0/s1", Line: &LineSpec{W: &w}}},
+		{"v2-master", &ObjectSetSpec{At: "page0/s1", Line: &LineSpec{W: &w, Color: "#7F7F7F", Dash: "1"}}},
+		{"v2-master", &ObjectSetSpec{At: "page0/s1", Name: &name}},
+		{"v2-master", &ObjectSetSpec{At: "page0/s2", Fill: &PaintSpec{Hex: "#FF0000"}}},
+		{"v2-master", &ObjectSetSpec{At: "page0/s5", Fill: &PaintSpec{Hex: "#0000FF"}}},
+		{"v2-master", &ObjectSetSpec{At: "page0/s4", Fill: &PaintSpec{Hex: "#5B9BD5"}}},
+		{"v1-minimal", &ObjectSetSpec{At: "page0/s1", Fill: &PaintSpec{Hex: "#4472C4"}}},
+	} {
+		src := vsdxtest.Fixture(t, tc.fixture)
+		changed, out := styleRun(t, src, tc.spec, nil, "pt")
+		if len(changed) != 0 {
+			t.Errorf("%s: changed = %v, want empty for identity", tc.spec.At, changed)
+		}
+		if got, want := propDeletePageXML(t, out), propDeletePageXML(t, src); got != want {
+			t.Errorf("%s: identity changed the page:\ngot  %s\nwant %s", tc.spec.At, got, want)
+		}
+	}
+}
+
 // TestSetStyleUntargeted checks that setting the fill of V3 s1
 // leaves V3 s2's fill and line as read from the original.
 func TestSetStyleUntargeted(t *testing.T) {
