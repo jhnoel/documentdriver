@@ -71,4 +71,26 @@ const (
 	CellLineColor   = "LineColor"
 	CellLineWeight  = "LineWeight"
 	CellLinePattern = "LinePattern"
+
+	CellBeginArrow       = "BeginArrow"
+	CellEndArrow         = "EndArrow"
+	CellBeginArrowSize   = "BeginArrowSize"
+	CellEndArrowSize     = "EndArrowSize"
+	CellShdwPattern      = "ShdwPattern"
+	CellShdwForegnd      = "ShdwForegnd"
+	CellShdwForegndTrans = "ShdwForegndTrans"
+	CellShapeShdwType    = "ShapeShdwType"
+	CellShapeShdwOffsetX = "ShapeShdwOffsetX"
+	CellShapeShdwOffsetY = "ShapeShdwOffsetY"
+	CellShapeShdwBlur    = "ShapeShdwBlur"
+	CellShapeShdwOblique = "ShapeShdwObliqueAngle"
+	CellShapeShdwScale   = "ShapeShdwScaleFactor"
+)
+
+// ArrowNames maps the stored arrow indexes the contract names
+// (docs/contract.md §3, Line ends) to their names; ArrowIndex is the
+// reverse. An index not in the table is shown as its stored string.
+var (
+	ArrowNames = map[string]string{"0": "none", "4": "triangle", "5": "stealth"}
+	ArrowIndex = map[string]string{"none": "0", "triangle": "4", "stealth": "5"}
 )

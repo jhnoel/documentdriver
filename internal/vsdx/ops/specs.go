@@ -42,37 +42,39 @@ const htmlRule = "html must be in the text grammar (help html)"
 // connector (Kind "connector" with From/To or glue), at a page or
 // group, with optional text and name.
 type ObjectAddSpec struct {
-	At       string     `json:"at" doc:"A page or group address as read shows it (page0 or page0/s1), or $name."`
-	As       string     `json:"as,omitempty" plan:"optional" doc:"A name for the new shape; later operations write $name for it."`
-	Kind     string     `json:"kind,omitempty" plan:"optional" doc:"connector for a master-less straight connector; absent for a shape."`
-	Master   string     `json:"master,omitempty" plan:"optional" doc:"A master address (master2) or the master's name as read shows it."`
-	Geom     string     `json:"geom,omitempty" plan:"optional" doc:"rect or ellipse for a master-less shape."`
-	Box      []float64  `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box; for a 2-D master or geom shape."`
-	Pin      []float64  `json:"pin,omitempty" plan:"optional" doc:"[x, y], the centre in view points (input only: read shows box); for a 2-D master or geom shape. Without box, a geom shape is 72 x 72 pt and a master instance takes the master's size."`
-	Name     string     `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
-	HTML     *string    `json:"html,omitempty" plan:"optional" doc:"The shape's text as HTML (help html), as read shows html."`
-	Fill     *PaintSpec `json:"fill,omitempty" plan:"optional" doc:"\"none\" or {hex: #RRGGBB}, as read shows fill."`
-	Line     *LineSpec  `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string."`
-	From     []float64  `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector or 1-D master."`
-	To       []float64  `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector or 1-D master."`
-	FromGlue string     `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows from_glue."`
-	ToGlue   string     `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows to_glue."`
+	At       string      `json:"at" doc:"A page or group address as read shows it (page0 or page0/s1), or $name."`
+	As       string      `json:"as,omitempty" plan:"optional" doc:"A name for the new shape; later operations write $name for it."`
+	Kind     string      `json:"kind,omitempty" plan:"optional" doc:"connector for a master-less straight connector; absent for a shape."`
+	Master   string      `json:"master,omitempty" plan:"optional" doc:"A master address (master2) or the master's name as read shows it."`
+	Geom     string      `json:"geom,omitempty" plan:"optional" doc:"rect or ellipse for a master-less shape."`
+	Box      []float64   `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box; for a 2-D master or geom shape."`
+	Pin      []float64   `json:"pin,omitempty" plan:"optional" doc:"[x, y], the centre in view points (input only: read shows box); for a 2-D master or geom shape. Without box, a geom shape is 72 x 72 pt and a master instance takes the master's size."`
+	Name     string      `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
+	HTML     *string     `json:"html,omitempty" plan:"optional" doc:"The shape's text as HTML (help html), as read shows html."`
+	Fill     *PaintSpec  `json:"fill,omitempty" plan:"optional" doc:"\"none\" or {hex: #RRGGBB}, as read shows fill."`
+	Line     *LineSpec   `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors only) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
+	From     []float64   `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector or 1-D master."`
+	To       []float64   `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector or 1-D master."`
+	FromGlue string      `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows from_glue."`
+	ToGlue   string      `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows to_glue."`
+	Shadow   *ShadowSpec `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
 }
 
 // ObjectSetSpec is object.set (the fields create and P2 share first).
 type ObjectSetSpec struct {
-	At       string     `json:"at" doc:"A shape address as read shows it (page0/s1), or $name."`
-	Box      []float64  `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box."`
-	Rot      *float64   `json:"rot,omitempty" plan:"optional" doc:"Rotation in degrees, as read shows rot."`
-	FlipH    *bool      `json:"flip_h,omitempty" plan:"optional" doc:"Flip horizontally, as read shows flip_h."`
-	FlipV    *bool      `json:"flip_v,omitempty" plan:"optional" doc:"Flip vertically, as read shows flip_v."`
-	Name     *string    `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
-	Fill     *PaintSpec `json:"fill,omitempty" plan:"optional" doc:"\"none\" or {hex: #RRGGBB}, as read shows fill."`
-	Line     *LineSpec  `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string."`
-	From     []float64  `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector."`
-	To       []float64  `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector."`
-	FromGlue *string    `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows from_glue."`
-	ToGlue   *string    `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows to_glue."`
+	At       string      `json:"at" doc:"A shape address as read shows it (page0/s1), or $name."`
+	Box      []float64   `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box."`
+	Rot      *float64    `json:"rot,omitempty" plan:"optional" doc:"Rotation in degrees, as read shows rot."`
+	FlipH    *bool       `json:"flip_h,omitempty" plan:"optional" doc:"Flip horizontally, as read shows flip_h."`
+	FlipV    *bool       `json:"flip_v,omitempty" plan:"optional" doc:"Flip vertically, as read shows flip_v."`
+	Name     *string     `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
+	Fill     *PaintSpec  `json:"fill,omitempty" plan:"optional" doc:"\"none\" or {hex: #RRGGBB}, as read shows fill."`
+	Line     *LineSpec   `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors only) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
+	From     []float64   `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector."`
+	To       []float64   `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector."`
+	FromGlue *string     `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows from_glue."`
+	ToGlue   *string     `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows to_glue."`
+	Shadow   *ShadowSpec `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
 }
 
 // PaintSpec is a fill: "none" or {"hex": "#RRGGBB"}, as read shows it.
@@ -93,7 +95,29 @@ type LineSpec struct {
 	W     *float64
 	Color string
 	Dash  string
+	// Begin and End are the arrowheads at a connector's from and to
+	// ends (docs/contract.md §3, Line ends); nil leaves the end alone.
+	Begin, End *LineEndSpec
 }
+
+// LineEndSpec is one arrowhead: "none", a name, or {arrow, size}.
+// Arrow is the name or index string as given; Size nil keeps the size.
+type LineEndSpec struct {
+	Arrow string
+	Size  *float64
+}
+
+// ShadowSpec is a shadow: "none" or {color, transparency, offset},
+// each member nil (or "") when left out.
+type ShadowSpec struct {
+	None         bool
+	Color        string
+	Transparency *float64
+	Offset       []float64
+}
+
+// HelpType names ShadowSpec's plan type in help.
+func (ShadowSpec) HelpType() string { return `object|"none"` }
 
 // TextSetSpec is text.set: replace a shape's tried text with HTML.
 // Delete lists field addresses of the shape's shown text that the

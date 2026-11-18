@@ -17,6 +17,12 @@ func paint(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 	}
 	paintFill(o, r, s)
 	paintLine(o, r, s)
+	if o.Kind == Connector {
+		paintLineEnds(o, r, s)
+	}
+	if o.Kind == Shape || o.Kind == Group {
+		paintShadow(o, r, s)
+	}
 }
 
 // paintFill sets o's fill from the effective FillPattern and
@@ -144,4 +150,140 @@ func paintColor(r *inherit.Resolver, v string) (string, bool) {
 		return vsd.Color(v)
 	}
 	return r.Doc().Color(v)
+}
+
+// paintLineEnds sets a connector's line ends (docs/contract.md §8):
+// for each of Begin and End, the effective arrow cell, shown only when
+// it is not 0; a themed arrow omits line.begin or line.end, a themed
+// size omits only line.begin.size or line.end.size. A line that is
+// none shows no ends. The ends share the line's origin key.
+func paintLineEnds(o *Object, r *inherit.Resolver, s *inherit.Shape) {
+	if o.Line != nil && o.Line.None {
+		return
+	}
+	for _, e := range []struct {
+		prop, arrow, size string
+		set               func(l *Line, v *LineEnd)
+	}{
+		{"line.begin", vsd.CellBeginArrow, vsd.CellBeginArrowSize, func(l *Line, v *LineEnd) { l.Begin = v }},
+		{"line.end", vsd.CellEndArrow, vsd.CellEndArrowSize, func(l *Line, v *LineEnd) { l.End = v }},
+	} {
+		cell, origin, ok := r.Cell(s, sheet.ShapeCell(e.arrow))
+		if !ok {
+			continue
+		}
+		if cell.V == vsd.ValueThemed {
+			o.Omitted = append(o.Omitted, Omission{Prop: e.prop, Reason: "themed value not derived"})
+			continue
+		}
+		n, isNum := vsd.Number(cell.V)
+		if !isNum {
+			o.Omitted = append(o.Omitted, Omission{Prop: e.prop, Reason: e.arrow + " not a number"})
+			continue
+		}
+		if n == 0 {
+			continue
+		}
+		key := vsd.FormatInches(n)
+		end := &LineEnd{Arrow: key}
+		if name, named := vsd.ArrowNames[key]; named {
+			end.Arrow = name
+		}
+		best := origin
+		if sz, szOrigin, has := r.Cell(s, sheet.ShapeCell(e.size)); has {
+			if sz.V == vsd.ValueThemed {
+				o.Omitted = append(o.Omitted, Omission{Prop: e.prop + ".size", Reason: "themed value not derived"})
+			} else if v, okNum := vsd.Number(sz.V); okNum {
+				end.Size, end.HasSize = v, true
+				best = boxOrigin(best, szOrigin)
+			}
+		}
+		if o.Line == nil {
+			o.Line = &Line{}
+		}
+		e.set(o.Line, end)
+		setOrigin(o, "line", boxOrigin(o.Origins["line"], best))
+	}
+}
+
+// paintShadow sets a shape's or group's shadow (docs/contract.md §8)
+// from the effective ShdwPattern: 0 or absent is no shadow; themed or
+// not a number omits shadow; otherwise colour (ShdwForegnd),
+// transparency (ShdwForegndTrans as percent) and, when ShapeShdwType
+// is 1, the offset (ShapeShdwOffsetX/Y, inches y up, shown in points
+// y down), each omitted alone when themed or not derived. A non-zero
+// blur, oblique angle or scale is named in omitted.
+func paintShadow(o *Object, r *inherit.Resolver, s *inherit.Shape) {
+	pattern, origin, ok := r.Cell(s, sheet.ShapeCell(vsd.CellShdwPattern))
+	if !ok {
+		return
+	}
+	if pattern.V == vsd.ValueThemed {
+		o.Omitted = append(o.Omitted, Omission{Prop: "shadow", Reason: "themed value not derived"})
+		return
+	}
+	n, isNum := vsd.Number(pattern.V)
+	if !isNum {
+		o.Omitted = append(o.Omitted, Omission{Prop: "shadow", Reason: vsd.CellShdwPattern + " not a number"})
+		return
+	}
+	if n == 0 {
+		return
+	}
+	sh := &Shadow{}
+	best := origin
+	if c, co, has := r.Cell(s, sheet.ShapeCell(vsd.CellShdwForegnd)); has {
+		if hex, okc := paintColor(r, c.V); okc && c.V != vsd.ValueThemed {
+			sh.Color, sh.HasColor = hex, true
+			best = boxOrigin(best, co)
+		} else {
+			o.Omitted = append(o.Omitted, Omission{Prop: "shadow.color", Reason: shadowReason(c.V)})
+		}
+	}
+	if t, to, has := r.Cell(s, sheet.ShapeCell(vsd.CellShdwForegndTrans)); has {
+		if v, okt := vsd.Number(t.V); okt {
+			sh.Transparency, sh.HasTrans = v*100, true
+			best = boxOrigin(best, to)
+		} else {
+			o.Omitted = append(o.Omitted, Omission{Prop: "shadow.transparency", Reason: shadowReason(t.V)})
+		}
+	}
+	typ, _, hasType := r.Cell(s, sheet.ShapeCell(vsd.CellShapeShdwType))
+	tn, typeNum := vsd.Number(typ.V)
+	if hasType && typeNum && tn == 1 {
+		x, xo, hasX := r.Cell(s, sheet.ShapeCell(vsd.CellShapeShdwOffsetX))
+		y, yo, hasY := r.Cell(s, sheet.ShapeCell(vsd.CellShapeShdwOffsetY))
+		xv, okx := vsd.Number(x.V)
+		yv, oky := vsd.Number(y.V)
+		if hasX && hasY && okx && oky {
+			sh.Offset, sh.HasOffset = [2]float64{xv * vsd.PointsPerInch, -yv * vsd.PointsPerInch}, true
+			best = boxOrigin(best, xo, yo)
+		} else {
+			o.Omitted = append(o.Omitted, Omission{Prop: "shadow.offset", Reason: "themed value not derived"})
+		}
+	} else {
+		o.Omitted = append(o.Omitted, Omission{Prop: "shadow.offset", Reason: "page default shadow not derived"})
+	}
+	for _, c := range []string{vsd.CellShapeShdwBlur, vsd.CellShapeShdwOblique} {
+		if v, _, has := r.Cell(s, sheet.ShapeCell(c)); has {
+			if f, okf := vsd.Number(v.V); okf && f != 0 {
+				o.Omitted = append(o.Omitted, Omission{Prop: "shadow", Reason: c + " " + v.V + " not shown"})
+			}
+		}
+	}
+	if v, _, has := r.Cell(s, sheet.ShapeCell(vsd.CellShapeShdwScale)); has {
+		if f, okf := vsd.Number(v.V); okf && f != 1 {
+			o.Omitted = append(o.Omitted, Omission{Prop: "shadow", Reason: vsd.CellShapeShdwScale + " " + v.V + " not shown"})
+		}
+	}
+	o.Shadow = sh
+	setOrigin(o, "shadow", best)
+}
+
+// shadowReason is the omission reason of a shadow member stored as v.
+func shadowReason(v string) string {
+	if v == vsd.ValueThemed {
+		return "themed value not derived"
+	}
+	return "value " + v + " not derived"
 }

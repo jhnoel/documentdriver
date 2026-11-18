@@ -72,6 +72,7 @@ type Object struct {
 	ToGlue       string
 	Fill         *Paint
 	Line         *Line
+	Shadow       *Shadow
 	HTML         string
 	HasText      bool
 	Text         string // plain text, as find matches it
@@ -100,6 +101,28 @@ type Line struct {
 	HasW  bool
 	Color string
 	Dash  string
+	// Begin and End are a connector's arrowheads at its from and to
+	// ends, nil when the effective arrow is none or not derived.
+	Begin, End *LineEnd
+}
+
+// LineEnd is one arrowhead: Arrow is the contract's name (none,
+// triangle, stealth) or the stored index as a string; Size the stored
+// size number when HasSize.
+type LineEnd struct {
+	Arrow   string
+	Size    float64
+	HasSize bool
+}
+
+// Shadow is an object's effective shadow: Color "#RRGGBB" (HasColor),
+// Transparency in percent (HasTrans) and Offset [dx, dy] in view
+// points, y down (HasOffset), each left out when not derived.
+type Shadow struct {
+	Color                         string
+	HasColor, HasTrans, HasOffset bool
+	Transparency                  float64
+	Offset                        [2]float64
 }
 
 // Prop is one effective shape data row.

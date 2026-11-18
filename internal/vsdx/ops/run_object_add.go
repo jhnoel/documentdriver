@@ -59,6 +59,16 @@ type addPage struct {
 // at through aliases, places the shape with place.Unplace, emits with
 // emit, inserts through the edit layer, then applies text and fill/line.
 func (s *ObjectAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units string, idSrc ids.Source) (string, []string, []string, string, error) {
+	addr, changed, deleted, stale, err := s.runAdd(ws, aliases, units, idSrc)
+	if err != nil {
+		return addr, changed, deleted, stale, err
+	}
+	return addr, changed, deleted, stale, addExtras(ws, s, changed, aliases, units)
+}
+
+// runAdd adds the shape or connector of s (everything but its line
+// ends and shadow, which addExtras writes on the new shape).
+func (s *ObjectAddSpec) runAdd(ws *edit.Workspace, aliases map[string]string, units string, idSrc ids.Source) (string, []string, []string, string, error) {
 	_ = idSrc
 	scale := 1.0
 	if units == "in" {

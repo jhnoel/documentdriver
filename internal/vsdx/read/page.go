@@ -85,9 +85,24 @@ type hexJSON struct {
 
 // lineJSON is a line as read shows it.
 type lineJSON struct {
-	W     json.Number `json:"w,omitempty"`
-	Color *hexJSON    `json:"color,omitempty"`
-	Dash  string      `json:"dash,omitempty"`
+	W     json.Number  `json:"w,omitempty"`
+	Color *hexJSON     `json:"color,omitempty"`
+	Dash  string       `json:"dash,omitempty"`
+	Begin *lineEndJSON `json:"begin,omitempty"`
+	End   *lineEndJSON `json:"end,omitempty"`
+}
+
+// lineEndJSON is one arrowhead as read shows it (docs/contract.md §3).
+type lineEndJSON struct {
+	Arrow string      `json:"arrow"`
+	Size  json.Number `json:"size,omitempty"`
+}
+
+// shadowJSON is a shadow as read shows it (docs/contract.md §8).
+type shadowJSON struct {
+	Color        *hexJSON      `json:"color,omitempty"`
+	Transparency json.Number   `json:"transparency,omitempty"`
+	Offset       []json.Number `json:"offset,omitempty"`
 }
 
 // gluedJSON is one non-end Connect row as read shows it.
@@ -148,6 +163,7 @@ type objectJSON struct {
 	Glued    []gluedJSON       `json:"glued,omitempty"`
 	Fill     any               `json:"fill,omitempty"`
 	Line     any               `json:"line,omitempty"`
+	Shadow   *shadowJSON       `json:"shadow,omitempty"`
 	HTML     string            `json:"html,omitempty"`
 	Text     string            `json:"text,omitempty"`
 	Props    []propJSON        `json:"props,omitempty"`
@@ -237,10 +253,47 @@ func lineJSONOf(l *model.Line, in bool) any {
 		lj.Color = &hexJSON{Hex: l.Color}
 	}
 	lj.Dash = l.Dash
-	if lj.W == "" && lj.Color == nil && lj.Dash == "" {
+	lj.Begin, lj.End = lineEndJSONOf(l.Begin), lineEndJSONOf(l.End)
+	if lj.W == "" && lj.Color == nil && lj.Dash == "" && lj.Begin == nil && lj.End == nil {
 		return nil
 	}
 	return lj
+}
+
+// lineEndJSONOf shows one arrowhead, nil when there is none.
+func lineEndJSONOf(e *model.LineEnd) *lineEndJSON {
+	if e == nil {
+		return nil
+	}
+	j := &lineEndJSON{Arrow: e.Arrow}
+	if e.HasSize {
+		j.Size = json.Number(geom.FormatNum(e.Size))
+		if e.Size == 0 {
+			j.Size = "0"
+		}
+	}
+	return j
+}
+
+// shadowJSONOf shows a shadow, nil when there is none.
+func shadowJSONOf(s *model.Shadow, in bool) *shadowJSON {
+	if s == nil {
+		return nil
+	}
+	j := &shadowJSON{}
+	if s.HasColor {
+		j.Color = &hexJSON{Hex: s.Color}
+	}
+	if s.HasTrans {
+		j.Transparency = json.Number(geom.FormatNum(s.Transparency))
+		if s.Transparency == 0 {
+			j.Transparency = "0"
+		}
+	}
+	if s.HasOffset {
+		j.Offset = []json.Number{lengthNum(s.Offset[0], in), lengthNum(s.Offset[1], in)}
+	}
+	return j
 }
 
 // propValue shows a shape data value as read shows it.
@@ -283,6 +336,7 @@ func objectJSONOf(obj *model.Object, in, full bool) objectJSON {
 	}
 	j.Fill = fillJSON(obj.Fill)
 	j.Line = lineJSONOf(obj.Line, in)
+	j.Shadow = shadowJSONOf(obj.Shadow, in)
 	if obj.HasText {
 		j.HTML, j.Text = obj.HTML, obj.Text
 	}

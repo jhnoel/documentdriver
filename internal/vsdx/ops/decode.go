@@ -154,10 +154,112 @@ func (l *LineSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 			default:
 				d.Fail(cli.CodeInvalidPlan, cli.Join(path, "dash"), m.Value, "expected a string or a number, found %s", m.Value.Kind)
 			}
+		case "begin":
+			l.Begin = decodeLineEnd(m.Value, cli.Join(path, "begin"), d)
+		case "end":
+			l.End = decodeLineEnd(m.Value, cli.Join(path, "end"), d)
 		default:
 			e := cli.Errorf(cli.CodeInvalidPlan, cli.Join(path, m.Key), "unknown field %q", m.Key)
-			e.Hint = "fields: w, color, dash"
+			e.Hint = "fields: w, color, dash, begin, end"
 			d.Add(e, m.Value)
+		}
+	}
+}
+
+// decodeLineEnd decodes one arrowhead: a string (a name, "none", or
+// an index string) or {arrow, size}; size must be a number from 0 to
+// 6 (invalid_operation otherwise). Whether the arrow is written is
+// decided against the document when the op runs.
+func decodeLineEnd(v *cli.Value, path string, d *cli.Decoder) *LineEndSpec {
+	if v.Kind == cli.String {
+		return &LineEndSpec{Arrow: v.Str}
+	}
+	if v.Kind != cli.Object {
+		d.Fail(cli.CodeInvalidPlan, path, v, "expected \"none\", an arrow name or an object, found %s", v.Kind)
+		return nil
+	}
+	e := &LineEndSpec{}
+	seen := false
+	for _, m := range v.Members {
+		switch m.Key {
+		case "arrow":
+			n := len(d.Errs())
+			d.Value(m.Value, cli.Join(path, "arrow"), &e.Arrow)
+			seen = len(d.Errs()) == n
+		case "size":
+			var sz float64
+			n := len(d.Errs())
+			d.Value(m.Value, cli.Join(path, "size"), &sz)
+			if len(d.Errs()) > n {
+				continue
+			}
+			if sz < 0 || sz > 6 || sz != float64(int(sz)) {
+				d.Add(cli.Errorf(cli.CodeInvalidOperation, cli.Join(path, "size"), "size %v: want a whole number from 0 to 6", sz), m.Value)
+				continue
+			}
+			e.Size = &sz
+		default:
+			er := cli.Errorf(cli.CodeInvalidPlan, cli.Join(path, m.Key), "unknown field %q", m.Key)
+			er.Hint = "fields: arrow, size"
+			d.Add(er, m.Value)
+		}
+	}
+	if !seen {
+		d.Fail(cli.CodeInvalidPlan, cli.Join(path, "arrow"), v, "missing field %q", "arrow")
+	}
+	return e
+}
+
+// DecodePlan implements cli.PlanDecoder: "none" or {color,
+// transparency, offset}; color as line.color, transparency 0 to 100,
+// offset two finite numbers.
+func (sh *ShadowSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
+	if v.Kind == cli.String {
+		if v.Str != "none" {
+			d.Add(cli.Errorf(cli.CodeInvalidOperation, path, "shadow %q: want \"none\" or an object", v.Str), v)
+			return
+		}
+		*sh = ShadowSpec{None: true}
+		return
+	}
+	if v.Kind != cli.Object {
+		d.Fail(cli.CodeInvalidPlan, path, v, "expected \"none\" or an object, found %s", v.Kind)
+		return
+	}
+	for _, m := range v.Members {
+		switch m.Key {
+		case "color":
+			var l LineSpec
+			decodeLineColor(&l, m.Value, cli.Join(path, "color"), d)
+			sh.Color = l.Color
+		case "transparency":
+			var t float64
+			n := len(d.Errs())
+			d.Value(m.Value, cli.Join(path, "transparency"), &t)
+			if len(d.Errs()) > n {
+				continue
+			}
+			if t < 0 || t > 100 {
+				d.Add(cli.Errorf(cli.CodeInvalidOperation, cli.Join(path, "transparency"), "transparency %v: want 0 to 100", t), m.Value)
+				continue
+			}
+			sh.Transparency = &t
+		case "offset":
+			var off []float64
+			n := len(d.Errs())
+			d.Value(m.Value, cli.Join(path, "offset"), &off)
+			if len(d.Errs()) > n {
+				continue
+			}
+			if len(off) != 2 || !addFinite(off) {
+				d.Add(cli.Errorf(cli.CodeInvalidOperation, cli.Join(path, "offset"), "offset: want [dx, dy], two finite numbers"), m.Value)
+				continue
+			}
+			sh.Offset = off
+		default:
+			er := cli.Errorf(cli.CodeInvalidPlan, cli.Join(path, m.Key), "unknown field %q", m.Key)
+			er.Hint = "fields: color, transparency, offset"
+			d.Add(er, m.Value)
 		}
 	}
 }
@@ -236,6 +338,11 @@ func (s *ObjectAddSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 		{Name: "to", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.To) }},
 		{Name: "from_glue", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.FromGlue) }},
 		{Name: "to_glue", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.ToGlue) }},
+		{Name: "shadow", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) {
+			sp := &ShadowSpec{}
+			sp.DecodePlan(mv, fp, dd)
+			s.Shadow = sp
+		}},
 	})
 }
 
@@ -285,6 +392,11 @@ func (s *ObjectSetSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 			var str string
 			dd.Value(mv, fp, &str)
 			s.ToGlue = &str
+		}},
+		{Name: "shadow", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) {
+			sp := &ShadowSpec{}
+			sp.DecodePlan(mv, fp, dd)
+			s.Shadow = sp
 		}},
 	})
 }

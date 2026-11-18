@@ -237,7 +237,7 @@ func checkObjectSet(s *ObjectSetSpec) (string, string, bool) {
 	if s.ToGlue != nil && !glueOK(*s.ToGlue, true) {
 		return "to_glue must name a shape or $name, with an optional point, or none", "to_glue", true
 	}
-	if s.Box == nil && s.Rot == nil && s.FlipH == nil && s.FlipV == nil && s.Name == nil && s.Fill == nil && s.Line == nil && s.From == nil && s.To == nil && s.FromGlue == nil && s.ToGlue == nil {
+	if s.Box == nil && s.Rot == nil && s.FlipH == nil && s.FlipV == nil && s.Name == nil && s.Fill == nil && s.Line == nil && s.Shadow == nil && s.From == nil && s.To == nil && s.FromGlue == nil && s.ToGlue == nil {
 		return "object.set needs a field to set", "", true
 	}
 	return "", "", false

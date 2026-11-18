@@ -41,7 +41,7 @@ type styleShape struct {
 // shapes are operation_failed at at, a missing shape is not_found at
 // at, and an unreadable page part is unreadable_target.
 func setStyle(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, units string) (changed []string, stale string, err error) {
-	if s.Fill == nil && s.Line == nil && s.Name == nil {
+	if s.Fill == nil && s.Line == nil && s.Name == nil && s.Shadow == nil {
 		return nil, "", nil
 	}
 	addr, err := resolveShape(s.At, aliases)
@@ -75,6 +75,15 @@ func setStyle(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, u
 	if err != nil {
 		return nil, "", err
 	}
+	ends, err := lineEndCells(st, s)
+	if err != nil {
+		return nil, "", err
+	}
+	shadow, err := shadowCells(st, s, scale)
+	if err != nil {
+		return nil, "", err
+	}
+	cells = append(append(cells, ends...), shadow...)
 	curName, _ := st.node.Attr("Name")
 	nameDone := s.Name == nil || curName == *s.Name
 	if len(cells) == 0 && nameDone {
