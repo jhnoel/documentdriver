@@ -6,13 +6,14 @@
 // the read model, which internal/pptx/ops never sees. The transaction,
 // dry run and result envelope are internal/plan's; this package adds the
 // slide, the units and the read-model hazards (stale-connector,
-// dangling-glue, group-frame).
+// dangling-glue, group-frame) and inset-overflow on the objects it changed.
 package apply
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
@@ -20,6 +21,7 @@ import (
 	"github.com/jhnoel/documentdriver/internal/ids"
 	"github.com/jhnoel/documentdriver/internal/opc"
 	"github.com/jhnoel/documentdriver/internal/plan"
+	"github.com/jhnoel/documentdriver/internal/pptx/derive"
 	"github.com/jhnoel/documentdriver/internal/pptx/model"
 	"github.com/jhnoel/documentdriver/internal/pptx/ops"
 	"github.com/jhnoel/documentdriver/internal/pptx/ops/edit"
@@ -192,6 +194,10 @@ func result(in, out string, p *ops.Plan, tx *ops.Tx, opt Options) (*Result, erro
 			if b != nil && b.Kind == o.Kind && bytes.Equal(ownXML(pre, b), ownXML(post, o)) && !moved[o.ID] {
 				continue
 			}
+			if b != nil {
+				hzPre = append(hzPre, insetHazards(pre.Name, b)...)
+			}
+			hzPost = append(hzPost, insetHazards(post.Name, o)...)
 			var j []byte
 			if opt.ChangedIDs {
 				j, err = json.Marshal(post.Name + "/" + o.ID)
@@ -279,6 +285,36 @@ func lis(seq []int) map[int]bool {
 		out[i] = true
 	}
 	return out
+}
+
+// insetHazards returns the inset-overflow hazard of an object whose text
+// insets leave no room for text: left + right at least the box width, or
+// top + bottom at least its height (both in slide space). It is checked
+// only on objects a plan changed, so it is reported at apply time, never
+// by read; an object whose box or any inset is not derived has none.
+func insetHazards(slide string, o *model.Object) []Hazard {
+	t := o.Text
+	if t == nil || o.Box == nil {
+		return nil
+	}
+	for _, v := range t.Insets {
+		if v == nil {
+			return nil
+		}
+	}
+	pt := func(e float64) string { return derive.FormatNum(e / model.EMUPerPoint) }
+	l, tp, r, b := *t.Insets[0], *t.Insets[1], *t.Insets[2], *t.Insets[3]
+	var why []string
+	if l+r >= o.Box.W {
+		why = append(why, fmt.Sprintf("left + right insets %s + %s pt >= width %s pt", pt(l), pt(r), pt(o.Box.W)))
+	}
+	if tp+b >= o.Box.H {
+		why = append(why, fmt.Sprintf("top + bottom insets %s + %s pt >= height %s pt", pt(tp), pt(b), pt(o.Box.H)))
+	}
+	if why == nil {
+		return nil
+	}
+	return []Hazard{{Kind: "inset-overflow", ID: slide + "/" + o.ID, Detail: strings.Join(why, "; ") + ": no room for text (insets are [left, top, right, bottom], not CSS order)"}}
 }
 
 // hazards returns the read model's hazards on a slide.

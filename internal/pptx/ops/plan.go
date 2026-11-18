@@ -224,33 +224,74 @@ func (l *LineSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 	*l = LineSpec{W: w.W, Color: w.Color, Dash: w.Dash, Cap: w.Cap, Head: w.Head, Tail: w.Tail}
 }
 
+// InsetsSpec is a text body's insets in the plan's units: Sides are
+// left, top, right, bottom (lIns, tIns, rIns, bIns), each set only when
+// the plan gives it. The wire form is the array [left, top, right,
+// bottom] that --detail full shows (all four; not CSS order), or the
+// object {"left", "top", "right", "bottom"} with any non-empty subset,
+// the sides left out keeping the value shown.
+type InsetsSpec struct {
+	Sides [4]Opt[float64]
+}
+
+// HelpType implements cli.HelpTyper.
+func (*InsetsSpec) HelpType() string { return "[left, top, right, bottom] or object" }
+
+// DecodePlan implements cli.PlanDecoder.
+func (s *InsetsSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
+	if v.Kind == cli.Array {
+		var a [4]float64
+		d.Value(v, path, &a)
+		for i := range a {
+			s.Sides[i] = Some(a[i])
+		}
+		return
+	}
+	if v.Kind != cli.Object {
+		d.Fail(cli.CodeInvalidPlan, path, v, "insets: want [left, top, right, bottom] (not CSS order) or an object of left, top, right, bottom, found %s", v.Kind)
+		return
+	}
+	var w struct {
+		Left   Opt[float64] `json:"left"`
+		Top    Opt[float64] `json:"top"`
+		Right  Opt[float64] `json:"right"`
+		Bottom Opt[float64] `json:"bottom"`
+	}
+	d.Struct(v, path, &w)
+	s.Sides = [4]Opt[float64]{w.Left, w.Top, w.Right, w.Bottom}
+	if !w.Left.Set && !w.Top.Set && !w.Right.Set && !w.Bottom.Set && len(v.Members) == 0 {
+		d.Fail(cli.CodeInvalidPlan, path, v, "insets: give at least one of left, top, right, bottom")
+	}
+}
+
 // BodySpec is a shape's text body properties in the views' form (`text`
 // in --detail full): anchor, wrap, vert, vertOverflow and horzOverflow as
-// DrawingML names them, insets [left, top, right, bottom] and spcCol in
+// DrawingML names them, insets [left, top, right, bottom] (not CSS
+// order; see InsetsSpec) and spcCol in
 // the plan's units, rot in degrees, numCol a count, the flags as
 // booleans, autofit "none", "shape" (a:spAutoFit) or "shrink"
 // (a:normAutofit) with fontScale and lnSpcReduction in percent.
 // Properties left out keep the value shown.
 type BodySpec struct {
-	Anchor           Opt[string]     `json:"anchor"`
-	Wrap             Opt[string]     `json:"wrap"`
-	Insets           Opt[[4]float64] `json:"insets"`
-	Autofit          Opt[string]     `json:"autofit"`
-	FontScale        Opt[float64]    `json:"font_scale"`
-	LnSpcReduction   Opt[float64]    `json:"ln_spc_reduction"`
-	Vert             Opt[string]     `json:"vert"`
-	Rot              Opt[float64]    `json:"rot"`
-	NumCol           Opt[int64]      `json:"num_col"`
-	SpcCol           Opt[float64]    `json:"spc_col"`
-	RtlCol           Opt[bool]       `json:"rtl_col"`
-	AnchorCtr        Opt[bool]       `json:"anchor_ctr"`
-	Upright          Opt[bool]       `json:"upright"`
-	VertOverflow     Opt[string]     `json:"vert_overflow"`
-	HorzOverflow     Opt[string]     `json:"horz_overflow"`
-	CompatLnSpc      Opt[bool]       `json:"compat_ln_spc"`
-	SpcFirstLastPara Opt[bool]       `json:"spc_first_last_para"`
-	FromWordArt      Opt[bool]       `json:"from_word_art"`
-	ForceAA          Opt[bool]       `json:"force_aa"`
+	Anchor           Opt[string]  `json:"anchor"`
+	Wrap             Opt[string]  `json:"wrap"`
+	Insets           *InsetsSpec  `json:"insets" doc:"[left, top, right, bottom], not CSS order; or {\"left\",\"top\",\"right\",\"bottom\"}, any subset, the rest keep their shown values."`
+	Autofit          Opt[string]  `json:"autofit"`
+	FontScale        Opt[float64] `json:"font_scale"`
+	LnSpcReduction   Opt[float64] `json:"ln_spc_reduction"`
+	Vert             Opt[string]  `json:"vert"`
+	Rot              Opt[float64] `json:"rot"`
+	NumCol           Opt[int64]   `json:"num_col"`
+	SpcCol           Opt[float64] `json:"spc_col"`
+	RtlCol           Opt[bool]    `json:"rtl_col"`
+	AnchorCtr        Opt[bool]    `json:"anchor_ctr"`
+	Upright          Opt[bool]    `json:"upright"`
+	VertOverflow     Opt[string]  `json:"vert_overflow"`
+	HorzOverflow     Opt[string]  `json:"horz_overflow"`
+	CompatLnSpc      Opt[bool]    `json:"compat_ln_spc"`
+	SpcFirstLastPara Opt[bool]    `json:"spc_first_last_para"`
+	FromWordArt      Opt[bool]    `json:"from_word_art"`
+	ForceAA          Opt[bool]    `json:"force_aa"`
 }
 
 // attrs returns the stored a:bodyPr attribute values the spec gives,
@@ -271,9 +312,11 @@ func (b BodySpec) attrs(u interface{ ToEMU(float64) float64 }) (map[string]strin
 	}
 	str("anchor", b.Anchor)
 	str("wrap", b.Wrap)
-	if b.Insets.Set {
+	if b.Insets != nil {
 		for i, k := range []string{"lIns", "tIns", "rIns", "bIns"} {
-			out[k] = emuString(u.ToEMU(b.Insets.V[i]))
+			if v := b.Insets.Sides[i]; v.Set {
+				out[k] = emuString(u.ToEMU(v.V))
+			}
 		}
 	}
 	str("vert", b.Vert)

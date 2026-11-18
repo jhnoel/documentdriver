@@ -974,7 +974,13 @@ the view's colour, fill, line, arrow and adjust formatting into
 - Name: `cNvPr@name` in every branch.
 - Text body properties (2026-11-13; read since M2 but not writable,
   although Properties lists them): `"text": {"anchor", "wrap",
-  "insets": [l, t, r, b]}`, the form `--detail full` shows, on
+  "insets": [l, t, r, b]}` (left, top, right, bottom; not CSS order;
+  since 2026-11-18 also the named form `{"left","top","right","bottom"}`
+  with any subset, after an agent wrote CSS order and put 230 pt into
+  bIns of a 46 pt box; the `inset-overflow` hazard reports insets that
+  leave no room, on changed shapes only, as a report, not a refusal:
+  such insets are schema-valid and the tool derives facts, never
+  decides), the form `--detail full` shows, on
   `object.set` and on `object.add` with `html`. The read half,
   `derive.ReadBodyAttr` over the placeholder chain (values found nowhere
   are those the specification implies, origin `spec`), moved out of the

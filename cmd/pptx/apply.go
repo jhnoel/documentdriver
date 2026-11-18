@@ -59,7 +59,11 @@ Fields of object.add and object.set, as pptx read shows them:
   locks.
   descr, title, hidden, tx_box (shapes), and text: the body properties
   pptx read --detail full shows (anchor, wrap, insets, autofit
-  none|shape|shrink, vert, num_col, ...).
+  none|shape|shrink, vert, num_col, ...). insets is [left, top, right,
+  bottom] -- not CSS order -- or {"left","top","right","bottom"} with
+  any subset (the rest keep their shown values). Insets that leave no
+  room for text (left+right >= width or top+bottom >= height) apply
+  but report the inset-overflow hazard.
 html is the text body in the HTML pptx read shows (<p>, <ul>/<ol> with
 <li>, <b>, <i>, <u>, <s>, <a href>, <br>, <span style>, lang and data-*
 attributes). Anything outside that grammar is refused, never dropped; what
