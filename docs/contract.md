@@ -429,12 +429,11 @@ no op writes them.
   - `object.add` `kind: "picture"` needs `image` and `box` or `pin`.
     With `pin` the picture is its pixel size at 96 pixels per inch
     (0.75 pt per pixel). `box` is taken as given: the aspect ratio is
-    the plan's. The picture takes
-    the drawing's "None" style sheet (LineStyle, FillStyle and TextStyle,
-    as the Visio-authored samples store them), so it reads `fill` and
-    `line` "none"; a drawing with no "None" sheet (one whose
-    LinePattern and FillPattern are 0) gets LinePattern 0 and FillPattern
-    0 on the picture itself. An added picture has no connection points.
+    the plan's. An added picture
+    stores LinePattern 0 and FillPattern 0 itself and refers to no style
+    sheet (the schema's LineStyle, FillStyle and TextStyle are optional),
+    so it reads `fill` and `line` "none" in any drawing. It has no
+    connection points.
   - `object.set` `image` replaces the picture's image and keeps its
     box, rotation, flips, crop and every other cell. An `image` equal
     to the part shown, or a file whose bytes equal that part's, writes

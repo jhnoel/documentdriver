@@ -1161,6 +1161,16 @@ each write stores, and its grounding:
   (fixture V18, derived from `overzichtfoto's.vsdx`, CC BY 4.0:
   `CompressionType='JPEG'`, `imageN.jpeg`, `image/jpeg`); PNG takes the
   same form with `CompressionType='PNG'`, `imageN.png`, `image/png`.
+- **No fill, no line, no style reference**: an added picture stores
+  `LinePattern` 0 and `FillPattern` 0 (visio.xsd `LinePattern_Type`
+  line 621, `FillPattern_Type` line 698, cells of `ShapeSheet_Type`
+  line 150) and omits `LineStyle`, `FillStyle` and `TextStyle`
+  (optional attributes of `ShapeSheet_Type`, lines 508-510), so it
+  depends on no style sheet ID. It carries no Connection section:
+  nothing in the schema requires one on a Foreign shape.
+- **Owner guidance (2026-11-18)**: the MS-VSDX schema and spec are the
+  authority for what vsdx writes; corpus samples confirm the schema
+  and do not replace it.
 - **Owner ruling (2026-11-18)**: picture writes are grounded in the
   MS-VSDX schema and spec and the one Visio-authored JPEG sample, not in
   two Visio-authored samples per format. This supersedes the
