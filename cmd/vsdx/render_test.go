@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/laws"
 	"github.com/jhnoel/documentdriver/internal/render"
 	"github.com/jhnoel/documentdriver/internal/vsdx/read"
@@ -21,7 +22,7 @@ import (
 // or a rasteriser is missing.
 func needRenderer(t *testing.T) *render.Renderer {
 	t.Helper()
-	renderer, err := render.New(os.Getenv("VSDX_SOFFICE"))
+	renderer, err := render.New(os.Getenv("DD_SOFFICE"))
 	if errors.Is(err, render.ErrNoSoffice) || errors.Is(err, render.ErrNoRasteriser) {
 		t.Skip(err)
 	}
@@ -405,5 +406,37 @@ func TestRenderUnreadable(t *testing.T) {
 				t.Errorf("output file exists after a refused render: stat err = %v", err)
 			}
 		})
+	}
+}
+
+// TestRenderNoSoffice checks the row: render finds soffice from
+// DD_SOFFICE (then PATH), as xlsx --recalc does; when LibreOffice
+// cannot run (here DD_SOFFICE names a missing file) render is
+// operation_failed, exit 1, and writes nothing.
+func TestRenderNoSoffice(t *testing.T) {
+	t.Setenv("DD_SOFFICE", filepath.Join(t.TempDir(), "no-soffice"))
+	out := filepath.Join(t.TempDir(), "x.png")
+	var stdout, stderr bytes.Buffer
+	args := []string{"render", vsdxtest.Fixture(t, "v1-minimal"), "--page", "page0", "-o", out}
+	if code := run(args, &stdout, &stderr); code != 1 {
+		t.Fatalf("render without soffice: exit %d, want 1: %s", code, stderr.String())
+	}
+	if !strings.Contains(stderr.String(), `"code":"operation_failed"`) {
+		t.Errorf("stderr = %q, want operation_failed", stderr.String())
+	}
+	if _, err := os.Stat(out); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("render without soffice wrote %s", out)
+	}
+}
+
+// TestRenderErrNoSofficeIsOperationFailed checks that a missing
+// LibreOffice or rasteriser maps to operation_failed with the
+// DD_SOFFICE hint.
+func TestRenderErrNoSofficeIsOperationFailed(t *testing.T) {
+	for _, err := range []error{render.ErrNoSoffice, render.ErrNoRasteriser} {
+		ce := rendererError(err)
+		if ce.Code != cli.CodeOperationFailed || !strings.Contains(ce.Hint, "DD_SOFFICE") {
+			t.Errorf("rendererError(%v) = %s %q, want operation_failed with a DD_SOFFICE hint", err, ce.Code, ce.Hint)
+		}
 	}
 }

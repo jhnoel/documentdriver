@@ -29,7 +29,8 @@ var renderCommand = &cli.Command{
 		{Name: "scale", Value: "n", Help: "pixels per point (default 1.5)"},
 	},
 	Help: `Rasterises one page through headless LibreOffice to the PNG named by -o
-(required), as pptx render does a slide. LibreOffice draws the values
+(required), as pptx render does a slide; soffice comes from DD_SOFFICE or
+PATH, and without it render is operation_failed and writes nothing. LibreOffice draws the values
 the file caches and ignores what only Visio computes; the render is for
 checking, not proof. Overlays come from the read model, in the page's
 coordinates.`,
@@ -70,9 +71,9 @@ func runRender(p *cli.Parsed, stdout io.Writer) error {
 	if err != nil {
 		return cli.Wrap(cli.CodeOperationFailed, "", err)
 	}
-	renderer, err := render.New(os.Getenv("VSDX_SOFFICE"))
+	renderer, err := render.New(os.Getenv("DD_SOFFICE"))
 	if err != nil {
-		return cli.Wrap(cli.CodeIO, "", err)
+		return rendererError(err)
 	}
 	defer renderer.Close()
 	img, err := renderPage(renderer, p.Args[0], info, scale)
@@ -168,4 +169,13 @@ func pageMarks(input []byte, page string, ids []string, sites bool) ([]render.Ma
 		marks = append(marks, mark)
 	}
 	return marks, nil
+}
+
+// rendererError is the error of a renderer that cannot start.
+// LibreOffice or a PDF rasteriser that is missing makes render
+// operation_failed, as xlsx --recalc is without LibreOffice.
+func rendererError(err error) *cli.Error {
+	e := &cli.Error{Code: cli.CodeOperationFailed, Message: err.Error(), Cause: err}
+	e.Hint = "install LibreOffice (and pdftoppm, mutool or gs) or set DD_SOFFICE"
+	return e
 }
