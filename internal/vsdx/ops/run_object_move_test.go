@@ -82,31 +82,50 @@ func TestObjectMoveV5Stale(t *testing.T) {
 	checkBox(t, "s1", page.Objects[i].Box, [4]float64{180, 126, 72, 36})
 }
 
-// TestObjectMoveV5OneD checks the V5 s3 row: the 1-D shape's ends
-// move from [180,144] to [324,144] to [252,144] to [396,144], and
-// its stored PinX is 4.5, Width 2, Angle 0.
+// TestObjectMoveV5OneD checks the CC2 rows: V5 s3 is glued at both
+// ends (from_glue s1, to_glue s2:1), so dx 72 is operation_failed
+// at ops[0].at (both ends glued); V5 s5 (from_glue s1:1, to free)
+// dx 72 keeps from at [216,216] glued s1:1, moves to to [288,288],
+// and recomputes PinX, Width and Angle by the line family.
 func TestObjectMoveV5OneD(t *testing.T) {
 	path := vsdxtest.Fixture(t, "v5-glue")
+	_, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.move","at":"page0/s3","dx":72}]}`), apply.Options{Out: filepath.Join(t.TempDir(), "out.vsdx")})
+	var ce *cli.Error
+	if !errors.As(err, &ce) {
+		t.Fatalf("error %v, want *cli.Error", err)
+	}
+	if ce.Code != cli.CodeOperationFailed || ce.Path != "ops[0].at" {
+		t.Errorf("got %s at %q, want operation_failed at ops[0].at", ce.Code, ce.Path)
+	}
+	if !strings.Contains(ce.Message, "both ends glued") {
+		t.Errorf("message %q does not name both ends glued", ce.Message)
+	}
 	out := filepath.Join(t.TempDir(), "out.vsdx")
-	if _, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.move","at":"page0/s3","dx":72}]}`), apply.Options{Out: out}); err != nil {
+	if _, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.move","at":"page0/s5","dx":72}]}`), apply.Options{Out: out}); err != nil {
 		t.Fatalf("Run: %v", err)
 	}
 	page := readPage(t, out)
-	i := findObject(t, page, "page0/s3")
-	checkPt(t, "s3 from", page.Objects[i].From, [2]float64{252, 144})
-	checkPt(t, "s3 to", page.Objects[i].To, [2]float64{396, 144})
-	xml := shapeXML(t, out, "page0/s3")
-	if !strings.Contains(xml, "N='PinX' V='4.5'") {
-		t.Errorf("stored PinX is not 4.5: %s", xml)
+	i := findObject(t, page, "page0/s5")
+	checkPt(t, "s5 from", page.Objects[i].From, [2]float64{216, 216})
+	checkPt(t, "s5 to", page.Objects[i].To, [2]float64{288, 288})
+	if page.Objects[i].FromGlue != "s1:1" {
+		t.Errorf("s5 from_glue = %q, want s1:1 (kept)", page.Objects[i].FromGlue)
 	}
-	if !strings.Contains(xml, "N='Width' V='2'") {
-		t.Errorf("stored Width is not 2: %s", xml)
+	if page.Objects[i].ToGlue != "" {
+		t.Errorf("s5 to_glue = %q, want free", page.Objects[i].ToGlue)
 	}
-	if !strings.Contains(xml, "N='Angle' V='0'") {
-		t.Errorf("stored Angle is not 0: %s", xml)
+	xml := shapeXML(t, out, "page0/s5")
+	if !strings.Contains(xml, "N='PinX' V='3.5'") {
+		t.Errorf("stored PinX is not 3.5: %s", xml)
 	}
-	if !strings.Contains(xml, "N='BeginX' V='3.5'") || !strings.Contains(xml, "N='EndX' V='5.5'") {
-		t.Errorf("stored ends did not move to 3.5 and 5.5: %s", xml)
+	if !strings.Contains(xml, "N='Width'") {
+		t.Errorf("stored Width missing: %s", xml)
+	}
+	if !strings.Contains(xml, "N='BeginX' V='3'") {
+		t.Errorf("stored BeginX did not stay 3: %s", xml)
+	}
+	if !strings.Contains(xml, "N='EndX' V='4'") {
+		t.Errorf("stored EndX is not 4: %s", xml)
 	}
 	checkNoNewFindings(t, path, out)
 }

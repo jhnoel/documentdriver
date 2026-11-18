@@ -2,6 +2,7 @@ package ops
 
 import (
 	"errors"
+	"math"
 	"strconv"
 	"strings"
 
@@ -19,19 +20,27 @@ import (
 
 // setEnds applies the from, to, from_glue and to_glue fields of an
 // object.set to a 1-D shape (chunk OSG; run_object_set.go calls it
-// for the fields given). A free end (from/to) is placed at the view
-// point and freed: its Connect row and end formula go, its V
-// becomes the point. A point glue (from_glue/to_glue "s2:2") writes
-// the create form (PAR(PNT(Sheet.N!Connections.Xk, ...)) on the
-// end's cells and a Connect row) and moves the end to the site.
-// "none" frees the end and keeps its V. Whole-shape glue is
-// refused as object.add refuses it: routing a dynamic connector
-// is Visio's, not reproduced here (docs/vsdx-design.md, decision
-// d). The transform cells are rewritten by formula.OneD
-// (coinciding ends give width 0 at the shared point). Changed is
-// the shape's address, or nothing for an identity write. Stale
-// names a dependent the write did not rewrite ("" when there is
-// none), for apply's stale-values report.
+// for the fields given; chunk CC2 adds Visio-authored connectors).
+// A free end (from/to) is placed at the view point and freed: its
+// Connect row and end formula go, its V becomes the point, and
+// its trigger cell is freed as for "none". A point glue
+// (from_glue/to_glue "s2:2") writes the create form
+// (PAR(PNT(Sheet.N!Connections.Xk, ...)) on the end's cells and a
+// Connect row) and moves the end to the site, with the trigger
+// _XFTRIGGER(Sheet.N!EventXFMod) V 2. Whole-shape glue ("s2")
+// writes the _WALKGLUE form and a ToCell PinX ToPart 3 Connect
+// row when the connector is from a master with Visio's dynamic
+// glue cells, the cached end at the midpoint of the target's box
+// edge facing the other end; otherwise operation_failed at the
+// glue field. "none" frees the end and keeps its V. The transform
+// cells are re-evaluated over the closed evaluator (decision c-R):
+// every cell whose formula is CC1-evaluable gets its new V with
+// F kept (Inh materialised with F="Inh"), and Geometry1 is
+// rewritten as the straight two-point line. A dynamic free-end
+// write reports stale-values "<address> route". Changed is the
+// shape's address, or nothing for an identity write. Stale names
+// a dependent the write did not rewrite ("" when there is none),
+// for apply's stale-values report.
 func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, units string) ([]string, string, error) {
 	if s.From == nil && s.To == nil && s.FromGlue == nil && s.ToGlue == nil {
 		return nil, "", nil
@@ -134,6 +143,39 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 	}
 	curBeginView := place.Point(loc.f, beginX, beginY, pg.height)
 	curEndView := place.Point(loc.f, endX, endY, pg.height)
+	// A glue equal to the end's current glue writes nothing
+	// (Fable identity): it is treated as unchanged, so its
+	// cached value (and the position's round-trip) is kept.
+	// The check needs the Connect equality and the end
+	// formulas already in the wanted form: a Connector with
+	// the row but no formula (V5 stores none) is a real
+	// write, not an identity.
+	if beginReq.present && !beginReq.freePoint && !beginReq.freeGlue {
+		if target, point, whole, present := currentGlue(pg.root, a.Shape, true); present && target == beginReq.glue.id && whole == beginReq.isWhole() && (whole || point == beginReq.glue.point) {
+			wantFormula := glueFormula(beginReq.glue.id, beginReq.glue.point)
+			if beginReq.isWhole() {
+				wantFormula = walkFormula(true)
+			}
+			xf, _ := cur.formula(vsd.CellBeginX)
+			yf, _ := cur.formula(vsd.CellBeginY)
+			if xf == wantFormula && yf == wantFormula {
+				beginReq = endRequest{}
+			}
+		}
+	}
+	if endReq.present && !endReq.freePoint && !endReq.freeGlue {
+		if target, point, whole, present := currentGlue(pg.root, a.Shape, false); present && target == endReq.glue.id && whole == endReq.isWhole() && (whole || point == endReq.glue.point) {
+			wantFormula := glueFormula(endReq.glue.id, endReq.glue.point)
+			if endReq.isWhole() {
+				wantFormula = walkFormula(false)
+			}
+			xf, _ := cur.formula(vsd.CellEndX)
+			yf, _ := cur.formula(vsd.CellEndY)
+			if xf == wantFormula && yf == wantFormula {
+				endReq = endRequest{}
+			}
+		}
+	}
 	beginView, endView := curBeginView, curEndView
 	if beginReq.freePoint {
 		beginView = geom.Pt{X: s.From[0] * scale, Y: s.From[1] * scale}
@@ -151,36 +193,58 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 			return nil, "", err
 		}
 	}
-	if err := checkWholeGlue(beginReq, "from_glue", derefStr(s.FromGlue)); err != nil {
+	if beginReq.isWhole() {
+		if !hasDynamicMaster(r, h) {
+			return nil, "", wholeGlueRefusal(shapeAddr, "from_glue")
+		}
+		beginView, err = wholeEndView(beginReq.glue, located, endView, "from_glue", pg.height)
+		if err != nil {
+			return nil, "", err
+		}
+	}
+	if endReq.isWhole() {
+		if !hasDynamicMaster(r, h) {
+			return nil, "", wholeGlueRefusal(shapeAddr, "to_glue")
+		}
+		endView, err = wholeEndView(endReq.glue, located, beginView, "to_glue", pg.height)
+		if err != nil {
+			return nil, "", err
+		}
+	}
+	if err := checkConnectorEditable(r, h, shapeAddr); err != nil {
 		return nil, "", err
 	}
-	if err := checkWholeGlue(endReq, "to_glue", derefStr(s.ToGlue)); err != nil {
-		return nil, "", err
-	}
-	beginEnd, err := desiredEnd(beginReq, cur, loc, beginView, pg.height, vsd.CellBeginX, vsd.CellBeginY, "from")
+	beginEnd, err := desiredEnd(beginReq, cur, loc, beginView, pg.height, vsd.CellBeginX, vsd.CellBeginY, "from", true)
 	if err != nil {
 		return nil, "", err
 	}
-	endEnd, err := desiredEnd(endReq, cur, loc, endView, pg.height, vsd.CellEndX, vsd.CellEndY, "to")
+	endEnd, err := desiredEnd(endReq, cur, loc, endView, pg.height, vsd.CellEndX, vsd.CellEndY, "to", false)
 	if err != nil {
 		return nil, "", err
 	}
-	pinX, pinY, width, angle, bad := oneDOrCoinciding(beginEnd.X, beginEnd.Y, endEnd.X, endEnd.Y)
-	if bad {
+	tr, err := evalTransform(r, h, shapeAddr, beginEnd.X, beginEnd.Y, endEnd.X, endEnd.Y)
+	if err != nil {
+		return nil, "", err
+	}
+	if beginEnd.X == beginX && beginEnd.Y == beginY && endEnd.X == endX && endEnd.Y == endY {
+		// Ends unchanged (for example "none" with its V
+		// kept): the cached transform and Geometry1 stay
+		// byte for byte, so re-evaluation drift must not
+		// write. The current transform is the stored one.
+		tr = endOfConnector{pinX: loc.t.PinX, pinY: loc.t.PinY, width: loc.t.Width, height: loc.t.Height, locPinX: loc.t.LocPinX, locPinY: loc.t.LocPinY, angle: loc.t.Angle, present: true}
+	}
+	if math.IsNaN(tr.width) || math.IsInf(tr.width, 0) {
 		return nil, "", cli.Errorf(cli.CodeOperationFailed, "to", "the connector ends cannot form a 1-D transform")
 	}
 	desired := edit.ConnectorEnds{
 		Begin: beginEnd, End: endEnd,
-		PinX: pinX, PinY: pinY, Width: width, Height: 0,
-		LocPinX: width * 0.5, LocPinY: 0, Angle: angle,
+		PinX: tr.pinX, PinY: tr.pinY, Width: tr.width, Height: tr.height,
+		LocPinX: tr.locPinX, LocPinY: tr.locPinY, Angle: tr.angle,
 	}
 	if err := checkEndFormulas(beginEnd, cur, vsd.CellBeginX, vsd.CellBeginY); err != nil {
 		return nil, "", err
 	}
 	if err := checkEndFormulas(endEnd, cur, vsd.CellEndX, vsd.CellEndY); err != nil {
-		return nil, "", err
-	}
-	if err := checkTransformFormulas(cur, loc.t, desired); err != nil {
 		return nil, "", err
 	}
 	changed, err := ws.SetConnectorEnds(shapeAddr, desired)
@@ -194,14 +258,108 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 		}
 		return nil, "", cli.Errorf(cli.CodeInternal, "", "%v", err)
 	}
+	part, err := connectorPagePart(ws, d, a)
+	if err != nil {
+		return nil, "", err
+	}
+	if c, err := materialiseTransform(ws, r, h, shapeAddr, tr); err != nil {
+		return nil, "", err
+	} else if c {
+		changed = true
+	}
+	if beginReq.present {
+		if beginReq.freePoint || beginReq.freeGlue {
+			if c, err := freeTrigger(ws, part, r, h, shapeAddr, cellBegTrigger, node); err != nil {
+				return nil, "", err
+			} else if c {
+				changed = true
+			}
+		} else if c, err := writeTriggerGlue(ws, r, h, shapeAddr, cellBegTrigger, beginReq.glue.id); err != nil {
+			return nil, "", err
+		} else if c {
+			changed = true
+		}
+	}
+	if endReq.present {
+		if endReq.freePoint || endReq.freeGlue {
+			if c, err := freeTrigger(ws, part, r, h, shapeAddr, cellEndTrigger, node); err != nil {
+				return nil, "", err
+			} else if c {
+				changed = true
+			}
+		} else if c, err := writeTriggerGlue(ws, r, h, shapeAddr, cellEndTrigger, endReq.glue.id); err != nil {
+			return nil, "", err
+		} else if c {
+			changed = true
+		}
+	}
+	if beginEnd.X != beginX || beginEnd.Y != beginY || endEnd.X != endX || endEnd.Y != endY {
+		if c, err := writeGeometry1(ws, part, shapeAddr, node, isLineTransform(r, h), tr, beginEnd.Y, endEnd.Y); err != nil {
+			return nil, "", err
+		} else if c {
+			changed = true
+		}
+	}
 	if !changed {
 		return nil, "", nil
 	}
 	stale := ""
 	if beginEnd.X != beginX || beginEnd.Y != beginY || endEnd.X != endX || endEnd.Y != endY {
-		stale = endsStale(node, shapeAddr)
+		if isDynamicConnector(r, h) {
+			stale = shapeAddr + " route"
+		} else if s := endsStale(node, shapeAddr); s != "" {
+			stale = s
+		}
 	}
 	return []string{shapeAddr}, stale, nil
+}
+
+// wholeEndView returns the cached whole-glue end of one request
+// as a view point: the midpoint of the target's box edge facing
+// other. A missing target is not_found at the glue field, an
+// unreadable target operation_failed there.
+func wholeEndView(g addGlue, located map[string]addLocated, other geom.Pt, field string, height float64) (geom.Pt, error) {
+	loc, ok := located[g.target]
+	if !ok {
+		return geom.Pt{}, cli.Errorf(cli.CodeNotFound, field, "no shape %s: not found", g.target)
+	}
+	if !loc.ok {
+		return geom.Pt{}, cli.Errorf(cli.CodeOperationFailed, field, "%s has no readable transform", g.target)
+	}
+	return wholeEdgeView(loc, other, height), nil
+}
+
+// materialiseTransform materialises every transform cell the
+// shape does not store locally (its effective origin is the
+// master) whose re-evaluated value differs from the effective
+// value, as a local F="Inh" cell. It reports whether it
+// changed anything.
+func materialiseTransform(ws *edit.Workspace, r *inherit.Resolver, h *inherit.Shape, shapeAddr string, tr endOfConnector) (bool, error) {
+	changed := false
+	for _, w := range []struct {
+		name  string
+		value float64
+	}{
+		{vsd.CellPinX, tr.pinX}, {vsd.CellPinY, tr.pinY},
+		{vsd.CellWidth, tr.width}, {vsd.CellHeight, tr.height},
+		{vsd.CellLocPinX, tr.locPinX}, {vsd.CellLocPinY, tr.locPinY},
+		{vsd.CellAngle, tr.angle},
+	} {
+		cell, origin, ok := r.Cell(h, sheet.ShapeCell(w.name))
+		if !ok || origin != inherit.Master {
+			continue
+		}
+		cur, _ := vsd.Number(cell.V)
+		formatted := vsd.FormatInches(w.value)
+		if vsd.FormatInches(cur) == formatted {
+			continue
+		}
+		if err := ws.SetCells(shapeAddr, []edit.Cell{{N: w.name, V: formatted, F: vsd.FormulaInherited}}); err != nil {
+			return false, err
+		}
+		changed = true
+	}
+	return changed, nil
 }
 
 // endRequest is one end's setEnds input: a free point, a glue to a
@@ -301,24 +459,6 @@ func findEndsNode(root *tree.Node, a vsd.Address) *tree.Node {
 	return found
 }
 
-// checkWholeGlue refuses whole-shape glue, as object.add refuses
-// it on a master-less connector: the op writes the create form
-// (point glue only) and Visio's dynamic routing is not reproduced.
-func checkWholeGlue(req endRequest, field, raw string) error {
-	if !req.isWhole() {
-		return nil
-	}
-	return addWholeGlue(field, raw)
-}
-
-// derefStr returns the string p points to, or "" for nil.
-func derefStr(p *string) string {
-	if p == nil {
-		return ""
-	}
-	return *p
-}
-
 // walkGlueFormula is the _WALKGLUE formula prefix of a dynamic
 // connector end, which a point glue or a free end replaces
 // (edit/delete.go carries the same spelling).
@@ -326,9 +466,11 @@ const walkGlueFormula = "_WALKGLUE"
 
 // desiredEnd builds one end's desired state: an unchanged end keeps
 // its stored coordinates, formula and Connect rows; a free point or
-// "none" frees it; a point glue writes the PAR(PNT(...)) formula.
+// "none" frees it; a point glue writes the PAR(PNT(...)) formula;
+// a whole-shape glue writes the _WALKGLUE formula and targets the
+// whole shape. Begin reports whether the end is the begin.
 // Coordinates are parent inches.
-func desiredEnd(req endRequest, cur endsCurrent, loc addLocated, view geom.Pt, height float64, xName, yName, pointField string) (edit.GlueEnd, error) {
+func desiredEnd(req endRequest, cur endsCurrent, loc addLocated, view geom.Pt, height float64, xName, yName, pointField string, begin bool) (edit.GlueEnd, error) {
 	if !req.present {
 		x, _ := cur.number(xName)
 		y, _ := cur.number(yName)
@@ -346,6 +488,9 @@ func desiredEnd(req endRequest, cur endsCurrent, loc addLocated, view geom.Pt, h
 	if req.freePoint {
 		return edit.GlueEnd{X: x, Y: y}, nil
 	}
+	if req.isWhole() {
+		return edit.GlueEnd{X: x, Y: y, Glue: true, Whole: true, Target: req.glue.id, Formula: walkFormula(begin)}, nil
+	}
 	return edit.GlueEnd{X: x, Y: y, Glue: true, Target: req.glue.id, Point: req.glue.point, Formula: glueFormula(req.glue.id, req.glue.point)}, nil
 }
 
@@ -356,21 +501,6 @@ func glueFormula(target uint32, point int) string {
 	id := strconv.FormatUint(uint64(target), 10)
 	p := strconv.Itoa(point)
 	return "PAR(PNT(Sheet." + id + "!Connections.X" + p + ",Sheet." + id + "!Connections.Y" + p + "))"
-}
-
-// oneDOrCoinciding returns the transform cells formula.OneD derives
-// for ends in parent inches. Coinciding ends (width 0) give the
-// shared point, width 0 and angle 0 (ATAN2(0,0)); bad is true for
-// a non-finite transform.
-func oneDOrCoinciding(beginX, beginY, endX, endY float64) (pinX, pinY, width, angle float64, bad bool) {
-	pinX, pinY, width, angle, ok := formula.OneD(beginX, beginY, endX, endY)
-	if ok {
-		return pinX, pinY, width, angle, false
-	}
-	if beginX == endX && beginY == endY && addFinite([]float64{beginX, beginY}) {
-		return beginX, beginY, 0, 0, false
-	}
-	return 0, 0, 0, 0, true
 }
 
 // isGlueFormula reports whether f is a glue formula this chunk
@@ -400,37 +530,6 @@ func checkEndFormulas(end edit.GlueEnd, cur endsCurrent, xName, yName string) er
 			continue
 		}
 		if !has || f == "" || formula.Allowed(f) || isGlueFormula(f) {
-			continue
-		}
-		return cli.Errorf(cli.CodeOperationFailed, "at", "%s F=%s is outside the allow list", tc.name, f)
-	}
-	return nil
-}
-
-// checkTransformFormulas refuses writing a transform cell whose
-// effective formula is neither allowed nor the OneD formula of
-// formula.OneD, naming the cell and formula. A cell whose desired
-// value already matches is not written, so it passes.
-func checkTransformFormulas(cur endsCurrent, t place.Transform, desired edit.ConnectorEnds) error {
-	for _, tc := range []struct {
-		name     string
-		current  float64
-		want     float64
-		expected string
-	}{
-		{vsd.CellPinX, t.PinX, desired.PinX, "(BeginX+EndX)/2"},
-		{vsd.CellPinY, t.PinY, desired.PinY, "(BeginY+EndY)/2"},
-		{vsd.CellWidth, t.Width, desired.Width, "SQRT((EndX-BeginX)^2+(EndY-BeginY)^2)"},
-		{vsd.CellHeight, t.Height, desired.Height, ""},
-		{vsd.CellLocPinX, t.LocPinX, desired.LocPinX, "Width*0.5"},
-		{vsd.CellLocPinY, t.LocPinY, desired.LocPinY, "Height*0.5"},
-		{vsd.CellAngle, t.Angle, desired.Angle, "ATAN2(EndY-BeginY,EndX-BeginX)"},
-	} {
-		if tc.current == tc.want {
-			continue
-		}
-		f, has := cur.formula(tc.name)
-		if !has || f == "" || f == tc.expected || formula.Allowed(f) {
 			continue
 		}
 		return cli.Errorf(cli.CodeOperationFailed, "at", "%s F=%s is outside the allow list", tc.name, f)

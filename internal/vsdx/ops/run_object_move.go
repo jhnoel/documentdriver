@@ -21,14 +21,17 @@ import (
 // Run applies object.move: it resolves at through aliases, refuses
 // stencils, converts dx, dy from the plan's units (view points, y
 // down) to the parent's inches through the frame's inverse, and moves
-// the shape. A 2-D shape moves by PinX and PinY; a 1-D shape moves
-// BeginX/Y and EndX/Y and rewrites PinX, PinY, Width and Angle from
-// formula.OneD. A group moves as one: only its own cells change, its
-// children's cells are untouched. A cell outside the decision (c)
-// allow list is refused with operation_failed naming the cell and its
-// formula, except a 1-D derived cell whose formula is the one
-// formula.OneD derives it from. Glued connectors are left where they
-// are and reported as the stale detail, so apply asks Visio to
+// the shape. A 2-D shape moves by PinX and PinY; a 1-D shape (chunk
+// CC2) moves its free ends by the delta (a glued end keeps its glue
+// and position; both ends glued is operation_failed), re-evaluates
+// its transform cells over the closed evaluator and rewrites
+// Geometry1 as for a free end. A group moves as one: only its own
+// cells change, its children's cells are untouched. A cell outside
+// the decision (c) allow list is refused with operation_failed
+// naming the cell and its formula, except a 1-D derived cell whose
+// formula is CC1-evaluable. A dynamic connector move reports
+// stale-values "<address> route"; connectors glued to the moved
+// shape are reported as the stale detail, so apply asks Visio to
 // recalculate. A zero move, and any move whose stored cells already
 // show the new values, writes nothing.
 func (s *ObjectMoveSpec) Run(ws *edit.Workspace, aliases map[string]string, units string, _ ids.Source) (string, []string, []string, string, error) {
@@ -98,6 +101,16 @@ func (s *ObjectMoveSpec) Run(ws *edit.Workspace, aliases map[string]string, unit
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s cannot be placed", shapeAddr)
 	}
 	deltaX, deltaY := x1-x0, y1-y0
+	if _, _, has := r.Cell(h, sheet.ShapeCell(vsd.CellBeginX)); has {
+		changed, stale, err := moveConnector(ws, r, d, h, node, a, pg, loc, deltaX, deltaY, shapeAddr)
+		if err != nil {
+			return "", nil, nil, "", err
+		}
+		if !changed {
+			return "", nil, nil, "", nil
+		}
+		return "", []string{shapeAddr}, nil, stale, nil
+	}
 	wants, err := moveWants(r, h, loc.t, deltaX, deltaY, shapeAddr)
 	if err != nil {
 		return "", nil, nil, "", err
@@ -131,6 +144,105 @@ func (s *ObjectMoveSpec) Run(ws *edit.Workspace, aliases map[string]string, unit
 		stale = strings.Join(staleEnds, ", ") + " left stale (stale-connector)"
 	}
 	return "", []string{shapeAddr}, nil, stale, nil
+}
+
+// moveConnector moves the 1-D shape node: its free ends move by
+// deltaX, deltaY (parent inches) while a glued end keeps its glue
+// and position (both ends glued is operation_failed at at). The
+// transform cells are re-evaluated and Geometry1 rewritten as
+// for a free end; a dynamic move reports route stale.
+func moveConnector(ws *edit.Workspace, r *inherit.Resolver, d *doc.Document, h *inherit.Shape, node *tree.Node, a vsd.Address, pg *addPage, _ addLocated, deltaX, deltaY float64, shapeAddr string) (bool, string, error) {
+	if err := checkConnectorEditable(r, h, shapeAddr); err != nil {
+		return false, "", err
+	}
+	cur := endsCurrent{r: r, h: h}
+	beginX, ok := cur.number(vsd.CellBeginX)
+	if !ok {
+		return false, "", endsCellRefusal(shapeAddr, vsd.CellBeginX)
+	}
+	beginY, ok := cur.number(vsd.CellBeginY)
+	if !ok {
+		return false, "", endsCellRefusal(shapeAddr, vsd.CellBeginY)
+	}
+	endX, ok := cur.number(vsd.CellEndX)
+	if !ok {
+		return false, "", endsCellRefusal(shapeAddr, vsd.CellEndX)
+	}
+	endY, ok := cur.number(vsd.CellEndY)
+	if !ok {
+		return false, "", endsCellRefusal(shapeAddr, vsd.CellEndY)
+	}
+	beginGlued, endGlued := isGluedEnds(pg.root, a.Shape, r, h)
+	if beginGlued && endGlued {
+		return false, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s has both ends glued: set from_glue or to_glue to none first", shapeAddr)
+	}
+	newBeginX, newBeginY := beginX, beginY
+	newEndX, newEndY := endX, endY
+	if !beginGlued {
+		newBeginX, newBeginY = beginX+deltaX, beginY+deltaY
+	}
+	if !endGlued {
+		newEndX, newEndY = endX+deltaX, endY+deltaY
+	}
+	if math.IsNaN(newBeginX) || math.IsInf(newBeginX, 0) || math.IsNaN(newEndX) || math.IsInf(newEndX, 0) {
+		return false, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s cannot be placed", shapeAddr)
+	}
+	beginEnd := edit.GlueEnd{X: newBeginX, Y: newBeginY}
+	endEnd := edit.GlueEnd{X: newEndX, Y: newEndY}
+	if beginGlued {
+		beginEnd.KeepFormula, beginEnd.KeepConnect = true, true
+	}
+	if endGlued {
+		endEnd.KeepFormula, endEnd.KeepConnect = true, true
+	}
+	if !beginGlued {
+		if err := checkEndFormulas(beginEnd, cur, vsd.CellBeginX, vsd.CellBeginY); err != nil {
+			return false, "", err
+		}
+	}
+	if !endGlued {
+		if err := checkEndFormulas(endEnd, cur, vsd.CellEndX, vsd.CellEndY); err != nil {
+			return false, "", err
+		}
+	}
+	tr, err := evalTransform(r, h, shapeAddr, newBeginX, newBeginY, newEndX, newEndY)
+	if err != nil {
+		return false, "", err
+	}
+	changed, err := ws.SetConnectorEnds(shapeAddr, edit.ConnectorEnds{
+		Begin: beginEnd, End: endEnd,
+		PinX: tr.pinX, PinY: tr.pinY, Width: tr.width, Height: tr.height,
+		LocPinX: tr.locPinX, LocPinY: tr.locPinY, Angle: tr.angle,
+	})
+	if err != nil {
+		return false, "", moveEditError(err)
+	}
+	part, err := connectorPagePart(ws, d, a)
+	if err != nil {
+		return false, "", err
+	}
+	if c, err := materialiseTransform(ws, r, h, shapeAddr, tr); err != nil {
+		return false, "", err
+	} else if c {
+		changed = true
+	}
+	if c, err := writeGeometry1(ws, part, shapeAddr, node, isLineTransform(r, h), tr, newBeginY, newEndY); err != nil {
+		return false, "", err
+	} else if c {
+		changed = true
+	}
+	if !changed {
+		return false, "", nil
+	}
+	stale := ""
+	if newBeginX != beginX || newBeginY != beginY || newEndX != endX || newEndY != endY {
+		if isDynamicConnector(r, h) {
+			stale = shapeAddr + " route"
+		} else if s := endsStale(node, shapeAddr); s != "" {
+			stale = s
+		}
+	}
+	return true, stale, nil
 }
 
 // moveAncestorsOK reports whether every group ancestor of node has a
