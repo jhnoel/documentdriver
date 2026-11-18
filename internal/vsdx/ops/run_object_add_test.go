@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -350,6 +351,258 @@ func TestObjectAddFromMaster(t *testing.T) {
 	// Master2 is 1 x 0.75 in at its centre pin 144,126: the view box
 	// is 72 x 54 with centre there.
 	checkBox(t, "master instance", page.Objects[i].Box, [4]float64{108, 99, 72, 54})
+}
+
+// master1DCell returns the V and F of the first shape-level Cell
+// named name in one shape's XML, in either quote style the edit
+// layer or the corpus writes, failing the test when it is absent.
+func master1DCell(t *testing.T, xml, name string) (string, string) {
+	t.Helper()
+	for _, marker := range []string{"<Cell N='" + name + "'", `<Cell N="` + name + `"`} {
+		start := strings.Index(xml, marker)
+		if start < 0 {
+			continue
+		}
+		rest := xml[start:]
+		if end := strings.Index(rest, "/>"); end >= 0 {
+			rest = rest[:end]
+		}
+		attr := func(key string) string {
+			for _, q := range []byte{'\'', '"'} {
+				needle := key + "=" + string(q)
+				if i := strings.Index(rest, needle); i >= 0 {
+					v := rest[i+len(needle):]
+					if j := strings.IndexByte(v, q); j >= 0 {
+						return v[:j]
+					}
+				}
+			}
+			return ""
+		}
+		return attr("V"), attr("F")
+	}
+	t.Fatalf("no Cell %s in %s", name, xml)
+	return "", ""
+}
+
+// TestObjectAdd1DMaster checks the CC3 row: object.add master
+// "Dynamic connector" (and master97) on Connectors with
+// from_glue s40:2 and to_glue s41:1 reads back from [266.5,
+// 72.01] to [347.09, 72.01] with that glue and master master97,
+// its BeginX..EndY cells equal page0/s42's in V and F, its Width
+// is 1.1193 within 1e-9, its PinX/PinY/LocPin cells are Inh with
+// a V, and it reports stale-values "<new address> route".
+func TestObjectAdd1DMaster(t *testing.T) {
+	for _, tc := range []struct{ name, master string }{
+		{"name", "Dynamic connector"},
+		{"address", "master97"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			path := connectorCorpusFile(t, connectorJsFile)
+			out := filepath.Join(t.TempDir(), "out.vsdx")
+			plan := `{"ops":[{"op":"object.add","at":"page0","master":"` + tc.master + `","from_glue":"s40:2","to_glue":"s41:1","as":"c"}]}`
+			res, err := apply.Run(path, parsePlan(t, plan), apply.Options{Out: out})
+			if err != nil {
+				t.Fatalf("Run: %v", err)
+			}
+			addr := res.Aliases["c"]
+			if addr == "" {
+				t.Fatalf("no alias for the new connector, aliases %v", res.Aliases)
+			}
+			foundStale := false
+			for _, h := range res.Hazards {
+				if h.Kind == "stale-values" && h.Detail == addr+" route" {
+					foundStale = true
+				}
+			}
+			if !foundStale {
+				t.Errorf("hazards %+v, want stale-values %s route", res.Hazards, addr)
+			}
+			page := readPage(t, out)
+			i := findObject(t, page, addr)
+			obj := page.Objects[i]
+			if obj.Kind != "connector" {
+				t.Errorf("kind %q, want connector", obj.Kind)
+			}
+			if obj.Master != "master97" {
+				t.Errorf("master %q, want master97", obj.Master)
+			}
+			checkPt(t, "new from", obj.From, [2]float64{266.5, 72.01})
+			checkPt(t, "new to", obj.To, [2]float64{347.09, 72.01})
+			if obj.FromGlue != "s40:2" || obj.ToGlue != "s41:1" {
+				t.Errorf("glue %q %q, want s40:2 s41:1", obj.FromGlue, obj.ToGlue)
+			}
+			foundConn := false
+			for _, c := range page.Connections {
+				if c.Connector == addr {
+					foundConn = true
+					if c.From != "page0/s40" || c.To != "page0/s41" || c.FromGlue != "s40:2" || c.ToGlue != "s41:1" {
+						t.Errorf("connection %+v, want %s page0/s40 page0/s41 s40:2 s41:1", c, addr)
+					}
+				}
+			}
+			if !foundConn {
+				t.Errorf("connections %v have no %s", page.Connections, addr)
+			}
+			newXML := shapeXML(t, out, addr)
+			s42XML := shapeXML(t, out, "page0/s42")
+			for _, cell := range []string{"BeginX", "BeginY", "EndX", "EndY"} {
+				newV, newF := master1DCell(t, newXML, cell)
+				wantV, wantF := master1DCell(t, s42XML, cell)
+				newNum, e1 := strconv.ParseFloat(newV, 64)
+				wantNum, e2 := strconv.ParseFloat(wantV, 64)
+				if e1 != nil || e2 != nil || newNum < wantNum-1e-9 || newNum > wantNum+1e-9 {
+					t.Errorf("%s V %q, want s42's %q", cell, newV, wantV)
+				}
+				if newF != wantF {
+					t.Errorf("%s F %q, want s42's %q", cell, newF, wantF)
+				}
+			}
+			widthV, widthF := master1DCell(t, newXML, "Width")
+			width, werr := strconv.ParseFloat(widthV, 64)
+			if werr != nil || width < 1.1193-1e-9 || width > 1.1193+1e-9 {
+				t.Errorf("Width V %q is not 1.1193 within 1e-9 in %s", widthV, newXML)
+			}
+			if widthF != "Inh" {
+				t.Errorf("Width F %q, want Inh", widthF)
+			}
+			for _, cell := range []string{"PinX", "PinY", "LocPinX", "LocPinY"} {
+				v, f := master1DCell(t, newXML, cell)
+				if f != "Inh" || v == "" {
+					t.Errorf("%s (V %q, F %q), want Inh with a V", cell, v, f)
+				}
+			}
+		})
+	}
+}
+
+// TestObjectAdd1DMasterFromWithGlue checks the CC3 row added
+// 2026-11-17: Connectors object.add master "Dynamic connector"
+// from [0,0] from_glue "s40:2" to_glue "s41:1" is accepted,
+// from_glue reads back s40:2, and the hazards are stale-connector
+// and stale-values, because the begin is off its site.
+func TestObjectAdd1DMasterFromWithGlue(t *testing.T) {
+	path := connectorCorpusFile(t, connectorJsFile)
+	out := filepath.Join(t.TempDir(), "out.vsdx")
+	res, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.add","at":"page0","master":"Dynamic connector","from":[0,0],"from_glue":"s40:2","to_glue":"s41:1","as":"c"}]}`), apply.Options{Out: out})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	addr := res.Aliases["c"]
+	if addr == "" {
+		t.Fatalf("no alias for the new connector, aliases %v", res.Aliases)
+	}
+	foundStaleValues, foundStaleConnector := false, false
+	for _, h := range res.Hazards {
+		if h.Kind == "stale-values" && strings.Contains(h.Detail, addr+" route") {
+			foundStaleValues = true
+		}
+		if h.Kind == "stale-values" && strings.Contains(h.Detail, addr) && strings.Contains(h.Detail, "stale-connector") {
+			foundStaleConnector = true
+		}
+	}
+	if !foundStaleValues {
+		t.Errorf("hazards %+v, want stale-values %s route", res.Hazards, addr)
+	}
+	if !foundStaleConnector {
+		t.Errorf("hazards %+v, want stale-connector for %s", res.Hazards, addr)
+	}
+	page := readPage(t, out)
+	i := findObject(t, page, addr)
+	obj := page.Objects[i]
+	checkPt(t, "new from", obj.From, [2]float64{0, 0})
+	checkPt(t, "new to", obj.To, [2]float64{347.09, 72.01})
+	if obj.FromGlue != "s40:2" || obj.ToGlue != "s41:1" {
+		t.Errorf("glue %q %q, want s40:2 s41:1", obj.FromGlue, obj.ToGlue)
+	}
+	if obj.Master != "master97" {
+		t.Errorf("master %q, want master97", obj.Master)
+	}
+}
+
+// TestObjectAdd1DMasterBox checks the CC3 row: object.add of a
+// 1-D master with box is operation_failed at ops[0].box with
+// "master97 is a 1-D master: give from and to".
+func TestObjectAdd1DMasterBox(t *testing.T) {
+	path := connectorCorpusFile(t, connectorJsFile)
+	_, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.add","at":"page0","master":"Dynamic connector","box":[0,0,72,72]}]}`), apply.Options{Out: filepath.Join(t.TempDir(), "out.vsdx")})
+	var ce *cli.Error
+	if !errors.As(err, &ce) {
+		t.Fatalf("error %v, want *cli.Error", err)
+	}
+	if ce.Code != cli.CodeOperationFailed || ce.Path != "ops[0].box" {
+		t.Errorf("got %s at %q, want operation_failed at ops[0].box", ce.Code, ce.Path)
+	}
+	if !strings.Contains(ce.Message, "master97 is a 1-D master: give from and to") {
+		t.Errorf("message %q does not hold the CC3 wording", ce.Message)
+	}
+}
+
+// TestObjectAdd1DMasterMissingBlank checks the CC3 row: object.add
+// master "Dynamic connector" on the blank drawing, which has no
+// masters, is not_found at ops[0].master and changes nothing.
+func TestObjectAdd1DMasterMissingBlank(t *testing.T) {
+	blank := blankFile(t)
+	before, err := os.ReadFile(blank)
+	if err != nil {
+		t.Fatalf("read blank: %v", err)
+	}
+	_, err = apply.Run(blank, parsePlan(t, `{"ops":[{"op":"object.add","at":"page0","master":"Dynamic connector"}]}`), apply.Options{Out: filepath.Join(t.TempDir(), "out.vsdx")})
+	var ce *cli.Error
+	if !errors.As(err, &ce) {
+		t.Fatalf("error %v, want *cli.Error", err)
+	}
+	if ce.Code != cli.CodeNotFound || ce.Path != "ops[0].master" {
+		t.Errorf("got %s at %q, want not_found at ops[0].master", ce.Code, ce.Path)
+	}
+	after, _ := os.ReadFile(blank)
+	if string(after) != string(before) {
+		t.Error("a refused plan changed the file")
+	}
+}
+
+// TestObjectAdd1DMasterFreeAndWhole checks the other two end
+// forms of the 1-D master branch: free from/to read back as
+// given, and whole-shape from_glue on the dynamic master gives
+// the _WALKGLUE form and a PinX Connect row.
+func TestObjectAdd1DMasterFreeAndWhole(t *testing.T) {
+	path := connectorCorpusFile(t, connectorJsFile)
+	out := filepath.Join(t.TempDir(), "free.vsdx")
+	res, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.add","at":"page0","master":"master97","from":[72,72],"to":[216,72],"as":"c"}]}`), apply.Options{Out: out})
+	if err != nil {
+		t.Fatalf("free Run: %v", err)
+	}
+	addr := res.Aliases["c"]
+	page := readPage(t, out)
+	i := findObject(t, page, addr)
+	checkPt(t, "free from", page.Objects[i].From, [2]float64{72, 72})
+	checkPt(t, "free to", page.Objects[i].To, [2]float64{216, 72})
+	if page.Objects[i].FromGlue != "" || page.Objects[i].ToGlue != "" {
+		t.Errorf("free glue %q %q, want absent", page.Objects[i].FromGlue, page.Objects[i].ToGlue)
+	}
+	out2 := filepath.Join(t.TempDir(), "whole.vsdx")
+	res, err = apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.add","at":"page0","master":"Dynamic connector","from_glue":"s40","to_glue":"s41:1","as":"c"}]}`), apply.Options{Out: out2})
+	if err != nil {
+		t.Fatalf("whole Run: %v", err)
+	}
+	addr = res.Aliases["c"]
+	page = readPage(t, out2)
+	i = findObject(t, page, addr)
+	checkPt(t, "whole from", page.Objects[i].From, [2]float64{266.5, 72.01})
+	checkPt(t, "whole to", page.Objects[i].To, [2]float64{347.09, 72.01})
+	if page.Objects[i].FromGlue != "s40" || page.Objects[i].ToGlue != "s41:1" {
+		t.Errorf("whole glue %q %q, want s40 s41:1", page.Objects[i].FromGlue, page.Objects[i].ToGlue)
+	}
+	xml := shapeXML(t, out2, addr)
+	if !strings.Contains(xml, "_WALKGLUE(BegTrigger,EndTrigger,WalkPreference)") {
+		t.Errorf("BeginX F is not the _WALKGLUE form: %s", xml)
+	}
+	partXML := connectorPartXML(t, out2, "/visio/pages/page1.xml")
+	id := strings.TrimPrefix(addr, "page0/s")
+	want := "<Connect FromSheet='" + id + "' FromCell='BeginX' FromPart='9' ToSheet='40' ToCell='PinX' ToPart='3'/>"
+	if !strings.Contains(partXML, want) {
+		t.Errorf("Connect %s missing in page: %s", want, partXML)
+	}
 }
 
 // TestScalingObjectAdd checks the scaling row: adding one shape to a

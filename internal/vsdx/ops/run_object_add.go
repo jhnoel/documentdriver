@@ -92,6 +92,7 @@ func (s *ObjectAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units
 	var masterID uint32
 	var masterEntry *doc.MasterEntry
 	var locX, locY float64
+	var master1D bool
 	if s.Master != "" {
 		raw, err := addAddr(s.Master, aliases, "master")
 		if err != nil {
@@ -101,9 +102,40 @@ func (s *ObjectAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units
 		if err != nil {
 			return "", nil, nil, "", err
 		}
-		locX, locY, err = addMasterLoc(r, masterID)
+		master1D, err = addMasterIs1D(r, masterID)
 		if err != nil {
 			return "", nil, nil, "", err
+		}
+		if master1D {
+			// A 1-D master takes from/to or glue, never box
+			// or pin; the rules cannot refuse box or pin
+			// before the document is open (chunk CC3).
+			if s.Box != nil {
+				return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "box", "%s is a 1-D master: give from and to", vsd.MasterID(masterID))
+			}
+			if s.Pin != nil {
+				return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "pin", "%s is a 1-D master: give from and to", vsd.MasterID(masterID))
+			}
+		} else {
+			if s.From != nil {
+				return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "from", "%s is a 2-D master: give box or pin", vsd.MasterID(masterID))
+			}
+			if s.To != nil {
+				return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "to", "%s is a 2-D master: give box or pin", vsd.MasterID(masterID))
+			}
+			if s.FromGlue != "" {
+				return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "from_glue", "%s is a 2-D master: give box or pin", vsd.MasterID(masterID))
+			}
+			if s.ToGlue != "" {
+				return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "to_glue", "%s is a 2-D master: give box or pin", vsd.MasterID(masterID))
+			}
+			if s.Box == nil && s.Pin == nil {
+				return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "box", "%s is a 2-D master: give box or pin", vsd.MasterID(masterID))
+			}
+			locX, locY, err = addMasterLoc(r, masterID)
+			if err != nil {
+				return "", nil, nil, "", err
+			}
 		}
 	}
 	pg, err := addLoadPage(ws, r, a.Container, a.PageDup)
@@ -122,6 +154,9 @@ func (s *ObjectAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units
 	}
 	if s.Kind == "connector" {
 		return s.addConnector(ws, aliases, r, pg, pageAddr, parent, a.Container, a.PageDup, scale)
+	}
+	if master1D {
+		return s.addMasterConnector(ws, aliases, r, d, pg, pageAddr, parent, a.Container, a.PageDup, scale, masterID, masterEntry)
 	}
 	return s.addShape(ws, r, d, pg, pageAddr, parent, scale, masterID, masterEntry, locX, locY)
 }
@@ -160,6 +195,46 @@ func addMaster(d *doc.Document, raw string) (uint32, *doc.MasterEntry, error) {
 		}
 	}
 	return 0, nil, cli.Errorf(cli.CodeNotFound, "master", "no master %q: not found", raw)
+}
+
+// addMasterIs1D reports whether the master's top shape is 1-D: it
+// stores a BeginX cell, so its placement is its ends, not a box.
+func addMasterIs1D(r *inherit.Resolver, masterID uint32) (bool, error) {
+	top, ok := r.MasterShape(&inherit.Shape{Master: masterID, HasMaster: true})
+	if !ok || top == nil || top.Sheet == nil {
+		e := cli.Errorf(cli.CodeUnreadableTarget, "master", "%s cannot be edited safely", vsd.MasterID(masterID))
+		e.Detail = "it has no readable top shape"
+		return false, e
+	}
+	_, ok = top.Sheet.Cell(sheet.ShapeCell(vsd.CellBeginX))
+	return ok, nil
+}
+
+// addMasterTopShape returns the top shape element of the master's
+// contents: the first Shape of its Shapes, as the 2-D instance
+// writer and the 1-D instance writer both start from. It allocates
+// in proportion to the master, never to the page.
+func addMasterTopShape(d *doc.Document, masterID uint32) (*tree.Node, error) {
+	contents, err := d.MasterContents(masterID)
+	if err != nil {
+		e := cli.Errorf(cli.CodeUnreadableTarget, "master", "%s cannot be edited safely", vsd.MasterID(masterID))
+		e.Detail = err.Error()
+		return nil, e
+	}
+	top := addShapesChild(contents.Root())
+	if top == nil {
+		return nil, cli.Errorf(cli.CodeOperationFailed, "master", "%s has no shapes", vsd.MasterID(masterID))
+	}
+	var topShape *tree.Node
+	for n := top.LastChild(); n != nil; n = n.PrevSibling() {
+		if n.Kind() == tree.ElementNode && n.Local() == vsd.ElemShape {
+			topShape = n
+		}
+	}
+	if topShape == nil {
+		return nil, cli.Errorf(cli.CodeOperationFailed, "master", "%s has no shapes", vsd.MasterID(masterID))
+	}
+	return topShape, nil
 }
 
 // addMasterLoc returns the LocPin fractions of the master's top shape
@@ -689,24 +764,9 @@ func addMasterShape(_ *edit.Workspace, d *doc.Document, _ *inherit.Resolver, new
 			name = entry.Name
 		}
 	}
-	contents, err := d.MasterContents(masterID)
+	topShape, err := addMasterTopShape(d, masterID)
 	if err != nil {
-		e := cli.Errorf(cli.CodeUnreadableTarget, "master", "%s cannot be edited safely", vsd.MasterID(masterID))
-		e.Detail = err.Error()
-		return nil, e
-	}
-	top := addShapesChild(contents.Root())
-	if top == nil {
-		return nil, cli.Errorf(cli.CodeOperationFailed, "master", "%s has no shapes", vsd.MasterID(masterID))
-	}
-	var topShape *tree.Node
-	for n := top.LastChild(); n != nil; n = n.PrevSibling() {
-		if n.Kind() == tree.ElementNode && n.Local() == vsd.ElemShape {
-			topShape = n
-		}
-	}
-	if topShape == nil {
-		return nil, cli.Errorf(cli.CodeOperationFailed, "master", "%s has no shapes", vsd.MasterID(masterID))
+		return nil, err
 	}
 	if s.Box != nil {
 		if !addFinite(s.Box) {
@@ -719,7 +779,7 @@ func addMasterShape(_ *edit.Workspace, d *doc.Document, _ *inherit.Resolver, new
 		}
 		return addInstanceFrag(topShape, d, newID, masterID, name, tr, true), nil
 	}
-	if !addFinite(s.Pin) {
+	if len(s.Pin) != 2 || !addFinite(s.Pin) {
 		return nil, cli.Errorf(cli.CodeOperationFailed, "pin", "pin must hold finite numbers")
 	}
 	view := geom.Pt{X: s.Pin[0] * scale, Y: s.Pin[1] * scale}
@@ -778,6 +838,297 @@ func addInstanceShape(b *strings.Builder, masterNode *tree.Node, next *uint32, m
 		b.WriteString("</" + vsd.ElemShapes + ">")
 	}
 	b.WriteString("</" + vsd.ElemShape + ">")
+}
+
+// addMasterConnector adds an instance of a 1-D master (chunk
+// CC3): its ends are from/to or from_glue/to_glue as for a
+// master-less connector, its transform is the master's CC1
+// evaluable cells re-evaluated over those ends and materialised
+// as F="Inh", its Geometry is CC2's straight line, and it
+// reports stale-values "<address> route" when the master is a
+// dynamic connector, so apply sets RecalcDocument. A point
+// with a glue places the end at the point and glues it, and
+// reports stale-connector when the point is off the glue site,
+// as object.set does since CC10.
+func (s *ObjectAddSpec) addMasterConnector(ws *edit.Workspace, aliases map[string]string, r *inherit.Resolver, d *doc.Document, pg *addPage, pageAddr, parent string, container uint32, dup int, scale float64, masterID uint32, entry *doc.MasterEntry) (string, []string, []string, string, error) {
+	if s.From == nil && s.FromGlue == "" {
+		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "from", "%s is a 1-D master: give from and to", vsd.MasterID(masterID))
+	}
+	if s.To == nil && s.ToGlue == "" {
+		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "to", "%s is a 1-D master: give from and to", vsd.MasterID(masterID))
+	}
+	newID, err := ws.NextShapeID(pageAddr)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
+	newAddr := vsd.ShapeID(pageAddr, newID, 1)
+	masterH := &inherit.Shape{Master: masterID, HasMaster: true}
+	located := map[string]addLocated{}
+	wanted := map[string]bool{}
+	if parent != "" {
+		wanted[parent] = true
+	}
+	var fromGlue, toGlue addGlue
+	if s.FromGlue != "" {
+		fromGlue, err = addParseGlue(s.FromGlue, aliases, pageAddr, container, dup, "from_glue")
+		if err != nil {
+			return "", nil, nil, "", err
+		}
+		if !fromGlue.hasPoint && !hasDynamicMaster(r, masterH) {
+			return "", nil, nil, "", wholeGlueRefusal(newAddr, "from_glue")
+		}
+		wanted[fromGlue.target] = true
+	}
+	if s.ToGlue != "" {
+		toGlue, err = addParseGlue(s.ToGlue, aliases, pageAddr, container, dup, "to_glue")
+		if err != nil {
+			return "", nil, nil, "", err
+		}
+		if !toGlue.hasPoint && !hasDynamicMaster(r, masterH) {
+			return "", nil, nil, "", wholeGlueRefusal(newAddr, "to_glue")
+		}
+		wanted[toGlue.target] = true
+	}
+	if len(wanted) > 0 {
+		located = addLocate(pg.root, pageAddr, wanted, r)
+	}
+	frame, err := addParentFrame(parent, located)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
+	viewOf := func(point []float64, glued bool, g addGlue, field, glueField string) (geom.Pt, error) {
+		if point != nil && glued && !g.hasPoint {
+			if err := validateGlueTarget(g, located, glueField); err != nil {
+				return geom.Pt{}, err
+			}
+			if len(point) != 2 || !addFinite(point) {
+				return geom.Pt{}, cli.Errorf(cli.CodeOperationFailed, field, "%s must hold finite numbers", field)
+			}
+			return geom.Pt{X: point[0] * scale, Y: point[1] * scale}, nil
+		}
+		return addEndView(point, glued, g, located, field, glueField, pg.height, scale)
+	}
+	beginWhole := s.FromGlue != "" && !fromGlue.hasPoint && s.From == nil
+	endWhole := s.ToGlue != "" && !toGlue.hasPoint && s.To == nil
+	var beginView, endView geom.Pt
+	if !beginWhole {
+		beginView, err = viewOf(s.From, s.FromGlue != "", fromGlue, "from", "from_glue")
+		if err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	if !endWhole {
+		endView, err = viewOf(s.To, s.ToGlue != "", toGlue, "to", "to_glue")
+		if err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	if beginWhole {
+		other := endView
+		if endWhole {
+			other = addTargetCentre(located, toGlue, pg.height)
+		}
+		beginView, err = wholeEndView(fromGlue, located, other, "from_glue", pg.height)
+		if err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	if endWhole {
+		endView, err = wholeEndView(toGlue, located, beginView, "to_glue", pg.height)
+		if err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	var beginStale, endStale bool
+	if s.From != nil && s.FromGlue != "" {
+		req := endRequest{glued: true, pointGiven: true, glue: fromGlue}
+		var site geom.Pt
+		var hasSite bool
+		if fromGlue.hasPoint {
+			if v, err := addSiteView(fromGlue, located, "from_glue", pg.height); err == nil {
+				site, hasSite = v, true
+			}
+		}
+		beginStale = endOffSite(req, site, hasSite, beginView, located, pg.height)
+	}
+	if s.To != nil && s.ToGlue != "" {
+		req := endRequest{glued: true, pointGiven: true, glue: toGlue}
+		var site geom.Pt
+		var hasSite bool
+		if toGlue.hasPoint {
+			if v, err := addSiteView(toGlue, located, "to_glue", pg.height); err == nil {
+				site, hasSite = v, true
+			}
+		}
+		endStale = endOffSite(req, site, hasSite, endView, located, pg.height)
+	}
+	beginX, beginY, ok := addViewToParent(frame, beginView, pg.height)
+	if !ok {
+		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "from", "the begin cannot be placed")
+	}
+	endX, endY, ok := addViewToParent(frame, endView, pg.height)
+	if !ok {
+		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "to", "the end cannot be placed")
+	}
+	if beginX == endX && beginY == endY {
+		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "to", "the connector ends coincide; give distinct from and to positions")
+	}
+	field := "from"
+	if s.FromGlue != "" {
+		field = "from_glue"
+	}
+	tr, err := evalTransform(r, masterH, newAddr, field, beginX, beginY, endX, endY)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
+	name := s.Name
+	if name == "" {
+		name = entry.NameU
+		if name == "" {
+			name = entry.Name
+		}
+	}
+	topShape, err := addMasterTopShape(d, masterID)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
+	frag := addMasterConnectorFrag(topShape, newID, masterID, name, isLineTransform(r, masterH), tr, beginY, endY)
+	addr, err := ws.InsertShape(pageAddr, parent, frag)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
+	beginEnd := edit.GlueEnd{X: beginX, Y: beginY}
+	if s.FromGlue != "" {
+		beginEnd.Glue, beginEnd.Target = true, fromGlue.id
+		if fromGlue.hasPoint {
+			beginEnd.Point, beginEnd.Formula = fromGlue.point, glueFormula(fromGlue.id, fromGlue.point)
+		} else {
+			beginEnd.Whole, beginEnd.Formula = true, walkFormula(true)
+		}
+	}
+	endEnd := edit.GlueEnd{X: endX, Y: endY}
+	if s.ToGlue != "" {
+		endEnd.Glue, endEnd.Target = true, toGlue.id
+		if toGlue.hasPoint {
+			endEnd.Point, endEnd.Formula = toGlue.point, glueFormula(toGlue.id, toGlue.point)
+		} else {
+			endEnd.Whole, endEnd.Formula = true, walkFormula(false)
+		}
+	}
+	desired := edit.ConnectorEnds{Begin: beginEnd, End: endEnd, PinX: tr.pinX, PinY: tr.pinY, Width: tr.width, Height: tr.height, LocPinX: tr.locPinX, LocPinY: tr.locPinY, Angle: tr.angle}
+	if _, err := ws.SetConnectorEnds(addr, desired); err != nil {
+		return "", nil, nil, "", err
+	}
+	if _, err := materialiseTransform(ws, r, masterH, addr, tr); err != nil {
+		return "", nil, nil, "", err
+	}
+	if s.FromGlue != "" {
+		if _, err := writeTriggerGlue(ws, r, masterH, addr, cellBegTrigger, fromGlue.id); err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	if s.ToGlue != "" {
+		if _, err := writeTriggerGlue(ws, r, masterH, addr, cellEndTrigger, toGlue.id); err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	if a2, err := vsd.Parse(addr); err == nil {
+		if node := findEndsNode(pg.root, a2); node != nil {
+			if part, err := connectorPagePart(ws, d, a2); err == nil {
+				if _, err := writeGeometry1(ws, part, addr, node, isLineTransform(r, masterH), tr, beginY, endY); err != nil {
+					return "", nil, nil, "", err
+				}
+			}
+		}
+	}
+	if err := addText(ws, addr, s.HTML); err != nil {
+		return "", nil, nil, "", err
+	}
+	if err := addPaint(ws, addr, s, false); err != nil {
+		return "", nil, nil, "", err
+	}
+	var staleParts []string
+	if isDynamicConnector(r, masterH) {
+		staleParts = append(staleParts, addr+" route")
+	}
+	if beginStale {
+		staleParts = append(staleParts, addr+" begin left stale (stale-connector)")
+	}
+	if endStale {
+		staleParts = append(staleParts, addr+" end left stale (stale-connector)")
+	}
+	return addr, []string{addr}, nil, strings.Join(staleParts, "; "), nil
+}
+
+// addTargetCentre returns the view point of the centre (the
+// LocPin site) of the glue target g, or the zero point when it
+// cannot be read: the direction cue for a whole-glue end whose
+// other end is itself whole glue.
+func addTargetCentre(located map[string]addLocated, g addGlue, height float64) geom.Pt {
+	loc, ok := located[g.target]
+	if !ok || !loc.ok {
+		return geom.Pt{}
+	}
+	return place.Site(loc.f, loc.t, loc.t.LocPinX, loc.t.LocPinY, height)
+}
+
+// addMasterConnectorFrag writes the fragment of one 1-D master
+// instance: the top shape with Master (and MasterShape on its
+// nested instances, as addInstanceShape writes them), named name,
+// and a Geometry section with CC2's straight line: MoveTo (0,
+// yb) and LineTo (Width, ye), at Height/2 in the line family and
+// at LocPinY+(BeginY-PinY) and LocPinY+(EndY-PinY) in the dynamic
+// family. The ends, triggers and transform cells are written
+// after the insert by SetConnectorEnds, writeTriggerGlue and
+// materialiseTransform, so this allocates in proportion to the
+// fragment and the master's nested shapes only.
+func addMasterConnectorFrag(topShape *tree.Node, newID, masterID uint32, name string, line bool, tr endOfConnector, beginY, endY float64) []byte {
+	var b strings.Builder
+	next := newID
+	id := next
+	next++
+	typ, _ := topShape.Attr("Type")
+	if typ == "" {
+		typ = "Shape"
+	}
+	b.WriteString("<" + vsd.ElemShape + " ID='" + strconv.FormatUint(uint64(id), 10) + "'")
+	if name != "" {
+		escaped := xmlscan.EscapeAttr(name, '\'')
+		b.WriteString(" NameU='" + escaped + "' Name='" + escaped + "'")
+	}
+	b.WriteString(" Type='" + typ + "'")
+	b.WriteString(" Master='" + strconv.FormatUint(uint64(masterID), 10) + "'")
+	b.WriteByte('>')
+	yb, ye := 0.0, 0.0
+	if line {
+		yb = tr.height * 0.5
+		ye = yb
+	} else {
+		yb = tr.locPinY + (beginY - tr.pinY)
+		ye = tr.locPinY + (endY - tr.pinY)
+	}
+	b.WriteString("<" + vsd.ElemSection + " N='" + vsd.SectionGeometry + "' IX='0'>")
+	b.WriteString("<" + vsd.ElemRow + " T='MoveTo' IX='1'>")
+	b.WriteString("<" + vsd.ElemCell + " N='X' V='0'/>")
+	b.WriteString("<" + vsd.ElemCell + " N='Y' V='" + vsd.FormatInches(yb) + "'/>")
+	b.WriteString("</" + vsd.ElemRow + ">")
+	b.WriteString("<" + vsd.ElemRow + " T='LineTo' IX='2'>")
+	b.WriteString("<" + vsd.ElemCell + " N='X' V='" + vsd.FormatInches(tr.width) + "'/>")
+	b.WriteString("<" + vsd.ElemCell + " N='Y' V='" + vsd.FormatInches(ye) + "'/>")
+	b.WriteString("</" + vsd.ElemRow + ">")
+	b.WriteString("</" + vsd.ElemSection + ">")
+	nested := addShapesChild(topShape)
+	if nested != nil {
+		b.WriteString("<" + vsd.ElemShapes + ">")
+		for n := nested.FirstChild(); n != nil; n = n.NextSibling() {
+			if n.Kind() == tree.ElementNode && n.Local() == vsd.ElemShape {
+				addInstanceShape(&b, n, &next, masterID, "", place.Transform{}, false, false)
+			}
+		}
+		b.WriteString("</" + vsd.ElemShapes + ">")
+	}
+	b.WriteString("</" + vsd.ElemShape + ">")
+	return []byte(b.String())
 }
 
 // addConnector adds a master-less straight connector.

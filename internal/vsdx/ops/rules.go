@@ -163,7 +163,13 @@ func checkObjectAdd(s *ObjectAddSpec) (string, string, bool) {
 	if s.Kind == "connector" && s.Pin != nil {
 		return "connector takes no pin", "pin", true
 	}
-	if s.Kind != "connector" {
+	// A master may be 1-D, whose placement is from/to or glue, or
+	// 2-D, whose placement is box or pin; whether it is 1-D is only
+	// in the document, so both placements pass here and Run refuses
+	// the wrong one operation_failed (chunk CC3). A master-less
+	// shape is known 2-D, so it still takes no from/to or glue and
+	// still needs box or pin here.
+	if s.Kind != "connector" && s.Master == "" {
 		if s.From != nil {
 			return "shape takes no from", "from", true
 		}
@@ -176,9 +182,9 @@ func checkObjectAdd(s *ObjectAddSpec) (string, string, bool) {
 		if s.ToGlue != "" {
 			return "shape takes no to_glue", "to_glue", true
 		}
-	}
-	if s.Kind != "connector" && s.Box == nil && s.Pin == nil {
-		return "shape needs box or pin", "box", true
+		if s.Box == nil && s.Pin == nil {
+			return "shape needs box or pin", "box", true
+		}
 	}
 	if s.Kind != "connector" && s.Box != nil && s.Pin != nil {
 		return "shape takes box or pin, not both", "pin", true
