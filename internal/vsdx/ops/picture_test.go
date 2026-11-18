@@ -115,11 +115,11 @@ func TestPictureRefusals(t *testing.T) {
 	}
 }
 
-// TestPictureAddNoneStyle is Fable's must-fix row: an added picture
-// takes the drawing's "None" style sheet (ID 2 in the blank drawing,
-// as V18 shape 5 and 60973 master24/s5 store LineStyle, FillStyle and
-// TextStyle '2'), so it reads back with fill "none" and line "none"
-// and has no connection points (the samples store none).
+// TestPictureAddNoneStyle is Fable's must-fix row (owner's guidance:
+// the schema, not the samples): an added picture stores LinePattern 0
+// and FillPattern 0 itself and refers to no style sheet, so it reads
+// back with fill "none" and line "none" in any drawing; it has no
+// connection points and is written in single quotes.
 func TestPictureAddNoneStyle(t *testing.T) {
 	img := pngFile(t, 10, 10, 1)
 	out, _ := refusalOut(t, vsdxtest.Blank(t), `{"ops":[{"op":"object.add","at":"page0","kind":"picture","image":"`+img+`","box":[0,0,10,10]}]}`)
@@ -128,8 +128,8 @@ func TestPictureAddNoneStyle(t *testing.T) {
 		t.Errorf("picture fill %s line %s, want \"none\" and \"none\"", o["fill"], o["line"])
 	}
 	page := pagePart(t, out)
-	if !strings.Contains(page, "LineStyle='2' FillStyle='2' TextStyle='2'") {
-		t.Errorf("picture style attributes not the None sheet's 2: %s", page)
+	if strings.Contains(page, "LineStyle=") || !strings.Contains(page, "<Cell N='LinePattern' V='0'/><Cell N='FillPattern' V='0'/>") {
+		t.Errorf("picture: want no style reference and local LinePattern 0 and FillPattern 0: %s", page)
 	}
 	if strings.Contains(page, "N='Connection'") {
 		t.Error("an added picture stores connection points; the samples have none")
@@ -139,10 +139,9 @@ func TestPictureAddNoneStyle(t *testing.T) {
 	}
 }
 
-// TestPictureAddNoNoneStyleFallback is the fallback row (designer's
-// ruling): a drawing with no "None" style sheet gives the picture its
-// default style and stores LinePattern 0 and FillPattern 0 locally, so
-// it still reads fill "none" and line "none".
+// TestPictureAddNoNoneStyleFallback checks that a drawing with no
+// "None" style sheet (the blank drawing without its sheet 2) gives the
+// same: fill "none" and line "none".
 func TestPictureAddNoNoneStyleFallback(t *testing.T) {
 	src := withoutNoneStyle(t, vsdxtest.Blank(t))
 	img := pngFile(t, 10, 10, 1)

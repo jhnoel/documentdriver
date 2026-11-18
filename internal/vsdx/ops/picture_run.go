@@ -8,7 +8,6 @@ import (
 	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/edit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
-	"strconv"
 	"strings"
 )
 
@@ -77,23 +76,20 @@ func makePicture(ws *edit.Workspace, addr string, in *imageInput, crop []float64
 	if err := hd.SetAttr(core.Path{}, "Type", vsd.ShapeTypeForeign); err != nil {
 		return err
 	}
-	// The picture takes the drawing's "None" style sheet, as both
-	// Visio-authored samples do (LineStyle, FillStyle, TextStyle 2:
-	// V18 shape 5, 60973 master24/s5), so it shows no fill or line;
-	// without one, it stores LinePattern 0 and FillPattern 0 itself.
-	if id, ok := noneStyle(ws); ok {
-		v := strconv.FormatUint(uint64(id), 10)
-		for _, n := range []string{"LineStyle", "FillStyle", "TextStyle"} {
-			if err := hd.SetAttr(core.Path{}, n, v); err != nil {
-				return err
-			}
+	// The picture shows no fill and no line in any drawing: it stores
+	// LinePattern 0 and FillPattern 0 itself (MS-VSDX visio.xsd
+	// LinePattern_Type line 621, FillPattern_Type line 698, both cells of
+	// ShapeSheet_Type, line 150), and refers to no style sheet: the
+	// LineStyle, FillStyle and TextStyle attributes are optional
+	// (ShapeSheet_Type, lines 508-510), so no style ID is assumed.
+	for _, n := range []string{"LineStyle", "FillStyle", "TextStyle"} {
+		if err := hd.RemoveAttr(core.Path{}, n); err != nil {
+			return err
 		}
 	}
-	cells := cropCells(crop, w, h)
-	if _, ok := noneStyle(ws); !ok {
-		cells = append(cells, edit.Cell{N: vsd.CellLinePattern, V: "0"}, edit.Cell{N: vsd.CellFillPattern, V: "0"})
-	}
-	// The samples store no connection points on a picture.
+	// A picture has no connection points: nothing in MS-VSDX needs a
+	// Connection section on a Foreign shape, and glue to a picture is
+	// not a contract operation.
 	for c := range st.node.ElementsSeq() {
 		if c.Local() == vsd.ElemSection {
 			if n, _ := c.Attr("N"); n == "Connection" {
@@ -104,6 +100,7 @@ func makePicture(ws *edit.Workspace, addr string, in *imageInput, crop []float64
 			}
 		}
 	}
+	cells := append([]edit.Cell{{N: vsd.CellLinePattern, V: "0"}, {N: vsd.CellFillPattern, V: "0"}}, cropCells(crop, w, h)...)
 	// The Img cells and the ForeignData are written as one fragment
 	// in the page's single-quote style.
 	frag := append(cellsXML(cells), foreignDataXML(in.compression, relID)...)
@@ -319,34 +316,6 @@ func picturePage(ws *edit.Workspace, a vsd.Address) (*pictureNode, error) {
 		}
 	}
 	return nil, cli.Errorf(cli.CodeNotFound, "at", "no page")
-}
-
-// noneStyle returns the ID of the drawing's style sheet named "None"
-// (NameU) whose effective LinePattern and FillPattern are 0.
-func noneStyle(ws *edit.Workspace) (uint32, bool) {
-	d, err := doc.Open(ws.Package())
-	if err != nil {
-		return 0, false
-	}
-	for id, st := range d.Styles {
-		if st == nil || st.NameU != "None" || st.Node == nil {
-			continue
-		}
-		line, fill := false, false
-		for c := range st.Node.ElementsSeq() {
-			if c.Local() != vsd.ElemCell {
-				continue
-			}
-			n, _ := c.Attr("N")
-			v, _ := c.Attr("V")
-			line = line || (n == vsd.CellLinePattern && v == "0")
-			fill = fill || (n == vsd.CellFillPattern && v == "0")
-		}
-		if line && fill {
-			return id, true
-		}
-	}
-	return 0, false
 }
 
 // cellsXML writes cells as Cell elements with single-quoted attributes.
