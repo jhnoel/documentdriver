@@ -240,3 +240,31 @@ func TestRefusalsCorpusStructureCounts(t *testing.T) {
 		t.Error("no container member refused object.move")
 	}
 }
+
+// TestPageReplaceOnlyInSkippedShapeNotFound checks the row: a
+// page-wide text.replace whose only match is in a container, list or
+// callout (skipped) is not_found at select, not a silent no-op.
+func TestPageReplaceOnlyInSkippedShapeNotFound(t *testing.T) {
+	for _, structure := range []string{"Container", "List", "Callout"} {
+		path := v1Structure(t, structure, false)
+		expectRefusalCode(t, path, `{"ops":[{"op":"text.replace","at":"page0","select":"Hello","with":"Bye","all":true}]}`, "not_found", "select")
+	}
+}
+
+// expectRefusalCode runs plan on path and wants code at ops[0].field,
+// with no out file written.
+func expectRefusalCode(t *testing.T, path, plan, code, field string) {
+	t.Helper()
+	out := filepath.Join(t.TempDir(), "out.vsdx")
+	_, err := apply.Run(path, parsePlan(t, plan), apply.Options{Out: out})
+	var ce *cli.Error
+	if !errors.As(err, &ce) {
+		t.Fatalf("%s: error %v, want *cli.Error %s", plan, err, code)
+	}
+	if string(ce.Code) != code || ce.Path != "ops[0]."+field {
+		t.Errorf("%s: got %s at %q, want %s at ops[0].%s", plan, ce.Code, ce.Path, code, field)
+	}
+	if _, statErr := os.Stat(out); !errors.Is(statErr, os.ErrNotExist) {
+		t.Errorf("%s: a refused op wrote its out file", plan)
+	}
+}
