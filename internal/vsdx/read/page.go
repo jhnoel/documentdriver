@@ -106,7 +106,7 @@ type propJSON struct {
 	ID     string `json:"id"`
 	Label  string `json:"label"`
 	Type   string `json:"type"`
-	Value  any    `json:"value"`
+	Value  any    `json:"value,omitzero"` // absent, never null, when there is none (§4)
 	Format string `json:"format,omitempty"`
 	Unit   string `json:"unit,omitempty"`
 	Hidden bool   `json:"hidden,omitempty"`
