@@ -273,7 +273,8 @@ plan touched, which are pre-existing (`new` false), as in docx.")
 > **vsdx** text uses the pptx text grammar's subset that Visio stores
 > (`help html`): `<p>`, `<ul><li>` (`data-char`), `<b> <i> <u> <s>`,
 > `<br/>`; `<span style>` with `font-weight`, `font-style`,
-> `text-decoration` (with the `normal` and `none` forms), `font-size`,
+> `text-decoration` (with the `normal` and `none` forms), `font-size`
+(at least 1pt, Visio's minimum; less is refused, CC1),
 > `color`, `font-family`, and `data-color` beside `color` in pptx's
 > canonical form (always `#RRGGBB`: Visio text has no theme colour
 > references; on input `data-color` must agree with `color`);
