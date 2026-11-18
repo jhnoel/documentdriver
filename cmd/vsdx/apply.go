@@ -35,7 +35,7 @@ optional plan fields: base (the hash vsdx read shows: the plan is refused
 if the drawing has changed), units (pt, the default, or in).
 
 ` + "`vsdx help ops`" + ` lists the operations; ` + "`vsdx help <op>`" + ` gives one.
-See the contract: docs/contract.md and docs/vsdx-contract-draft.md.`,
+See the contract: docs/contract.md, sections 3 and 4.`,
 }
 
 // defaultClock is the fixed clock of deterministic mode when --seed is

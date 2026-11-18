@@ -18,6 +18,9 @@ type Flag struct {
 	// Help is one line for the help text. A hidden flag is not listed.
 	Help   string
 	Hidden bool
+	// Required shows the flag without brackets on the usage line; the
+	// command's handler still checks it (usage, path the flag).
+	Required bool
 }
 
 // Command is one command's grammar and help.
@@ -65,6 +68,14 @@ var (
 
 // OutFlag is the shared -o/--out flag, for commands that write a file.
 func OutFlag() Flag { return outFlag }
+
+// RequiredOutFlag is OutFlag for a command that always writes a file:
+// the usage line shows -o without brackets.
+func RequiredOutFlag() Flag {
+	f := outFlag
+	f.Required = true
+	return f
+}
 
 // flag returns the named flag of the command, including pretty for JSON commands.
 func (c *Command) flag(name string) (Flag, bool) {
@@ -161,6 +172,10 @@ func (c *Command) Usage(tool string) string {
 	}
 	for _, f := range flags {
 		if f.Hidden {
+			continue
+		}
+		if f.Required {
+			b.WriteString(" " + flagSpec(f))
 			continue
 		}
 		b.WriteString(" [" + flagSpec(f) + "]")

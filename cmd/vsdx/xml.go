@@ -41,9 +41,9 @@ func runXML(p *cli.Parsed, stdout io.Writer) error {
 }
 
 // htmlHelp is `vsdx help html` (chunk C1 writes it from the grammar of
-// text.Render; docs/vsdx-contract-draft.md, section 7).
+// text.Render; docs/contract.md, section 7).
 func htmlHelp() string {
-	return `HTML in vsdx results and plans (docs/vsdx-contract-draft.md, section 7).
+	return `HTML in vsdx results and plans (docs/contract.md, section 7).
 
 vsdx read writes a shape's text as HTML in html; a plan writes it in
 html (text.set, object.add). The input is HTML5: end tags HTML makes

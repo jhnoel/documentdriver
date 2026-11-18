@@ -24,7 +24,7 @@ func TestHelpApplyComplete(t *testing.T) {
 		"in place", "-o", "atomically", "--dry-run",
 		`{"ops":[{"op":"object.move","at":"page0/s5","dx":10,"dy":0}]}`,
 		"base", "units",
-		"the contract: docs/contract.md and docs/vsdx-contract-draft.md",
+		"the contract: docs/contract.md, sections 3 and 4",
 		"`vsdx help ops`",
 	} {
 		if !strings.Contains(out, want) {
@@ -94,5 +94,29 @@ func TestCreateKeyOrderEqualsApply(t *testing.T) {
 	}
 	if got := jsonKeys(t, blankText); strings.Join(got, ",") != "new_base,dry_run,saved" {
 		t.Errorf("blank create keys %v, want [new_base dry_run saved] in apply's order", got)
+	}
+}
+
+// TestHelpRequiredFlagsAndCreateKeys checks that the usage lines of
+// create and render show their required flags without brackets, and
+// that create's help names every result key (docs/contract.md §4).
+func TestHelpRequiredFlagsAndCreateKeys(t *testing.T) {
+	for _, tc := range []struct{ cmd, want, notWant string }{
+		{"create", "] -o <file>", "[-o <file>]"},
+		{"render", "<drawing.vsdx> --page <pageN> -o <file>", "[--page <pageN>]"},
+	} {
+		code, out, _ := runCLI(t, "help", tc.cmd)
+		if code != cli.ExitOK {
+			t.Fatalf("help %s exit %d", tc.cmd, code)
+		}
+		if !strings.Contains(out, tc.want) || strings.Contains(out, tc.notWant) {
+			t.Errorf("help %s usage: want %q, not %q:\n%s", tc.cmd, tc.want, tc.notWant, out)
+		}
+	}
+	_, out, _ := runCLI(t, "help", "create")
+	for _, want := range []string{"dry_run", "saved", "new_base", "aliases", "changed", "deleted", "hazards", "parts", "units"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("help create lacks %q", want)
+		}
 	}
 }

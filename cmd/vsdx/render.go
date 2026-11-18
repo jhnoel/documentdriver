@@ -22,8 +22,8 @@ var renderCommand = &cli.Command{
 	JSON:    true,
 	Summary: "rasterise a page to a PNG, with optional overlays",
 	Flags: []cli.Flag{
-		{Name: "page", Value: "pageN", Help: "the page (required)"},
-		cli.OutFlag(),
+		{Name: "page", Value: "pageN", Help: "the page (required)", Required: true},
+		cli.RequiredOutFlag(),
 		{Name: "overlay", Value: "ids,sites,glue", Help: "marks to draw"},
 		{Name: "ids", Value: "ids", Help: "limit the marks to these objects and their descendants"},
 		{Name: "scale", Value: "n", Help: "pixels per point (default 1.5)"},

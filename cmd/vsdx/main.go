@@ -39,7 +39,7 @@ func app() *cli.App {
 	return &cli.App{
 		Tool:     "vsdx",
 		Version:  version,
-		Summary:  "vsdx reads, edits and creates Visio drawings: pages, shapes, connectors, groups, shape data and their text; its command line, results and errors follow docs/contract.md and docs/vsdx-contract-draft.md.",
+		Summary:  "vsdx reads, edits and creates Visio drawings: pages, shapes, connectors, groups, shape data and their text; its command line, results and errors follow docs/contract.md.",
 		Commands: []*cli.Command{readCommand, findCommand, xmlCommand, applyCommand, createCommand, renderCommand},
 		Topics:   map[string]func() string{"ops": opsHelp, "html": htmlHelp},
 		Topic:    opHelp,
