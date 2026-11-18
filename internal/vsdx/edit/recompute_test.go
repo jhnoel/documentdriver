@@ -85,9 +85,13 @@ func TestRecomputeShapeV2Width(t *testing.T) {
 	}
 }
 
-// TestRecomputeShapeGuard checks the RC1 row: a shape whose dependent
-// is GUARD(Width*0.5) rewrites nothing and reports every dependent
-// stale, including one in the closed grammar.
+// TestRecomputeShapeGuard checks the RC1 rows as CC1 leaves them
+// (GUARD in the closed grammar, gate ruling 2026-11-17): a shape whose
+// dependents are GUARD(Width*0.5) and Width*0.5 rewrites both from the
+// new Width 2 (LocPinX and Angle V 1, formulas kept) with nothing
+// stale; and the all-or-nothing rule still holds when one dependent is
+// outside the grammar (Sheet.5!Width*0.5): nothing is rewritten and
+// every dependent, the in-grammar one included, is reported stale.
 func TestRecomputeShapeGuard(t *testing.T) {
 	w := mustBegin(t, vsdxtest.Fixture(t, "v1-minimal"))
 	if err := w.SetCells("page0/s1", []Cell{
@@ -101,18 +105,37 @@ func TestRecomputeShapeGuard(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RecomputeShape: %v", err)
 	}
-	want := []string{"page0/s1 LocPinX", "page0/s1 Angle"}
-	if !slices.Equal(stale, want) {
-		t.Errorf("stale = %v, want %v (every dependent)", stale, want)
+	if len(stale) != 0 {
+		t.Errorf("stale = %v, want none (GUARD is evaluated)", stale)
 	}
 	if err := w.Verify(); err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
-	if c, _ := localCell(t, w, 1, sheet.ShapeCell("LocPinX")); c.V != "0.5" {
-		t.Errorf("LocPinX V = %q, want 0.5 (nothing rewritten)", c.V)
+	for _, want := range []struct{ name, f string }{{"LocPinX", "GUARD(Width*0.5)"}, {"Angle", "Width*0.5"}} {
+		if c, _ := localCell(t, w, 1, sheet.ShapeCell(want.name)); c.V != "1" || c.F != want.f {
+			t.Errorf("%s = (V %q, F %q), want V 1 F %s (rewritten, formula kept)", want.name, c.V, c.F, want.f)
+		}
 	}
-	if c, _ := localCell(t, w, 1, sheet.ShapeCell("Angle")); c.V != "0.5" {
-		t.Errorf("Angle V = %q, want 0.5 (nothing rewritten)", c.V)
+
+	w2 := mustBegin(t, vsdxtest.Fixture(t, "v1-minimal"))
+	if err := w2.SetCells("page0/s1", []Cell{
+		{N: "LocPinX", V: "0.5", F: "Sheet.5!Width*0.5"},
+		{N: "Angle", V: "0.5", F: "GUARD(Width*0.5)"},
+		{N: "Width", V: "2"},
+	}); err != nil {
+		t.Fatalf("SetCells: %v", err)
+	}
+	stale, err = w2.RecomputeShape("page0/s1", []string{"Width"})
+	if err != nil {
+		t.Fatalf("RecomputeShape: %v", err)
+	}
+	if want := []string{"page0/s1 LocPinX", "page0/s1 Angle"}; !slices.Equal(stale, want) {
+		t.Errorf("stale = %v, want %v (every dependent, all or nothing)", stale, want)
+	}
+	for _, name := range []string{"LocPinX", "Angle"} {
+		if c, _ := localCell(t, w2, 1, sheet.ShapeCell(name)); c.V != "0.5" {
+			t.Errorf("%s V = %q, want 0.5 (nothing rewritten)", name, c.V)
+		}
 	}
 }
 

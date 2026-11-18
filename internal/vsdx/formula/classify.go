@@ -9,18 +9,10 @@ import (
 // Allowed reports whether f is on the allow list of decision (c),
 // rule 2 (docs/vsdx-design.md): absent (""), Inh, No Formula, a
 // constant (one number with an optional unit of the closed list
-// below), THEMEVAL(), THEMEGUARD(...), or a formula in the closed
-// evaluator grammar of Eval (numbers, + - * / and ^ with a constant
-// exponent, unary minus, parentheses, same-shape references including
-// BeginX, BeginY, EndX and EndY, and GUARD, SQRT and ATAN2), so a
-// write that changes a cell such a formula reads rewrites its cached
-// value and keeps the formula. Anything else is refused, including
-// a formula that reads a User cell (User.DefaultWidth in decision
-// (g)), a Sheet.N! or ThePage! reference, a function other than
-// GUARD, SQRT, ATAN2, THEMEVAL and THEMEGUARD (TEXTWIDTH, IF and
-// SETATREF among them), a ^ with a non-constant exponent, a string
-// and an unknown unit. Names and units match case-insensitively, as
-// Visio reads them, and spaces between tokens do not matter.
+// below), THEMEVAL() or THEMEGUARD(...). Anything else (GUARD(...),
+// a reference, an expression, a string, an unknown unit) is refused.
+// Names and units match case-insensitively, as Visio reads them, and
+// spaces between tokens do not matter.
 func Allowed(f string) bool {
 	toks := Lex(f)
 	i := skipSpaces(toks, 0)
@@ -30,40 +22,22 @@ func Allowed(f string) bool {
 	t := toks[i]
 	switch t.Kind {
 	case Ref:
-		if ascii.EqualFold(t.Text, "Inh") && skipSpaces(toks, i+1) == len(toks) {
-			return true
+		if ascii.EqualFold(t.Text, "Inh") {
+			return skipSpaces(toks, i+1) == len(toks)
 		}
 		if ascii.EqualFold(t.Text, "No") {
 			j := skipSpaces(toks, i+1)
-			if j < len(toks) && toks[j].Kind == Ref &&
+			return j < len(toks) && toks[j].Kind == Ref &&
 				ascii.EqualFold(toks[j].Text, "Formula") &&
-				skipSpaces(toks, j+1) == len(toks) {
-				return true
-			}
-		}
-		// A lone reference (Width, InhX) is a dependent copy, not an
-		// evaluable expression: it stays refused for a direct write.
-		if skipSpaces(toks, i+1) == len(toks) {
-			return false
+				skipSpaces(toks, j+1) == len(toks)
 		}
 	case Number:
-		if _, ok := constantValue(toks); ok {
-			return true
-		}
-		// A lone number is a constant, finite or not: an overflowing
-		// or unknown-unit constant stays refused, as before.
-		if skipSpaces(toks, i+1) == len(toks) {
-			return false
-		}
+		_, ok := constantValue(toks)
+		return ok
 	case Op:
 		if t.Text == "+" || t.Text == "-" {
-			if _, ok := constantValue(toks); ok {
-				return true
-			}
-			j := skipSpaces(toks, i+1)
-			if j < len(toks) && toks[j].Kind == Number && skipSpaces(toks, j+1) == len(toks) {
-				return false
-			}
+			_, ok := constantValue(toks)
+			return ok
 		}
 	case Func:
 		if ascii.EqualFold(t.Text, "THEMEVAL") {
@@ -79,6 +53,38 @@ func Allowed(f string) bool {
 			return themeguard(toks, i)
 		}
 	}
+	return false
+}
+
+// Evaluable reports whether f is a formula a write may recompute:
+// on the allow list (Allowed), or in the closed evaluator grammar of
+// Eval (numbers, + - * / and ^ with a constant exponent, unary minus,
+// parentheses, same-shape references including BeginX, BeginY, EndX
+// and EndY, and GUARD, SQRT and ATAN2) without reading a User cell
+// (User.DefaultWidth in decision (g)). A write that changes a cell
+// such a formula reads rewrites its cached value and keeps the
+// formula; a write never replaces such a formula with a value of its
+// own (Allowed is that list). A lone reference (Width, a dependent
+// copy) and a lone number Constant rejects are not evaluable.
+// Chunk CC1, split from Allowed by the gate ruling of 2026-11-17.
+func Evaluable(f string) bool {
+	if Allowed(f) {
+		return true
+	}
+	toks := Lex(f)
+	i := skipSpaces(toks, 0)
+	if i < len(toks) {
+		t := toks[i]
+		if (t.Kind == Ref || t.Kind == Number) && skipSpaces(toks, i+1) == len(toks) {
+			return false
+		}
+		if t.Kind == Op && (t.Text == "+" || t.Text == "-") {
+			j := skipSpaces(toks, i+1)
+			if j < len(toks) && toks[j].Kind == Number && skipSpaces(toks, j+1) == len(toks) {
+				return false
+			}
+		}
+	}
 	if !inGrammar(f) {
 		return false
 	}
@@ -92,7 +98,7 @@ func Allowed(f string) bool {
 
 // inGrammar reports whether f is in the closed evaluator grammar
 // of Eval, syntactically: Eval with a dummy cell does not report
-// ErrOutsideGrammar. It is the grammar check Allowed and the
+// ErrOutsideGrammar. It is the grammar check Evaluable and the
 // corpus sweep share, so they cannot drift apart.
 func inGrammar(f string) bool {
 	p := &parser{

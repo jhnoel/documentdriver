@@ -365,17 +365,19 @@ func TestSetTransformAlias(t *testing.T) {
 	transformBox(t, "s1", transformRead(t, out, "page0/s1").Box, [4]float64{72, 90, 144, 72})
 }
 
-// TestSetTransformStale checks that a GUARD dependent is left
-// stale: V1 s1 with LocPinX GUARD(Width*0.5) resized reports
-// LocPinX left stale, and V5 s1 resized reports its glued
-// connectors stale.
+// TestSetTransformStale checks that a dependent outside the closed
+// grammar is left stale: V1 s1 with LocPinX Sheet.5!Width*0.5
+// resized reports LocPinX left stale; with LocPinX GUARD(Width*0.5)
+// (in the grammar since CC1) the resize rewrites it to V 1, formula
+// kept, nothing stale; and V5 s1 resized reports its glued connectors
+// stale.
 func TestSetTransformStale(t *testing.T) {
 	src := vsdxtest.Fixture(t, "v1-minimal")
 	w, err := edit.Begin(src)
 	if err != nil {
 		t.Fatalf("Begin: %v", err)
 	}
-	if err := w.SetCells("page0/s1", []edit.Cell{{N: "LocPinX", V: "0.5", F: "GUARD(Width*0.5)"}}); err != nil {
+	if err := w.SetCells("page0/s1", []edit.Cell{{N: "LocPinX", V: "0.5", F: "Sheet.5!Width*0.5"}}); err != nil {
 		t.Fatalf("SetCells: %v", err)
 	}
 	spec := &ObjectSetSpec{At: "page0/s1", Box: []float64{72, 90, 144, 72}}
@@ -390,6 +392,27 @@ func TestSetTransformStale(t *testing.T) {
 		t.Errorf("stale = %q, want it to name page0/s1 LocPinX left stale", stale)
 	}
 	w.Tx().Rollback()
+
+	// GUARD(Width*0.5) is in the closed grammar since CC1: the box
+	// write recomputes it (V 1 for Width 2) and keeps the formula,
+	// with nothing stale.
+	wg, err := edit.Begin(src)
+	if err != nil {
+		t.Fatalf("Begin: %v", err)
+	}
+	if err := wg.SetCells("page0/s1", []edit.Cell{{N: "LocPinX", V: "0.5", F: "GUARD(Width*0.5)"}}); err != nil {
+		t.Fatalf("SetCells: %v", err)
+	}
+	if _, staleG, err := setTransform(wg, spec, nil, "pt"); err != nil || staleG != "" {
+		t.Errorf("GUARD LocPinX: stale = %q, err %v; want none", staleG, err)
+	}
+	if err := wg.Verify(); err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+	if xml := propDeletePageXML(t, propDeleteSnapshot(t, wg)); !strings.Contains(xml, "<Cell N='LocPinX' V='1' F='GUARD(Width*0.5)'/>") && !strings.Contains(xml, `<Cell N="LocPinX" V="1" F="GUARD(Width*0.5)"/>`) {
+		t.Errorf("GUARD LocPinX not rewritten to V 1 with its formula: %s", xml)
+	}
+	wg.Tx().Rollback()
 	src2 := vsdxtest.Fixture(t, "v5-glue")
 	spec2 := &ObjectSetSpec{At: "page0/s1", Box: []float64{72, 90, 144, 72}}
 	_, stale2, _ := transformRun(t, src2, spec2, nil, "pt")
