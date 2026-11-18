@@ -28,7 +28,9 @@ func evalCell(ref string) (float64, bool) {
 // TestEval checks the FL3 rows: Width*0.5 with Width 2 is 1,
 // Height*1-0.25IN with Height 1 is 0.75, (Width+Height)/2 is 1.5,
 // -Width is -2, Geometry1.X1 (2.5) is 2.5, 25.4MM is 1, and
-// Width*0.5 with Width unknown is an error.
+// Width*0.5 with Width unknown is an error. It also checks the
+// CC1 rows in that grammar: GUARD, SQRT, ATAN2, ^ with a constant
+// exponent and the DL and DA units.
 func TestEval(t *testing.T) {
 	rows := []struct {
 		in   string
@@ -56,6 +58,19 @@ func TestEval(t *testing.T) {
 		{"Width/Height", 2},
 		{"1-2-3", -4},
 		{"8/4/2", 1},
+		{"GUARD(Width*0.5)", 1},
+		{"GUARD(Width)", 2},
+		{"GUARD(0.19685039370079DL)", 0.19685039370079},
+		{"GUARD(0DA)", 0},
+		{"SQRT(4)", 2},
+		{"SQRT(Width^2)", 2},
+		{"Width^2", 4},
+		{"2^3", 8},
+		{"(Width+Height)^2", 9},
+		{"Width^0.5", math.Sqrt(2)},
+		{"0.5DL", 0.5},
+		{"0.25DL", 0.25},
+		{"ATAN2(1,1)", math.Pi / 4},
 	}
 	for _, row := range rows {
 		got, err := Eval(row.in, evalCell)
@@ -69,18 +84,63 @@ func TestEval(t *testing.T) {
 	}
 }
 
-// TestEvalOutside checks the FL3 outside rows: SQRT(4),
-// Sheet.5!Width, ThePage!PageHeight and 1XX are ErrOutsideGrammar,
-// and 65 nested parentheses are an error, never a panic. Width
-// unknown is ErrUnknownCell, not outside the grammar.
+// TestEvalOneD checks the CC1 Eval rows: GUARD(EndX-BeginX) with
+// BeginX 3.7014 and EndX 4.8207 is 1.1193 (Connectors.vsdx
+// page0/s42's stored Width), SQRT((EndX-BeginX)^2+(EndY-BeginY)^2)
+// from (2,2) to (2.75,2) is 0.75 (master30), ATAN2(EndY-BeginY,
+// EndX-BeginX) from (0,0) to (1,1) is pi/4 to 1e-15, and
+// GUARD((BeginX+EndX)/2) from 1 to 2 is 1.5.
+func TestEvalOneD(t *testing.T) {
+	rows := []struct {
+		in    string
+		cells map[string]float64
+		want  float64
+		tol   float64
+	}{
+		{"GUARD(EndX-BeginX)", map[string]float64{"BeginX": 3.7014, "EndX": 4.8207}, 1.1193, 1e-12},
+		{"SQRT((EndX-BeginX)^2+(EndY-BeginY)^2)", map[string]float64{"BeginX": 2, "BeginY": 2, "EndX": 2.75, "EndY": 2}, 0.75, 0},
+		{"ATAN2(EndY-BeginY,EndX-BeginX)", map[string]float64{"BeginX": 0, "BeginY": 0, "EndX": 1, "EndY": 1}, math.Pi / 4, 1e-15},
+		{"GUARD((BeginX+EndX)/2)", map[string]float64{"BeginX": 1, "EndX": 2}, 1.5, 0},
+	}
+	for _, row := range rows {
+		cell := func(ref string) (float64, bool) {
+			v, ok := row.cells[ref]
+			return v, ok
+		}
+		got, err := Eval(row.in, cell)
+		if err != nil {
+			t.Errorf("Eval(%q): %v, want %v", row.in, err, row.want)
+			continue
+		}
+		if row.tol == 0 {
+			if got != row.want {
+				t.Errorf("Eval(%q) = %v, want %v", row.in, got, row.want)
+			}
+		} else if math.Abs(got-row.want) > row.tol {
+			t.Errorf("Eval(%q) = %v, want %v within %v", row.in, got, row.want, row.tol)
+		}
+	}
+}
+
+// TestEvalOutside checks the FL3 outside rows: Sheet.5!Width,
+// ThePage!PageHeight and 1XX are ErrOutsideGrammar, as are the
+// still-refused CC1 forms GUARD(TEXTWIDTH(TheText)), IF(...),
+// SETATREF(...) and a ^ with a non-constant exponent, and 65
+// nested parentheses are an error, never a panic. Width unknown
+// is ErrUnknownCell, not outside the grammar.
 func TestEvalOutside(t *testing.T) {
 	rows := []string{
-		"SQRT(4)", "Sheet.5!Width", "ThePage!PageHeight", "1XX",
-		"0.5DL", "Width^2", "Width%Height", "Width&Height",
+		"Sheet.5!Width", "ThePage!PageHeight", "1XX",
+		"Width%Height", "Width&Height",
 		"Width=Height", "Width<>Height", `"abc"`, "Width,Height",
 		"Width;Height", "Width*", "*Width", "+Width", "()",
 		"(Width", "Width)", "Width Height", "1IN*",
-		"GUARD(Width)", "Width[", "1E400", "",
+		"Width[", "1E400", "",
+		"GUARD(TEXTWIDTH(TheText))", "IF(Width,1,0)", "SETATREF(Width)",
+		"Width^Height", "Width^(Height)", "GUARD()", "GUARD(Width,Height)",
+		"SQRT()", "SQRT(Width,Height)", "ATAN2(Width)", "ATAN2(Width,Height,Width)",
+		"THEMEVAL()", "THEMEGUARD(Width)", "PAR(PNT(Sheet.40!Connections.X2,Sheet.40!Connections.Y2))",
+		"_WALKGLUE(BegTrigger,EndTrigger,WalkPreference)", "_XFTRIGGER(EventXFMod)", "PNT(1,2)", "TEXTWIDTH(TheText)",
 	}
 	for _, in := range rows {
 		_, err := Eval(in, evalCell)
@@ -101,6 +161,16 @@ func TestEvalOutside(t *testing.T) {
 	unary := strings.Repeat("-", 65) + "Width"
 	if _, err := Eval(unary, evalCell); !errors.Is(err, ErrOutsideGrammar) {
 		t.Errorf("Eval(65 unary minuses) error = %v, want ErrOutsideGrammar", err)
+	}
+	// 65 nested GUARD calls are equally beyond the limit.
+	guardDeep := strings.Repeat("GUARD(", 65) + "1" + strings.Repeat(")", 65)
+	if _, err := Eval(guardDeep, evalCell); !errors.Is(err, ErrOutsideGrammar) {
+		t.Errorf("Eval(65 nested GUARD calls) error = %v, want ErrOutsideGrammar", err)
+	}
+	// A negative square root and a power that overflows are
+	// non-finite errors, not outside the grammar.
+	if _, err := Eval("SQRT(-1)", evalCell); err == nil || errors.Is(err, ErrOutsideGrammar) {
+		t.Errorf("Eval(SQRT(-1)) error = %v, want a non-outside error", err)
 	}
 	// Width unknown is in the grammar, so not ErrOutsideGrammar.
 	_, err := Eval("Width*0.5", func(string) (float64, bool) { return 0, false })
@@ -132,8 +202,15 @@ func TestRefs(t *testing.T) {
 		{"(Width+Height)/2", []string{"Width", "Height"}},
 		{"Geometry1.X1*Width+Height", []string{"Geometry1.X1", "Width", "Height"}},
 		{"Width+Width", []string{"Width", "Width"}},
+		{"GUARD(Width*0.5)", []string{"Width"}},
+		{"SQRT((EndX-BeginX)^2+(EndY-BeginY)^2)", []string{"EndX", "BeginX", "EndY", "BeginY"}},
+		{"ATAN2(EndY-BeginY,EndX-BeginX)", []string{"EndY", "BeginY", "EndX", "BeginX"}},
+		{"Width^2", []string{"Width"}},
 		{"25.4MM", nil},
 		{"SQRT(4)", nil},
+		{"GUARD(TEXTWIDTH(TheText))", nil},
+		{"Width^Height", nil},
+		{"IF(Width,1,0)", nil},
 		{"Sheet.5!Width", nil},
 		{"ThePage!PageHeight", nil},
 		{"1XX", nil},
@@ -214,6 +291,9 @@ func FuzzEval(f *testing.F) {
 		"ThePage!PageHeight", "1XX", "1/0", "Width/0", "1E400",
 		"((((Width))))", "---Width", "Width**Height", "Width*", "+Width",
 		"0.5DL", "90DEG", "1FT+2IN", "\xff\xfe", "Width<>Height",
+		"GUARD(Width*0.5)", "SQRT(Width^2)", "ATAN2(Height,Width)", "Width^2",
+		"Width^Height", "GUARD(TEXTWIDTH(TheText))", "GUARD(EndX-BeginX)",
+		"SQRT((EndX-BeginX)^2+(EndY-BeginY)^2)", "ATAN2(EndY-BeginY,EndX-BeginX)",
 	} {
 		f.Add(s)
 	}

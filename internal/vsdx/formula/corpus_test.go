@@ -54,6 +54,7 @@ type corpusCounts struct {
 	eligible      int
 	evaluated     int
 	equal         int
+	clamped       int
 	outside       int
 	refMissing    int
 	refNonNumeric int
@@ -74,11 +75,12 @@ type classifiedEntry struct {
 
 // classifiedDisagreements is the FL4 classified table: empty,
 // because the sweep of the 53 Visio-authored corpus drawings
-// evaluates 17,902 eligible cells and every one agrees with its
-// cached value within tolerance, so there is nothing to explain.
-// A future disagreement is added here with its inspected reason,
-// with the designer's approval in the commit message, or the
-// test fails.
+// evaluates every eligible cell and, after the Char.Size 1pt
+// clamp of formula.Clamp (four GUARD(0) Char.Size cells cache
+// 1pt), every one agrees with its cached value within tolerance,
+// so there is nothing to explain. A future disagreement is added
+// here with its inspected reason, with the designer's approval in
+// the commit message, or the test fails.
 var classifiedDisagreements = []classifiedEntry{}
 
 // isVisioAuthoredFile reports whether pkg's app.xml names
@@ -540,6 +542,10 @@ func sweepSheet(c *corpusCounts, sh corpusSheet) {
 		if isInh {
 			c.inhEvaluated++
 		}
+		if clamped := Clamp(cc.ref, got); clamped != got {
+			c.clamped++
+			got = clamped
+		}
 		diff := math.Abs(got - want)
 		if diff <= 1e-12 || diff <= 1e-9*math.Abs(want) {
 			c.equal++
@@ -649,6 +655,7 @@ func TestEvalCorpus(t *testing.T) {
 		total.eligible += r.Value.eligible
 		total.evaluated += r.Value.evaluated
 		total.equal += r.Value.equal
+		total.clamped += r.Value.clamped
 		total.outside += r.Value.outside
 		total.refMissing += r.Value.refMissing
 		total.refNonNumeric += r.Value.refNonNumeric
@@ -665,14 +672,17 @@ func TestEvalCorpus(t *testing.T) {
 		t.Errorf("unexplained disagreement: %s", dg)
 		t.Logf("disagreement: %s", dg)
 	}
-	t.Logf("vsdx FL4 corpus: %d Visio files, %d sheets, %d cells, %d with formula, %d Inh (%d without a master formula, %d evaluated), %d in grammar, %d eligible, %d evaluated, %d equal, %d classified, %d outside grammar, %d ref missing, %d ref non-numeric, %d cell non-numeric, %d eval errors, %d disagreements",
-		visioFiles, total.sheets, total.cells, total.withFormula, total.inh, total.inhNoMaster, total.inhEvaluated, total.inGrammar, total.eligible, total.evaluated, total.equal, classified, total.outside, total.refMissing, total.refNonNumeric, total.cellNonNum, total.evalErrors, len(total.disagreements))
+	t.Logf("vsdx FL4 corpus: %d Visio files, %d sheets, %d cells, %d with formula, %d Inh (%d without a master formula, %d evaluated), %d in grammar, %d eligible, %d evaluated, %d equal, %d clamped, %d classified, %d outside grammar, %d ref missing, %d ref non-numeric, %d cell non-numeric, %d eval errors, %d disagreements",
+		visioFiles, total.sheets, total.cells, total.withFormula, total.inh, total.inhNoMaster, total.inhEvaluated, total.inGrammar, total.eligible, total.evaluated, total.equal, total.clamped, classified, total.outside, total.refMissing, total.refNonNumeric, total.cellNonNum, total.evalErrors, len(total.disagreements))
 	if !corpustest.Sharded() {
 		if visioFiles == 0 {
 			t.Error("corpus holds no Visio-authored drawings")
 		}
 		if total.eligible == 0 {
 			t.Error("corpus holds no eligible cells")
+		}
+		if total.clamped != 4 {
+			t.Errorf("clamped %d, want 4 (the GUARD(0) Char.Size cells)", total.clamped)
 		}
 	}
 }
@@ -733,4 +743,393 @@ func TestEvalCorpusScaling(t *testing.T) {
 	}
 	laws.Scales(t, "vsdx FL4 corpus sweep copies", setup)
 	laws.TimeScales(t, "vsdx FL4 corpus sweep copies", setup)
+}
+
+// oneDCellNames are the 1-D transform and trigger cell names of CC1.
+var oneDCellNames = []string{
+	"Width", "Height", "PinX", "PinY", "LocPinX", "LocPinY", "Angle",
+	"BeginX", "BeginY", "EndX", "EndY", "BegTrigger", "EndTrigger",
+}
+
+// oneDCounts are one file's CC1 1-D tally.
+type oneDCounts struct {
+	visio         bool
+	shapes        int
+	cells         int
+	constant      int
+	inh           int
+	inhNoMaster   int
+	evaluable     int
+	evaluated     int
+	equal         int
+	clamped       int
+	gluePoint     int
+	glueWhole     int
+	glueTrigger   int
+	refused       int
+	refMissing    int
+	refNonNumeric int
+	cellNonNum    int
+	evalErrors    int
+	disagreements []string
+	unreadable    []string
+	forms         map[string]int
+}
+
+// isOneDCell reports whether name is a CC1 1-D cell.
+func isOneDCell(name string) bool {
+	return slices.Contains(oneDCellNames, name)
+}
+
+// oneDFormName returns the aggregated form name of a stored 1-D
+// formula for the CC1 log: PAR and _XFTRIGGER sheet numbers and
+// Width*0.5-like coefficients are normalised, as in the CC1 table.
+func oneDFormName(cell, f string, hasF bool) string {
+	if !hasF {
+		return cell + " constant"
+	}
+	switch {
+	case strings.HasPrefix(f, "PAR(PNT(Sheet."):
+		return cell + " PAR(PNT(Sheet.N!Connections.Xk,...))"
+	case strings.HasPrefix(f, "_XFTRIGGER(Sheet."):
+		return cell + " _XFTRIGGER(Sheet.N!EventXFMod)"
+	case strings.HasPrefix(f, "Width*"):
+		return cell + " Width*0.5"
+	case strings.HasPrefix(f, "Height*"):
+		return cell + " Height*0.5"
+	case strings.HasPrefix(f, "GUARD(") && strings.Contains(f, "DL)"):
+		return cell + " GUARD(nDL)"
+	default:
+		return cell + " " + f
+	}
+}
+
+// sweepOneDSheet tallies the 1-D cells of one sheet in c: a sheet
+// with a BeginX cell is a 1-D shape; its Width, Height, Pin, LocPin,
+// Angle, Begin, End and trigger cells are classified as constant,
+// Inh, evaluable (in the closed grammar, evaluated against the
+// sheet's cached cells), a glue form (GlueForm) or refused, and an
+// evaluable cell that Eval errors on or disagrees with beyond
+// tolerance is a disagreement.
+func sweepOneDSheet(c *oneDCounts, sh corpusSheet) {
+	hasBegin := false
+	for _, cc := range sh.cells {
+		if cc.key.Cell == "BeginX" {
+			hasBegin = true
+			break
+		}
+	}
+	if !hasBegin {
+		return
+	}
+	c.shapes++
+	if c.forms == nil {
+		c.forms = map[string]int{}
+	}
+	refs := buildRefMap(sh.cells)
+	for _, cc := range sh.cells {
+		if !isOneDCell(cc.key.Cell) {
+			continue
+		}
+		c.cells++
+		c.forms[oneDFormName(cc.key.Cell, cc.cell.F, cc.cell.HasF)]++
+		if !cc.cell.HasF || cc.cell.F == "" || cc.cell.F == vsd.FormulaNone {
+			c.constant++
+			continue
+		}
+		formula := cc.cell.F
+		if formula == vsd.FormulaInherited {
+			c.inh++
+			mc, ok := sh.master[cc.key]
+			if !ok || !mc.HasF || mc.F == "" || mc.F == vsd.FormulaNone || mc.F == vsd.FormulaInherited {
+				c.inhNoMaster++
+				continue
+			}
+			formula = mc.F
+		}
+		if g, ok := GlueForm(formula); ok {
+			switch g.Kind {
+			case GluePoint:
+				c.gluePoint++
+			case GlueWhole:
+				c.glueWhole++
+			case GlueTrigger:
+				c.glueTrigger++
+			}
+			continue
+		}
+		formulaRefs := Refs(formula)
+		if formulaRefs == nil && !grammarNoRefs(formula) {
+			c.refused++
+			continue
+		}
+		c.evaluable++
+		want, ok := vsd.Number(cc.cell.V)
+		if !cc.cell.HasV || !ok {
+			c.cellNonNum++
+			continue
+		}
+		bad := false
+		for _, ref := range formulaRefs {
+			rv, hit := refs[strings.ToLower(ref)]
+			if !hit {
+				c.refMissing++
+				bad = true
+				break
+			}
+			if !rv.numeric {
+				c.refNonNumeric++
+				bad = true
+				break
+			}
+		}
+		if bad {
+			continue
+		}
+		got, err := Eval(formula, func(ref string) (float64, bool) {
+			rv, hit := refs[strings.ToLower(ref)]
+			return rv.v, hit && rv.numeric
+		})
+		if err != nil {
+			c.evalErrors++
+			c.disagreements = append(c.disagreements, fmt.Sprintf("%s %s %s F=%q cached=%v eval-error=%v", sh.part, sh.addr, cc.ref, cc.cell.F, want, err))
+			continue
+		}
+		c.evaluated++
+		if clamped := Clamp(cc.ref, got); clamped != got {
+			c.clamped++
+			got = clamped
+		}
+		diff := math.Abs(got - want)
+		if diff <= 1e-12 || diff <= 1e-9*math.Abs(want) {
+			c.equal++
+			continue
+		}
+		c.disagreements = append(c.disagreements, fmt.Sprintf("%s %s %s F=%q cached=%v eval=%v", sh.part, sh.addr, cc.ref, cc.cell.F, want, got))
+	}
+}
+
+// sweepOneDFile sweeps the 1-D sheets of the Visio-authored drawing
+// at path, returning its tally. A file that is not Visio-authored
+// returns visio false and is not in the sweep.
+func sweepOneDFile(path string) (counts oneDCounts) {
+	counts.forms = map[string]int{}
+	pkg, err := opc.Open(path)
+	if err != nil {
+		return counts
+	}
+	defer func() { _ = pkg.Close() }()
+	if !isVisioAuthoredFile(pkg) {
+		return counts
+	}
+	counts.visio = true
+	d, err := doc.Open(pkg)
+	if err != nil {
+		counts.unreadable = append(counts.unreadable, "doc.Open: "+err.Error())
+		return counts
+	}
+	r := inherit.New(d)
+	sheets, unreadable := sheetsOfFile(d, r)
+	counts.unreadable = append(counts.unreadable, unreadable...)
+	for _, sh := range sheets {
+		sweepOneDSheet(&counts, sh)
+	}
+	return counts
+}
+
+// TestOneDCorpus checks the CC1 FL4 re-run row: over the
+// Visio-authored VSDX_CORPUS drawings, every 1-D cell formula
+// (Width, Height, Pin, LocPin, Angle, Begin, End and the triggers
+// of a shape with a BeginX cell) is classified as evaluable, a
+// glue form or refused, and the evaluable ones reproduce the
+// stored V within 1e-9 (relative for angles), with 0
+// disagreements. Counts are logged and match the CC1 table:
+// Width GUARD(EndX-BeginX) 66 cells, SQRT 16, GUARD(nDL) 11;
+// Height GUARD(EndY-BeginY) 48, GUARD(nDL) 27; PinX/PinY
+// (Begin+End)/2 and GUARD of it 37 each; LocPin Width*0.5 and
+// GUARD of it 37 each; Angle ATAN2 16 and GUARD(0DA) 21; point
+// glue 168 cells, whole glue 52, triggers 114, and 1 refused
+// (a SETATREF Height). It skips without VSDX_CORPUS and fails
+// naming the path when VSDX_CORPUS is set but holds no corpus.
+func TestOneDCorpus(t *testing.T) {
+	dir := lexCorpusDir()
+	if dir == "" {
+		if d := os.Getenv("VSDX_CORPUS"); d != "" {
+			t.Fatalf("VSDX_CORPUS %s holds no vsdx corpus (no repos directory under it)", d)
+		}
+		t.Skip("no vsdx corpus (set VSDX_CORPUS)")
+	}
+	paths := lexCorpusDrawings(dir)
+	if len(paths) == 0 {
+		t.Fatalf("VSDX_CORPUS %s holds no vsdx drawings under %s", os.Getenv("VSDX_CORPUS"), dir)
+	}
+	files := corpustest.Files(paths, dir)
+	if len(corpustest.Shard(t, files)) == 0 {
+		t.Skip("no corpus drawings in this CORPUS_SHARD")
+	}
+	res := corpustest.Run(t, files, func(t *testing.T, f corpustest.File, r *oneDCounts) {
+		counts := sweepOneDFile(f.Path)
+		if !counts.visio {
+			return
+		}
+		for _, u := range counts.unreadable {
+			t.Errorf("%s: %s", f.Name, u)
+		}
+		for i, dg := range counts.disagreements {
+			counts.disagreements[i] = f.Name + " " + dg
+		}
+		*r = counts
+	})
+	var total oneDCounts
+	var visioFiles int
+	for _, r := range res {
+		if !r.Ran {
+			continue
+		}
+		if r.Value.visio {
+			visioFiles++
+		}
+		total.shapes += r.Value.shapes
+		total.cells += r.Value.cells
+		total.constant += r.Value.constant
+		total.inh += r.Value.inh
+		total.inhNoMaster += r.Value.inhNoMaster
+		total.evaluable += r.Value.evaluable
+		total.evaluated += r.Value.evaluated
+		total.equal += r.Value.equal
+		total.clamped += r.Value.clamped
+		total.gluePoint += r.Value.gluePoint
+		total.glueWhole += r.Value.glueWhole
+		total.glueTrigger += r.Value.glueTrigger
+		total.refused += r.Value.refused
+		total.refMissing += r.Value.refMissing
+		total.refNonNumeric += r.Value.refNonNumeric
+		total.cellNonNum += r.Value.cellNonNum
+		total.evalErrors += r.Value.evalErrors
+		total.disagreements = append(total.disagreements, r.Value.disagreements...)
+		if total.forms == nil {
+			total.forms = map[string]int{}
+		}
+		for k, v := range r.Value.forms {
+			total.forms[k] += v
+		}
+	}
+	for _, dg := range total.disagreements {
+		t.Errorf("disagreement: %s", dg)
+	}
+	t.Logf("vsdx CC1 1-D corpus: %d Visio files, %d shapes, %d cells, %d constant, %d Inh (%d without a master formula), %d evaluable, %d evaluated, %d equal, %d clamped, point glue %d, whole glue %d, trigger glue %d, %d refused, %d ref missing, %d ref non-numeric, %d cell non-numeric, %d eval errors, %d disagreements",
+		visioFiles, total.shapes, total.cells, total.constant, total.inh, total.inhNoMaster, total.evaluable, total.evaluated, total.equal, total.clamped, total.gluePoint, total.glueWhole, total.glueTrigger, total.refused, total.refMissing, total.refNonNumeric, total.cellNonNum, total.evalErrors, len(total.disagreements))
+	keys := make([]string, 0, len(total.forms))
+	for k := range total.forms {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+	for _, k := range keys {
+		t.Logf("form %q: %d", k, total.forms[k])
+	}
+	if !corpustest.Sharded() {
+		if visioFiles == 0 {
+			t.Error("corpus holds no Visio-authored drawings")
+		}
+		if total.shapes == 0 {
+			t.Error("corpus holds no 1-D shapes")
+		}
+		if total.evaluated != total.evaluable || total.equal != total.evaluated {
+			t.Errorf("evaluated %d, equal %d, evaluable %d; want equal evaluated pairs", total.evaluated, total.equal, total.evaluable)
+		}
+		// The table counts, summed over page and master cells:
+		// each shape stores X and Y cells with the same formula,
+		// so a per-shape table count is doubled in cells.
+		wantForms := map[string]int{
+			"Width GUARD(EndX-BeginX)":                               66,
+			"Width SQRT((EndX-BeginX)^2+(EndY-BeginY)^2)":            16,
+			"Width GUARD(nDL)":                                       11,
+			"Height GUARD(EndY-BeginY)":                              48,
+			"Height GUARD(nDL)":                                      27,
+			"PinX (BeginX+EndX)/2":                                   16,
+			"PinY (BeginY+EndY)/2":                                   16,
+			"PinX GUARD((BeginX+EndX)/2)":                            21,
+			"PinY GUARD((BeginY+EndY)/2)":                            21,
+			"LocPinX Width*0.5":                                      16,
+			"LocPinX GUARD(Width*0.5)":                               21,
+			"Angle ATAN2(EndY-BeginY,EndX-BeginX)":                   16,
+			"Angle GUARD(0DA)":                                       21,
+			"BeginX _WALKGLUE(BegTrigger,EndTrigger,WalkPreference)": 9,
+			"EndX _WALKGLUE(EndTrigger,BegTrigger,WalkPreference)":   17,
+			"BegTrigger _XFTRIGGER(Sheet.N!EventXFMod)":              50,
+			"BegTrigger _XFTRIGGER(EventXFMod)":                      7,
+			"EndTrigger _XFTRIGGER(Sheet.N!EventXFMod)":              50,
+			"EndTrigger _XFTRIGGER(EventXFMod)":                      7,
+			"PinX Inh":                                               57,
+			"PinY Inh":                                               57,
+			"LocPinX Inh":                                            56,
+		}
+		for k, want := range wantForms {
+			if got := total.forms[k]; got != want {
+				t.Errorf("form %q: %d, want %d (CC1 table)", k, got, want)
+			}
+		}
+		if total.gluePoint != 168 || total.glueWhole != 52 || total.glueTrigger != 114 {
+			t.Errorf("glue point %d, whole %d, trigger %d; want 168, 52, 114", total.gluePoint, total.glueWhole, total.glueTrigger)
+		}
+		if total.refused != 1 {
+			t.Errorf("refused %d, want 1 (the SETATREF Height)", total.refused)
+		}
+	}
+}
+
+// TestOneDCorpusScaling checks the scaling row for the 1-D sweep:
+// sweeping N and 4N copies of one 1-D sheet (N = laws.Small,
+// 4N = laws.Large) allocates at most 5.5 times as much
+// (laws.Scales) and the laws.TimeScales time ratio is at most 8.
+func TestOneDCorpusScaling(t *testing.T) {
+	setup := func(n int) (func() error, error) {
+		mk := func(name, v, f string) corpusCell {
+			cell := sheet.Cell{N: name, V: v, HasV: true}
+			if f != "" {
+				cell.F, cell.HasF = f, true
+			}
+			return corpusCell{
+				key:  sheet.Key{Section: "Transform", SectionIX: 0, RowIX: -1, Cell: name},
+				cell: cell,
+				ref:  name,
+			}
+		}
+		sh := corpusSheet{
+			addr: "page0/s1",
+			part: "/visio/pages/page1.xml",
+			cells: []corpusCell{
+				mk("BeginX", "1", ""),
+				mk("BeginY", "1", ""),
+				mk("EndX", "3", ""),
+				mk("EndY", "1", ""),
+				mk("Width", "2", "GUARD(EndX-BeginX)"),
+				mk("Height", "0", "GUARD(EndY-BeginY)"),
+				mk("PinX", "2", "(BeginX+EndX)/2"),
+			},
+		}
+		copies := make([]corpusSheet, n)
+		for i := range copies {
+			copies[i] = sh
+		}
+		var want oneDCounts
+		for _, s := range copies {
+			sweepOneDSheet(&want, s)
+		}
+		if want.evaluated == 0 || want.equal != want.evaluated {
+			return nil, fmt.Errorf("1-D sheet: evaluated %d, equal %d, want equal evaluated pairs", want.evaluated, want.equal)
+		}
+		return func() error {
+			var got oneDCounts
+			for _, s := range copies {
+				sweepOneDSheet(&got, s)
+			}
+			if got.evaluated != want.evaluated || got.equal != want.equal {
+				return fmt.Errorf("sweep of %d copies: evaluated %d, equal %d; want %d, %d", n, got.evaluated, got.equal, want.evaluated, want.equal)
+			}
+			return nil
+		}, nil
+	}
+	laws.Scales(t, "vsdx CC1 1-D corpus sweep copies", setup)
+	laws.TimeScales(t, "vsdx CC1 1-D corpus sweep copies", setup)
 }

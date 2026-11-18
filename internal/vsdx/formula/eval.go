@@ -11,10 +11,11 @@ import (
 
 // ErrOutsideGrammar reports that a formula is outside the closed
 // grammar of decision (c) (docs/vsdx-design.md): anything other than
-// numbers with the closed unit list (IN, FT, MM, CM, M, PT, DEG, RAD
-// and none), the operators + - * /, unary minus, parentheses and
-// same-shape references. The error names the token that puts it
-// outside.
+// numbers with the closed unit list (IN, FT, MM, CM, M, PT, DEG, RAD,
+// the implicit DL, DP, DT and DA, and none), the operators + - * / and
+// ^ with a constant exponent, unary minus, parentheses, same-shape
+// references, and the functions GUARD(x), SQRT(x) and ATAN2(y,x).
+// The error names the token that puts it outside.
 var ErrOutsideGrammar = errors.New("formula outside closed grammar")
 
 // ErrUnknownCell reports that a formula in the closed grammar names
@@ -23,14 +24,16 @@ var ErrOutsideGrammar = errors.New("formula outside closed grammar")
 var ErrUnknownCell = errors.New("formula cell unknown")
 
 // maxEvalDepth is the nesting limit of the closed evaluator: 64
-// nested parentheses or unary minuses evaluate, the 65th is outside
-// the grammar. A flat chain of operators is iterative and does not
-// count towards it.
+// nested parentheses, unary minuses or function calls evaluate, the
+// 65th is outside the grammar. A flat chain of operators is
+// iterative and does not count towards it.
 const maxEvalDepth = 64
 
 // Eval evaluates f in the closed grammar of decision (c): numbers
-// with units from the closed list, + - * /, unary minus, parentheses
-// and same-shape references. A reference is looked up through cell
+// with units from the closed list, + - * /, ^ with a constant
+// exponent, unary minus, parentheses, same-shape references (including
+// the 1-D names BeginX, BeginY, EndX and EndY), and GUARD(x) (the
+// value of x), SQRT(x) and ATAN2(y,x). A reference is looked up through cell
 // with the reference as stored: the callback decides, case
 // insensitively as Visio reads names, whether it knows it. Units
 // convert to internal units with the exact factors of Constant:
@@ -47,9 +50,11 @@ func Eval(f string, cell func(ref string) (float64, bool)) (float64, error) {
 
 // Refs returns the same-shape references of f in the order they
 // occur, duplicates included, when f is in the closed grammar: the
-// references a dependency closure walks. It returns nil when f is
+// references a dependency closure walks, including those inside
+// GUARD, SQRT and ATAN2 and the base of ^. It returns nil when f is
 // outside the grammar, including when it names a Sheet.N! or
-// ThePage! reference or a function, and nil when f names none.
+// ThePage! reference, a function other than GUARD, SQRT and ATAN2,
+// or a ^ with a non-constant exponent, and nil when f names none.
 func Refs(f string) []string {
 	p := &parser{
 		toks:     Lex(f),
@@ -64,11 +69,12 @@ func Refs(f string) []string {
 }
 
 // parser is a recursive-descent parser over the tokens of one
-// formula: expr over term over factor over primary. The + - and * /
-// loops are iterative, so a flat formula of any length recurses at
-// most a fixed depth; only parentheses and unary minuses recurse,
-// and depth bounds both. It evaluates as it parses, so it holds no
-// tree and copies no token text.
+// formula: expr over term over power over factor over primary. The
+// + -, * /, and ^ loops are iterative, so a flat formula of any
+// length recurses at most a fixed depth; only parentheses, unary
+// minuses and function calls recurse, and depth bounds all three.
+// It evaluates as it parses, so it holds no tree and copies no token
+// text.
 type parser struct {
 	// toks are the tokens Lex(f) produced for the formula.
 	toks []Token
@@ -84,8 +90,11 @@ type parser struct {
 	wantRefs bool
 	// refs are the references collected, in order of occurrence.
 	refs []string
-	// depth is the current parenthesis and unary-minus nesting.
+	// depth is the current parenthesis, unary-minus and call nesting.
 	depth int
+	// refCount counts the references parsed so far, so power can tell
+	// whether an exponent named one.
+	refCount int
 }
 
 // parse parses a whole formula, refusing any token left over.
@@ -127,9 +136,9 @@ func (p *parser) expr() (float64, error) {
 	}
 }
 
-// term parses factors joined by * or /.
+// term parses powers joined by * or /.
 func (p *parser) term() (float64, error) {
-	left, err := p.factor()
+	left, err := p.power()
 	if err != nil {
 		return 0, err
 	}
@@ -139,7 +148,7 @@ func (p *parser) term() (float64, error) {
 			return left, nil
 		}
 		p.consume()
-		right, err := p.factor()
+		right, err := p.power()
 		if err != nil {
 			return 0, err
 		}
@@ -148,6 +157,41 @@ func (p *parser) term() (float64, error) {
 		} else {
 			left /= right
 		}
+		if left, err = p.finite(left); err != nil {
+			return 0, err
+		}
+	}
+}
+
+// power parses a factor raised to a constant exponent by ^: the
+// exponent is a factor that names no reference, as the corpus's
+// ^2 does. A chain a^2^3 reads as (a^2)^3. The ^ loop is iterative.
+func (p *parser) power() (float64, error) {
+	left, err := p.factor()
+	if err != nil {
+		return 0, err
+	}
+	for {
+		tok, ok := p.peek()
+		if !ok || tok.Kind != Op || tok.Text != "^" {
+			return left, nil
+		}
+		p.consume()
+		start := p.pos
+		refs := p.refCount
+		exp, err := p.factor()
+		if err != nil {
+			return 0, err
+		}
+		if p.refCount != refs {
+			for i := start; i < p.pos && i < len(p.toks); i++ {
+				if p.toks[i].Kind == Ref {
+					return 0, outsideGrammar(p.toks[i].Text)
+				}
+			}
+			return 0, outsideGrammar(tok.Text)
+		}
+		left = math.Pow(left, exp)
 		if left, err = p.finite(left); err != nil {
 			return 0, err
 		}
@@ -177,18 +221,20 @@ func (p *parser) factor() (float64, error) {
 	return p.primary()
 }
 
-// primary parses a number, a same-shape reference or a parenthesised
-// expression.
+// primary parses a number, a same-shape reference, a parenthesised
+// expression or a GUARD, SQRT or ATAN2 call.
 func (p *parser) primary() (float64, error) {
 	tok, ok := p.peek()
 	if !ok {
 		return 0, outsideGrammar("")
 	}
 	switch tok.Kind {
+	case Func:
+		return p.call(tok)
 	case Number:
 		p.consume()
 		v, unit, ok := tok.NumberValue()
-		if !ok || implicitUnit(unit) {
+		if !ok {
 			return 0, outsideGrammar(tok.Text)
 		}
 		if v, ok = convertUnit(v, unit); !ok {
@@ -200,6 +246,7 @@ func (p *parser) primary() (float64, error) {
 			return 0, outsideGrammar(tok.Text)
 		}
 		p.consume()
+		p.refCount++
 		if p.wantRefs {
 			p.refs = append(p.refs, tok.Text)
 		}
@@ -238,6 +285,79 @@ func (p *parser) primary() (float64, error) {
 	return 0, outsideGrammar(tok.Text)
 }
 
+// call parses a GUARD(x), SQRT(x) or ATAN2(y,x) call whose Func
+// token is tok: GUARD is the value of its argument, SQRT its square
+// root and ATAN2 the angle of (y,x). Any other function, a missing
+// "(", a wrong argument count or a missing "," or ")" is outside
+// the grammar naming the token that puts it there. Depth counts the
+// call as it counts parentheses.
+func (p *parser) call(tok Token) (float64, error) {
+	name := tok.Text
+	one := ascii.EqualFold(name, "GUARD") || ascii.EqualFold(name, "SQRT")
+	two := ascii.EqualFold(name, "ATAN2")
+	if !one && !two {
+		return 0, outsideGrammar(tok.Text)
+	}
+	p.consume()
+	t, ok := p.peek()
+	if !ok || t.Kind != LParen {
+		if ok {
+			return 0, outsideGrammar(t.Text)
+		}
+		return 0, outsideGrammar("")
+	}
+	p.consume()
+	p.depth++
+	if p.depth > maxEvalDepth {
+		p.depth--
+		return 0, outsideGrammar(t.Text)
+	}
+	defer func() { p.depth-- }()
+	first, err := p.expr()
+	if err != nil {
+		return 0, err
+	}
+	if one {
+		if err := p.closeParen(); err != nil {
+			return 0, err
+		}
+		if ascii.EqualFold(name, "GUARD") {
+			return first, nil
+		}
+		return p.finite(math.Sqrt(first))
+	}
+	t, ok = p.peek()
+	if !ok || t.Kind != Comma {
+		if ok {
+			return 0, outsideGrammar(t.Text)
+		}
+		return 0, outsideGrammar("")
+	}
+	p.consume()
+	second, err := p.expr()
+	if err != nil {
+		return 0, err
+	}
+	if err := p.closeParen(); err != nil {
+		return 0, err
+	}
+	return p.finite(math.Atan2(first, second))
+}
+
+// closeParen consumes the ")" that closes a call, or reports the
+// token that should have been it as outside the grammar.
+func (p *parser) closeParen() error {
+	tok, ok := p.peek()
+	if !ok || tok.Kind != RParen {
+		if ok {
+			return outsideGrammar(tok.Text)
+		}
+		return outsideGrammar("")
+	}
+	p.consume()
+	return nil
+}
+
 // finite reports a non-finite intermediate or result as an error,
 // except while validating the grammar only for Refs.
 func (p *parser) finite(v float64) (float64, error) {
@@ -268,12 +388,4 @@ func outsideGrammar(token string) error {
 		return fmt.Errorf("%w: <end>", ErrOutsideGrammar)
 	}
 	return fmt.Errorf("%w: %q", ErrOutsideGrammar, token)
-}
-
-// implicitUnit reports whether unit is one of the implicit units of
-// Constant (DL, DP, DT, DA): they are not in the closed list of the
-// evaluator, so a number carrying one is outside its grammar.
-func implicitUnit(unit string) bool {
-	return ascii.EqualFold(unit, "DL") || ascii.EqualFold(unit, "DP") ||
-		ascii.EqualFold(unit, "DT") || ascii.EqualFold(unit, "DA")
 }

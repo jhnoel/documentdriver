@@ -326,8 +326,12 @@ func charDecl(f *CharFormat, d htmlx.StyleDecl) error {
 		}
 		f.Underline, f.Strike = "off", "off"
 	case "font-size":
-		if _, ok := htmlx.Measure(d.Value, "pt", false); !ok {
+		pt, ok := htmlx.Measure(d.Value, "pt", false)
+		if !ok {
 			return fmt.Errorf("text: font-size:%s: want points, such as 12pt", d.Value)
+		}
+		if pt < 1 {
+			return fmt.Errorf("text: font-size:%s: font-size below 1pt: Visio's minimum", d.Value)
 		}
 		size := strings.TrimSuffix(d.Value, "pt")
 		if f.Size != "" && f.Size != size {

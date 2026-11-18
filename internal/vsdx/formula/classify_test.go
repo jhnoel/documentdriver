@@ -11,9 +11,13 @@ import (
 
 // TestAllowed checks the FL2 rows: "", Inh, No Formula, 2.5, 1IN,
 // 0.5DL, 25.4MM, 90DEG, THEMEVAL() and THEMEGUARD(RGB(0,0,0)) are
-// allowed; GUARD(1), Width*0.5, Sheet.10!Width*0.25,
-// PAR(PNT(Sheet.135!Connections.X1,Sheet.135!Connections.Y1)) and
-// 1FT+2IN are refused.
+// allowed; Sheet.10!Width*0.25 and
+// PAR(PNT(Sheet.135!Connections.X1,Sheet.135!Connections.Y1)) are
+// refused. It also checks the CC1 rows: each evaluable 1-D form in
+// the CC1 table, with its corpus spelling, is allowed, and the
+// still-refused forms (GUARD(TEXTWIDTH(TheText)),
+// User.DefaultWidth, Sheet.N!Width*k, IF(...) and SETATREF(...))
+// and the glue forms are refused.
 func TestAllowed(t *testing.T) {
 	rows := []struct {
 		in    string
@@ -29,11 +33,33 @@ func TestAllowed(t *testing.T) {
 		{"90DEG", true},
 		{"THEMEVAL()", true},
 		{"THEMEGUARD(RGB(0,0,0))", true},
-		{"GUARD(1)", false},
-		{"Width*0.5", false},
+		{"GUARD(1)", true},
+		{"Width*0.5", true},
+		{"Height*0.5", true},
+		{"GUARD(EndX-BeginX)", true},
+		{"GUARD(EndY-BeginY)", true},
+		{"GUARD(0.19685039370079DL)", true},
+		{"GUARD(0DA)", true},
+		{"GUARD((BeginX+EndX)/2)", true},
+		{"GUARD((BeginY+EndY)/2)", true},
+		{"GUARD(Width*0.5)", true},
+		{"GUARD(Height*0.5)", true},
+		{"SQRT((EndX-BeginX)^2+(EndY-BeginY)^2)", true},
+		{"ATAN2(EndY-BeginY,EndX-BeginX)", true},
+		{"(BeginX+EndX)/2", true},
+		{"(BeginY+EndY)/2", true},
+		{"Width^2", true},
+		{"SQRT(4)", true},
 		{"Sheet.10!Width*0.25", false},
+		{"Sheet.5!Width*0.5", false},
 		{"PAR(PNT(Sheet.135!Connections.X1,Sheet.135!Connections.Y1))", false},
-		{"1FT+2IN", false},
+		{"_WALKGLUE(BegTrigger,EndTrigger,WalkPreference)", false},
+		{"_XFTRIGGER(Sheet.41!EventXFMod)", false},
+		{"GUARD(TEXTWIDTH(TheText))", false},
+		{"User.DefaultWidth", false},
+		{"IF(Width,1,0)", false},
+		{"SETATREF(Width)", false},
+		{"1FT+2IN", true},
 		{"1XX", false},
 		{"-1IN", true},
 		{"1in", true},
@@ -107,14 +133,15 @@ func TestConstant(t *testing.T) {
 // TestAllowedScaling checks the scaling row: Allowed on a formula of
 // laws.Small (1000) and laws.Large (4000) terms allocates at most
 // 5.5 times as much (laws.Scales) and the laws.TimeScales time ratio
-// is at most 8.
+// is at most 8. The formula is still refused (Sheet.5! refs), so
+// Allowed must scan it and refuse it at every size.
 func TestAllowedScaling(t *testing.T) {
 	setup := func(n int) (func() error, error) {
 		var b strings.Builder
 		for range n {
-			b.WriteString("Width*0.5+")
+			b.WriteString("Sheet.5!Width*0.5+")
 		}
-		b.WriteString("Width")
+		b.WriteString("Sheet.5!Width")
 		formula := b.String()
 		return func() error {
 			if Allowed(formula) {
