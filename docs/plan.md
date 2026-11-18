@@ -319,6 +319,14 @@ Exit (met 2026-11-13, P4 close-out):
   decoder (the serde emulation is gone; `ops.ParsePlanJSON` reads
   docxdriver's envelope with the same decoder, for the parity tests), and
   `apply` runs once (no preview key).
+- **vsdx, in (2026-11-17):** the contract's vsdx parts, merged into
+  `docs/contract.md` from `docs/vsdx-contract-draft.md` (kept as the
+  record): `read`, `find`, `xml`, `apply`, `create`, `render`, `help`;
+  the 15 operations of §3 (`object.*`, `text.*`, `prop.*`, `page.*`);
+  `help` text compared with §3's op table and refusals (CC7's test).
+  Design: `docs/vsdx-design.md`.
+- **vsdx, not yet:** Visio confirmation of the recalculation, glue and
+  rerouting facts (VE2, VE3, VE4, VE12, VE13); the v1 deferrals of §12.
 
 ### P5. docx operations, by family
 
