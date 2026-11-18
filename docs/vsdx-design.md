@@ -4,15 +4,17 @@ The fourth CLI, `vsdx`, reads and edits Microsoft Visio drawings
 (.vsdx, .vsdm, .vstx, .vstm; stencils .vssx/.vssm read only) on the same
 engine as `pptx`, `docx` and `xlsx`. The owner's instruction: "Add a vsdx
 tool to documentdriver patterned after pptx tool." The agent surface is
-drafted in `docs/vsdx-contract-draft.md`; `docs/contract.md` is not
-changed until the owner signs the draft.
+merged into `docs/contract.md` on 2026-11-17 (the draft,
+`docs/vsdx-contract-draft.md`, is kept as the record).
 
 Format facts come from the researcher's notes (kept beside the work as
 `.worktrees/vsdx-work/vsdx-format-notes.md`, not committed; tags [C]
 confirmed in a fetched source, [K] knowledge, UNCONFIRMED). Every format
 behaviour below that the notes mark [K] or UNCONFIRMED is an experiment
-(VE1 to VE12, Verification) before code that relies on it merges, as
-xlsx did with E1 to E13.
+(VE1 to VE14, Verification). No Visio has been available: none has been
+run in Visio, the code that relies on them merged, and `docs/contract.md` labels
+each claim that rests on one "Visio unconfirmed" until its result is
+recorded here.
 
 Status: P0 skeleton and the shared promotions are on `wt/vsdx-design`
 (see "What landed with this design"). Nothing reads a file yet. The
@@ -944,7 +946,7 @@ S0's ctypes extraction runs over the Visio-authored subset
 per entry; a type seen in fewer files stays out of the table and the
 code that needs it waits (S0 reports which).
 
-### Visio experiments (VE1 to VE14, results recorded before dependent code merges)
+### Visio experiments (VE1 to VE14; not yet run, dependent claims labelled Visio unconfirmed)
 
 Fixtures under `testdata/vsdx/experiments`, written by a Go generator,
 with a README of what to look for; run by the owner if and when a Visio

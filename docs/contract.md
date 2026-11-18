@@ -17,12 +17,12 @@ page is the target; `docs/plan.md` says what is implemented.
 
 ```
 <tool> read  <file> [flags]              facts about the document; never writes
-<tool> find  <file> <query> [flags]      docx: paragraphs containing text; xlsx: cells containing text
+<tool> find  <file> <query> [flags]      docx: paragraphs; xlsx: cells; vsdx: shapes and shape data containing text
 <tool> apply <file> <plan.json|-> [--dry-run] [-o <out>] [--changed ids|full]
 <tool> create <doc.html|-> [--dry-run] -o <out>     docx: a new document from HTML
-<tool> create [<plan.json|->] [--dry-run] -o <out>  xlsx: a new workbook, optionally with a plan applied
-<tool> xml   <file> <address>            pptx: source bytes of one object
-<tool> render <file> ... -o <out.png>    pptx: picture of a slide
+<tool> create [<plan.json|->] [--dry-run] -o <out>  xlsx, vsdx: a new workbook or drawing, optionally with a plan applied
+<tool> xml   <file> <address>            pptx, vsdx: source bytes of one object
+<tool> render <file> ... -o <out.png>    pptx, vsdx: picture of a slide or page
 <tool> help [<command>|ops|<op>|html|schema|values]   same text as --help
 <tool> --version
 ```
@@ -56,9 +56,15 @@ vsdx render <file> --page pageN -o <out.png> [--overlay ids,sites,glue] [--ids i
   their masters, and `pages` is `[]`.
 - `read` has no `--format svg`: there is no Visio geometry renderer.
   `render` rasterises one page through headless LibreOffice, with
-  pptx render's flags and result (`saved`, `px`, `size`, `scale`,
-  `key`); LibreOffice draws the values the file caches, so the
-  picture is for checking, not proof.
+  pptx render's flags. Its result is `{"saved", "px", "size",
+  "scale", "hidden", "key"}`: the PNG written, its `[w, h]` in
+  pixels, the page's `[w, h]` in points, the pixels per point, whether
+  the page is hidden, and the numbered marks of `--overlay`
+  (`[{"n", "id"}]`). LibreOffice draws the values the file caches, so
+  the picture is for checking, not proof. `soffice` comes from
+  `DD_SOFFICE` or `PATH` (with a PDF rasteriser: `pdftoppm`, `mutool`
+  or `gs`); without them `render` is `operation_failed` and nothing is
+  written, as xlsx `--recalc` is.
 - `--page` and `--master` take an address as `read` lists it; any
   other value is `usage` at the flag, exit 2; a page address the
   drawing lacks is `not_found` at the flag.
@@ -265,14 +271,14 @@ no op writes them.
 
 | Op | Fields |
 | --- | --- |
-| `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector; `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector, point glue only (whole-shape glue needs the Dynamic connector master). No `rot`, `flip_h`, `flip_v` (set them with object.set) |
-| `object.set` (vsdx) | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `name`, `fill` (`"none"` or `{"hex":"#RRGGBB"}`), `line` (`"none"` or `{w, color, dash}`; `dash` the LinePattern number, as a number or the string `read` shows), and for a connector `from`, `to`, `from_glue`, `to_glue`. No `html` (use text.set) |
+| `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector; `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector, point glue only (whole-shape glue needs the Dynamic connector master). No `rot`, `flip_h`, `flip_v` (set them with object.set). `pin` is input only (`read` shows `box`): with `pin` and no `box`, a `geom` shape is 72 x 72 pt, and a master instance takes the master's size: it stores only its pin and inherits the rest, which Visio accepting is **Visio unconfirmed (VE1)**. `master` by name matches `name` or `name_u` as `read` shows them; an address (`master2`) is taken as an address first, and when several masters share a name the first in stored order is used |
+| `object.set` (vsdx) | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `name`, `fill` (`"none"` or `{"hex":"#RRGGBB"}`), `line` (`"none"` or `{w, color, dash}`; `color` is `{"hex":"#RRGGBB"}` as `read` shows it, or the bare string `"#RRGGBB"`; `dash` the LinePattern number, as a number or the string `read` shows), and for a connector `from`, `to`, `from_glue`, `to_glue`. No `html` (use text.set) |
 | `object.move` (vsdx) | `at`, `dx`, `dy` (each defaults to 0) |
-| `object.delete` (vsdx) | `at` |
+| `object.delete` (vsdx) | `at`. Connectors glued to the deleted shape lose that glue (their Connect rows and glue formulas are removed) and keep their end where it was; they appear in `changed` |
 | `object.reorder` (vsdx) | `at`, `to` (`front`, `back`, or an object of the same parent with `position`) |
 | `text.set` (vsdx) | `at` (a shape), `html`, `delete` (field addresses, §7) |
 | `text.replace` (vsdx) | `at` (a shape or a page), `select`, `with`, `occurrence` or `all` |
-| `prop.add` | `at` (a shape), `name` (the row name: ASCII letters, digits and `_`, not starting with a digit; anything else is `invalid_operation` at `name` before the document opens; rows a file already has with other names are read, set and deleted by their address), `type` (`string`, `number`, `boolean`, `date`, `duration`, `currency`, `fixed_list`, `variable_list`), `label`, `value`, `format` |
+| `prop.add` | `at` (a shape), `name` (the row name: ASCII letters, digits and `_`, not starting with a digit; anything else is `invalid_operation` at `name` before the document opens; rows a file already has with other names are read, set and deleted by their address), `type` (`string`, `number`, `boolean`, `date`, `duration`, `currency`, `fixed_list`, `variable_list`), `label`, `value`, `format`. The stored type codes and value forms for `boolean`, `date`, `duration` and `currency` are **Visio unconfirmed (VE9)** |
 | `prop.set` | `at` (`page0/s5/prop:Cost`), `value` |
 | `prop.delete` | `at` (a row) |
 | `page.add` | `name`, `as`, `size`, `orientation`, and `at` (another page) with `position` (`before`, `after`): the two go together; neither appends. A new page is 8.5 x 11 in portrait unless `size` or `orientation` says otherwise |
@@ -309,6 +315,22 @@ no op writes them.
 - **object.move** moves a 2-D object, or a connector's free ends; a
   glued end keeps its glue and position. A connector glued at both
   ends is refused (set one end's glue to `none` first).
+- **Moving a glue target** (object.move or box on a shape a connector
+  is glued to) leaves the glued ends where they are: the result
+  reports `stale-connector` and `stale-values`, and Visio moves the
+  ends when it recalculates. Glue given without `from`/`to` places the
+  end on the site. Glue equal to what `read` shows writes nothing when
+  the end already stores Visio's glue formulas; an end glued only by a
+  Connect row gets the formulas written and is placed on the site. To
+  put a stale end back on its site, send `to` (or `from`) with the
+  glue, or set the glue to `none` and then to the site again.
+  vsdx does not move point-glued ends itself (§12).
+- **Groups.** box or object.move on a group carries its children: a
+  resize changes only the group's frame, and the children keep their
+  stored local positions and sizes, which are measured from the
+  group's lower-left corner, so their shown `y` changes. `changed`
+  lists the group and then every descendant whose shown values
+  changed.
 - **Formulas.** A write to a cell whose formula vsdx does not
   evaluate is refused, `operation_failed`, `path` the field written
   (`ops[n].at` for object.move), `detail` each refused cell as
@@ -320,7 +342,9 @@ no op writes them.
   values, shape data, page values and text formats alike, whether the
   shown value is stored on the object or inherited (master, then style
   sheets): `read`'s output sent back is a no-op. A different value is
-  stored on the object, and its origin becomes `local`. A text format
+  stored on the object, and its origin becomes `local`; that a local
+  value with no formula overrides a formula the object inherits is
+  **Visio unconfirmed (VE8)**. A text format
   equal to the inherited one is never stored, and a stored one equal to
   it is removed when the text is set (decision f of
   `docs/vsdx-design.md`). Pinning an inherited value locally (storing it
@@ -341,7 +365,15 @@ no op writes them.
   (never in a style sheet). Stored positions do not change, so every
   shown `y` moves by the change in height; `changed` lists the page
   and its top-level objects; an object now wholly off the page is an
-  `off-page` hazard.
+  `off-page` hazard. That Visio keeps the stored positions when the
+  orientation flips is **Visio unconfirmed (VE10)**. In page.add and
+  page.set, a `size` that contradicts `orientation` is
+  `invalid_operation` at `orientation`; a square size takes no
+  `orientation`.
+- **text.replace at a page** skips containers, lists and callouts (use
+  `find` to see their matches); when its only matches are in skipped
+  shapes it is `not_found` at `select`. A match that crosses a
+  paragraph or line break, or touches a field, is refused.
 - **Refused** (`operation_failed`, `path` the op or field, unless
   given): a formula-bound cell (above); a container, list or callout
   (`User.msvStructureType` `Container`, `List`, `Callout`) for every
@@ -361,7 +393,12 @@ no op writes them.
   whole-shape glue on a master-less connector; deleting a
   sub-shape a master instance inherits (a shape with `MasterShape`
   inside an instance), `ops[n].at`; `page.set` when PageWidth
-  or PageHeight is bound to a formula.
+  or PageHeight is bound to a formula; box, rot or flips on a
+  connector; box or pin on a 1-D master, and from, to or glue on a
+  2-D master (object.add); reorder relative to itself; line on a
+  picture; a text.replace match that crosses a paragraph or line
+  break or touches a field. The `refuses:` list of `help <op>` is
+  the closed list for that op.
 
 `text.insert` is new (an insertion point, §6); it needs its own laws and
 a Word check before it ships. The other docx ops are docxdriver 0.5.2's
@@ -580,7 +617,10 @@ Hazard kinds:
   `#REF!`; `id` is the cell or name), and the findings of the integrity
   check on the parts the plan touched, which are pre-existing (`new`
   false), as in docx.
-- **vsdx**: `stale-connector` and `dangling-glue` as pptx; `off-page`
+- **vsdx**: `stale-connector` and `dangling-glue` as pptx (vsdx
+  never writes glue to a missing shape, and object.delete removes the
+  glue to the deleted shape, so `dangling-glue` is only ever
+  pre-existing); `off-page`
   (an object whose box lies wholly outside its page); `stale-values`
   (`id` `"document"`: the save left cached values that formulas would
   compute differently and asked Visio to recalculate on open, §9;
@@ -722,7 +762,7 @@ An address is a string that names one thing in one document.
 | page | `page0` (the page's stored ID); `page0~2` for the second page sharing it | vsdx | yes |
 | master | `master2` (stored ID), read only | vsdx | yes |
 | object | `page0/s5`, `master2/s5`; `page0/s5~2` for the second shape sharing id 5. Group children are addressed by their own id; `parent` names the group | vsdx | yes (`~n` is positional) |
-| connection site | `s12:3` (point 3 of object 12 on the connector's page), `s12` (the whole shape); `none` | vsdx | yes |
+| connection site | `s12:3` (point 3 of object 12 on the connector's page), `s12` (the whole shape); `none`. `read` also shows, read only, glue to another cell as `s12@Geometry1.X2` and glue to a shape the page lacks as `#12` | vsdx | yes |
 | shape data row | `page0/s5/prop:Cost` (the row name) | vsdx | yes |
 | layer | `page0/layer:Connector`, read only | vsdx | until renamed |
 | field | `page0/s5/field:1` (1-based in the shape's text): a placeholder (§7) | vsdx | positional |
@@ -845,7 +885,8 @@ Input policy, both tools: **HTML5 syntax, strict meaning.**
 
 **vsdx** text uses the pptx text grammar's subset that Visio stores
 (`help html`): `<p>`, `<ul><li>` (`data-char`), `<b> <i> <u> <s>`,
-`<br/>`; `<span style>` with `font-weight`, `font-style`,
+`<br/>` (stored as U+2028, Visio's line break in a paragraph:
+**Visio unconfirmed, VE7**); `<span style>` with `font-weight`, `font-style`,
 `text-decoration` (with the `normal` and `none` forms), `font-size`
 (at least 1pt, Visio's minimum; less is refused),
 `color`, `font-family`, and `data-color` beside `color` in pptx's
@@ -993,8 +1034,11 @@ form in `read` output and in plans (`help values`).
   page's top-left corner, y down. A master is shown in the frame of
   its own page sheet; one with no stored PageHeight shows no `box`,
   `from` or `to`, with a note. The page also has `layers` (read
-  only), `connections` (`{connector, from, to, from_glue, to_glue}`),
-  `hazards` and `notes`.
+  only, `{id, name, index, visible, print}` and `lock` when set),
+  `connections` (`{connector, from, to, from_glue, to_glue}`),
+  `hazards` and `notes`. In the summary, `background` is true on a
+  page that is a background page, and `background_page` is the page
+  this page uses as its background.
 - Object keys are pptx's where pptx has them (`id`, `kind`, `type`,
   `name`, `parent`, `hidden`, `box`, `rot`, `flip_h`, `flip_v`,
   `from`, `to`, `from_glue`, `to_glue`, `fill`, `line`, `html`,
@@ -1005,7 +1049,9 @@ form in `read` output and in plans (`help values`).
   (the shape's own stored cells, `{"n","v","u","f"}`). Kinds: `shape`,
   `connector` (any 1-D shape), `group`, `picture`, `other`. `line`
   is `{w, color, dash}` with `dash` the LinePattern as stored, a
-  string. A `props` entry is `{id, label, type, value}` with
+  string. A connector shows the `fill` it stores or inherits, as
+  Visio stores it on 1-D shapes; Visio draws no fill on an open
+  path. A `props` entry is `{id, label, type, value}` with
   `format`, `unit` (a number's length unit, value in inches),
   `hidden` and `linked` when they apply; a date that is not stored in
   date form shows no `value`, with an omission.
@@ -1066,8 +1112,12 @@ are the precise rules.
 
 - The output gives Office no new repair prompt: a file Office opened
   cleanly still opens cleanly. (A file that already needed repair is not
-  made worse, and is not repaired.)
-- Content no op targeted is unchanged, byte for byte. There are two
+  made worse, and is not repaired.) **vsdx**: that Visio opens any vsdx
+  output, including a created drawing, without a repair prompt is
+  **Visio unconfirmed** until visio-smoke results are recorded in
+  `docs/vsdx-design.md`. Verified: the structural integrity gate, vsdx
+  read-back, and LibreOffice import.
+- Content no op targeted is unchanged, byte for byte. There are three
   exceptions:
   - a docx save writes the `w14:paraId` of every paragraph that lacked
     one (§6), so that addresses stay stable;
@@ -1154,7 +1204,11 @@ Real files have defects the tool did not make. The rule:
 - **vsdx** in v1 (deferred, not refused by name unless listed in §3):
   writing hyperlinks, comments (not read either), layers, assigning a
   page's background page, group create/ungroup, object.duplicate,
-  master import and editing masters; `read --format svg`.
+  master import and editing masters; `read --format svg`; formula
+  and ShapeSheet cell writes (there is no `cell.set`); arrowheads and
+  line ends (`line.begin`, `line.end`); theme resolution for fill and
+  line (a themed value is omitted, §8); pinning an inherited value
+  locally; moving point-glued ends when their target moves.
 
 ## 13. Implementation notes (not for agents)
 

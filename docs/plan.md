@@ -325,8 +325,11 @@ Exit (met 2026-11-13, P4 close-out):
   the 15 operations of §3 (`object.*`, `text.*`, `prop.*`, `page.*`);
   `help` text compared with §3's op table and refusals (CC7's test).
   Design: `docs/vsdx-design.md`.
-- **vsdx, not yet:** Visio confirmation of the recalculation, glue and
-  rerouting facts (VE2, VE3, VE4, VE12, VE13); the v1 deferrals of §12.
+- **vsdx, not yet:** a Visio check that every vsdx output, including a
+  created drawing, opens without a repair prompt (visio-smoke); the
+  Visio experiments VE1 to VE14 (`docs/vsdx-design.md`, none run in Visio:
+  the contract labels each claim that rests on one "Visio
+  unconfirmed"); the v1 deferrals of §12.
 
 ### P5. docx operations, by family
 

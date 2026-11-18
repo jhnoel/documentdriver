@@ -3,7 +3,7 @@
 documentdriver is one Go module, standard library only, that ships four CLIs
 on one OOXML engine: `pptx` (moved in from pptxdriver), `docx` (a port of
 docxdriver 0.5.2; see `docs/plan.md`), `xlsx` and `vsdx` (Visio; design in
-`docs/vsdx-design.md`, agent surface drafted in `docs/vsdx-contract-draft.md`). Agents run these
+`docs/vsdx-design.md`, agent surface in `docs/contract.md`; the merged draft is kept as the record in `docs/vsdx-contract-draft.md`). Agents run these
 binaries on documents they did not write, so every input is untrusted.
 
 Read before changing anything:
