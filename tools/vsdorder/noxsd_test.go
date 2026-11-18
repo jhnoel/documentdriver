@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"errors"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -19,6 +21,12 @@ func TestNoSchemaTextInTrackedFiles(t *testing.T) {
 	root, err := repo.Root()
 	if err != nil {
 		t.Fatal(err)
+	}
+	// An export (git archive) has no .git at the root and nothing is
+	// tracked; a checkout or worktree has one (a directory, or a file
+	// in a worktree), and there a git error fails.
+	if _, err := os.Stat(filepath.Join(root, ".git")); errors.Is(err, fs.ErrNotExist) {
+		t.Skipf("no .git at %s: not a git checkout, so there are no tracked files to check", root)
 	}
 	out, err := exec.Command("git", "-C", root, "ls-files", "-z").Output()
 	if err != nil {
