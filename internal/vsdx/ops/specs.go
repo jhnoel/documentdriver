@@ -48,11 +48,11 @@ type ObjectAddSpec struct {
 	Master   string     `json:"master,omitempty" plan:"optional" doc:"A master address (master2) or the master's name as read shows it."`
 	Geom     string     `json:"geom,omitempty" plan:"optional" doc:"rect or ellipse for a master-less shape."`
 	Box      []float64  `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box; for a 2-D master or geom shape."`
-	Pin      []float64  `json:"pin,omitempty" plan:"optional" doc:"[x, y], the centre in view points, as read shows it; for a 2-D master or geom shape."`
+	Pin      []float64  `json:"pin,omitempty" plan:"optional" doc:"[x, y], the centre in view points (input only: read shows box); for a 2-D master or geom shape. Without box, a geom shape is 72 x 72 pt and a master instance takes the master's size."`
 	Name     string     `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
 	HTML     *string    `json:"html,omitempty" plan:"optional" doc:"The shape's text as HTML (help html), as read shows html."`
-	Fill     *PaintSpec `json:"fill,omitempty" plan:"optional" doc:"none or {hex: #RRGGBB}, as read shows fill."`
-	Line     *LineSpec  `json:"line,omitempty" plan:"optional" doc:"none or {w, color, dash}, as read shows line; dash is the LinePattern number as a number or string."`
+	Fill     *PaintSpec `json:"fill,omitempty" plan:"optional" doc:"\"none\" or {hex: #RRGGBB}, as read shows fill."`
+	Line     *LineSpec  `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string."`
 	From     []float64  `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector or 1-D master."`
 	To       []float64  `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector or 1-D master."`
 	FromGlue string     `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows from_glue."`
@@ -67,8 +67,8 @@ type ObjectSetSpec struct {
 	FlipH    *bool      `json:"flip_h,omitempty" plan:"optional" doc:"Flip horizontally, as read shows flip_h."`
 	FlipV    *bool      `json:"flip_v,omitempty" plan:"optional" doc:"Flip vertically, as read shows flip_v."`
 	Name     *string    `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
-	Fill     *PaintSpec `json:"fill,omitempty" plan:"optional" doc:"none or {hex: #RRGGBB}, as read shows fill."`
-	Line     *LineSpec  `json:"line,omitempty" plan:"optional" doc:"none or {w, color, dash}, as read shows line; dash is the LinePattern number as a number or string."`
+	Fill     *PaintSpec `json:"fill,omitempty" plan:"optional" doc:"\"none\" or {hex: #RRGGBB}, as read shows fill."`
+	Line     *LineSpec  `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string."`
 	From     []float64  `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector."`
 	To       []float64  `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector."`
 	FromGlue *string    `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows from_glue."`
@@ -80,6 +80,12 @@ type PaintSpec struct {
 	None bool
 	Hex  string
 }
+
+// HelpType names PaintSpec's plan type in help.
+func (PaintSpec) HelpType() string { return `object|"none"` }
+
+// HelpType names LineSpec's plan type in help.
+func (LineSpec) HelpType() string { return `object|"none"` }
 
 // LineSpec is a line: "none" or {w, color, dash}.
 type LineSpec struct {
@@ -96,7 +102,7 @@ type LineSpec struct {
 type TextSetSpec struct {
 	At     string   `json:"at" doc:"A shape address as read shows it (page0/s1), or $name."`
 	HTML   string   `json:"html" doc:"Replacement text as HTML (help html), as read shows html."`
-	Delete []string `json:"delete,omitempty" plan:"optional" doc:"Field addresses (page0/s5 field 1) or $name of shown fields the HTML does not send back."`
+	Delete []string `json:"delete,omitempty" plan:"optional" doc:"Field addresses ({field-address}) or $name of shown fields the HTML does not send back."`
 }
 
 // PropAddSpec is prop.add.
@@ -111,7 +117,7 @@ type PropAddSpec struct {
 
 // PropSetSpec is prop.set.
 type PropSetSpec struct {
-	At    string `json:"at" doc:"A shape data row address (page0/s5, row Cost) or $name."`
+	At    string `json:"at" doc:"A shape data row address ({prop-address}) or $name."`
 	Value any    `json:"value" doc:"In the form read shows for the row's type: string, number, boolean, date {date: YYYY-MM-DDThh:mm:ss}, duration text, or a list item's text."`
 }
 

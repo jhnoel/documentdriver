@@ -120,3 +120,18 @@ func TestHelpRequiredFlagsAndCreateKeys(t *testing.T) {
 		}
 	}
 }
+
+// TestHelpAddressesInPlanForm checks that op help gives example
+// addresses in the form a plan takes and leaves no doc placeholder.
+func TestHelpAddressesInPlanForm(t *testing.T) {
+	for op, want := range map[string]string{
+		"text.set":    "page0/s5/field:1",
+		"prop.set":    "page0/s5/prop:Cost",
+		"prop.delete": "page0/s5/prop:Cost",
+	} {
+		_, out, _ := runCLI(t, "help", op)
+		if !strings.Contains(out, want) || strings.Contains(out, "{prop-address}") || strings.Contains(out, "{field-address}") {
+			t.Errorf("help %s: want %q and no placeholder:\n%s", op, want, out)
+		}
+	}
+}

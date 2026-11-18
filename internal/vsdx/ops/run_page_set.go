@@ -356,7 +356,7 @@ func (s *PageSetSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 	if s.Size != nil {
 		newW, newH = sizeInches(s.Size, units)
 		if s.Orientation != "" && orientationOf(newW, newH) != s.Orientation {
-			return "", nil, nil, "", cli.Errorf(cli.CodeInvalidOperation, "orientation", "size [%v %v] is %s, not %s", s.Size[0], s.Size[1], orientationOf(newW, newH), s.Orientation)
+			return "", nil, nil, "", orientationMismatch(s.Size, orientationOf(newW, newH), s.Orientation)
 		}
 		if s.Orientation != "" {
 			desired = orientationInt(s.Orientation)
@@ -418,4 +418,14 @@ func (s *PageSetSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 		return "", nil, nil, "", err
 	}
 	return "", changed, nil, stale, nil
+}
+
+// orientationMismatch is the invalid_operation at orientation for a
+// size that contradicts the orientation asked for; a square size
+// (shape "") takes no orientation.
+func orientationMismatch(size []float64, shape, asked string) *cli.Error {
+	if shape == "" {
+		return cli.Errorf(cli.CodeInvalidOperation, "orientation", "size [%v %v] is square: a square size takes no orientation", size[0], size[1])
+	}
+	return cli.Errorf(cli.CodeInvalidOperation, "orientation", "size [%v %v] is %s, not %s", size[0], size[1], shape, asked)
 }

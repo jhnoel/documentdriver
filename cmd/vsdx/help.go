@@ -6,6 +6,18 @@ import (
 
 	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/vsdx/ops"
+	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
+)
+
+// exampleShape is the shape the field docs' example addresses name.
+var exampleShape = vsd.ShapeID(vsd.PageID(0, 0), 5, 0)
+
+// docExamples replaces the placeholders of the spec doc tags with
+// example addresses in plan form, built by vsd so that no package
+// spells the address grammar itself.
+var docExamples = strings.NewReplacer(
+	"{prop-address}", vsd.PropID(exampleShape, "Cost"),
+	"{field-address}", vsd.FieldID(exampleShape, 1),
 )
 
 // opsIntro is the text above the generated operation list.
@@ -24,6 +36,9 @@ func opDocs() []cli.OpDoc {
 		}
 		doc := cli.OpDoc{Name: d.Name, Summary: d.Summary,
 			Fields: cli.FieldDocs(reflect.TypeOf(d.New()).Elem(), nil)}
+		for j := range doc.Fields {
+			doc.Fields[j].Doc = docExamples.Replace(doc.Fields[j].Doc)
+		}
 		if info, ok := ops.HelpFor(d.Name); ok {
 			doc.Rules = append(doc.Rules, info.Rules...)
 		}

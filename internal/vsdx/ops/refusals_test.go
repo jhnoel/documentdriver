@@ -268,3 +268,22 @@ func expectRefusalCode(t *testing.T, path, plan, code, field string) {
 		t.Errorf("%s: a refused op wrote its out file", plan)
 	}
 }
+
+// TestOrientationContradictsSize checks the rows: a size that
+// contradicts orientation is invalid_operation at orientation in
+// page.add and page.set, and a square size takes no orientation.
+func TestOrientationContradictsSize(t *testing.T) {
+	path := vsdxtest.Fixture(t, "v1-minimal")
+	for _, tc := range []struct{ plan, msg string }{
+		{`{"ops":[{"op":"page.add","name":"X","size":[792,612],"orientation":"portrait"}]}`, "is landscape, not portrait"},
+		{`{"ops":[{"op":"page.add","name":"X","size":[600,600],"orientation":"portrait"}]}`, "is square: a square size takes no orientation"},
+		{`{"ops":[{"op":"page.set","at":"page0","size":[612,792],"orientation":"landscape"}]}`, "is portrait, not landscape"},
+		{`{"ops":[{"op":"page.set","at":"page0","size":[600,600],"orientation":"landscape"}]}`, "is square: a square size takes no orientation"},
+	} {
+		_, err := apply.Run(path, parsePlan(t, tc.plan), apply.Options{DryRun: true})
+		var ce *cli.Error
+		if !errors.As(err, &ce) || ce.Code != cli.CodeInvalidOperation || ce.Path != "ops[0].orientation" || !strings.Contains(ce.Message, tc.msg) {
+			t.Errorf("%s: got %v, want invalid_operation at ops[0].orientation containing %q", tc.plan, err, tc.msg)
+		}
+	}
+}

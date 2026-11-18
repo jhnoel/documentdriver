@@ -9,7 +9,7 @@ import (
 // Designer-owned (the spec, its decoding and its rules); the op's chunk
 // adds Run in run_prop_delete.go.
 type PropDeleteSpec struct {
-	At string `json:"at" doc:"A shape data row address (page0/s5, row Cost) or $name."`
+	At string `json:"at" doc:"A shape data row address ({prop-address}) or $name."`
 }
 
 // DecodePlan implements cli.PlanDecoder for prop.delete.

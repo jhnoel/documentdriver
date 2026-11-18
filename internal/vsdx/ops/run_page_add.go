@@ -116,7 +116,7 @@ func (s *PageAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 	if s.Size != nil && s.Orientation != "" {
 		wIn, hIn := sizeInches(s.Size, units)
 		if orientationOf(wIn, hIn) != s.Orientation {
-			return "", nil, nil, "", cli.Errorf(cli.CodeInvalidOperation, "orientation", "size [%v %v] is %s, not %s", s.Size[0], s.Size[1], orientationOf(wIn, hIn), s.Orientation)
+			return "", nil, nil, "", orientationMismatch(s.Size, orientationOf(wIn, hIn), s.Orientation)
 		}
 	}
 	// at and position go together (chunk CC13), as the plan rules

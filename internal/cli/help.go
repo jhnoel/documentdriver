@@ -52,8 +52,17 @@ func FieldDocs(t reflect.Type, typeName func(reflect.Type) string) []FieldDoc {
 	return out
 }
 
+// HelpTyper is a plan field type that names its own help type, for a
+// field that takes more than one JSON form ("none" or an object).
+type HelpTyper interface{ HelpType() string }
+
+var helpTyperType = reflect.TypeFor[HelpTyper]()
+
 // TypeName names a Go type as a plan reader sees it.
 func TypeName(t reflect.Type) string {
+	if t.Kind() != reflect.Pointer && t.Implements(helpTyperType) {
+		return reflect.Zero(t).Interface().(HelpTyper).HelpType()
+	}
 	if reflect.PointerTo(t).Implements(optionalType) {
 		if f, ok := t.FieldByName("V"); ok {
 			return TypeName(f.Type)
