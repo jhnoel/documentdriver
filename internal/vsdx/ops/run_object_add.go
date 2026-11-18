@@ -871,9 +871,7 @@ func (s *ObjectAddSpec) addConnector(ws *edit.Workspace, aliases map[string]stri
 
 // addWholeGlue refuses whole-shape glue on a master-less connector.
 func addWholeGlue(field, raw string) error {
-	e := cli.Errorf(cli.CodeOperationFailed, field, "%s is whole-shape glue; a master-less connector takes point glue", raw)
-	e.Hint = "glue to a connection point, such as s1:2 or $a:2 (points are numbered 1, 2, 3, 4)"
-	return e
+	return wholeGlueRefusal(raw, field)
 }
 
 // addEndView returns one connector end as a view point in points.
