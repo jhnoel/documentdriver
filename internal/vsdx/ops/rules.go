@@ -244,10 +244,18 @@ func checkObjectSet(s *ObjectSetSpec) (string, string, bool) {
 }
 
 // checkTextSet reports the first rule text.set breaks: its message
-// and its field relative to the operation, or false.
+// and its field relative to the operation, or false. Its delete
+// must list field addresses (a $name may name one, as at);
+// whether a listed field is one of the shape's is the op's
+// (not_found, with the document open).
 func checkTextSet(s *TextSetSpec) (string, string, bool) {
 	if !addressOK(s.At, vsd.KindShape) {
 		return "at must be a shape address or $name", "at", true
+	}
+	for _, del := range s.Delete {
+		if !addressOK(del, vsd.KindField) {
+			return "delete must list field addresses or $name", "delete", true
+		}
 	}
 	return "", "", false
 }

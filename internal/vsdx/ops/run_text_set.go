@@ -21,7 +21,12 @@ import (
 // HTML's body, when the body already shows the HTML (as read renders
 // it) it writes nothing, and a shape showing its master's text gains
 // a local Text with local rows only where the HTML differs from the
-// inherited ones. A field placeholder whose shape is not the target,
+// inherited ones. The HTML must account for every field of the shown
+// text (contract section 7, chunk CC11): sent back, or listed in
+// delete (a listed field is removed from the Text and its Field row
+// deleted, and is in the result's deleted; a field both sent back and
+// listed is deleted), else operation_failed at html with the addresses
+// left out in detail. A field placeholder whose shape is not the target,
 // or whose number is past the shape's fields, is not_found at html; a
 // Foreign or guide shape and a master shape are operation_failed at
 // at; a page whose part cannot be edited is unreadable_target.
@@ -44,6 +49,14 @@ func (s *TextSetSpec) Run(ws *edit.Workspace, aliases map[string]string, _ strin
 	if err := resolveTextFields(&body, st.fields, addr, resolved); err != nil {
 		return "", nil, nil, "", err
 	}
+	deleted, err := resolveTextDeletes(s.Delete, aliases, st.fields, addr, resolved)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
+	if err := checkTextFieldAccounting(&body, st, deleted, resolved); err != nil {
+		return "", nil, nil, "", err
+	}
+	stripTextDeletes(&body, deleted)
 	if text.Render(st.body, st.form, resolved) == text.Render(body, formats, resolved) {
 		return "", nil, nil, "", nil
 	}
@@ -55,7 +68,23 @@ func (s *TextSetSpec) Run(ws *edit.Workspace, aliases map[string]string, _ strin
 	if err := ws.SetText(resolved, sections, textEl); err != nil {
 		return "", nil, nil, "", err
 	}
-	return "", []string{resolved}, nil, "", nil
+	if len(deleted) > 0 && !st.masterText {
+		ixs := make([]int, len(deleted))
+		for i, n := range deleted {
+			ixs[i] = st.fields[n-1].ix
+		}
+		if err := ws.DeleteFieldRows(resolved, ixs); err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	var deletedAddrs []string
+	if len(deleted) > 0 {
+		deletedAddrs = make([]string, len(deleted))
+		for i, n := range deleted {
+			deletedAddrs[i] = vsd.FieldID(resolved, n)
+		}
+	}
+	return "", []string{resolved}, deletedAddrs, "", nil
 }
 
 // textSetAddress resolves an `at` of text.set to a shape address and
@@ -82,12 +111,15 @@ func textSetAddress(at string, aliases map[string]string) (string, vsd.Address, 
 // textShape holds what text.set reads of its target before writing:
 // the shape and its owner (itself, or its master shape when it shows
 // the master's Text) as resolver shapes, the shown body and formats,
-// and the shown fields in text order.
+// masterText whether the shown Text is the master's (its Field rows
+// live on the master shape, so text.set deletes no local row for a
+// field it drops), and the shown fields in text order.
 type textShape struct {
-	res   *inherit.Resolver
-	shape *inherit.Shape
-	body  text.Body
-	form  text.Formats
+	res        *inherit.Resolver
+	shape      *inherit.Shape
+	body       text.Body
+	form       text.Formats
+	masterText bool
 	// fields is the shown Text's fld elements in order: the IX of the
 	// n-th field and its cached text.
 	fields []textField
@@ -159,6 +191,7 @@ func loadTextShape(ws *edit.Workspace, a vsd.Address, resolved string) (*textSha
 	}
 	owner := sh
 	if origin == inherit.Master {
+		st.masterText = true
 		if master, ok := r.MasterShape(sh); ok {
 			owner = master
 		}
@@ -284,6 +317,100 @@ func resolveTextFields(body *text.Body, fields []textField, addr vsd.Address, re
 		}
 	}
 	return nil
+}
+
+// resolveTextDeletes resolves the delete list to the 1-based field
+// numbers (in text order) of the shape's shown fields it names: a raw
+// is resolved through aliases, and one that is not a field of the
+// target shape (or past its fields) is not_found at delete. Listed
+// twice counts once.
+func resolveTextDeletes(list []string, aliases map[string]string, fields []textField, addr vsd.Address, resolved string) ([]int, error) {
+	if len(list) == 0 {
+		return nil, nil
+	}
+	want := make(map[int]bool, len(list))
+	for _, raw := range list {
+		target, err := ResolveAlias(raw, aliases, "delete")
+		if err != nil {
+			return nil, err
+		}
+		ref, err := vsd.Parse(target)
+		if err != nil || ref.Kind != vsd.KindField || ref.InMaster ||
+			ref.Container != addr.Container || ref.PageDup != addr.PageDup ||
+			ref.Shape != addr.Shape || ref.Dup != addr.Dup ||
+			ref.N < 1 || ref.N > len(fields) {
+			return nil, cli.Errorf(cli.CodeNotFound, "delete", "field %s is not in %s: not found", raw, resolved)
+		}
+		want[ref.N] = true
+	}
+	out := make([]int, 0, len(want))
+	for i := range fields {
+		if want[i+1] {
+			out = append(out, i+1)
+		}
+	}
+	return out, nil
+}
+
+// checkTextFieldAccounting refuses a text.set whose body leaves a
+// shown field out without listing it in delete: every field of the
+// shown text is either sent back (its placeholder is in body) or
+// deleted, and one left out is operation_failed at html with the
+// addresses left out in detail, in text order.
+func checkTextFieldAccounting(body *text.Body, st *textShape, deleted []int, resolved string) error {
+	kept := make(map[int]bool, len(st.fields))
+	for i := range body.Paras {
+		for _, run := range body.Paras[i].Runs {
+			if run.Ref == "" {
+				continue
+			}
+			if ref, err := vsd.Parse(run.Ref); err == nil && ref.Kind == vsd.KindField {
+				kept[ref.N] = true
+			}
+		}
+	}
+	gone := make(map[int]bool, len(deleted))
+	for _, n := range deleted {
+		gone[n] = true
+	}
+	var leftOut []string
+	for i := range st.fields {
+		if n := i + 1; !kept[n] && !gone[n] {
+			leftOut = append(leftOut, vsd.FieldID(resolved, n))
+		}
+	}
+	if len(leftOut) > 0 {
+		e := cli.Errorf(cli.CodeOperationFailed, "html", "html must send back every field of %s or list it in delete", resolved)
+		e.Detail = strings.Join(leftOut, ", ")
+		return e
+	}
+	return nil
+}
+
+// stripTextDeletes removes the placeholders of the deleted fields
+// from body: a field both sent back and listed for deletion is
+// deleted, so its run does not reach the written Text.
+func stripTextDeletes(body *text.Body, deleted []int) {
+	if len(deleted) == 0 {
+		return
+	}
+	gone := make(map[int]bool, len(deleted))
+	for _, n := range deleted {
+		gone[n] = true
+	}
+	for i := range body.Paras {
+		runs := body.Paras[i].Runs
+		kept := runs[:0]
+		for _, run := range runs {
+			if run.Ref != "" {
+				if ref, err := vsd.Parse(run.Ref); err == nil && ref.Kind == vsd.KindField && gone[ref.N] {
+					continue
+				}
+			}
+			kept = append(kept, run)
+		}
+		body.Paras[i].Runs = kept
+	}
 }
 
 // textSetFormats builds the formats the HTML shows for a shape's Text:

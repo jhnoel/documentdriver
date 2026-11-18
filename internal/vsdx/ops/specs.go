@@ -55,10 +55,14 @@ type LineSpec struct {
 	Dash  string
 }
 
-// TextSetSpec is text.set.
+// TextSetSpec is text.set: replace a shape's tried text with HTML.
+// Delete lists field addresses of the shape's shown text that the
+// HTML does not send back; a listed field is removed from the Text
+// and its Field row deleted (contract section 7, chunk CC11).
 type TextSetSpec struct {
-	At   string `json:"at"`
-	HTML string `json:"html"`
+	At     string   `json:"at"`
+	HTML   string   `json:"html"`
+	Delete []string `json:"delete,omitempty" plan:"optional"`
 }
 
 // PropAddSpec is prop.add.

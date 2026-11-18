@@ -294,6 +294,7 @@ func (s *TextSetSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 	decodeFields(v, path, d, []planField{
 		{Name: "at", Required: true, Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.At) }},
 		{Name: "html", Required: true, Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.HTML) }},
+		{Name: "delete", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Delete) }},
 	})
 }
 
