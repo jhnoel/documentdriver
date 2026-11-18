@@ -626,6 +626,34 @@ func TestParseHTMLCSSRows(t *testing.T) {
 	}
 }
 
+// TestParseHTMLFontSizeMin checks the CC1 clamp rows: a font-size
+// below 1pt (0.5pt and 0pt) is refused with "font-size below 1pt:
+// Visio's minimum", while 1pt is accepted.
+func TestParseHTMLFontSizeMin(t *testing.T) {
+	for _, html := range []string{
+		`<p><span style="font-size:0.5pt">x</span></p>`,
+		`<p><span style="font-size:0pt">x</span></p>`,
+	} {
+		_, _, err := ParseHTML(html)
+		if err == nil {
+			t.Fatalf("ParseHTML(%q): no error; want font-size below 1pt", html)
+		}
+		if !strings.Contains(err.Error(), "font-size below 1pt: Visio's minimum") {
+			t.Errorf("ParseHTML(%q): %v; want it to mention %q", html, err, "font-size below 1pt: Visio's minimum")
+		}
+	}
+	got, formats, err := ParseHTML(`<p><span style="font-size:1pt">x</span></p>`)
+	if err != nil {
+		t.Fatalf("ParseHTML(font-size 1pt): %v", err)
+	}
+	if !reflect.DeepEqual(got, Body{Paras: []Para{{PP: 0, Runs: []Run{{CP: 0, Text: "x", Field: -1}}}}, Terminated: true}) {
+		t.Errorf("ParseHTML(font-size 1pt) body = %#v", got)
+	}
+	if !reflect.DeepEqual(formats, Formats{Char: map[int]CharFormat{0: {Size: "1"}}, Para: map[int]ParaFormat{0: {}}}) {
+		t.Errorf("ParseHTML(font-size 1pt) formats = %#v", formats)
+	}
+}
+
 // TestParseHTMLErrors checks that HTML outside the grammar is refused
 // with an error naming the element or attribute.
 func TestParseHTMLErrors(t *testing.T) {

@@ -56,6 +56,60 @@ func Allowed(f string) bool {
 	return false
 }
 
+// Evaluable reports whether f is a formula a write may recompute:
+// on the allow list (Allowed), or in the closed evaluator grammar of
+// Eval (numbers, + - * / and ^ with a constant exponent, unary minus,
+// parentheses, same-shape references including BeginX, BeginY, EndX
+// and EndY, and GUARD, SQRT and ATAN2) without reading a User cell
+// (User.DefaultWidth in decision (g)). A write that changes a cell
+// such a formula reads rewrites its cached value and keeps the
+// formula; a write never replaces such a formula with a value of its
+// own (Allowed is that list). A lone reference (Width, a dependent
+// copy) and a lone number Constant rejects are not evaluable.
+// Chunk CC1, split from Allowed by the gate ruling of 2026-11-17.
+func Evaluable(f string) bool {
+	if Allowed(f) {
+		return true
+	}
+	toks := Lex(f)
+	i := skipSpaces(toks, 0)
+	if i < len(toks) {
+		t := toks[i]
+		if (t.Kind == Ref || t.Kind == Number) && skipSpaces(toks, i+1) == len(toks) {
+			return false
+		}
+		if t.Kind == Op && (t.Text == "+" || t.Text == "-") {
+			j := skipSpaces(toks, i+1)
+			if j < len(toks) && toks[j].Kind == Number && skipSpaces(toks, j+1) == len(toks) {
+				return false
+			}
+		}
+	}
+	if !inGrammar(f) {
+		return false
+	}
+	for _, ref := range Refs(f) {
+		if len(ref) >= 5 && ascii.EqualFold(ref[:5], "User.") {
+			return false
+		}
+	}
+	return true
+}
+
+// inGrammar reports whether f is in the closed evaluator grammar
+// of Eval, syntactically: Eval with a dummy cell does not report
+// ErrOutsideGrammar. It is the grammar check Evaluable and the
+// corpus sweep share, so they cannot drift apart.
+func inGrammar(f string) bool {
+	p := &parser{
+		toks:    Lex(f),
+		cell:    func(string) (float64, bool) { return 0, true },
+		syntact: true,
+	}
+	_, err := p.parse()
+	return err == nil
+}
+
 // Constant returns the internal value of f when f is a constant (one
 // number with an optional unit of the closed list): inches for a
 // length, radians for an angle. ok is false for anything that is not
