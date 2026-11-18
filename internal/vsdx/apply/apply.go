@@ -5,6 +5,7 @@
 package apply
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -451,9 +452,10 @@ type pageForChanged struct {
 	Hazards []json.RawMessage `json:"hazards"`
 }
 
-// objectID reads the id of one object JSON.
+// objectID reads the id (and parent) of one object JSON.
 type objectID struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	Parent string `json:"parent"`
 }
 
 // objectProps reads the props of one object JSON.
@@ -485,11 +487,13 @@ func finishUnits(res *plan.Result, input, sealed []byte, units, base string, cha
 		}
 	}
 	outObjects := map[string]map[string]json.RawMessage{}
+	outParts, inParts := map[string]*pageParts{}, map[string]*pageParts{}
 	outProps := map[string]json.RawMessage{}
 	var outHazards, inHazards []plan.Hazard
 	for _, pageAddr := range slices.Sorted(maps.Keys(pages)) {
 		out, outErr := readPageParts(sealed, base, pageAddr, units)
 		if outErr == nil {
+			outParts[pageAddr] = out
 			outObjects[pageAddr] = out.objects
 			for id, raw := range out.props {
 				outProps[id] = raw
@@ -498,10 +502,12 @@ func finishUnits(res *plan.Result, input, sealed []byte, units, base string, cha
 		}
 		in, inErr := readPageParts(input, base, pageAddr, units)
 		if inErr == nil {
+			inParts[pageAddr] = in
 			inHazards = append(inHazards, in.hazards...)
 		}
 	}
 	res.Hazards = plan.MarkNew(inHazards, outHazards)
+	changed = withDescendants(changed, outParts, inParts)
 	for _, a := range changed {
 		addr, err := vsd.Parse(a)
 		if err != nil {
@@ -580,6 +586,10 @@ func containerOf(addr vsd.Address) string {
 // its props by id, and its hazards.
 type pageParts struct {
 	objects map[string]json.RawMessage
+	// order is the object ids in read's paint order; parent maps an
+	// object id to its group's id ("" at top level).
+	order   []string
+	parent  map[string]string
 	props   map[string]json.RawMessage
 	hazards []plan.Hazard
 }
@@ -595,13 +605,15 @@ func readPageParts(data []byte, base, address, units string) (*pageParts, error)
 	if err := json.Unmarshal(b, &page); err != nil {
 		return nil, err
 	}
-	out := &pageParts{objects: map[string]json.RawMessage{}, props: map[string]json.RawMessage{}}
+	out := &pageParts{objects: map[string]json.RawMessage{}, props: map[string]json.RawMessage{}, parent: map[string]string{}}
 	for _, raw := range page.Objects {
 		var id objectID
 		if err := json.Unmarshal(raw, &id); err != nil {
 			continue
 		}
 		out.objects[id.ID] = raw
+		out.order = append(out.order, id.ID)
+		out.parent[id.ID] = id.Parent
 		var withProps objectProps
 		if err := json.Unmarshal(raw, &withProps); err != nil {
 			continue
@@ -621,4 +633,48 @@ func readPageParts(data []byte, base, address, units string) (*pageParts, error)
 		out.hazards = append(out.hazards, plan.Hazard{Kind: h.Kind, ID: h.ID, Detail: h.Detail})
 	}
 	return out, nil
+}
+
+// withDescendants returns changed with, after each changed group, every
+// descendant of it whose read form differs between in and out (a box
+// or move of a group carries its children; docs/contract.md §3, vsdx
+// groups rule), in read's paint order, each listed once.
+func withDescendants(changed []string, out, in map[string]*pageParts) []string {
+	listed := map[string]bool{}
+	for _, a := range changed {
+		listed[a] = true
+	}
+	res := make([]string, 0, len(changed))
+	for _, a := range changed {
+		res = append(res, a)
+		addr, err := vsd.Parse(a)
+		if err != nil || addr.Kind != vsd.KindShape {
+			continue
+		}
+		o, i := out[containerOf(addr)], in[containerOf(addr)]
+		if o == nil || i == nil {
+			continue
+		}
+		for _, id := range o.order {
+			if listed[id] || !descends(o.parent, id, a) {
+				continue
+			}
+			if before, ok := i.objects[id]; ok && bytes.Equal(before, o.objects[id]) {
+				continue
+			}
+			listed[id] = true
+			res = append(res, id)
+		}
+	}
+	return res
+}
+
+// descends reports whether id is a descendant of group in parent.
+func descends(parent map[string]string, id, group string) bool {
+	for p := parent[id]; p != ""; p = parent[p] {
+		if p == group {
+			return true
+		}
+	}
+	return false
 }
