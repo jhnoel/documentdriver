@@ -343,6 +343,8 @@ func (s *ObjectAddSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 			sp.DecodePlan(mv, fp, dd)
 			s.Shadow = sp
 		}},
+		{Name: "image", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Image) }},
+		{Name: "crop", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Crop) }},
 	})
 }
 
@@ -398,6 +400,12 @@ func (s *ObjectSetSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 			sp.DecodePlan(mv, fp, dd)
 			s.Shadow = sp
 		}},
+		{Name: "image", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) {
+			var str string
+			dd.Value(mv, fp, &str)
+			s.Image = &str
+		}},
+		{Name: "crop", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Crop) }},
 	})
 }
 

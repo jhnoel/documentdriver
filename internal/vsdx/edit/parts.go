@@ -34,3 +34,25 @@ func (w *Workspace) AddRel(source, relType, target string) (string, error) {
 	}
 	return id, nil
 }
+
+// RemoveRel removes relationship id from source's relationships,
+// declaring the relationships part. A missing id is not an error.
+func (w *Workspace) RemoveRel(source, id string) error {
+	rels, err := w.pkg.Rels(source)
+	if err != nil {
+		return fmt.Errorf("vsdx edit: %w", err)
+	}
+	w.core.DeclarePart(rels.Name())
+	rels.Remove(id)
+	return nil
+}
+
+// DeletePart removes a part and its Override, declaring both.
+func (w *Workspace) DeletePart(name string) error {
+	w.core.DeclarePart(name)
+	w.core.DeclarePart(opc.ContentTypesName)
+	if err := w.pkg.DeletePart(name); err != nil {
+		return fmt.Errorf("vsdx edit: %w", err)
+	}
+	return nil
+}

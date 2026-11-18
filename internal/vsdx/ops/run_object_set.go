@@ -29,6 +29,7 @@ func (s *ObjectSetSpec) Run(ws *edit.Workspace, aliases map[string]string, units
 	for _, step := range []func() ([]string, string, error){
 		func() ([]string, string, error) { return setTransform(ws, s, aliases, units) },
 		func() ([]string, string, error) { return setStyle(ws, s, aliases, units) },
+		func() ([]string, string, error) { return setPicture(ws, s, aliases) },
 		func() ([]string, string, error) {
 			if endsIdentity(ws, s, aliases, units) {
 				return nil, "", nil

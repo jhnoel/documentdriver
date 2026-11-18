@@ -136,8 +136,14 @@ func checkObjectAdd(s *ObjectAddSpec) (string, string, bool) {
 	if s.As != "" && !cli.ValidAlias(s.As) {
 		return "as must match [A-Za-z_][A-Za-z0-9_]*", "as", true
 	}
-	if s.Kind != "" && s.Kind != "connector" {
-		return "kind must be connector", "kind", true
+	if s.Kind != "" && s.Kind != "connector" && s.Kind != "picture" {
+		return "kind must be connector or picture", "kind", true
+	}
+	if s.Kind == "picture" {
+		return checkPictureAdd(s)
+	}
+	if s.Image != "" || s.Crop != nil {
+		return "image and crop go with kind picture", "image", true
 	}
 	if s.Geom != "" && !geomOK(s.Geom) {
 		return "geom must be rect or ellipse", "geom", true
@@ -237,7 +243,7 @@ func checkObjectSet(s *ObjectSetSpec) (string, string, bool) {
 	if s.ToGlue != nil && !glueOK(*s.ToGlue, true) {
 		return "to_glue must name a shape or $name, with an optional point, or none", "to_glue", true
 	}
-	if s.Box == nil && s.Rot == nil && s.FlipH == nil && s.FlipV == nil && s.Name == nil && s.Fill == nil && s.Line == nil && s.Shadow == nil && s.From == nil && s.To == nil && s.FromGlue == nil && s.ToGlue == nil {
+	if s.Box == nil && s.Rot == nil && s.FlipH == nil && s.FlipV == nil && s.Name == nil && s.Fill == nil && s.Line == nil && s.Shadow == nil && s.Image == nil && s.Crop == nil && s.From == nil && s.To == nil && s.FromGlue == nil && s.ToGlue == nil {
 		return "object.set needs a field to set", "", true
 	}
 	return "", "", false
@@ -392,6 +398,39 @@ type checker interface {
 func needAddress(s, field, what string, kinds ...vsd.Kind) (string, string, bool) {
 	if !addressOK(s, kinds...) {
 		return field + " must be " + what + " or $name", field, true
+	}
+	return "", "", false
+}
+
+// checkPictureAdd reports the first rule an object.add of kind
+// picture breaks (docs/contract.md §3, Pictures).
+func checkPictureAdd(s *ObjectAddSpec) (string, string, bool) {
+	for _, f := range []struct {
+		set   bool
+		field string
+	}{
+		{s.Master != "", "master"}, {s.Geom != "", "geom"}, {s.Fill != nil, "fill"}, {s.Line != nil, "line"},
+		{s.HTML != nil, "html"}, {s.Shadow != nil, "shadow"}, {s.From != nil, "from"}, {s.To != nil, "to"},
+		{s.FromGlue != "", "from_glue"}, {s.ToGlue != "", "to_glue"},
+	} {
+		if f.set {
+			return "picture takes no master, geom, fill, line, html, shadow, from, to, from_glue or to_glue", f.field, true
+		}
+	}
+	if s.Image == "" {
+		return "picture needs image", "image", true
+	}
+	if s.Box == nil && s.Pin == nil {
+		return "shape needs box or pin", "box", true
+	}
+	if s.Box != nil && s.Pin != nil {
+		return "shape takes box or pin, not both", "pin", true
+	}
+	if s.Box != nil && !boxOK(s.Box) {
+		return "box must be four numbers with positive width and height", "box", true
+	}
+	if s.Pin != nil && !pointOK2(s.Pin) {
+		return "pin must be two numbers", "pin", true
 	}
 	return "", "", false
 }

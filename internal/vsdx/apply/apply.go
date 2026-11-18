@@ -44,7 +44,11 @@ func Run(path string, p *ops.Plan, opt Options) (*plan.Result, error) {
 	// The document-independent html pass: every html field is parsed
 	// against the vsdx text grammar before the drawing is read, and
 	// all faults come back together (chunk CC5).
-	if errs := ops.CheckHTML(p); len(errs) > 0 {
+	errs := ops.CheckHTML(p)
+	// Image files are read and checked with the rest of the plan,
+	// before the document opens (docs/contract.md §3, Pictures).
+	errs = append(errs, ops.CheckImages(p)...)
+	if len(errs) > 0 {
 		return nil, errs
 	}
 	input, err := os.ReadFile(path) //nolint:gosec // G304: the caller's own argument

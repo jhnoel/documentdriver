@@ -59,6 +59,9 @@ type addPage struct {
 // at through aliases, places the shape with place.Unplace, emits with
 // emit, inserts through the edit layer, then applies text and fill/line.
 func (s *ObjectAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units string, idSrc ids.Source) (string, []string, []string, string, error) {
+	if s.Kind == "picture" {
+		return s.runPicture(ws, aliases, units, idSrc)
+	}
 	addr, changed, deleted, stale, err := s.runAdd(ws, aliases, units, idSrc)
 	if err != nil {
 		return addr, changed, deleted, stale, err

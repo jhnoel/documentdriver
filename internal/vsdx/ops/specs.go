@@ -44,7 +44,7 @@ const htmlRule = "html must be in the text grammar (help html)"
 type ObjectAddSpec struct {
 	At       string      `json:"at" doc:"A page or group address as read shows it (page0 or page0/s1), or $name."`
 	As       string      `json:"as,omitempty" plan:"optional" doc:"A name for the new shape; later operations write $name for it."`
-	Kind     string      `json:"kind,omitempty" plan:"optional" doc:"connector for a master-less straight connector; absent for a shape."`
+	Kind     string      `json:"kind,omitempty" plan:"optional" doc:"connector for a master-less straight connector, picture for a picture; absent for a shape."`
 	Master   string      `json:"master,omitempty" plan:"optional" doc:"A master address (master2) or the master's name as read shows it."`
 	Geom     string      `json:"geom,omitempty" plan:"optional" doc:"rect or ellipse for a master-less shape."`
 	Box      []float64   `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box; for a 2-D master or geom shape."`
@@ -58,6 +58,9 @@ type ObjectAddSpec struct {
 	FromGlue string      `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows from_glue."`
 	ToGlue   string      `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows to_glue."`
 	Shadow   *ShadowSpec `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
+	Image    string      `json:"image,omitempty" plan:"optional" doc:"A picture's image: a local PNG or JPEG file path (absolute, or relative to the working directory), or a media part as read shows image (/visio/media/image1.png)."`
+	Crop     []float64   `json:"crop,omitempty" plan:"optional" doc:"A picture's crop [l, t, r, b] in percent of the image, as read shows crop; each 0 to under 100, l + r and t + b under 100."`
+	img      *imageInput // the checked image (CheckImages)
 }
 
 // ObjectSetSpec is object.set (the fields create and P2 share first).
@@ -75,6 +78,9 @@ type ObjectSetSpec struct {
 	FromGlue *string     `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows from_glue."`
 	ToGlue   *string     `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows to_glue."`
 	Shadow   *ShadowSpec `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
+	Image    *string     `json:"image,omitempty" plan:"optional" doc:"A picture's image: a local PNG or JPEG file path (absolute, or relative to the working directory), or a media part as read shows image (/visio/media/image1.png)."`
+	Crop     []float64   `json:"crop,omitempty" plan:"optional" doc:"A picture's crop [l, t, r, b] in percent of the image, as read shows crop; each 0 to under 100, l + r and t + b under 100."`
+	img      *imageInput // the checked image (CheckImages)
 }
 
 // PaintSpec is a fill: "none" or {"hex": "#RRGGBB"}, as read shows it.
@@ -178,7 +184,10 @@ type PageSetSpec struct {
 var objectAddRules = []string{
 	"at must be a page or shape address or $name",
 	"as must match [A-Za-z_][A-Za-z0-9_]*",
-	"kind must be connector",
+	"kind must be connector or picture",
+	"image and crop go with kind picture",
+	"picture takes no master, geom, fill, line, html, shadow, from, to, from_glue or to_glue",
+	"picture needs image",
 	"geom must be rect or ellipse",
 	"master must be a master address or a master name",
 	"object.add takes master or geom, not both",

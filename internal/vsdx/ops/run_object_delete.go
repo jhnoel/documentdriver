@@ -5,6 +5,7 @@ import (
 
 	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/ids"
+	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/edit"
 )
@@ -34,6 +35,17 @@ func (s *ObjectDeleteSpec) Run(ws *edit.Workspace, aliases map[string]string, _ 
 	if err := inheritedSubShapeRefusal(ws, shapeAddr, "at"); err != nil {
 		return "", nil, nil, "", err
 	}
+	// The pictures in the deleted subtree release their media after
+	// the delete (docs/contract.md §3, Pictures).
+	var relIDs []string
+	var pagePart string
+	var pageRoot *tree.Node
+	if _, node, a, ok := targetNode(ws, shapeAddr); ok {
+		relIDs = pictureRelIDs(node)
+		if pn, err := picturePage(ws, a); err == nil {
+			pagePart, pageRoot = pn.part, pn.root
+		}
+	}
 	deleted, changed, err := ws.DeleteShape(shapeAddr)
 	if err != nil {
 		if errors.Is(err, edit.ErrNotFound) {
@@ -44,6 +56,11 @@ func (s *ObjectDeleteSpec) Run(ws *edit.Workspace, aliases map[string]string, _ 
 			return "", nil, nil, "", err
 		}
 		return "", nil, nil, "", cli.Errorf(cli.CodeInternal, "", "%v", err)
+	}
+	if pagePart != "" {
+		if _, err := releaseMedia(ws, pagePart, pageRoot, relIDs); err != nil {
+			return "", nil, nil, "", err
+		}
 	}
 	return "", changed, deleted, "", nil
 }
