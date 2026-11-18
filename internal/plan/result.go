@@ -7,7 +7,7 @@ import (
 
 // Hazard is a place where the document, after a plan, contradicts
 // itself, as the format's read model reports it. Kinds are the format's
-// (pptx: stale-connector, dangling-glue, group-frame). New is set when
+// (pptx: stale-connector, dangling-glue, group-frame, inset-overflow). New is set when
 // the input did not have it (same kind and id).
 type Hazard struct {
 	Kind   string `json:"kind"`

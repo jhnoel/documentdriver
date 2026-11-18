@@ -208,6 +208,16 @@ Verbs, same meaning everywhere:
 `object.duplicate`, `object.reorder`, `text.set`, `text.replace`,
 `group.create`, `group.ungroup`, `group.fit`.
 
+pptx text body insets (`text.insets` on `object.set` and `object.add`,
+and in `read --detail full`) are in the plan's units and in the order
+**[left, top, right, bottom] — not CSS order** (DrawingML `lIns`,
+`tIns`, `rIns`, `bIns`). `read` always shows the array. A plan gives
+either that array (all four) or the named form
+`{"left", "top", "right", "bottom"}` with any non-empty subset; sides
+left out keep the values shown, so `{"bottom": 4}` changes only the
+bottom inset. Any other key, an empty object or another JSON kind is
+`invalid_plan`. Writing back the array `read` shows is a no-op.
+
 **docx**:
 
 | Noun | Operations |
@@ -798,7 +808,16 @@ Hazard kinds:
 
 - **pptx**: `stale-connector` (an end is glued but not on its site),
   `dangling-glue` (glue to a missing object), `group-frame` (a child
-  outside its group's frame).
+  outside its group's frame), `inset-overflow` (a shape the plan
+  changed whose text insets leave no room for text: left + right ≥ the
+  box width or top + bottom ≥ the box height, box in slide space;
+  `detail` names the sides and sizes in pt and repeats that insets are
+  [left, top, right, bottom], not CSS order; `new` is false when the
+  shape had it before the plan). `inset-overflow` is checked only on
+  shapes the plan changes, so `read` never reports it, and a shape whose
+  box or any inset is not derived is not checked. The plan is applied:
+  insets that fill the box are valid DrawingML, and the tool reports,
+  it does not refuse.
 - **docx**: the findings of the integrity check, which is the same
   check that guards a save (§10); there is no second detector. `kind` is
   the finding's class (`help hazards` lists them), `id` the part or the

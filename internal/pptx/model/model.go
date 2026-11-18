@@ -66,7 +66,7 @@ type Slide struct {
 
 // Hazard is a place where the file contradicts itself.
 type Hazard struct {
-	Kind   string // stale-connector, dangling-glue, group-frame
+	Kind   string // stale-connector, dangling-glue, group-frame (inset-overflow is apply's)
 	ID     string // the object it concerns
 	Detail string
 }
