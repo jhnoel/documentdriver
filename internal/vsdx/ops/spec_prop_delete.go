@@ -9,7 +9,7 @@ import (
 // Designer-owned (the spec, its decoding and its rules); the op's chunk
 // adds Run in run_prop_delete.go.
 type PropDeleteSpec struct {
-	At string `json:"at"`
+	At string `json:"at" doc:"A shape data row address (page0/s5, row Cost) or $name."`
 }
 
 // DecodePlan implements cli.PlanDecoder for prop.delete.
@@ -23,4 +23,23 @@ func (s *PropDeleteSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 // relative to the operation, or false.
 func (s *PropDeleteSpec) check() (string, string, bool) {
 	return needAddress(s.At, "at", "a shape data row address", vsd.KindProp)
+}
+
+// propDeleteRules are prop.delete's document-independent checks, in
+// the order its check returns them. Chunk CC7.
+var propDeleteRules = []string{
+	"at must be a shape data row address or $name",
+}
+
+// propDeleteRefuses are prop.delete's document-dependent refusals,
+// one per line. Chunk CC7.
+var propDeleteRefuses = []string{
+	"containers/lists/callouts: a container, list or callout (User.msvStructureType) is not edited in v1",
+	"masters and stencils: at must name a page shape data row, not a master shape",
+	"a data-linked shape data row",
+}
+
+// init registers the help data of prop.delete (chunk CC7).
+func init() {
+	registerHelp("prop.delete", propDeleteRules, propDeleteRefuses)
 }

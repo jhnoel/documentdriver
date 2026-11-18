@@ -9,9 +9,9 @@ import (
 // Designer-owned (the spec, its decoding and its rules); the op's chunk
 // adds Run in run_page_reorder.go.
 type PageReorderSpec struct {
-	At       string `json:"at"`
-	To       string `json:"to"`
-	Position string `json:"position" enum:"before,after"`
+	At       string `json:"at" doc:"A page address as read shows it (page0), or $name."`
+	To       string `json:"to" doc:"Another page address as read shows it (page1), or $name."`
+	Position string `json:"position" enum:"before,after" doc:"Before or after to."`
 }
 
 // DecodePlan implements cli.PlanDecoder for page.reorder.
@@ -35,4 +35,22 @@ func (s *PageReorderSpec) check() (string, string, bool) {
 		return "to must be a page address or $name", "to", true
 	}
 	return "", "", false
+}
+
+// pageReorderRules are page.reorder's document-independent checks,
+// in the order its check returns them. Chunk CC7.
+var pageReorderRules = []string{
+	"at must be a page address or $name",
+	"to must be a page address or $name",
+}
+
+// pageReorderRefuses are page.reorder's document-dependent refusals,
+// one per line. Chunk CC7.
+var pageReorderRefuses = []string{
+	"masters and stencils: at or to names a master, not a page",
+}
+
+// init registers the help data of page.reorder (chunk CC7).
+func init() {
+	registerHelp("page.reorder", pageReorderRules, pageReorderRefuses)
 }

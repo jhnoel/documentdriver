@@ -9,7 +9,7 @@ import (
 // Designer-owned (the spec, its decoding and its rules); the op's chunk
 // adds Run in run_object_delete.go.
 type ObjectDeleteSpec struct {
-	At string `json:"at"`
+	At string `json:"at" doc:"A shape address as read shows it (page0/s1), or $name."`
 }
 
 // DecodePlan implements cli.PlanDecoder for object.delete.
@@ -23,4 +23,24 @@ func (s *ObjectDeleteSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder)
 // relative to the operation, or false.
 func (s *ObjectDeleteSpec) check() (string, string, bool) {
 	return needAddress(s.At, "at", "a shape address", vsd.KindShape)
+}
+
+// objectDeleteRules are object.delete's document-independent checks,
+// in the order its check returns them. Chunk CC7.
+var objectDeleteRules = []string{
+	"at must be a shape address or $name",
+}
+
+// objectDeleteRefuses are object.delete's document-dependent
+// refusals, one per line. Chunk CC7.
+var objectDeleteRefuses = []string{
+	"containers/lists/callouts: a container, list or callout (User.msvStructureType) is not edited in v1",
+	"a member of a container or list (Relationships DEPENDSON): its geometry and membership are not edited in v1",
+	"masters and stencils: a master shape or a shape in a stencil cannot be edited",
+	"a sub-shape a master instance inherits",
+}
+
+// init registers the help data of object.delete (chunk CC7).
+func init() {
+	registerHelp("object.delete", objectDeleteRules, objectDeleteRefuses)
 }

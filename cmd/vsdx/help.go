@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/vsdx/ops"
@@ -21,8 +22,12 @@ func opDocs() []cli.OpDoc {
 		if !d.Implemented() {
 			continue
 		}
-		out = append(out, cli.OpDoc{Name: d.Name, Summary: d.Summary,
-			Fields: cli.FieldDocs(reflect.TypeOf(d.New()).Elem(), nil)})
+		doc := cli.OpDoc{Name: d.Name, Summary: d.Summary,
+			Fields: cli.FieldDocs(reflect.TypeOf(d.New()).Elem(), nil)}
+		if info, ok := ops.HelpFor(d.Name); ok {
+			doc.Rules = append(doc.Rules, info.Rules...)
+		}
+		out = append(out, doc)
 	}
 	return out
 }
@@ -30,5 +35,23 @@ func opDocs() []cli.OpDoc {
 // opsHelp is `vsdx help ops`.
 func opsHelp() string { return cli.OpsHelp("vsdx", opsIntro, opDocs()) }
 
-// opHelp is `vsdx help <op>`.
-func opHelp(name string) (string, bool) { return cli.FindOpHelp(opDocs(), name) }
+// opHelp is `vsdx help <op>`: the summary, fields with their notes,
+// rules and refuses, as xlsx prints them. The refuses (the
+// document-dependent refusals of the op, one per line) are appended
+// after cli.OpHelp, which prints summary, fields and rules.
+func opHelp(name string) (string, bool) {
+	text, ok := cli.FindOpHelp(opDocs(), name)
+	if !ok {
+		return "", false
+	}
+	if info, ok := ops.HelpFor(name); ok && len(info.Refuses) > 0 {
+		var b strings.Builder
+		b.WriteString(text)
+		b.WriteString("\nrefuses:\n")
+		for _, r := range info.Refuses {
+			b.WriteString("  " + r + "\n")
+		}
+		text = b.String()
+	}
+	return text, true
+}
