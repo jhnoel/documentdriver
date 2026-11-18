@@ -226,7 +226,7 @@ Measure before and after; do not optimise by intuition.
   and its wall time grows linearly too (ratio at most 8): bytes and
   allocations are deterministic, so they are enforced in every run,
   while time ratios give their verdict only in `make scaling`
-  (`LAWS_TIME_VERDICT=1`, packages one at a time), because package-level
+  (`LAWS_TIME_VERDICT=1`, `-p 1`: packages one at a time), because package-level
   parallel load moves time ratios on linear work past the bound, and
   are only logged in `make check`. Peak live heap
   and allocation stay within the docx budgets (`TestMemoryBudget`)

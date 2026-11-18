@@ -1,14 +1,13 @@
 # vsdx contract amendments (draft for sign-off)
 
-Status: **draft, revision 2 (2026-11-17), after Fable's review for the
-owner: APPROVE-WITH-AMENDMENTS; Fable's rulings on the designer's eight
-questions folded in the same day.** Not merged into `docs/contract.md`,
-which stays the agent surface. Every promise below either holds in the
-binary at 9a57372 or is marked with the chunk that delivers it
-("(CC2)"); the chunks, their rows and the coverage matrix that maps
-every op and refusal to a test are in the chunk plan (`chunks.md`,
-"Contract-review chunks"). The merge happens after every marked chunk
-has merged and `make ci` passes; its plan is the last section.
+Status: **merged on 2026-11-17** into `docs/contract.md` (one commit on
+wt/vsdx-int), which is the agent surface; this file is kept as the
+record. Revision 2 (2026-11-17) followed Fable's review for the owner
+(APPROVE-WITH-AMENDMENTS) and folded in Fable's rulings on the
+designer's eight questions. The "(CCn)" marks below name the chunk
+that delivered each promise (`chunks.md`, "Contract-review chunks");
+every marked chunk merged and `make ci` passed before the merge, and
+the merged text carries no marks.
 
 The amendments are additive: the contract version stays `1` (§11
 allows a new tool's ops, fields, output keys, flags and hazard kinds).
