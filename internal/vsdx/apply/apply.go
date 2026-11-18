@@ -40,6 +40,12 @@ func Run(path string, p *ops.Plan, opt Options) (*plan.Result, error) {
 	if p == nil {
 		return nil, cli.Errorf(cli.CodeInvalidPlan, "", "the plan did not decode")
 	}
+	// The document-independent html pass: every html field is parsed
+	// against the vsdx text grammar before the drawing is read, and
+	// all faults come back together (chunk CC5).
+	if errs := ops.CheckHTML(p); len(errs) > 0 {
+		return nil, errs
+	}
 	input, err := os.ReadFile(path) //nolint:gosec // G304: the caller's own argument
 	if err != nil {
 		return nil, cli.Errorf(cli.CodeIO, "", "read the drawing: %v", err)
