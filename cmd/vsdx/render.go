@@ -78,7 +78,7 @@ func runRender(p *cli.Parsed, stdout io.Writer) error {
 	defer renderer.Close()
 	img, err := renderPage(renderer, p.Args[0], info, scale)
 	if err != nil {
-		return cli.Wrap(cli.CodeOperationFailed, "", err)
+		return cli.Wrap(cli.CodeOperationFailed, "-o", err)
 	}
 	result := render.Result{Saved: out, Size: [2]json.Number{json.Number(geom.FormatNum(info.W)), json.Number(geom.FormatNum(info.H))}, Scale: scale, Key: []render.KeyEntry{}}
 	if overlay.IDs || overlay.Sites || overlay.Glue {
@@ -173,9 +173,10 @@ func pageMarks(input []byte, page string, ids []string, sites bool) ([]render.Ma
 
 // rendererError is the error of a renderer that cannot start.
 // LibreOffice or a PDF rasteriser that is missing makes render
-// operation_failed, as xlsx --recalc is without LibreOffice.
+// operation_failed at -o (the picture that cannot be made), as xlsx
+// --recalc is at --recalc without LibreOffice.
 func rendererError(err error) *cli.Error {
-	e := &cli.Error{Code: cli.CodeOperationFailed, Message: err.Error(), Cause: err}
+	e := &cli.Error{Code: cli.CodeOperationFailed, Path: "-o", Message: err.Error(), Cause: err}
 	e.Hint = "install LibreOffice (and pdftoppm, mutool or gs) or set DD_SOFFICE"
 	return e
 }

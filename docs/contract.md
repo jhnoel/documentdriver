@@ -63,8 +63,8 @@ vsdx render <file> --page pageN -o <out.png> [--overlay ids,sites,glue] [--ids i
   (`[{"n", "id"}]`). LibreOffice draws the values the file caches, so
   the picture is for checking, not proof. `soffice` comes from
   `DD_SOFFICE` or `PATH` (with a PDF rasteriser: `pdftoppm`, `mutool`
-  or `gs`); without them `render` is `operation_failed` and nothing is
-  written, as xlsx `--recalc` is.
+  or `gs`); without them `render` is `operation_failed`, path `-o`,
+  and nothing is written, as xlsx `--recalc` is at `--recalc`.
 - `--page` and `--master` take an address as `read` lists it; any
   other value is `usage` at the flag, exit 2; a page address the
   drawing lacks is `not_found` at the flag.
@@ -341,7 +341,8 @@ no op writes them.
 - **A value equal to what `read` shows writes nothing**, for object
   values, shape data, page values and text formats alike, whether the
   shown value is stored on the object or inherited (master, then style
-  sheets): `read`'s output sent back is a no-op. A different value is
+  sheets): `read`'s output sent back is a no-op (one exception: glue on
+  an end that has only a Connect row, see "Moving a glue target"). A different value is
   stored on the object, and its origin becomes `local`; that a local
   value with no formula overrides a formula the object inherits is
   **Visio unconfirmed (VE8)**. A text format

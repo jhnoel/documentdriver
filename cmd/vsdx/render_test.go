@@ -421,7 +421,7 @@ func TestRenderNoSoffice(t *testing.T) {
 	if code := run(args, &stdout, &stderr); code != 1 {
 		t.Fatalf("render without soffice: exit %d, want 1: %s", code, stderr.String())
 	}
-	if !strings.Contains(stderr.String(), `"code":"operation_failed"`) {
+	if !strings.Contains(stderr.String(), `"code":"operation_failed"`) || !strings.Contains(stderr.String(), `"path":"-o"`) {
 		t.Errorf("stderr = %q, want operation_failed", stderr.String())
 	}
 	if _, err := os.Stat(out); !errors.Is(err, os.ErrNotExist) {
@@ -435,7 +435,7 @@ func TestRenderNoSoffice(t *testing.T) {
 func TestRenderErrNoSofficeIsOperationFailed(t *testing.T) {
 	for _, err := range []error{render.ErrNoSoffice, render.ErrNoRasteriser} {
 		ce := rendererError(err)
-		if ce.Code != cli.CodeOperationFailed || !strings.Contains(ce.Hint, "DD_SOFFICE") {
+		if ce.Code != cli.CodeOperationFailed || ce.Path != "-o" || !strings.Contains(ce.Hint, "DD_SOFFICE") {
 			t.Errorf("rendererError(%v) = %s %q, want operation_failed with a DD_SOFFICE hint", err, ce.Code, ce.Hint)
 		}
 	}
