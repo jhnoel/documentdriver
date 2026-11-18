@@ -52,7 +52,7 @@ func BuildPage(d *doc.Document, r *inherit.Resolver, e *doc.PageEntry, o Options
 	if err != nil {
 		return nil, err
 	}
-	return build(p, d, r, contents, container, o)
+	return build(p, d, r, contents, container, e.Part, o)
 }
 
 // BuildMaster builds the model of master m, read only, as BuildPage.
@@ -75,7 +75,7 @@ func BuildMaster(d *doc.Document, r *inherit.Resolver, m *doc.MasterEntry, o Opt
 	if err != nil {
 		return nil, err
 	}
-	p, err = build(p, d, r, contents, container, o)
+	p, err = build(p, d, r, contents, container, m.Part, o)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func BuildMaster(d *doc.Document, r *inherit.Resolver, m *doc.MasterEntry, o Opt
 // Connects to linkConnects. It reports an error only when the contents
 // have no root; a shape it cannot address is a note and its children
 // are still walked.
-func build(p *Page, d *doc.Document, r *inherit.Resolver, contents *tree.Document, container string, o Options) (*Page, error) {
+func build(p *Page, d *doc.Document, r *inherit.Resolver, contents *tree.Document, container, part string, o Options) (*Page, error) {
 	if contents == nil || contents.Root() == nil {
 		return nil, fmt.Errorf("vsdx: %s has no contents", container)
 	}
@@ -102,6 +102,7 @@ func build(p *Page, d *doc.Document, r *inherit.Resolver, contents *tree.Documen
 		d:         d,
 		r:         r,
 		container: container,
+		part:      part,
 		o:         o,
 		seen:      map[uint32]int{},
 		placed:    map[uint32]*placed{},
@@ -171,6 +172,8 @@ type walker struct {
 	ids       map[uint32]bool
 	count     int
 	stop      bool
+	part      string                 // the contents part, for picture relationships
+	media     map[string]*mediaFacts // media facts by part, read once per walk
 }
 
 // place records obj in the placed map, taking its placed value from
@@ -222,6 +225,12 @@ func (w *walker) step(fr frame) {
 		obj.StoredMaster = vsd.MasterID(head.stored)
 	}
 	fillObject(obj, w.r, head.s, fr.f, w.p.H, w.o)
+	if obj.Kind == Picture {
+		if w.media == nil {
+			w.media = map[string]*mediaFacts{}
+		}
+		pictureOf(obj, w.p, w.d, w.r, head.s, w.part, foreign, w.media)
+	}
 	layerValue := ""
 	if cell, _, ok := w.r.Cell(head.s, sheet.ShapeCell(vsd.CellLayerMember)); ok {
 		layerValue = cell.V

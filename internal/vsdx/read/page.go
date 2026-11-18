@@ -98,6 +98,14 @@ type lineEndJSON struct {
 	Size  json.Number `json:"size,omitempty"`
 }
 
+// mediaJSON is a picture's media facts as read shows them (§8).
+type mediaJSON struct {
+	Type   string `json:"type"`
+	Bytes  int    `json:"bytes"`
+	SHA256 string `json:"sha256"`
+	Px     []int  `json:"px,omitempty"`
+}
+
 // shadowJSON is a shadow as read shows it (docs/contract.md §8).
 type shadowJSON struct {
 	Color        *hexJSON      `json:"color,omitempty"`
@@ -164,6 +172,9 @@ type objectJSON struct {
 	Fill     any               `json:"fill,omitempty"`
 	Line     any               `json:"line,omitempty"`
 	Shadow   *shadowJSON       `json:"shadow,omitempty"`
+	Image    string            `json:"image,omitempty"`
+	Media    *mediaJSON        `json:"media,omitempty"`
+	Crop     []json.Number     `json:"crop,omitempty"`
 	HTML     string            `json:"html,omitempty"`
 	Text     string            `json:"text,omitempty"`
 	Props    []propJSON        `json:"props,omitempty"`
@@ -337,6 +348,18 @@ func objectJSONOf(obj *model.Object, in, full bool) objectJSON {
 	j.Fill = fillJSON(obj.Fill)
 	j.Line = lineJSONOf(obj.Line, in)
 	j.Shadow = shadowJSONOf(obj.Shadow, in)
+	if pic := obj.Picture; pic != nil {
+		j.Image = pic.Image
+		j.Media = &mediaJSON{Type: pic.Type, Bytes: pic.Bytes, SHA256: pic.SHA256}
+		if pic.HasPx {
+			j.Media.Px = []int{pic.Px[0], pic.Px[1]}
+		}
+		if pic.HasCrop {
+			for _, v := range pic.Crop {
+				j.Crop = append(j.Crop, json.Number(geom.FormatNum(v)))
+			}
+		}
+	}
 	if obj.HasText {
 		j.HTML, j.Text = obj.HTML, obj.Text
 	}

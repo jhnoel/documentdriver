@@ -73,6 +73,7 @@ type Object struct {
 	Fill         *Paint
 	Line         *Line
 	Shadow       *Shadow
+	Picture      *PictureInfo // kind picture: its image, media facts and crop
 	HTML         string
 	HasText      bool
 	Text         string // plain text, as find matches it

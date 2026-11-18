@@ -141,9 +141,25 @@ type budget struct {
 // decompressor actually consumed, and checks the CRC-32 and size against
 // the central directory as archive/zip does.
 func (b *budget) read(f *zip.File) (string, error) {
+	// Read into one string builder sized from the declared size, so the
+	// part is held once: no doubling buffer and no copy into a string.
+	// The declared size is attacker data, so it only sizes the first
+	// allocation, bounded by what the limits let this member decompress
+	// to; the bytes actually read are what the limits count.
+	var sb strings.Builder
+	sb.Grow(int(min(f.UncompressedSize64, uint64(b.growLimit(f))))) //nolint:gosec // G115: growLimit is non-negative and at most MaxPartSize
+	if err := b.stream(f, &sb); err != nil {
+		return "", err
+	}
+	return sb.String(), nil
+}
+
+// stream decompresses member f into w within the limits, checking the
+// size and CRC-32 as read does, without holding the whole member.
+func (b *budget) stream(f *zip.File, w io.Writer) error {
 	raw, err := f.OpenRaw()
 	if err != nil {
-		return "", err
+		return err
 	}
 	if b.br == nil {
 		b.br = bufio.NewReader(raw)
@@ -159,30 +175,23 @@ func (b *budget) read(f *zip.File) (string, error) {
 		if b.fr == nil {
 			b.fr = flate.NewReader(cr)
 		} else if err := b.fr.(flate.Resetter).Reset(cr, nil); err != nil {
-			return "", err
+			return err
 		}
 		src = b.fr
 	default:
-		return "", zip.ErrAlgorithm
+		return zip.ErrAlgorithm
 	}
 	lr := &limitReader{r: src, comp: cr, b: b, crc: crc32.NewIEEE()}
-	// Read into one string builder sized from the declared size, so the
-	// part is held once: no doubling buffer and no copy into a string.
-	// The declared size is attacker data, so it only sizes the first
-	// allocation, bounded by what the limits let this member decompress
-	// to; the bytes actually read are what the limits count.
-	var sb strings.Builder
-	sb.Grow(int(min(f.UncompressedSize64, uint64(b.growLimit(f))))) //nolint:gosec // G115: growLimit is non-negative and at most MaxPartSize
-	if _, err := io.Copy(&sb, lr); err != nil {
-		return "", err
+	if _, err := io.Copy(w, lr); err != nil {
+		return err
 	}
 	if lr.n < 0 || uint64(lr.n) != f.UncompressedSize64 { //nolint:gosec // G115: lr.n counts bytes read, so it is never negative (checked)
-		return "", zip.ErrFormat
+		return zip.ErrFormat
 	}
 	if lr.crc.Sum32() != f.CRC32 && f.CRC32 != 0 {
-		return "", zip.ErrChecksum
+		return zip.ErrChecksum
 	}
-	return sb.String(), nil
+	return nil
 }
 
 // growLimit is the most member f may decompress to within the limits:

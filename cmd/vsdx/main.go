@@ -40,11 +40,11 @@ func app() *cli.App {
 		Tool:     "vsdx",
 		Version:  version,
 		Summary:  "vsdx reads, edits and creates Visio drawings: pages, shapes, connectors, groups, shape data and their text; its command line, results and errors follow docs/contract.md.",
-		Commands: []*cli.Command{readCommand, findCommand, xmlCommand, applyCommand, createCommand, renderCommand},
+		Commands: []*cli.Command{readCommand, findCommand, xmlCommand, mediaCommand, applyCommand, createCommand, renderCommand},
 		Topics:   map[string]func() string{"ops": opsHelp, "html": htmlHelp},
 		Topic:    opHelp,
 		Handlers: map[string]cli.Handler{
-			"read": runRead, "find": runFind, "xml": runXML, "apply": runApply, "create": runCreate, "render": runRender,
+			"read": runRead, "find": runFind, "xml": runXML, "media": runMedia, "apply": runApply, "create": runCreate, "render": runRender,
 		},
 	}
 }

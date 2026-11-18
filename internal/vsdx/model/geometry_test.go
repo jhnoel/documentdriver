@@ -28,7 +28,7 @@ func buildH(t *testing.T, fixture string, opt Options) (*Page, *inherit.Resolver
 		t.Fatalf("PageContents(%s): %v", fixture, err)
 	}
 	p := &Page{H: 11}
-	got, err := build(p, d, r, contents, vsd.PageID(e.ID, pageDup(d, e)), opt)
+	got, err := build(p, d, r, contents, vsd.PageID(e.ID, pageDup(d, e)), e.Part, opt)
 	if err != nil {
 		t.Fatalf("build(%s): %v", fixture, err)
 	}
@@ -235,7 +235,7 @@ func TestGeometryNoPinX(t *testing.T) {
 		t.Fatalf("PageContents: %v", err)
 	}
 	p := &Page{H: 11}
-	got, err := build(p, d, r, contents, "page0", Options{})
+	got, err := build(p, d, r, contents, "page0", "", Options{})
 	if err != nil {
 		t.Fatalf("build deep: %v", err)
 	}

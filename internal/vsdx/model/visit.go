@@ -60,6 +60,7 @@ func VisitPage(d *doc.Document, r *inherit.Resolver, e *doc.PageEntry, o Options
 		d:         d,
 		r:         r,
 		container: container,
+		part:      e.Part,
 		o:         o,
 		seen:      map[uint32]int{},
 		ids:       map[uint32]bool{},

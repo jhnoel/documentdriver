@@ -403,6 +403,40 @@ func (pt *Part) Bytes() ([]byte, error) {
 	return b, nil
 }
 
+// WriteTo writes the part's current bytes to w. An original member
+// that has not been read, parsed or replaced is decompressed straight
+// into w within the package's limits, so a large part (an image) is
+// never held whole; any other part writes its current bytes.
+func (pt *Part) WriteTo(w io.Writer) (int64, error) {
+	m := pt.m
+	if m.zf != nil && !m.loaded && m.doc == nil && !m.replaced && m.patch == nil && !m.dropped && !m.deleted {
+		cw := &countingWriter{w: w}
+		if err := m.budget.stream(m.zf, cw); err != nil {
+			return cw.n, fmt.Errorf("opc: %s: %w", m.name, err)
+		}
+		return cw.n, nil
+	}
+	b, _, err := m.current()
+	if err != nil {
+		return 0, err
+	}
+	n, err := w.Write(b)
+	return int64(n), err
+}
+
+// countingWriter counts the bytes written through it to w.
+type countingWriter struct {
+	w io.Writer
+	n int64
+}
+
+// Write writes p and counts it.
+func (c *countingWriter) Write(p []byte) (int, error) {
+	n, err := c.w.Write(p)
+	c.n += int64(n)
+	return n, err
+}
+
 // Original returns the part's bytes as stored in the file when the package
 // was opened, a copy that is the caller's. Added parts have none.
 func (pt *Part) Original() ([]byte, error) {

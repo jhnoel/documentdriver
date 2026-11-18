@@ -40,23 +40,34 @@ tail -n +2 "$TSV" | while IFS=$'\t' read -r name _kind url commit path lic lic_f
   slug="${url#https://github.com/}"
   d="$DIR/repos/$name"
   mkdir -p "$d"
-  tree="$(curl -fsSL "https://api.github.com/repos/$slug/git/trees/$commit?recursive=1")"
-  if printf '%s' "$tree" | grep -q '"truncated": *true'; then
-    echo "fetch-vsdx: $name: tree listing truncated" >&2; exit 1
-  fi
-  { printf '%s' "$tree" | grep -o '"path": *"[^"]*"' | sed -E 's/^"path": *"//; s/"$//' \
-      | grep -i -E "$WANT" | grep "^$path/" || true
-    printf '%s\n' "$lic_files" | tr ',' '\n'; } > "$d/.want.txt"
+  # github-raw takes every Visio file under path; github-file and
+  # github-lfs-file take the one file path names (LFS files are served
+  # from media.githubusercontent.com, not raw).
+  base="https://raw.githubusercontent.com/$slug/$commit"
+  [ "$_kind" = github-lfs-file ] && base="https://media.githubusercontent.com/media/$slug/$commit"
+  case "$_kind" in
+    github-file|github-lfs-file)
+      { printf '%s\n' "$path"; printf '%s\n' "$lic_files" | tr ',' '\n'; } > "$d/.want.txt" ;;
+    *)
+      tree="$(curl -fsSL "https://api.github.com/repos/$slug/git/trees/$commit?recursive=1")"
+      if printf '%s' "$tree" | grep -q '"truncated": *true'; then
+        echo "fetch-vsdx: $name: tree listing truncated" >&2; exit 1
+      fi
+      { printf '%s' "$tree" | grep -o '"path": *"[^"]*"' | sed -E 's/^"path": *"//; s/"$//' \
+          | grep -i -E "$WANT" | grep "^$path/" || true
+        printf '%s\n' "$lic_files" | tr ',' '\n'; } > "$d/.want.txt" ;;
+  esac
   while IFS= read -r f; do
     [ -f "$d/$f" ] || {
       mkdir -p "$d/$(dirname "$f")"
-      curl -fsSL --max-filesize 50000000 -o "$d/$f.part" \
-        "https://raw.githubusercontent.com/$slug/$commit/$f"
+      src="$base"
+      printf '%s' "$f" | grep -q -i -E "$WANT" || src="https://raw.githubusercontent.com/$slug/$commit"
+      curl -fsSL --max-filesize 50000000 -o "$d/$f.part" "$src/$f"
       mv "$d/$f.part" "$d/$f"
     }
     if printf '%s' "$f" | grep -q -i -E "$WANT"; then
       printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$name" "$f" \
-        "https://raw.githubusercontent.com/$slug/$commit/$f" "$commit" \
+        "$base/$f" "$commit" \
         "$(shasum -a 256 "$d/$f" | cut -d' ' -f1)" "$(wc -c < "$d/$f" | tr -d ' ')" \
         "$lic" "$(sanity "$d/$f")" >> "$MAN"
     fi
