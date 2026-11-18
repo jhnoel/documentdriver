@@ -186,6 +186,14 @@ func TestPropValueFormula(t *testing.T) {
 		if !tc.ok && err == nil {
 			t.Errorf("formula %q: allowed, want refused", tc.f)
 		}
+		if !tc.ok && err != nil {
+			var ce *cli.Error
+			if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "value" {
+				t.Errorf("formula %q error = %v, want operation_failed at value", tc.f, err)
+			} else if ce.Detail != "Value F="+tc.f {
+				t.Errorf("formula %q detail = %q, want %q", tc.f, ce.Detail, "Value F="+tc.f)
+			}
+		}
 	}
 }
 

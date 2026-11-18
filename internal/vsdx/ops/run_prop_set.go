@@ -43,8 +43,8 @@ func (s *PropSetSpec) Run(ws *edit.Workspace, aliases map[string]string, _ strin
 	if state.Linked {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s is data-linked", vsd.PropID(shapeAddr, rowName))
 	}
-	if refusal := propValueRefusal(rowName, state.Formula, state.HasFormula); refusal != nil {
-		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s", refusal)
+	if propValueRefusal(rowName, state.Formula, state.HasFormula) != nil {
+		return "", nil, nil, "", formulaRefusal(vsd.PropID(shapeAddr, rowName), "value", []formulaCell{{name: "Value", formula: state.Formula}})
 	}
 	if s.Value == nil {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "value", "value is required")

@@ -127,8 +127,8 @@ func (s *ObjectMoveSpec) Run(ws *edit.Workspace, aliases map[string]string, unit
 				continue
 			}
 		}
-		if err := moveRefusal(want); err != nil {
-			return "", nil, nil, "", err
+		if c, ok := moveRefused(want); ok {
+			return "", nil, nil, "", formulaRefusal(shapeAddr, "at", []formulaCell{c})
 		}
 		cells = append(cells, edit.Cell{N: want.name, V: formatted})
 	}
@@ -152,7 +152,7 @@ func (s *ObjectMoveSpec) Run(ws *edit.Workspace, aliases map[string]string, unit
 // transform cells are re-evaluated and Geometry1 rewritten as
 // for a free end; a dynamic move reports route stale.
 func moveConnector(ws *edit.Workspace, r *inherit.Resolver, d *doc.Document, h *inherit.Shape, node *tree.Node, a vsd.Address, pg *addPage, _ addLocated, deltaX, deltaY float64, shapeAddr string) (bool, string, error) {
-	if err := checkConnectorEditable(r, h, shapeAddr); err != nil {
+	if err := checkConnectorEditable(r, h, shapeAddr, "at"); err != nil {
 		return false, "", err
 	}
 	cur := endsCurrent{r: r, h: h}
@@ -196,16 +196,16 @@ func moveConnector(ws *edit.Workspace, r *inherit.Resolver, d *doc.Document, h *
 		endEnd.KeepFormula, endEnd.KeepConnect = true, true
 	}
 	if !beginGlued {
-		if err := checkEndFormulas(beginEnd, cur, vsd.CellBeginX, vsd.CellBeginY); err != nil {
+		if err := checkEndFormulas(shapeAddr, "at", beginEnd, cur, vsd.CellBeginX, vsd.CellBeginY); err != nil {
 			return false, "", err
 		}
 	}
 	if !endGlued {
-		if err := checkEndFormulas(endEnd, cur, vsd.CellEndX, vsd.CellEndY); err != nil {
+		if err := checkEndFormulas(shapeAddr, "at", endEnd, cur, vsd.CellEndX, vsd.CellEndY); err != nil {
 			return false, "", err
 		}
 	}
-	tr, err := evalTransform(r, h, shapeAddr, newBeginX, newBeginY, newEndX, newEndY)
+	tr, err := evalTransform(r, h, shapeAddr, "at", newBeginX, newBeginY, newEndX, newEndY)
 	if err != nil {
 		return false, "", err
 	}
@@ -322,38 +322,38 @@ func moveWantOf(r *inherit.Resolver, h *inherit.Shape, name string, value float6
 	return moveWant{name: name, value: value, cell: cell, present: present}
 }
 
-// moveRefusal reports whether writing want's cell is outside the
+// moveRefused reports whether writing want's cell is outside the
 // allow list: its effective formula must be on the decision (c) list
 // (formula.Allowed), or, for a derived 1-D transform cell, the
-// formula formula.OneD derives it from. The refusal names the cell
-// and its formula.
-func moveRefusal(want moveWant) error {
+// formula formula.OneD derives it from. It returns the cell for
+// the formula refusal form.
+func moveRefused(want moveWant) (formulaCell, bool) {
 	if !want.present {
-		return nil
+		return formulaCell{}, false
 	}
 	f := want.cell.F
 	if formula.Allowed(f) {
-		return nil
+		return formulaCell{}, false
 	}
 	switch want.name {
 	case vsd.CellPinX:
 		if f == "(BeginX+EndX)/2" {
-			return nil
+			return formulaCell{}, false
 		}
 	case vsd.CellPinY:
 		if f == "(BeginY+EndY)/2" {
-			return nil
+			return formulaCell{}, false
 		}
 	case vsd.CellWidth:
 		if f == "SQRT((EndX-BeginX)^2+(EndY-BeginY)^2)" {
-			return nil
+			return formulaCell{}, false
 		}
 	case vsd.CellAngle:
 		if f == "ATAN2(EndY-BeginY,EndX-BeginX)" {
-			return nil
+			return formulaCell{}, false
 		}
 	}
-	return cli.Errorf(cli.CodeOperationFailed, "", "%s formula %q is outside the allow list", want.name, f)
+	return formulaCell{name: want.name, formula: f}, true
 }
 
 // moveEditError maps an edit.MoveShape error to the op's error: a

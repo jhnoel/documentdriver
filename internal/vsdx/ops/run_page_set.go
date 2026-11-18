@@ -299,18 +299,19 @@ func formulaOK(f string) bool {
 	return false
 }
 
-// unwritableCell names the first cell outside the allow list.
-func unwritableCell(pageSheet *tree.Node, names []string) string {
+// unwritableCells returns the first cell of names outside the
+// allow list, for the formula refusal form.
+func unwritableCells(pageSheet *tree.Node, names []string) []formulaCell {
 	if pageSheet == nil {
-		return ""
+		return nil
 	}
 	sh, _ := sheet.Index(pageSheet)
 	for _, name := range names {
 		if c, ok := sh.Cell(sheet.ShapeCell(name)); ok && !formulaOK(c.F) {
-			return name + " F=" + c.F
+			return []formulaCell{{name: name, formula: c.F}}
 		}
 	}
-	return ""
+	return nil
 }
 
 // Run applies page.set (decision 6).
@@ -381,16 +382,16 @@ func (s *PageSetSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 	}
 	var cells []edit.Cell
 	if sizeChanged {
-		if bad := unwritableCell(pageSheet, []string{vsd.CellPageWidth, vsd.CellPageHeight}); bad != "" {
-			return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "", "page size cell %s is outside the allow list", bad)
+		if refused := unwritableCells(pageSheet, []string{vsd.CellPageWidth, vsd.CellPageHeight}); len(refused) > 0 {
+			return "", nil, nil, "", formulaRefusal(addr, "size", refused)
 		}
 		cells = append(cells,
 			edit.Cell{N: vsd.CellPageWidth, V: vsd.FormatInches(newW)},
 			edit.Cell{N: vsd.CellPageHeight, V: vsd.FormatInches(newH)})
 	}
 	if desired != 0 && desired != oldPrint {
-		if bad := unwritableCell(pageSheet, []string{vsd.CellOrientation}); bad != "" {
-			return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "", "print orientation cell %s is outside the allow list", bad)
+		if refused := unwritableCells(pageSheet, []string{vsd.CellOrientation}); len(refused) > 0 {
+			return "", nil, nil, "", formulaRefusal(addr, "orientation", refused)
 		}
 		cells = append(cells, edit.Cell{N: vsd.CellOrientation, V: strconv.Itoa(desired)})
 	}

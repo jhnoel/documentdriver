@@ -152,10 +152,10 @@ func hasDynamicMaster(r *inherit.Resolver, h *inherit.Shape) bool {
 // evalTransform re-evaluates every transform cell whose effective
 // formula is CC1-evaluable and returns the new transform for new
 // ends. A constant, Inh, or absent cell keeps its current value.
-// A cell outside those forms is operation_failed at at, naming
-// the cell and formula. It allocates in proportion to the
+// A cell outside those forms is operation_failed at field, in the
+// formula refusal form. It allocates in proportion to the
 // formula texts only.
-func evalTransform(r *inherit.Resolver, h *inherit.Shape, shapeAddr string, beginX, beginY, endX, endY float64) (endOfConnector, error) {
+func evalTransform(r *inherit.Resolver, h *inherit.Shape, shapeAddr, field string, beginX, beginY, endX, endY float64) (endOfConnector, error) {
 	type want struct {
 		name    string
 		cur     float64
@@ -227,11 +227,11 @@ func evalTransform(r *inherit.Resolver, h *inherit.Shape, shapeAddr string, begi
 			continue
 		}
 		if !formula.Evaluable(f) {
-			return endOfConnector{}, cli.Errorf(cli.CodeOperationFailed, "at", "%s F=%s is outside the allow list", w.name, f)
+			return endOfConnector{}, formulaRefusal(shapeAddr, field, []formulaCell{{name: w.name, formula: f}})
 		}
 		v, err := formula.Eval(f, cellFn)
 		if err != nil {
-			return endOfConnector{}, cli.Errorf(cli.CodeOperationFailed, "at", "%s F=%s cannot be evaluated", w.name, f)
+			return endOfConnector{}, formulaRefusal(shapeAddr, field, []formulaCell{{name: w.name, formula: f}})
 		}
 		if math.IsNaN(v) || math.IsInf(v, 0) {
 			return endOfConnector{}, cli.Errorf(cli.CodeOperationFailed, "at", "%s cannot be placed", shapeAddr)
@@ -279,8 +279,8 @@ type endOfConnector struct {
 // end cells are outside CC1's editability test: every transform
 // cell is a constant, Inh, or evaluable, and every end cell is a
 // constant or a glue form. An Inh transform cell passes. The
-// refusal is at at, naming the cell and formula.
-func checkConnectorEditable(r *inherit.Resolver, h *inherit.Shape, _ string) error {
+// refusal is at field, in the formula refusal form.
+func checkConnectorEditable(r *inherit.Resolver, h *inherit.Shape, shapeAddr, field string) error {
 	for _, name := range []string{vsd.CellPinX, vsd.CellPinY, vsd.CellWidth, vsd.CellHeight, vsd.CellLocPinX, vsd.CellLocPinY, vsd.CellAngle} {
 		cell, origin, ok := r.Cell(h, sheet.ShapeCell(name))
 		if !ok {
@@ -297,7 +297,7 @@ func checkConnectorEditable(r *inherit.Resolver, h *inherit.Shape, _ string) err
 			continue
 		}
 		if !formula.Evaluable(f) {
-			return cli.Errorf(cli.CodeOperationFailed, "at", "%s F=%s is outside the allow list", name, f)
+			return formulaRefusal(shapeAddr, field, []formulaCell{{name: name, formula: f}})
 		}
 	}
 	return nil

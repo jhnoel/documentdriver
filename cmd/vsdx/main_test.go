@@ -93,6 +93,9 @@ func TestReadErrors(t *testing.T) {
 		{[]string{"read", file, "--ids", "page0/s1"}, cli.ExitUsage, cli.CodeUsage, "--ids"},
 		{[]string{"read", file, "--region", "0,0,10,10"}, cli.ExitUsage, cli.CodeUsage, "--region"},
 		{[]string{"read", file, "--units", "in"}, cli.ExitUsage, cli.CodeUsage, "--units"},
+		{[]string{"read", file, "--page", "slide1"}, cli.ExitUsage, cli.CodeUsage, "--page"},
+		{[]string{"read", file, "--master", "slide1"}, cli.ExitUsage, cli.CodeUsage, "--master"},
+		{[]string{"read", file, "--page", "master2"}, cli.ExitUsage, cli.CodeUsage, "--page"},
 		{[]string{"read", file, "--page", "page7"}, cli.ExitFailed, cli.CodeNotFound, "--page"},
 		{[]string{"read", notAZip}, cli.ExitFailed, cli.CodeInvalidDocument, ""},
 		{[]string{"read", file, "--page", "page0", "--region", "1,2,3"}, cli.ExitUsage, cli.CodeUsage, "--region"},
@@ -101,6 +104,25 @@ func TestReadErrors(t *testing.T) {
 		code, _, errs := runCLI(t, c.args...)
 		if code != c.exit || len(errs) != 1 || errs[0].Code != c.code || errs[0].Path != c.path {
 			t.Errorf("vsdx %v: exit %d, errors %+v; want exit %d, %s at %q", c.args, code, errs, c.exit, c.code, c.path)
+		}
+	}
+}
+
+// TestReadPageUsage checks the CC10 rows: read --page slide1 (and
+// --master) is usage at the flag with the want hint, while a
+// well-formed unknown page stays not_found.
+func TestReadPageUsage(t *testing.T) {
+	file := drawingFile(t)
+	for _, c := range []struct {
+		args []string
+		hint string
+	}{
+		{[]string{"read", file, "--page", "slide1"}, "want page<id>, as read lists them"},
+		{[]string{"read", file, "--master", "slide1"}, "want master<id>, as read lists them"},
+	} {
+		code, _, errs := runCLI(t, c.args...)
+		if code != cli.ExitUsage || len(errs) != 1 || errs[0].Code != cli.CodeUsage || errs[0].Hint != c.hint {
+			t.Errorf("vsdx %v: exit %d, errors %+v; want usage with hint %q", c.args, code, errs, c.hint)
 		}
 	}
 }

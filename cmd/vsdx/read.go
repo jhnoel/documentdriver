@@ -10,6 +10,7 @@ import (
 	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/opc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/read"
+	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
 
 var readCommand = &cli.Command{
@@ -55,6 +56,21 @@ func readInput(path string) ([]byte, error) {
 	return data, nil
 }
 
+// checkPageValue reports a usage error at flag when value is not
+// an address of kind want, with the hint naming the form read
+// lists. A well-formed address of that kind that the drawing lacks
+// stays not_found downstream.
+func checkPageValue(value, flag string, want vsd.Kind) error {
+	if a, err := vsd.Parse(value); err != nil || a.Kind != want {
+		hint := "want page<id>, as read lists them"
+		if want == vsd.KindMaster {
+			hint = "want master<id>, as read lists them"
+		}
+		return cli.Errorf(cli.CodeUsage, flag, "%q is not a %s address", value, strings.TrimPrefix(flag, "--")).WithHint(hint)
+	}
+	return nil
+}
+
 // runRead is the read handler (chunk C1): the file read once, cli.Hash
 // for base, read.Document or read.WritePage; --page and --master exclusive
 // (usage); the per-page flags only with one of them (usage, as pptx);
@@ -63,6 +79,16 @@ func readInput(path string) ([]byte, error) {
 func runRead(p *cli.Parsed, stdout io.Writer) error {
 	if p.Has("page") && p.Has("master") {
 		return cli.Errorf(cli.CodeUsage, "--master", "--page and --master are exclusive")
+	}
+	if p.Has("page") {
+		if err := checkPageValue(p.Get("page"), "--page", vsd.KindPage); err != nil {
+			return err
+		}
+	}
+	if p.Has("master") {
+		if err := checkPageValue(p.Get("master"), "--master", vsd.KindMaster); err != nil {
+			return err
+		}
 	}
 	if !p.Has("page") && !p.Has("master") {
 		for _, f := range []string{"detail", "ids", "region", "units"} {

@@ -824,6 +824,17 @@ func (s *ObjectAddSpec) addConnector(ws *edit.Workspace, aliases map[string]stri
 	if err != nil {
 		return "", nil, nil, "", err
 	}
+	var beginStale, endStale bool
+	if s.From != nil && s.FromGlue != "" {
+		if site, err := addSiteView(fromGlue, located, "from_glue", pg.height); err == nil && math.Hypot(beginView.X-site.X, beginView.Y-site.Y) > place.GlueTolerance {
+			beginStale = true
+		}
+	}
+	if s.To != nil && s.ToGlue != "" {
+		if site, err := addSiteView(toGlue, located, "to_glue", pg.height); err == nil && math.Hypot(endView.X-site.X, endView.Y-site.Y) > place.GlueTolerance {
+			endStale = true
+		}
+	}
 	beginX, beginY, ok := addViewToParent(frame, beginView, pg.height)
 	if !ok {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "from", "the begin cannot be placed")
@@ -866,7 +877,14 @@ func (s *ObjectAddSpec) addConnector(ws *edit.Workspace, aliases map[string]stri
 	if err := addPaint(ws, addr, s, false); err != nil {
 		return "", nil, nil, "", err
 	}
-	return addr, []string{addr}, nil, "", nil
+	var staleParts []string
+	if beginStale {
+		staleParts = append(staleParts, addr+" begin left stale (stale-connector)")
+	}
+	if endStale {
+		staleParts = append(staleParts, addr+" end left stale (stale-connector)")
+	}
+	return addr, []string{addr}, nil, strings.Join(staleParts, "; "), nil
 }
 
 // addWholeGlue refuses whole-shape glue on a master-less connector.
@@ -875,13 +893,29 @@ func addWholeGlue(field, raw string) error {
 }
 
 // addEndView returns one connector end as a view point in points.
+// A point with a glue is the point (the glue is validated); a
+// glue without a point is the site.
 func addEndView(point []float64, glued bool, g addGlue, located map[string]addLocated, field, glueField string, height, scale float64) (geom.Pt, error) {
-	if !glued {
-		if !addFinite(point) {
+	if point != nil {
+		if len(point) != 2 || !addFinite(point) {
 			return geom.Pt{}, cli.Errorf(cli.CodeOperationFailed, field, "%s must hold finite numbers", field)
+		}
+		if glued {
+			if _, err := addSiteView(g, located, glueField, height); err != nil {
+				return geom.Pt{}, err
+			}
 		}
 		return geom.Pt{X: point[0] * scale, Y: point[1] * scale}, nil
 	}
+	if !glued {
+		return geom.Pt{}, cli.Errorf(cli.CodeOperationFailed, field, "%s must hold finite numbers", field)
+	}
+	return addSiteView(g, located, glueField, height)
+}
+
+// addSiteView returns the view point of glue g's connection point
+// in located, refusing a missing target or point at glueField.
+func addSiteView(g addGlue, located map[string]addLocated, glueField string, height float64) (geom.Pt, error) {
 	loc, ok := located[g.target]
 	if !ok {
 		return geom.Pt{}, cli.Errorf(cli.CodeNotFound, glueField, "no shape %s: not found", g.target)
