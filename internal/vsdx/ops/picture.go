@@ -3,10 +3,8 @@ package ops
 import (
 	"bytes"
 	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"image"
-	"io"
 	"io/fs"
 	"os"
 	"path"
@@ -16,10 +14,8 @@ import (
 
 	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/ooxml/ctypes"
-	core "github.com/jhnoel/documentdriver/internal/ooxml/edit"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 	"github.com/jhnoel/documentdriver/internal/opc"
-	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/edit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
@@ -437,18 +433,6 @@ func cropCells(c []float64, w, h float64) []edit.Cell {
 func foreignDataXML(compression, relID string) []byte {
 	return []byte("<ForeignData ForeignType='Bitmap' CompressionType='" + compression + "'><Rel r:id='" + relID + "'/></ForeignData>")
 }
-
-// readAll streams a part into memory (for a media part an op reads).
-func readAll(pt *opc.Part) ([]byte, error) {
-	var buf bytes.Buffer
-	_, err := pt.WriteTo(&buf)
-	return buf.Bytes(), err
-}
-
-var _ = io.Discard
-var _ = hex.EncodeToString
-var _ = doc.Stencil
-var _ = core.Path{}
 
 // foreignRelID returns the r:id of a ForeignData element's Rel child.
 func foreignRelID(foreign *tree.Node) string {
