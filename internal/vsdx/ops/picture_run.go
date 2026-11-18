@@ -8,6 +8,8 @@ import (
 	"github.com/jhnoel/documentdriver/internal/vsdx/doc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/edit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
+	"strconv"
+	"strings"
 )
 
 // picturePixelPt is the size of one image pixel in points: 96 pixels
@@ -71,18 +73,50 @@ func makePicture(ws *edit.Workspace, addr string, in *imageInput, crop []float64
 	}
 	w, _ := styleNumberCell(st, vsd.CellWidth)
 	h, _ := styleNumberCell(st, vsd.CellHeight)
-	if err := ws.SetCells(addr, cropCells(crop, w, h)); err != nil {
-		return err
-	}
 	hd := ws.Core().Target(st.part, addr, []*tree.Node{st.node})
 	if err := hd.SetAttr(core.Path{}, "Type", vsd.ShapeTypeForeign); err != nil {
 		return err
 	}
-	nodes, err := ws.Core().Parse(st.node, foreignDataXML(in.compression, relID), nil)
+	// The picture takes the drawing's "None" style sheet, as both
+	// Visio-authored samples do (LineStyle, FillStyle, TextStyle 2:
+	// V18 shape 5, 60973 master24/s5), so it shows no fill or line;
+	// without one, it stores LinePattern 0 and FillPattern 0 itself.
+	if id, ok := noneStyle(ws); ok {
+		v := strconv.FormatUint(uint64(id), 10)
+		for _, n := range []string{"LineStyle", "FillStyle", "TextStyle"} {
+			if err := hd.SetAttr(core.Path{}, n, v); err != nil {
+				return err
+			}
+		}
+	}
+	cells := cropCells(crop, w, h)
+	if _, ok := noneStyle(ws); !ok {
+		cells = append(cells, edit.Cell{N: vsd.CellLinePattern, V: "0"}, edit.Cell{N: vsd.CellFillPattern, V: "0"})
+	}
+	// The samples store no connection points on a picture.
+	for c := range st.node.ElementsSeq() {
+		if c.Local() == vsd.ElemSection {
+			if n, _ := c.Attr("N"); n == "Connection" {
+				if err := hd.RemoveNode(c); err != nil {
+					return err
+				}
+				break
+			}
+		}
+	}
+	// The Img cells and the ForeignData are written as one fragment
+	// in the page's single-quote style.
+	frag := append(cellsXML(cells), foreignDataXML(in.compression, relID)...)
+	nodes, err := ws.Core().Parse(st.node, frag, nil)
 	if err != nil {
 		return err
 	}
-	return ws.Core().Insert(st.part, core.Into(st.node), nodes[0], nil)
+	for _, n := range nodes {
+		if err := ws.Core().Insert(st.part, core.Into(st.node), n, nil); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // pictureNode is a picture shape in the working tree: its page part,
@@ -285,4 +319,45 @@ func picturePage(ws *edit.Workspace, a vsd.Address) (*pictureNode, error) {
 		}
 	}
 	return nil, cli.Errorf(cli.CodeNotFound, "at", "no page")
+}
+
+// noneStyle returns the ID of the drawing's style sheet named "None"
+// (NameU) whose effective LinePattern and FillPattern are 0.
+func noneStyle(ws *edit.Workspace) (uint32, bool) {
+	d, err := doc.Open(ws.Package())
+	if err != nil {
+		return 0, false
+	}
+	for id, st := range d.Styles {
+		if st == nil || st.NameU != "None" || st.Node == nil {
+			continue
+		}
+		line, fill := false, false
+		for c := range st.Node.ElementsSeq() {
+			if c.Local() != vsd.ElemCell {
+				continue
+			}
+			n, _ := c.Attr("N")
+			v, _ := c.Attr("V")
+			line = line || (n == vsd.CellLinePattern && v == "0")
+			fill = fill || (n == vsd.CellFillPattern && v == "0")
+		}
+		if line && fill {
+			return id, true
+		}
+	}
+	return 0, false
+}
+
+// cellsXML writes cells as Cell elements with single-quoted attributes.
+func cellsXML(cells []edit.Cell) []byte {
+	var b strings.Builder
+	for _, c := range cells {
+		b.WriteString("<Cell N='" + c.N + "' V='" + c.V + "'")
+		if c.F != "" {
+			b.WriteString(" F='" + c.F + "'")
+		}
+		b.WriteString("/>")
+	}
+	return []byte(b.String())
 }
