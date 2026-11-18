@@ -253,6 +253,65 @@ func TestSetTransformIdentity(t *testing.T) {
 	}
 }
 
+// TestSetTransformIdentityReadForm checks the CC4 identity rows in
+// read's form: a rotated shape (V9 s1 rot 270, s3 rot 30) and a
+// rotated group child (V4 s12 rot 330) sent back with the box,
+// rot and flips read shows write nothing, even though the stored
+// Angle cell would reformat on the round trip.
+func TestSetTransformIdentityReadForm(t *testing.T) {
+	for _, tc := range []struct {
+		fixture string
+		at      string
+		box     []float64
+		rot     float64
+	}{
+		{"v9-rotation", "page0/s1", []float64{90, 90, 72, 36}, 270},
+		{"v9-rotation", "page0/s3", []float64{396, 126, 72, 36}, 30},
+		{"v4-groups", "page0/s12", []float64{288, 360, 72, 72}, 330},
+		{"v4-groups", "page0/s13", []float64{306, 378, 36, 36}, 330},
+	} {
+		t.Run(tc.at, func(t *testing.T) {
+			src := vsdxtest.Fixture(t, tc.fixture)
+			rot := tc.rot
+			falseV := false
+			spec := &ObjectSetSpec{At: tc.at, Box: tc.box, Rot: &rot, FlipH: &falseV, FlipV: &falseV}
+			changed, stale, out := transformRun(t, src, spec, nil, "pt")
+			if len(changed) != 0 {
+				t.Errorf("changed = %v, want empty for identity", changed)
+			}
+			if stale != "" {
+				t.Errorf("stale = %q, want empty", stale)
+			}
+			if got, want := propDeletePageXML(t, out), propDeletePageXML(t, src); got != want {
+				t.Errorf("identity changed the page:\ngot  %s\nwant %s", got, want)
+			}
+		})
+	}
+}
+
+// TestSetTransformMasterLocPin checks the CC4 dependents row: V2
+// s1 resized to [40,20,100,100] reads back the same, stores Width
+// and Height 1.3888888888888888 and LocPinX and LocPinY
+// 0.6944444444444444 materialised as F="Inh", with no stale.
+func TestSetTransformMasterLocPin(t *testing.T) {
+	src := vsdxtest.Fixture(t, "v2-master")
+	spec := &ObjectSetSpec{At: "page0/s1", Box: []float64{40, 20, 100, 100}}
+	changed, stale, out := transformRun(t, src, spec, nil, "pt")
+	if len(changed) != 1 || changed[0] != "page0/s1" {
+		t.Fatalf("changed = %v, want [page0/s1]", changed)
+	}
+	if stale != "" {
+		t.Errorf("stale = %q, want empty", stale)
+	}
+	transformBox(t, "s1", transformRead(t, out, "page0/s1").Box, [4]float64{40, 20, 100, 100})
+	xml := propDeletePageXML(t, out)
+	for _, want := range []string{"<Cell N='LocPinX' V='0.6944444444444444' F='Inh'/>", "<Cell N='LocPinY' V='0.6944444444444444' F='Inh'/>"} {
+		if !strings.Contains(xml, want) {
+			t.Errorf("sealed page has no %s: %s", want, xml)
+		}
+	}
+}
+
 // TestSetTransformUntargeted checks that resizing V2 s1 leaves V2
 // s2's box as read from the original.
 func TestSetTransformUntargeted(t *testing.T) {
