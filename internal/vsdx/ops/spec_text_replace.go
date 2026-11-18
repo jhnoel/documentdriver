@@ -9,11 +9,11 @@ import (
 // Designer-owned (the spec, its decoding and its rules); the op's chunk
 // adds Run in run_text_replace.go.
 type TextReplaceSpec struct {
-	At         string `json:"at"`
-	Select     string `json:"select"`
-	With       string `json:"with"`
-	Occurrence int    `json:"occurrence" plan:"optional"`
-	All        bool   `json:"all" plan:"optional"`
+	At         string `json:"at" doc:"A shape or page address as read shows it (page0/s1 or page0), or $name."`
+	Select     string `json:"select" doc:"Exact text to find, as read shows text."`
+	With       string `json:"with" doc:"The replacement text."`
+	Occurrence int    `json:"occurrence" plan:"optional" doc:"1-based: which match, counting in paint order; not with all."`
+	All        bool   `json:"all" plan:"optional" doc:"Replace every match; not with occurrence."`
 }
 
 // DecodePlan implements cli.PlanDecoder for text.replace.
@@ -43,4 +43,28 @@ func (s *TextReplaceSpec) check() (string, string, bool) {
 		return "occurrence and all exclude each other", "all", true
 	}
 	return "", "", false
+}
+
+// textReplaceRules are text.replace's document-independent checks,
+// in the order its check returns them. Chunk CC7.
+var textReplaceRules = []string{
+	"at must be a shape or page address or $name",
+	"select must not be empty",
+	"occurrence is 1 or more",
+	"occurrence and all exclude each other",
+}
+
+// textReplaceRefuses are text.replace's document-dependent refusals,
+// one per line. Chunk CC7.
+var textReplaceRefuses = []string{
+	"containers, lists and callouts are skipped by a page-wide replace",
+	"containers/lists/callouts: a container, list or callout named directly at at (User.msvStructureType) is not edited in v1",
+	"masters and stencils: a master shape (masters cannot be edited) or a shape in a stencil (stencils cannot be edited)",
+	"text on a picture or other read-only kind (Foreign or guide shape)",
+	"a match crossing a paragraph or line break or touching a field",
+}
+
+// init registers the help data of text.replace (chunk CC7).
+func init() {
+	registerHelp("text.replace", textReplaceRules, textReplaceRefuses)
 }

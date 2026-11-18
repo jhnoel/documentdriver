@@ -9,7 +9,7 @@ import (
 // Designer-owned (the spec, its decoding and its rules); the op's chunk
 // adds Run in run_page_delete.go.
 type PageDeleteSpec struct {
-	At string `json:"at"`
+	At string `json:"at" doc:"A page address as read shows it (page0), or $name."`
 }
 
 // DecodePlan implements cli.PlanDecoder for page.delete.
@@ -23,4 +23,22 @@ func (s *PageDeleteSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 // relative to the operation, or false.
 func (s *PageDeleteSpec) check() (string, string, bool) {
 	return needAddress(s.At, "at", "a page address", vsd.KindPage)
+}
+
+// pageDeleteRules are page.delete's document-independent checks, in
+// the order its check returns them. Chunk CC7.
+var pageDeleteRules = []string{
+	"at must be a page address or $name",
+}
+
+// pageDeleteRefuses are page.delete's document-dependent refusals,
+// one per line. Chunk CC7.
+var pageDeleteRefuses = []string{
+	"deleting the last foreground page",
+	"deleting a page another page uses as its background",
+}
+
+// init registers the help data of page.delete (chunk CC7).
+func init() {
+	registerHelp("page.delete", pageDeleteRules, pageDeleteRefuses)
 }

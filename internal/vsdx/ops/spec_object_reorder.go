@@ -9,9 +9,9 @@ import (
 // Designer-owned (the spec, its decoding and its rules); the op's chunk
 // adds Run in run_object_reorder.go.
 type ObjectReorderSpec struct {
-	At       string `json:"at"`
-	To       string `json:"to"`
-	Position string `json:"position" plan:"optional" enum:"before,after"`
+	At       string `json:"at" doc:"A shape address as read shows it (page0/s1), or $name."`
+	To       string `json:"to" doc:"front, back, or a shape address of the same parent, as read shows paint order."`
+	Position string `json:"position" plan:"optional" enum:"before,after" doc:"Before or after the shape in to; with front or back it is refused."`
 }
 
 // DecodePlan implements cli.PlanDecoder for object.reorder.
@@ -41,4 +41,27 @@ func (s *ObjectReorderSpec) check() (string, string, bool) {
 		return "position (before or after) is needed with a shape in to", "position", true
 	}
 	return "", "", false
+}
+
+// objectReorderRules are object.reorder's document-independent
+// checks, in the order its check returns them. Chunk CC7.
+var objectReorderRules = []string{
+	"at must be a shape address or $name",
+	"to must be front, back or a shape address",
+	"position goes with a shape in to, not front or back",
+	"position (before or after) is needed with a shape in to",
+}
+
+// objectReorderRefuses are object.reorder's document-dependent
+// refusals, one per line. Chunk CC7.
+var objectReorderRefuses = []string{
+	"containers/lists/callouts: a container, list or callout (User.msvStructureType) is not edited in v1",
+	"masters and stencils: a master shape (masters cannot be edited) or a shape in a stencil cannot be edited",
+	"reorder relative to an object of another parent",
+	"reorder relative to itself",
+}
+
+// init registers the help data of object.reorder (chunk CC7).
+func init() {
+	registerHelp("object.reorder", objectReorderRules, objectReorderRefuses)
 }
