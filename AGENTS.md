@@ -541,6 +541,54 @@ gate. The design is `docs/design.md` (xlsx, and its "Write (P2)").
   and agents never launch it themselves.
 - Never launch other GUI apps from automation.
 
+## Delegated work
+
+The general method (designer, implementers, dispatcher, reviewers; chunk
+rules; gates) is in the maintainer's global agent instructions. What is
+specific to this repository:
+
+- Working files for a phase live in a gitignored `.worktrees/<phase>-work/`:
+  `chunks.md` (the chunk plan and every expected-value row), `briefs/`,
+  `logs/` (full output of every gate run), `pi-sessions/`, `state/done.txt`
+  and the queue and gate scripts (`job.sh`, `queue.sh`, `gate.sh`,
+  `merge.sh`). Chunks run in `.worktrees/<phase>-<id>` on
+  `wt/<phase>-<id>`; they merge into an integration branch
+  `wt/<phase>-int`, and the designer works on `wt/<phase>-design`.
+- Chunk ids are unique across a phase, including fix chunks: never reuse
+  an id a branch or worktree already has.
+- Implementers run through the `pi` CLI, at most 5 at once, each in its own
+  tmux window, with stdin closed (`</dev/null`). The maintainer chooses the
+  model.
+- Briefs tell implementers to search for existing helpers with `gcs "need"`
+  (semantic Go function search) before writing one; reports use
+  `NEEDS-EXPORT` (see Shared helpers) and `NEEDS-DESIGN` (a row that
+  cannot hold, or a line needed in a file the chunk does not own).
+- Extension points follow the docx and xlsx op layout: one `run_<name>.go`
+  per operation; whether an operation is implemented is derived from that
+  file, never from a flag in `table.go`; tests iterate the table. Shared
+  test fixtures come from the format's test helper package (`vsdxtest`,
+  `xlsxtest`).
+- Scaling rows use `internal/laws`: `Scales` for bytes and allocations
+  (absolute floor below which a ratio is not judged) and `TimeScales` for
+  time (one fixed sample, no verdict under `-race`). Never hand-write a
+  timing loop. Memory budgets checkpoint inside the call, and process
+  peak RSS is gated in `make scaling` for the read paths.
+- Fly Sprites (dd-ci) are not valid for time verdicts: fresh-heap page
+  faulting there skews `TimeScales`. Run `make scaling` and a
+  time-bearing `make ci` locally on an idle Mac. Sprites are fine for
+  bytes and allocations, peak RSS on Linux, `-race` and corpus runs.
+- Corpora are fetched by `eval/corpus/fetch-*.sh` at pinned commits into
+  the gitignored `corpus/` (`PPTX_CORPUS`, `DOCX_CORPUS`, `XLSX_CORPUS`,
+  `VSDX_CORPUS`, each the directory that holds `repos/`, not `repos/`
+  itself). A corpus test skips only when its variable is unset;
+  with it set, a named file that is missing fails the test. Third-party
+  schemas whose licence forbids redistribution (MS-VSDX) are fetched by
+  checksum into an ignored cache (`make vsdx-schema`); only data derived
+  from them is committed.
+- Office desktop apps are the only proof that output opens; where none is
+  available (Visio), say so in the test's doc comment and the report.
+  LibreOffice import is a render check, not a validity check.
+
 ## Evaluation integrity
 
 - Trial agents get only the tool surface under test (the Pi extension in
