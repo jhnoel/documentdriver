@@ -944,7 +944,7 @@ S0's ctypes extraction runs over the Visio-authored subset
 per entry; a type seen in fewer files stays out of the table and the
 code that needs it waits (S0 reports which).
 
-### Visio experiments (VE1 to VE13, results recorded before dependent code merges)
+### Visio experiments (VE1 to VE14, results recorded before dependent code merges)
 
 Fixtures under `testdata/vsdx/experiments`, written by a Go generator,
 with a README of what to look for; run by the owner if and when a Visio
@@ -966,6 +966,7 @@ labelled "LibreOffice ...: Visio unconfirmed" as xlsx did.
 | VE11 | Are lengths on a scaled page stored in page or drawing inches? |
 | VE12 | Does a created `docProps/custom.xml` with only RecalcDocument open cleanly? |
 | VE13 | Does Visio re-walk whole-shape glue CC2 writes (`_WALKGLUE`, `_XFTRIGGER(Sheet.N!EventXFMod)`, Connect `ToCell PinX ToPart 3`) when the target moves, and route the straight line CC2 stores when RecalcDocument is set (with VE4)? |
+| VE14 | Does Visio clamp a stored character Size between 0 and 1 pt to 1 pt (four corpus `GUARD(0)` Size cells cache 1 pt), and is there an upper bound? Until recorded, formula.CellBounds clamps Size to at least 1 pt and text input refuses font-size below 1pt (CC1). |
 
 ### What cannot be verified without real Visio
 
@@ -1116,3 +1117,13 @@ architect for contract questions):
   until VE2, VE3 and VE12 are recorded, as xlsx's §9 exception did.
 - Merge plan: Fable confirms the draft's section order matches its map;
   Fable reviews the merged diff before main moves.
+
+Gate rulings on held chunks (2026-11-17): CC1's four `Char.Size
+GUARD(0)` disagreements are a Visio clamp (Size at least 1 pt) that
+writes would also hit, so it is modelled (formula.CellBounds, font-size
+below 1pt refused) instead of classified, and FL4's table stays empty;
+CC5's path changes in OT1's tests and CC13's removal of OP1's
+first-page row are confirmed; RM3's budgets (default 84/343 MB, full
+123/551 MB) are the designer's; CC6's container skip in text.replace's
+walks stays (the skip replaces the "note" the row first asked for,
+since apply results carry no notes).
