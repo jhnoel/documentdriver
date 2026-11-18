@@ -330,6 +330,10 @@ Exit (met 2026-11-13, P4 close-out):
   Visio experiments VE1 to VE14 (`docs/vsdx-design.md`, none run in Visio:
   the contract labels each claim that rests on one "Visio
   unconfirmed"); the v1 deferrals of §12.
+- **vsdx, in (2026-11-18):** line ends, shadows, background page
+  assignment, picture reads (`image`, `media`, `crop`), `vsdx media`,
+  and picture writes (owner ruling: schema- and sample-grounded,
+  VE15 to VE18 open).
 
 ### P5. docx operations, by family
 

@@ -38,7 +38,7 @@ xlsx apply <file> <plan.json|-> [--dry-run] [-o <out>] [--changed ids|full] [--r
 xlsx create [<plan.json|->] [--dry-run] [--recalc] -o <out>
 ```
 
-**vsdx** has `read`, `find`, `xml`, `apply`, `create`, `render`,
+**vsdx** has `read`, `find`, `xml`, `media`, `apply`, `create`, `render`,
 `help` and `--version`. Its help topics are `ops`, `<op>` and `html`;
 there is no `schema` or `values` topic.
 
@@ -46,6 +46,7 @@ there is no `schema` or `values` topic.
 vsdx read   <file> [--page pageN | --master masterN] [--detail sites|full] [--ids ids] [--region x,y,w,h] [--units pt|in]
 vsdx find   <file> <query> [--ignore-case] [--page pageN] [--limit n]
 vsdx xml    <file> <address>
+vsdx media  <file> <address> -o <out>
 vsdx apply  <file> <plan.json|-> [--dry-run] [-o <out>] [--changed ids|full]
 vsdx create [<plan.json|->] [--dry-run] -o <out>
 vsdx render <file> --page pageN -o <out.png> [--overlay ids,sites,glue] [--ids ids] [--scale n]
@@ -68,6 +69,12 @@ vsdx render <file> --page pageN -o <out.png> [--overlay ids,sites,glue] [--ids i
 - `--page` and `--master` take an address as `read` lists it; any
   other value is `usage` at the flag, exit 2; a page address the
   drawing lacks is `not_found` at the flag.
+- `media` writes the bytes of one image to the file named by `-o`
+  (required) and prints `{"base","saved","image","type","bytes","sha256","px"}`.
+  `<address>` is a picture (`page0/s5`) or a media part as `read`
+  shows it in `image` (`/visio/media/image1.png`); anything else is
+  `not_found`. It is the only way the tool gives out image bytes:
+  `read` never inlines them. It writes only `-o` (§5).
 
 - Flags are `--name value` or `--name=value`, anywhere after the command;
   `--` ends flags. Boolean flags take no value. There are no short flags
@@ -271,8 +278,8 @@ no op writes them.
 
 | Op | Fields |
 | --- | --- |
-| `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector; `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector, point glue only (whole-shape glue needs the Dynamic connector master). No `rot`, `flip_h`, `flip_v` (set them with object.set). `pin` is input only (`read` shows `box`): with `pin` and no `box`, a `geom` shape is 72 x 72 pt, and a master instance takes the master's size: it stores only its pin and inherits the rest, which Visio accepting is **Visio unconfirmed (VE1)**. `master` by name matches `name` or `name_u` as `read` shows them; an address (`master2`) is taken as an address first, and when several masters share a name the first in stored order is used |
-| `object.set` (vsdx) | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `name`, `fill` (`"none"` or `{"hex":"#RRGGBB"}`), `line` (`"none"` or `{w, color, dash}`; `color` is `{"hex":"#RRGGBB"}` as `read` shows it, or the bare string `"#RRGGBB"`; `dash` the LinePattern number, as a number or the string `read` shows), and for a connector `from`, `to`, `from_glue`, `to_glue`. No `html` (use text.set) |
+| `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector; `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector, point glue only (whole-shape glue needs the Dynamic connector master); `kind: "picture"` with `image` (a file path, below) and `box` or `pin`, and optionally `crop` and `name`: a picture, with no `fill`, `line`, `html`, `shadow` or connector fields (`invalid_operation` at the field). `shadow` is accepted with `master` and `geom`. No `rot`, `flip_h`, `flip_v` (set them with object.set). `pin` is input only (`read` shows `box`): with `pin` and no `box`, a `geom` shape is 72 x 72 pt, and a master instance takes the master's size: it stores only its pin and inherits the rest, which Visio accepting is **Visio unconfirmed (VE1)**. `master` by name matches `name` or `name_u` as `read` shows them; an address (`master2`) is taken as an address first, and when several masters share a name the first in stored order is used |
+| `object.set` (vsdx) | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `name`, `fill` (`"none"` or `{"hex":"#RRGGBB"}`), `line` (`"none"` or `{w, color, dash}`; `color` is `{"hex":"#RRGGBB"}` as `read` shows it, or the bare string `"#RRGGBB"`; `dash` the LinePattern number, as a number or the string `read` shows; and on a connector `begin` and `end`, below), `shadow` (`"none"` or `{color, transparency, offset}`, below), and for a connector `from`, `to`, `from_glue`, `to_glue`; for a picture `image` and `crop`. No `html` (use text.set) |
 | `object.move` (vsdx) | `at`, `dx`, `dy` (each defaults to 0) |
 | `object.delete` (vsdx) | `at`. Connectors glued to the deleted shape lose that glue (their Connect rows and glue formulas are removed) and keep their end where it was; they appear in `changed` |
 | `object.reorder` (vsdx) | `at`, `to` (`front`, `back`, or an object of the same parent with `position`) |
@@ -281,11 +288,11 @@ no op writes them.
 | `prop.add` | `at` (a shape), `name` (the row name: ASCII letters, digits and `_`, not starting with a digit; anything else is `invalid_operation` at `name` before the document opens; rows a file already has with other names are read, set and deleted by their address), `type` (`string`, `number`, `boolean`, `date`, `duration`, `currency`, `fixed_list`, `variable_list`), `label`, `value`, `format`. The stored type codes and value forms for `boolean`, `date`, `duration` and `currency` are **Visio unconfirmed (VE9)** |
 | `prop.set` | `at` (`page0/s5/prop:Cost`), `value` |
 | `prop.delete` | `at` (a row) |
-| `page.add` | `name`, `as`, `size`, `orientation`, and `at` (another page) with `position` (`before`, `after`): the two go together; neither appends. A new page is 8.5 x 11 in portrait unless `size` or `orientation` says otherwise |
+| `page.add` | `name`, `as`, `size`, `orientation`, `background` (`true`: the new page is a background page), `background_page` (a background page's address: the new page uses it), and `at` (another page) with `position` (`before`, `after`): the two go together; with neither, a foreground page is added after the last foreground page and a background page at the end. A new page is 8.5 x 11 in portrait unless `size` or `orientation` says otherwise |
 | `page.rename` | `at`, `name` |
 | `page.delete` | `at` |
 | `page.reorder` | `at`, `to` (another page), `position` |
-| `page.set` | `at`, `orientation` (`portrait`, `landscape`) and/or `size` (`[w, h]`) |
+| `page.set` | `at`, and at least one of `orientation` (`portrait`, `landscape`), `size` (`[w, h]`), `background` (`true`, `false`), `background_page` (a background page's address, or `"none"`) |
 
 **vsdx** rules:
 
@@ -331,6 +338,176 @@ no op writes them.
   group's lower-left corner, so their shown `y` changes. `changed`
   lists the group and then every descendant whose shown values
   changed.
+- **Line ends.** `line.begin` and `line.end` are the arrowheads at a
+  connector's `from` and `to` ends (Visio's Begin and End). Each is
+  `"none"` or `{"arrow", "size"}`:
+  - `arrow` is a name from the closed table, or the stored index as a
+    string for an index the table does not name:
+
+    | Name | Stored index | Grounding |
+    | --- | --- | --- |
+    | `none` | 0 | Visio-authored files |
+    | `triangle` | 4 | drawn as a filled triangle by LibreOffice; stored by non-Visio writers only: **Visio unconfirmed (VE15)** |
+    | `stealth` | 5 | stored by Visio; drawn as a notched filled arrow by LibreOffice: appearance **Visio unconfirmed (VE15)** |
+
+    A plan may write the three names. An index string (`"13"`) is
+    accepted only where it equals what `read` shows for that end (a
+    no-op); any other index is `operation_failed` at the field, hint:
+    the names. Names are added to the table (additive, §11) as each
+    index is confirmed.
+  - `size` is the stored size number, 0 to 6 (the corpus shows 0 to
+    3; that Visio accepts 4 to 6 is **Visio unconfirmed, VE15**).
+    Left out, the effective size is kept and nothing is written.
+  - On input a bare name (`"end": "triangle"`) is shorthand for
+    `{"arrow": "triangle"}`; `read` always shows the object.
+  - A value equal to what `read` shows writes nothing; a different
+    one is stored on the shape (`BeginArrow`, `EndArrow`,
+    `BeginArrowSize`, `EndArrowSize`). The Formulas rule applies: an
+    end whose arrow cell is bound to a formula vsdx does not evaluate
+    (a master's `GUARD(0)`) is refused. A themed arrow may be
+    overridden.
+  - They apply to connectors only (any 1-D shape, with or without a
+    master, the Dynamic connector included). On any other kind
+    `begin` or `end` is `operation_failed` at the field: Visio draws
+    line ends on open paths, and vsdx does not derive whether a 2-D
+    shape's path is open.
+  - Arrow cells may be written while `line` is `"none"`; nothing is
+    drawn until the line has a pattern, and `read` shows no `begin` or
+    `end` on a line that is `"none"`.
+  - A connector added with `kind: "connector"` has no arrowheads
+    unless the plan gives them.
+- **Shadows.** `shadow` on object.add and object.set is `"none"` or
+  `{"color", "transparency", "offset"}`: `color` as `line.color`
+  (`{"hex":"#RRGGBB"}` or the bare string); `transparency` a number
+  from 0 (opaque) to 100, in percent; `offset` `[dx, dy]` in points
+  (or the plan's units), y down, so `[2, 2]` is a shadow below and to
+  the right.
+  - `"none"` stores `ShdwPattern` 0 on the object. An object value
+    stores `ShdwPattern` 1, `ShdwForegnd`, `ShdwForegndTrans` (the
+    percent as a fraction), `ShapeShdwType` 1 and
+    `ShapeShdwOffsetX`/`ShapeShdwOffsetY` (inches, y up), the cells
+    and values of the corpus's shadowed shapes. Only cells whose
+    shown value differs are written.
+  - On an object that shows no shadow, all three members are
+    required: vsdx supplies no default colour or offset. A missing
+    one is `operation_failed` at `shadow`, naming it (it depends on
+    the document, so it is not a plan-shape error). On an object
+    that shows one, members left out keep their value.
+  - Blur, the oblique and scaled shadow types and the page's default
+    shadow (`ShdwOffsetX`, `ShdwOffsetY`, `ShdwType` on the page
+    sheet) are not written; `ShapeShdwShow` is never touched.
+  - Applies to kinds `shape` and `group`. On a connector it is
+    `operation_failed` at `shadow`; on a picture or kind `other` it is
+    `operation_failed` at `at`, as fill and line are.
+  - The Formulas rule applies (a master's `GUARD(0)` or
+    `THEMEGUARD(…)` on `ShdwPattern` refuses); a themed value may be
+    overridden.
+  - That Visio shows a shadow for these cells alone, that
+    `ShapeShdwType` 1 makes it use the shape's own offsets, and that
+    `ShapeShdwShow` does not hide it, are **Visio unconfirmed
+    (VE17)**.
+- **Pictures.** `image` names a local image file: a path, absolute
+  or relative to the working directory (never to the plan file, also
+  when the plan is `-`), read as the operating system resolves it
+  (symbolic links are followed), exactly as pptx `image`. It is the
+  caller's path: confining it is the caller's job (§5). A value that
+  starts with `/` and names a media part of the drawing as `read`
+  shows it (`/visio/media/image1.png`) is that part; a value naming
+  both a part and an existing file is refused (`invalid_operation`),
+  as pptx.
+  - The files a plan names are read and checked with the rest of the
+    plan, before the document opens, and every fault comes back
+    together at `ops[n].image`: a file that is missing, unreadable or
+    not a regular file is `io`; a file over 16 MiB (checked from its
+    size, before it is read), a format other than PNG or JPEG (from
+    the bytes' signature, never the name), a header that does not
+    decode, or a pixel width or height over 16,384 is
+    `invalid_operation`. A plan's files together may hold at most
+    64 MiB. `--dry-run` reads and checks them too. (pptx reads its
+    file when the op runs and has no size limit; the limits are new
+    here.)
+  - `object.add` `kind: "picture"` needs `image` and `box` or `pin`.
+    With `pin` the picture is its pixel size at 96 pixels per inch
+    (0.75 pt per pixel). `box` is taken as given: the aspect ratio is
+    the plan's.
+  - `object.set` `image` replaces the picture's image and keeps its
+    box, rotation, flips, crop and every other cell. An `image` equal
+    to the part shown, or a file whose bytes equal that part's, writes
+    nothing.
+  - `crop` is `[l, t, r, b]`, the part of the image cut off at each
+    side in percent of the image, as pptx: each from 0 to under 100,
+    `l + r` and `t + b` under 100. It is stored in the picture's
+    `ImgOffsetX`, `ImgOffsetY`, `ImgWidth` and `ImgHeight` cells as
+    formulas of the corpus's form (`Width*k`, `ImgWidth*k`), so a
+    later resize keeps the crop: `ImgWidth = Width*100/(100-l-r)`,
+    `ImgOffsetX = ImgWidth*(-l/100)`, `ImgHeight =
+    Height*100/(100-t-b)`, `ImgOffsetY = ImgHeight*(-b/100)`.
+    `[0, 0, 0, 0]` is no crop (`Width*1`, `ImgWidth*0`). That Visio
+    crops by these cells in this sense is **Visio unconfirmed
+    (VE18)**. There is no separate scale: the box is the scale.
+  - Media: bytes whose SHA-256 equals a part under `/visio/media/`
+    with the same content type reuse that part; otherwise a new part
+    `/visio/media/imageN.<ext>`, N one more than the largest `imageN`
+    there or targeted by any relationship of the package (numbered
+    across extensions). The page part gets one relationship of the
+    image type to the part, reused by every picture of that image on
+    the page, with a relative target (`../media/image3.png`). The
+    content-type `Default` for the extension is added when the
+    drawing has none (an `Override` only when a `Default` gives
+    another type). The written form is the Visio-authored JPEG
+    picture's (`ForeignData ForeignType='Bitmap' CompressionType='JPEG'`,
+    media `imageN.jpeg`, `<Default Extension="jpeg"
+    ContentType="image/jpeg"/>`); PNG takes the same form with
+    `CompressionType='PNG'`, `imageN.png` and `image/png` (the owner's
+    ruling of 2026-11-18 grounds the writes in MS-VSDX and that sample).
+  - A replaced or deleted picture (the object, or any picture in a
+    deleted group) releases its media: the page's relationship is
+    removed when no shape of the page uses it, and the part when no
+    relationship in the package targets it. `parts` lists them.
+  - A picture that a master instance inherits (a picture with
+    `MasterShape` inside an instance) is refused for `image` and
+    `crop`. EMF, SVG, GIF
+    and other formats are read (kind `picture`) and not written.
+  - That Visio opens a drawing with a picture vsdx added is covered by
+  §9's label; that Visio accepts the stored form is **Visio unconfirmed
+  (VE18)**. Every picture write is checked against the MS-VSDX schema
+  and imported and drawn by LibreOffice in the tests.
+- **Background pages.** A page is a foreground page or a background
+  page (`background`); a page of either kind may use one background
+  page (`background_page`).
+  - `page.set` `background_page` with a page address makes `at` use
+    that page; `"none"` removes the use. `page.set` `background`
+    `true` makes `at` a background page, `false` a foreground page.
+    `page.add` takes both for the new page. A value equal to what
+    `read` shows writes nothing.
+  - When `background` changes the page's kind, the page moves in the
+    stored order so that foreground pages stay before background
+    pages: a page made a background goes to the end, a page made
+    foreground goes after the last foreground page. `page.add` with
+    `at` and `page.reorder` are refused when they would put a
+    foreground page after a background page or a background page
+    before a foreground page. A drawing that already mixes them is
+    read and edited as it is. That Visio requires this order is
+    **Visio unconfirmed (VE16)**; the rule is the cautious side.
+  - Refused, `operation_failed` at the field: `background_page`
+    naming a page that is not a background page (a foreground page);
+    naming `at` itself; a chain of background pages that would come
+    back to `at` (a cycle); `background: false` on a page another
+    page uses as its background (set those to `"none"` first);
+    `background: true` on the last foreground page;
+    `background_page` naming a master or a page the drawing lacks
+    (`not_found`). A plan may make a page a background and use it in
+    one plan: ops apply in order.
+  - In a plan, `page.set` with `background: true` and
+    `background_page` on the same op is applied kind first.
+  - `changed` lists each page whose summary entry changed; the pages
+    that use a page are not changed when it is edited.
+  - The stored form is the `Page` element's `Background` and
+    `BackPage` attributes (the schema's; `BackPage` holds the
+    background page's ID). That Visio reads them as vsdx writes them,
+    and draws a background behind a page of a different size or
+    orientation as it is, is **Visio unconfirmed (VE16)**: no
+    Visio-authored sample is in the corpus.
 - **Formulas.** A write to a cell whose formula vsdx does not
   evaluate is refused, `operation_failed`, `path` the field written
   (`ops[n].at` for object.move), `detail` each refused cell as
@@ -383,8 +560,9 @@ no op writes them.
   geometry on a page with a drawing scale (box, rot, flips, ends,
   move, object.add, page.set size); a data-linked shape data
   row for prop.set and prop.delete; any write to a master, a master
-  shape or a stencil; text and fill on a picture or other
-  read-only kind; glue to a cell other than a shape's pin or a
+  shape or a stencil; text, fill and shadow on a picture or other
+    read-only kind (a picture takes box, rot, flips, name, move,
+    reorder, delete, `image` and `crop`); glue to a cell other than a shape's pin or a
   connection point (`invalid_operation` at the glue field); deleting
   the last foreground page; deleting a page another page uses as its
   background; a duplicate page name (page.add, page.rename); a
@@ -394,7 +572,11 @@ no op writes them.
   whole-shape glue on a master-less connector; deleting a
   sub-shape a master instance inherits (a shape with `MasterShape`
   inside an instance), `ops[n].at`; `page.set` when PageWidth
-  or PageHeight is bound to a formula; box, rot or flips on a
+    or PageHeight is bound to a formula; `begin` or `end` on an object
+    that is not a connector, and an arrow index the table does not
+    name; `shadow` on a connector; the background refusals above;
+    `image` or `crop` on an object that is not a picture, and on a
+    picture a master instance inherits; box, rot or flips on a
   connector; box or pin on a 1-D master, and from, to or glue on a
   2-D master (object.add); reorder relative to itself; line on a
   picture; a text.replace match that crosses a paragraph or line
@@ -493,6 +675,7 @@ from the same table.
 | `to` | destination address, for `move` and `reorder` |
 | `value` | xlsx: one cell value, in the form of §7a |
 | `values` | xlsx: rows of cell values (a list of lists, top row first) |
+| `image` | pptx, vsdx: the image of a picture: a local file path, or a media part as `read` shows it |
 | `name` | the name being given (a new sheet, a renamed sheet, a defined name, a renamed bookmark) |
 | `count` | how many things an `insert` op creates (rows, columns) |
 
@@ -525,7 +708,10 @@ from the same table.
   `object.reorder` (`front`, `back`, or another object's address with
   `position`). Connector glue is `from_glue` and `to_glue` (was
   `start`, `end`), beside the end points `from` and `to`; `start` and
-  `end` mean text offsets only, in both tools.
+  `end` mean text offsets only, in both tools. (**vsdx** `line.begin`
+  and `line.end` are keys of `line`, not op fields: Visio's names for
+  a line's two ends, at `from` and `to`. pptx's `line.head` and
+  `line.tail` are DrawingML's names for the same two ends.)
 - Lengths are numbers in points unless the plan sets `units` (pptx).
   **xlsx** row heights are points; column widths are Excel's character
   widths, as `read` shows them.
@@ -591,6 +777,10 @@ page as its summary entry, a shape data row as its `props` entry
 when read shows them). `deleted` includes field addresses a
 `text.set` `delete` listed.
 
+A page whose `background` or `background_page` changed is in
+`changed` as its summary entry. `parts` includes media parts added
+or removed and `/[content_types].xml` when a `Default` was added.
+
 **vsdx** `create` prints `{"new_base", "dry_run", "saved"}`; with a
 plan also its `aliases`, `changed`, `deleted`, `hazards` and
 `parts`, and `units` when the plan sets it. The new drawing has
@@ -599,6 +789,10 @@ one page, `page0` "Page-1", 8.5 x 11 in portrait, and no masters, so
 `geom` and connectors from `kind: "connector"`. The plan must not
 have `base` (`invalid_plan`, path `base`). With `--dry-run` the plan
 is checked and applied in memory and nothing is written.
+
+A created drawing has no background page; a plan adds one with
+`page.add` `background: true`. Pictures, line ends and shadows work
+in a created drawing (none needs a master).
 
 Hazard kinds:
 
@@ -735,6 +929,10 @@ are the precise rules.
   It never writes anywhere else and never follows a path taken from
   inside a document. Confining the tool to a directory is the caller's
   job (sandbox, working directory).
+- **pptx, vsdx**: an op's `image` (and pptx `svg`) may name a file to
+  read, by the same path rule. The tool reads it and never writes it;
+  it is the only file besides the document and the plan that a
+  command reads. `vsdx media` writes only its `-o`.
 - Output is deterministic: the same document and the same ops give the
   same bytes, except fresh GUIDs and timestamps the format requires.
 
@@ -767,6 +965,7 @@ An address is a string that names one thing in one document.
 | shape data row | `page0/s5/prop:Cost` (the row name) | vsdx | yes |
 | layer | `page0/layer:Connector`, read only | vsdx | until renamed |
 | field | `page0/s5/field:1` (1-based in the shape's text): a placeholder (§7) | vsdx | positional |
+| media part | `/visio/media/image1.png` (the part name), as `read` shows it in a picture's `image`; taken by `image` and by `vsdx media` | vsdx | until the image is replaced |
 | alias | `$name`, defined by an earlier op's `as` in the same plan. **vsdx**: followed by any suffix the named address takes (`$r/prop:Cost`, `$r:2`) | all | for the plan |
 
 - Composite addresses nest with `/`; a kind and its number join with `:`.
@@ -1037,9 +1236,13 @@ form in `read` output and in plans (`help values`).
   `from` or `to`, with a note. The page also has `layers` (read
   only, `{id, name, index, visible, print}` and `lock` when set),
   `connections` (`{connector, from, to, from_glue, to_glue}`),
-  `hazards` and `notes`. In the summary, `background` is true on a
-  page that is a background page, and `background_page` is the page
-  this page uses as its background.
+  `hazards` and `notes`. In the summary and in the page result,
+  `background` is true on a page that is a background page (left out
+  on a foreground page), and `background_page` is the address of the
+  page this page uses as its background (left out when it uses none;
+  a stored reference to a page the drawing lacks is shown as `#7`,
+  read only, with a note). A page's objects never include its
+  background's: read the background page itself.
 - Object keys are pptx's where pptx has them (`id`, `kind`, `type`,
   `name`, `parent`, `hidden`, `box`, `rot`, `flip_h`, `flip_v`,
   `from`, `to`, `from_glue`, `to_glue`, `fill`, `line`, `html`,
@@ -1056,6 +1259,37 @@ form in `read` output and in plans (`help values`).
   `format`, `unit` (a number's length unit, value in inches),
   `hidden` and `linked` when they apply; a date that is not stored in
   date form shows no `value`, with an omission.
+- `line` on a connector also has `begin` and `end`,
+  `{"arrow","size"}` as §3, each shown only when its effective arrow
+  is not `none`: the cell the shape stores, else its master's, else
+  the line style's, as every `line` value, with the origin in
+  `origins.line`. An end whose arrow is stored as `Themed` is left
+  out, with `line.begin` or `line.end` in `omitted`; a size that is
+  themed leaves `size` out of the entry the same way. Other kinds
+  show no `begin` or `end`.
+- `shadow` is shown on a shape or group whose effective
+  `ShdwPattern` is not 0: `{"color","transparency","offset"}` in the
+  plan's form, each member from the effective cell (shape, master,
+  fill style), with the origin in `origins.shadow`. No `shadow` key
+  means no shadow or one not derived: a themed `ShdwPattern` (most
+  themed drawings) is left out with `shadow` in `omitted`, reason
+  `themed value not derived`; a themed member is left out of the
+  object with `shadow.color` (and so on) in `omitted`. `offset` is
+  shown only when the effective `ShapeShdwType` is 1; otherwise it is
+  omitted with the reason `page default shadow not derived` (the page
+  sheet's `ShdwOffsetX`/`ShdwOffsetY` are not shown). A non-zero `ShapeShdwBlur`, oblique
+  angle or scale is not shown and is named in `omitted`. `read` never
+  shows `"shadow": "none"`.
+- A picture (kind `picture`: a Foreign shape with an image
+  relationship) has `image`, the media part (`/visio/media/image1.png`),
+  `media` `{"type","bytes","sha256","px"}` (the content type from the
+  package; the part's size in bytes; the SHA-256 of its bytes; `px`
+  `[w, h]` from the header for PNG and JPEG, otherwise left out with
+  `media.px` in `omitted`, as for EMF), and `crop` `[l, t, r, b]` in
+  percent when the Img cells are in the forms §3 writes and not all
+  zero (any other form is `crop` in `omitted`). `read` never contains
+  image bytes; `vsdx media` extracts them. A picture whose
+  relationship or part is missing shows no `image`, with a note.
 - `origins` values: `local`, `inherited` (stored value, inherited
   formula), `master`, `style`. A value stored as `Themed` is left out,
   with the reason in `omitted`; palette-index colours are shown
@@ -1117,7 +1351,9 @@ are the precise rules.
   output, including a created drawing, without a repair prompt is
   **Visio unconfirmed** until visio-smoke results are recorded in
   `docs/vsdx-design.md`. Verified: the structural integrity gate, vsdx
-  read-back, and LibreOffice import.
+  read-back, and LibreOffice import. A vsdx save that adds or releases a picture changes
+  `[Content_Types].xml`, the page's relationships and the media parts
+  as §3 says; these are the op's own targets, not exceptions.
 - Content no op targeted is unchanged, byte for byte. There are three
   exceptions:
   - a docx save writes the `w14:paraId` of every paragraph that lacked
@@ -1173,7 +1409,11 @@ Real files have defects the tool did not make. The rule:
   a legacy binary or XML Visio file (`.vsd`, `.vdx`, `.vsx`); a
   malformed page or master part is a note in the summary and
   `unreadable_target` (path `--page`) when read; a shape whose master is
-  missing shows its own cells with a note.
+  missing shows its own cells with a note. An `image` file that is not a readable PNG or JPEG is refused
+  before the document opens (§3); an existing picture whose media part
+  is missing or malformed is read with a note, can be moved, deleted
+  and given a new `image`, and is `unreadable_target` only for `crop`
+  and for `vsdx media`.
 - **A read that asks for the damaged part itself** (`docx read --kind
   styles` on a file whose styles part is malformed) is refused with
   `unreadable_target`, path `--kind`: there is nothing else to show.
@@ -1203,13 +1443,18 @@ Real files have defects the tool did not make. The rule:
   translates plans and results for parity runs; the binaries do not.
 - MCP, WASM and language bindings. Agents run the binaries.
 - **vsdx** in v1 (deferred, not refused by name unless listed in §3):
-  writing hyperlinks, comments (not read either), layers, assigning a
-  page's background page, group create/ungroup, object.duplicate,
-  master import and editing masters; `read --format svg`; formula
-  and ShapeSheet cell writes (there is no `cell.set`); arrowheads and
-  line ends (`line.begin`, `line.end`); theme resolution for fill and
-  line (a themed value is omitted, §8); pinning an inherited value
-  locally; moving point-glued ends when their target moves.
+  writing hyperlinks, comments (not read either), layers, group
+  create/ungroup, object.duplicate, master import and editing
+  masters; `read --format svg`; formula and ShapeSheet cell writes
+  (there is no `cell.set`); arrow styles beyond `triangle` and
+  `stealth`, and line ends on 2-D shapes; shadow blur, oblique and
+  scaled shadows, the page's default shadow, and shadows on
+  connectors and pictures; writing EMF, SVG, GIF or any image other
+  than PNG and JPEG, picture brightness, contrast and other
+  adjustments, and `data:` URLs for images; theme resolution for
+  fill, line, line ends and shadow (a themed value is omitted, §8);
+  pinning an inherited value locally; moving point-glued ends when
+  their target moves.
 
 ## 13. Implementation notes (not for agents)
 

@@ -946,7 +946,7 @@ S0's ctypes extraction runs over the Visio-authored subset
 per entry; a type seen in fewer files stays out of the table and the
 code that needs it waits (S0 reports which).
 
-### Visio experiments (VE1 to VE14; not yet run, dependent claims labelled Visio unconfirmed)
+### Visio experiments (VE1 to VE18; not yet run, dependent claims labelled Visio unconfirmed)
 
 Fixtures under `testdata/vsdx/experiments`, written by a Go generator,
 with a README of what to look for; run by the owner if and when a Visio
@@ -969,6 +969,10 @@ labelled "LibreOffice ...: Visio unconfirmed" as xlsx did.
 | VE12 | Does a created `docProps/custom.xml` with only RecalcDocument open cleanly? |
 | VE13 | Does Visio re-walk whole-shape glue CC2 writes (`_WALKGLUE`, `_XFTRIGGER(Sheet.N!EventXFMod)`, Connect `ToCell PinX ToPart 3`) when the target moves, and route the straight line CC2 stores when RecalcDocument is set (with VE4)? |
 | VE14 | Does Visio clamp a stored character Size between 0 and 1 pt to 1 pt (four corpus `GUARD(0)` Size cells cache 1 pt), and is there an upper bound? Until recorded, formula.CellBounds clamps Size to at least 1 pt and text input refuses font-size below 1pt (CC1). |
+| VE15 | Which arrowhead does Visio draw for `BeginArrow`/`EndArrow` 4, 5 and 13, and for sizes 0 to 6? Does a local arrow cell on a Dynamic connector instance override the style's themed value? |
+| VE16 | Does Visio accept `Background='1'` and `BackPage='<ID>'` as vsdx writes them; does it require background pages after foreground pages; does it accept a background that itself has a background; what does it draw when the two pages differ in size? |
+| VE17 | Does Visio show a shadow for `ShdwPattern` 1 with `ShapeShdwType` 1 and local offsets; what do `ShapeShdwShow` 0, 1 and 2 do; which offset applies when `ShapeShdwType` is 0? |
+| VE18 | Does Visio open a page picture vsdx added (PNG, JPEG) without repair, and crop by `ImgOffsetX/Y`, `ImgWidth/Height` in the sense the contract states? |
 
 ### What cannot be verified without real Visio
 
@@ -1129,3 +1133,45 @@ first-page row are confirmed; RM3's budgets (default 84/343 MB, full
 123/551 MB) are the designer's; CC6's container skip in text.replace's
 walks stays (the skip replaces the "note" the row first asked for,
 since apply results carry no notes).
+
+## 13. Line ends, background pages, shadows and pictures (2026-11-18)
+
+The architect's amendment (line ends, background page assignment,
+shadows, pictures by file path) is merged into `docs/contract.md`. What
+each write stores, and its grounding:
+
+- **Line ends**: `BeginArrow`, `EndArrow`, `BeginArrowSize`,
+  `EndArrowSize` on the shape sheet (MS-VSDX `BeginArrow_Type` and
+  siblings, visio.xsd ShapeSheet cell alternatives, lines 172-176);
+  values as the corpus stores them (0, 4, 5, 13; sizes 0 to 3).
+- **Shadows**: `ShdwPattern`, `ShdwForegnd`, `ShdwForegndTrans`,
+  `ShapeShdwType`, `ShapeShdwOffsetX`/`Y`, the cells and values of the
+  Visio-authored Tika `testVISIO.vsdx` shadowed shapes.
+- **Background pages**: the `Page` element's `Background` and
+  `BackPage` attributes (visio.xsd `Page_Type`, lines 4671-4672); no
+  Visio-authored sample (B1), so every behavioural claim is VE16.
+- **Pictures**: `Shape Type='Foreign'` with `ImgOffsetX`, `ImgOffsetY`,
+  `ImgWidth`, `ImgHeight` cells in the formula forms `ImgWidth*k`,
+  `Width*k` and a `ForeignData ForeignType='Bitmap' CompressionType=`
+  element with one `Rel r:id` (visio.xsd `ForeignData_Type`, lines
+  4298-4312; `Rel_Type`, line 4313); the page relationship of type
+  `http://schemas.openxmlformats.org/officeDocument/2006/relationships/image`
+  with a relative target, and a content-type `Default` per extension
+  (OPC, ECMA-376 Part 2). The JPEG form is the Visio-authored sample's
+  (fixture V18, derived from `overzichtfoto's.vsdx`, CC BY 4.0:
+  `CompressionType='JPEG'`, `imageN.jpeg`, `image/jpeg`); PNG takes the
+  same form with `CompressionType='PNG'`, `imageN.png`, `image/png`.
+- **Owner ruling (2026-11-18)**: picture writes are grounded in the
+  MS-VSDX schema and spec and the one Visio-authored JPEG sample, not in
+  two Visio-authored samples per format. This supersedes the
+  amendment's precondition PRE-D. Visio's acceptance is VE18. Checks:
+  `tools/vsdxpicture` validates PNG and JPEG adds, crop, replace and
+  delete against the XSD (the differential check; the one kind it
+  reports, `r:id` on `ForeignData/Rel`, is the schema's own `Rel_Type`
+  gap that every drawing's `Page/Rel` shows too) and renders a picture
+  through LibreOffice.
+- **Corpus**: the researcher's Visio-authored files were not added as
+  sources: the CEG drawing holds 70 MB of BMP media and times out the
+  corpus test's LibreOffice step, and the Aspose drawing moves the
+  pinned CC1 corpus tables; the fetch script gained single-file source
+  kinds for later use.
