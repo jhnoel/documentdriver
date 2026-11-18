@@ -415,9 +415,9 @@ no op writes them.
   shows it (`/visio/media/image1.png`) is that part; a value naming
   both a part and an existing file is refused (`invalid_operation`),
   as pptx.
-  - The files a plan names are read and checked with the rest of the
-    plan, before the document opens, and every fault comes back
-    together at `ops[n].image`: a file that is missing, unreadable or
+  - The files a plan names are read and checked with the rest of the plan,
+    before the document opens, and every fault comes back together with
+    the plan's other faults, at `ops[n].image`: a file that is missing, unreadable or
     not a regular file is `io`; a file over 16 MiB (checked from its
     size, before it is read), a format other than PNG or JPEG (from
     the bytes' signature, never the name), a header that does not
@@ -429,7 +429,12 @@ no op writes them.
   - `object.add` `kind: "picture"` needs `image` and `box` or `pin`.
     With `pin` the picture is its pixel size at 96 pixels per inch
     (0.75 pt per pixel). `box` is taken as given: the aspect ratio is
-    the plan's.
+    the plan's. The picture takes
+    the drawing's "None" style sheet (LineStyle, FillStyle and TextStyle,
+    as the Visio-authored samples store them), so it reads `fill` and
+    `line` "none"; a drawing with no "None" sheet (one whose
+    LinePattern and FillPattern are 0) gets LinePattern 0 and FillPattern
+    0 on the picture itself. An added picture has no connection points.
   - `object.set` `image` replaces the picture's image and keeps its
     box, rotation, flips, crop and every other cell. An `image` equal
     to the part shown, or a file whose bytes equal that part's, writes

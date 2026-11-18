@@ -67,7 +67,9 @@ func ParsePlan(text []byte) (*Plan, cli.Errors) {
 		}
 		p.Ops = append(p.Ops, spec)
 	}
-	if errs := d.Errs(); len(errs) > 0 {
+	// Image files are read and checked here, with the plan's other
+	// document-independent faults (docs/contract.md §3, Pictures).
+	if errs := append(d.Errs(), CheckImages(p)...); len(errs) > 0 {
 		return nil, errs
 	}
 	return p, nil

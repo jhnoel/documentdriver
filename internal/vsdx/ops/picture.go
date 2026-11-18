@@ -28,6 +28,14 @@ const (
 	mediaDir      = "/visio/media/"
 )
 
+// statImage and readImage reach the file system for image files (the
+// caller's own paths, §5); tests replace them to fake a file at a
+// media part's name.
+var (
+	statImage = os.Stat
+	readImage = os.ReadFile
+)
+
 // imageInput is an image a plan names: the bytes of a local file
 // (file), or a media part of the drawing (part, checked when the op
 // runs).
@@ -85,6 +93,9 @@ func CheckImages(p *Plan) cli.Errors {
 			continue
 		}
 		at := cli.Index("ops", i)
+		if *dst != nil {
+			continue // checked already (ParsePlan, then apply.Run)
+		}
 		if crop != nil {
 			if msg, bad := cropFault(crop); bad {
 				errs = append(errs, cli.Errorf(cli.CodeInvalidOperation, cli.Join(at, "crop"), "%s", msg))
@@ -133,7 +144,7 @@ func cropFault(c []float64) (string, bool) {
 // operating system resolves it), or returns a media-part reference
 // when value is under /visio/media/ and names no file.
 func loadImage(value string) (*imageInput, int, error) {
-	st, err := os.Stat(value)
+	st, err := statImage(value)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) && strings.HasPrefix(strings.ToLower(value), mediaDir) {
 			return &imageInput{part: value}, 0, nil
@@ -146,7 +157,7 @@ func loadImage(value string) (*imageInput, int, error) {
 	if st.Size() > maxImageFile {
 		return nil, 0, cli.Errorf(cli.CodeInvalidOperation, "", "image %s is over 16 MiB", value)
 	}
-	b, err := os.ReadFile(value) //nolint:gosec // G304: the caller's own path (§5)
+	b, err := readImage(value)
 	if err != nil {
 		return nil, 0, cli.Errorf(cli.CodeIO, "", "image %s: %v", value, err)
 	}
