@@ -326,8 +326,8 @@ func checkPageSet(s *PageSetSpec) (string, string, bool) {
 	if s.Size != nil && !sizeOK(s.Size) {
 		return "size must be two positive numbers", "size", true
 	}
-	if s.Orientation == "" && s.Size == nil {
-		return "page.set needs orientation or size", "", true
+	if s.Orientation == "" && s.Size == nil && s.Background == nil && s.BackgroundPage == "" {
+		return "page.set needs orientation, size, background or background_page", "", true
 	}
 	return "", "", false
 }

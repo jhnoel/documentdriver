@@ -443,6 +443,12 @@ func (s *PageAddSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 		}},
 		{Name: "size", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Size) }},
 		{Name: "orientation", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Orientation) }},
+		{Name: "background", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) {
+			var b bool
+			dd.Value(mv, fp, &b)
+			s.Background = &b
+		}},
+		{Name: "background_page", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.BackgroundPage) }},
 	})
 }
 
@@ -460,5 +466,11 @@ func (s *PageSetSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 		{Name: "at", Required: true, Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.At) }},
 		{Name: "size", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Size) }},
 		{Name: "orientation", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Orientation) }},
+		{Name: "background", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) {
+			var b bool
+			dd.Value(mv, fp, &b)
+			s.Background = &b
+		}},
+		{Name: "background_page", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.BackgroundPage) }},
 	})
 }

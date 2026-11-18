@@ -233,3 +233,77 @@ func nextPagePart(pkg *opc.Package, dir string) string {
 		}
 	}
 }
+
+// SetPageBackground sets the Background and BackPage attributes of
+// the Page element of page (docs/contract.md §3, Background pages):
+// background, when not nil, writes Background='1' or removes it;
+// clearBack removes BackPage; back, when not nil, writes BackPage as
+// that page ID. The document's page entries follow.
+func (w *Workspace) SetPageBackground(page string, background *bool, back *uint32, clearBack bool) error {
+	a, err := vsd.Parse(page)
+	if err != nil {
+		return fmt.Errorf("vsdx edit: %w", err)
+	}
+	if a.Kind != vsd.KindPage || a.InMaster || w.pagesPart == "" {
+		return fmt.Errorf("%w: %s", ErrNotFound, page)
+	}
+	root, err := w.pagesRoot(page)
+	if err != nil {
+		return err
+	}
+	target := findPageElem(root, a.Container, a.PageDup)
+	if target == nil {
+		return fmt.Errorf("%w: %s", ErrNotFound, page)
+	}
+	h := w.core.Target(w.pagesPart, page, []*tree.Node{target})
+	if background != nil {
+		if *background {
+			if err := h.SetAttr(core.Path{}, "Background", "1"); err != nil {
+				return err
+			}
+		} else if err := h.RemoveAttr(core.Path{}, "Background"); err != nil {
+			return err
+		}
+	}
+	if clearBack {
+		if err := h.RemoveAttr(core.Path{}, "BackPage"); err != nil {
+			return err
+		}
+	}
+	if back != nil {
+		if err := h.SetAttr(core.Path{}, "BackPage", strconv.FormatUint(uint64(*back), 10)); err != nil {
+			return err
+		}
+	}
+	seen := 0
+	for i := range w.doc.Pages {
+		if w.doc.Pages[i].ID != a.Container {
+			continue
+		}
+		seen++
+		if seen != a.PageDup {
+			continue
+		}
+		e := &w.doc.Pages[i]
+		if background != nil {
+			e.Background = *background
+		}
+		if clearBack {
+			e.BackPage, e.HasBack = 0, false
+		}
+		if back != nil {
+			e.BackPage, e.HasBack = *back, true
+		}
+		break
+	}
+	return nil
+}
+
+// PagesRoot returns the Pages element of the working pages part, for
+// callers that read page attributes without opening the document.
+func (w *Workspace) PagesRoot() (*tree.Node, error) {
+	if w.pagesPart == "" {
+		return nil, ErrNotFound
+	}
+	return w.pagesRoot("pages")
+}

@@ -149,9 +149,25 @@ func (s *PageAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 	if duplicateName(pages, s.Name) {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "name", "page name %q is already used", s.Name)
 	}
+	order, err := bgPages(ws)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
 	after, beforeFirst, err := afterFor(pages, atAddr, s.Position)
 	if err != nil {
 		return "", nil, nil, "", err
+	}
+	if atAddr == "" && (s.Background == nil || !*s.Background) {
+		// A foreground page goes after the last foreground page, so
+		// it stays before the background pages (§3, Background pages).
+		for _, p := range order {
+			if !p.background {
+				after = p.addr
+			}
+		}
+		if len(order) > 0 && after == order[len(order)-1].addr {
+			after = ""
+		}
 	}
 	wIn, hIn, desired := addSize(s, units)
 	emitOrientation := 0
@@ -171,6 +187,24 @@ func (s *PageAddSpec) Run(ws *edit.Workspace, aliases map[string]string, units s
 		}
 		if !moved {
 			return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "position", "the new page could not be placed before the first page")
+		}
+	}
+	if s.Background != nil && *s.Background {
+		if err := ws.SetPageBackground(addr, s.Background, nil, false); err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	if atAddr != "" {
+		if err := checkPageOrder(ws, order, "position"); err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	if s.BackgroundPage != "" {
+		if s.BackgroundPage == "none" {
+			return "", nil, nil, "", cli.Errorf(cli.CodeInvalidOperation, "background_page", "page.add takes a background page's address, not \"none\"")
+		}
+		if _, err := applyBackground(ws, aliases, addr, nil, s.BackgroundPage); err != nil {
+			return "", nil, nil, "", err
 		}
 	}
 	return addr, []string{addr}, nil, "", nil

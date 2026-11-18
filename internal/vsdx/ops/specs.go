@@ -147,12 +147,14 @@ type PropSetSpec struct {
 
 // PageAddSpec is page.add: appended, or before/after At.
 type PageAddSpec struct {
-	Name        string    `json:"name" doc:"The new page's name, as read shows it."`
-	As          string    `json:"as,omitempty" plan:"optional" doc:"A name for the new page; later operations write $name for it."`
-	At          string    `json:"at,omitempty" plan:"optional" doc:"A page address to add next to, as read shows it; with position, neither appends."`
-	Position    string    `json:"position,omitempty" plan:"optional" enum:"before,after" doc:"Before or after at."`
-	Size        []float64 `json:"size,omitempty" plan:"optional" doc:"[width, height] in points, or the plan's units, as read shows size."`
-	Orientation string    `json:"orientation,omitempty" plan:"optional" doc:"portrait or landscape, as read shows orientation."`
+	Name           string    `json:"name" doc:"The new page's name, as read shows it."`
+	As             string    `json:"as,omitempty" plan:"optional" doc:"A name for the new page; later operations write $name for it."`
+	At             string    `json:"at,omitempty" plan:"optional" doc:"A page address to add next to, as read shows it, with position; with neither, a foreground page goes after the last foreground page and a background page at the end."`
+	Position       string    `json:"position,omitempty" plan:"optional" enum:"before,after" doc:"Before or after at."`
+	Size           []float64 `json:"size,omitempty" plan:"optional" doc:"[width, height] in points, or the plan's units, as read shows size."`
+	Orientation    string    `json:"orientation,omitempty" plan:"optional" doc:"portrait or landscape, as read shows orientation."`
+	Background     *bool     `json:"background,omitempty" plan:"optional" doc:"true: a background page; false: a foreground page, as read shows background."`
+	BackgroundPage string    `json:"background_page,omitempty" plan:"optional" doc:"A background page's address for this page to use, as read shows background_page."`
 }
 
 // PageRenameSpec is page.rename.
@@ -163,9 +165,11 @@ type PageRenameSpec struct {
 
 // PageSetSpec is page.set: orientation and/or size (decision 6).
 type PageSetSpec struct {
-	At          string    `json:"at" doc:"A page address as read shows it (page0), or $name."`
-	Size        []float64 `json:"size,omitempty" plan:"optional" doc:"[width, height] in points, or the plan's units, as read shows size."`
-	Orientation string    `json:"orientation,omitempty" plan:"optional" doc:"portrait or landscape, as read shows orientation."`
+	At             string    `json:"at" doc:"A page address as read shows it (page0), or $name."`
+	Size           []float64 `json:"size,omitempty" plan:"optional" doc:"[width, height] in points, or the plan's units, as read shows size."`
+	Orientation    string    `json:"orientation,omitempty" plan:"optional" doc:"portrait or landscape, as read shows orientation."`
+	Background     *bool     `json:"background,omitempty" plan:"optional" doc:"true: a background page; false: a foreground page, as read shows background."`
+	BackgroundPage string    `json:"background_page,omitempty" plan:"optional" doc:"A background page's address for this page to use, as read shows background_page, or \"none\"."`
 }
 
 // objectAddRules are object.add's document-independent checks, in the
@@ -325,7 +329,7 @@ var pageSetRules = []string{
 	"at must be a page address or $name",
 	"orientation must be portrait or landscape",
 	"size must be two positive numbers",
-	"page.set needs orientation or size",
+	"page.set needs orientation, size, background or background_page",
 }
 
 // pageSetRefuses are page.set's document-dependent refusals, one per

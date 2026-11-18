@@ -3,6 +3,7 @@ package ops
 import (
 	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -315,7 +316,32 @@ func unwritableCells(pageSheet *tree.Node, names []string) []formulaCell {
 }
 
 // Run applies page.set (decision 6).
-func (s *PageSetSpec) Run(ws *edit.Workspace, aliases map[string]string, units string, _ ids.Source) (string, []string, []string, string, error) {
+func (s *PageSetSpec) Run(ws *edit.Workspace, aliases map[string]string, units string, src ids.Source) (string, []string, []string, string, error) {
+	addr, err := resolvePage(s.At, aliases)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
+	var changed []string
+	var stale string
+	if s.Size != nil || s.Orientation != "" {
+		var err error
+		_, changed, _, stale, err = s.runSize(ws, aliases, units, src)
+		if err != nil {
+			return "", nil, nil, "", err
+		}
+	}
+	wrote, err := applyBackground(ws, aliases, addr, s.Background, s.BackgroundPage)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
+	if wrote && !slices.Contains(changed, addr) {
+		changed = append([]string{addr}, changed...)
+	}
+	return "", changed, nil, stale, nil
+}
+
+// runSize applies page.set's size and orientation.
+func (s *PageSetSpec) runSize(ws *edit.Workspace, aliases map[string]string, units string, _ ids.Source) (string, []string, []string, string, error) {
 	addr, err := resolvePage(s.At, aliases)
 	if err != nil {
 		return "", nil, nil, "", err

@@ -99,6 +99,10 @@ func pageFacts(p *Page, d *doc.Document, r *inherit.Resolver, e *doc.PageEntry) 
 	p.Background = e.Background
 	if e.HasBack {
 		p.BackPage = vsd.PageID(e.BackPage, 1)
+		if d != nil && !hasPageID(d, e.BackPage) {
+			p.BackPage = "#" + strconv.FormatUint(uint64(e.BackPage), 10)
+			p.Notes = append(p.Notes, doc.Note{At: p.ID, Reason: "background page " + p.BackPage + " is not in the drawing"})
+		}
 	} else {
 		p.BackPage = ""
 	}
@@ -268,4 +272,14 @@ func PageSheet(d *doc.Document, r *inherit.Resolver, e *doc.PageEntry) *Page {
 	p := &Page{}
 	pageFacts(p, d, r, e)
 	return p
+}
+
+// hasPageID reports whether d has a page with stored ID id.
+func hasPageID(d *doc.Document, id uint32) bool {
+	for i := range d.Pages {
+		if d.Pages[i].ID == id {
+			return true
+		}
+	}
+	return false
 }

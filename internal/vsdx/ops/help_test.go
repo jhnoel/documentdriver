@@ -126,7 +126,7 @@ func helpRuleCases() []struct {
 		{"page.set", &PageSetSpec{At: "x", Size: []float64{100, 100}}, "at must be a page address or $name"},
 		{"page.set", &PageSetSpec{At: "page0", Orientation: "diagonal"}, "orientation must be portrait or landscape"},
 		{"page.set", &PageSetSpec{At: "page0", Size: []float64{0, 0}}, "size must be two positive numbers"},
-		{"page.set", &PageSetSpec{At: "page0"}, "page.set needs orientation or size"},
+		{"page.set", &PageSetSpec{At: "page0"}, "page.set needs orientation, size, background or background_page"},
 		{"object.move", &ObjectMoveSpec{At: "x"}, "at must be a shape address or $name"},
 		{"object.delete", &ObjectDeleteSpec{At: "x"}, "at must be a shape address or $name"},
 		{"object.reorder", &ObjectReorderSpec{At: "x", To: "front"}, "at must be a shape address or $name"},

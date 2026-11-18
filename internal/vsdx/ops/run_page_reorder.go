@@ -25,6 +25,10 @@ func (s *PageReorderSpec) Run(ws *edit.Workspace, aliases map[string]string, _ s
 	if s.Position != "before" && s.Position != "after" {
 		return "", nil, nil, "", cli.Errorf(cli.CodeInvalidOperation, "position", "position must be before or after")
 	}
+	order, err := bgPages(ws)
+	if err != nil {
+		return "", nil, nil, "", err
+	}
 	moved, err := ws.ReorderPage(at, to, s.Position)
 	if err != nil {
 		if errors.Is(err, edit.ErrNotFound) {
@@ -42,6 +46,9 @@ func (s *PageReorderSpec) Run(ws *edit.Workspace, aliases map[string]string, _ s
 	}
 	if !moved {
 		return "", nil, nil, "", nil
+	}
+	if err := checkPageOrder(ws, order, "position"); err != nil {
+		return "", nil, nil, "", err
 	}
 	return "", []string{at}, nil, "", nil
 }

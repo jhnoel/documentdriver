@@ -56,23 +56,25 @@ func equalIDs(got, want []string) bool {
 	return true
 }
 
-// TestPageReorderV8Page3BeforePage0 checks the PGR row: V8 page3
-// before page0 gives summary order page3, page0, page1.
-func TestPageReorderV8Page3BeforePage0(t *testing.T) {
+// TestPageReorderV8Page1BeforePage0 checks the PGR row (amended for
+// the background-page order rule: V8's page3 is a background page, so
+// the row moves foreground page1): V8 page1 before page0 gives
+// summary order page1, page0, page3.
+func TestPageReorderV8Page1BeforePage0(t *testing.T) {
 	src := vsdxtest.Fixture(t, "v8-pages")
 	w := mustBegin(t, src)
-	as, changed, _, _, err := (&ops.PageReorderSpec{At: "page3", To: "page0", Position: "before"}).Run(w, map[string]string{}, "pt", nil)
+	as, changed, _, _, err := (&ops.PageReorderSpec{At: "page1", To: "page0", Position: "before"}).Run(w, map[string]string{}, "pt", nil)
 	if err != nil {
-		t.Fatalf("page.reorder page3 before page0: %v", err)
+		t.Fatalf("page.reorder page1 before page0: %v", err)
 	}
-	if as != "" || len(changed) != 1 || changed[0] != "page3" {
-		t.Errorf("Run = (%q, %v), want changed [page3]", as, changed)
+	if as != "" || len(changed) != 1 || changed[0] != "page1" {
+		t.Errorf("Run = (%q, %v), want changed [page1]", as, changed)
 	}
 	if err := w.Verify(); err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
-	if got := summaryIDs(readSummary(t, w)); !equalIDs(got, []string{"page3", "page0", "page1"}) {
-		t.Errorf("summary order = %v, want [page3 page0 page1]", got)
+	if got := summaryIDs(readSummary(t, w)); !equalIDs(got, []string{"page1", "page0", "page3"}) {
+		t.Errorf("summary order = %v, want [page1 page0 page3]", got)
 	}
 	checkOnlyPagesChanged(t, w, src)
 }
@@ -98,30 +100,30 @@ func TestPageReorderV8Page0AfterPage1(t *testing.T) {
 	checkOnlyPagesChanged(t, w, src)
 }
 
-// TestPageReorderSequences checks two reorders in one workspace:
-// V8 page3 before page0, then page1 after page3, gives
-// page3, page1, page0.
+// TestPageReorderSequences checks two reorders in one workspace
+// (amended for the background-page order rule): V8 page1 before
+// page0, then page0 before page1, gives page0, page1, page3.
 func TestPageReorderSequences(t *testing.T) {
 	w := mustBegin(t, vsdxtest.Fixture(t, "v8-pages"))
-	if _, _, _, _, err := (&ops.PageReorderSpec{At: "page3", To: "page0", Position: "before"}).Run(w, map[string]string{}, "pt", nil); err != nil {
+	if _, _, _, _, err := (&ops.PageReorderSpec{At: "page1", To: "page0", Position: "before"}).Run(w, map[string]string{}, "pt", nil); err != nil {
 		t.Fatalf("first reorder: %v", err)
 	}
-	if _, _, _, _, err := (&ops.PageReorderSpec{At: "page1", To: "page3", Position: "after"}).Run(w, map[string]string{}, "pt", nil); err != nil {
+	if _, _, _, _, err := (&ops.PageReorderSpec{At: "page0", To: "page1", Position: "before"}).Run(w, map[string]string{}, "pt", nil); err != nil {
 		t.Fatalf("second reorder: %v", err)
 	}
 	if err := w.Verify(); err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
-	if got := summaryIDs(readSummary(t, w)); !equalIDs(got, []string{"page3", "page1", "page0"}) {
-		t.Errorf("summary order = %v, want [page3 page1 page0]", got)
+	if got := summaryIDs(readSummary(t, w)); !equalIDs(got, []string{"page0", "page1", "page3"}) {
+		t.Errorf("summary order = %v, want [page0 page1 page3]", got)
 	}
 }
 
 // TestPageReorderApply checks page.reorder through apply: V8
-// page3 before page0 reads back as page3, page0, page1.
+// page1 before page0 reads back as page1, page0, page3.
 func TestPageReorderApply(t *testing.T) {
 	src := vsdxtest.Fixture(t, "v8-pages")
-	p, errs := ops.ParsePlan([]byte(`{"ops":[{"op":"page.reorder","at":"page3","to":"page0","position":"before"}]}`))
+	p, errs := ops.ParsePlan([]byte(`{"ops":[{"op":"page.reorder","at":"page1","to":"page0","position":"before"}]}`))
 	if len(errs) != 0 || p == nil {
 		t.Fatalf("ParsePlan: %v errors %v", p, errs)
 	}
@@ -141,8 +143,8 @@ func TestPageReorderApply(t *testing.T) {
 	for _, pg := range sum.Pages {
 		got = append(got, pg.ID)
 	}
-	if !equalIDs(got, []string{"page3", "page0", "page1"}) {
-		t.Errorf("applied summary order = %v, want [page3 page0 page1]", got)
+	if !equalIDs(got, []string{"page1", "page0", "page3"}) {
+		t.Errorf("applied summary order = %v, want [page1 page0 page3]", got)
 	}
 }
 
@@ -202,19 +204,19 @@ func TestPageReorderAlreadyThere(t *testing.T) {
 // TestPageReorderAlias checks that at and to resolve $aliases.
 func TestPageReorderAlias(t *testing.T) {
 	w := mustBegin(t, vsdxtest.Fixture(t, "v8-pages"))
-	aliases := map[string]string{"bg": "page3", "first": "page0"}
-	_, changed, _, _, err := (&ops.PageReorderSpec{At: "$bg", To: "$first", Position: "before"}).Run(w, aliases, "pt", nil)
+	aliases := map[string]string{"fg": "page1", "first": "page0"}
+	_, changed, _, _, err := (&ops.PageReorderSpec{At: "$fg", To: "$first", Position: "before"}).Run(w, aliases, "pt", nil)
 	if err != nil {
 		t.Fatalf("page.reorder with aliases: %v", err)
 	}
-	if len(changed) != 1 || changed[0] != "page3" {
-		t.Errorf("changed = %v, want [page3]", changed)
+	if len(changed) != 1 || changed[0] != "page1" {
+		t.Errorf("changed = %v, want [page1]", changed)
 	}
 	if err := w.Verify(); err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
-	if got := summaryIDs(readSummary(t, w)); !equalIDs(got, []string{"page3", "page0", "page1"}) {
-		t.Errorf("summary order = %v, want [page3 page0 page1]", got)
+	if got := summaryIDs(readSummary(t, w)); !equalIDs(got, []string{"page1", "page0", "page3"}) {
+		t.Errorf("summary order = %v, want [page1 page0 page3]", got)
 	}
 }
 
@@ -297,4 +299,17 @@ func TestScalingPageReorder(t *testing.T) {
 	}
 	laws.Scales(t, "vsdx page.reorder pages", setup)
 	laws.TimeScales(t, "vsdx page.reorder pages", setup)
+}
+
+// TestPageReorderBackgroundOrderRefused checks the background-page
+// order rule: V8 page3 (a background page) before page0 would put
+// foreground pages after a background page, so it is
+// operation_failed at position and the order is unchanged.
+func TestPageReorderBackgroundOrderRefused(t *testing.T) {
+	w := mustBegin(t, vsdxtest.Fixture(t, "v8-pages"))
+	_, _, _, _, err := (&ops.PageReorderSpec{At: "page3", To: "page0", Position: "before"}).Run(w, map[string]string{}, "pt", nil)
+	var ce *cli.Error
+	if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "position" {
+		t.Fatalf("page3 before page0: err %v, want operation_failed at position", err)
+	}
 }
