@@ -10,10 +10,13 @@ package memgate
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"syscall"
 	"testing"
 
@@ -153,22 +156,83 @@ func peakRSS(state *os.ProcessState) (uint64, bool) {
 	return rss, true
 }
 
+// wrapEnv, when set in the environment of this test binary, makes it a
+// wrapper instead of a test run: it runs its arguments, passes their
+// stdout and stderr through, and prints the child's peak RSS in bytes
+// as the last stderr line, after wrapPrefix.
+const (
+	wrapEnv    = "MEMGATE_WRAP"
+	wrapPrefix = "memgate-peak-rss "
+)
+
+// TestMain turns the test binary into the linux wrapper when wrapEnv
+// is set (see runRSS), and runs the tests otherwise.
+func TestMain(m *testing.M) {
+	if os.Getenv(wrapEnv) == "1" {
+		os.Exit(wrapMain(os.Args[1:]))
+	}
+	os.Exit(m.Run())
+}
+
+// wrapMain runs args[0] with args[1:] and reports its peak RSS on
+// stderr. It is exec'd fresh, so its own resident set is small.
+func wrapMain(args []string) int {
+	cmd := exec.Command(args[0], args[1:]...) //nolint:gosec // G204: arguments come from runRSS, never from a document
+	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
+	err := cmd.Run()
+	rss, ok := peakRSS(cmd.ProcessState)
+	if !ok {
+		fmt.Fprintln(os.Stderr, "memgate wrapper: no peak RSS")
+		return 3
+	}
+	fmt.Fprintf(os.Stderr, "%s%d\n", wrapPrefix, rss)
+	if err != nil {
+		return 1
+	}
+	return 0
+}
+
 // runRSS runs bin with args, returning the command's stdout size in
-// bytes and its peak RSS in bytes.
+// bytes and its peak RSS in bytes. On darwin the child is run and
+// measured directly. On linux a child's maxrss starts at the resident
+// high-water mark of the process that exec'd it (exec carries the
+// old memory map's high-water mark into the new image's rusage), so a
+// child exec'd straight from this test process, which holds the
+// generated drawings, would report this process's size. There the
+// child runs under a fresh copy of the test binary (wrapMain), whose
+// own small resident set is what the child inherits.
 func runRSS(t *testing.T, bin string, args ...string) (outBytes int, rss uint64) {
 	t.Helper()
+	name := append([]string{filepath.Base(bin)}, args...)
 	cmd := exec.Command(bin, args...) //nolint:gosec // G204: the binary and arguments are built above, never from a document
+	if runtime.GOOS == "linux" {
+		self, err := os.Executable()
+		if err != nil {
+			t.Fatalf("memgate: test binary: %v", err)
+		}
+		cmd = exec.Command(self, append([]string{bin}, args...)...) //nolint:gosec // G204: this test binary as the wrapper
+		cmd.Env = append(os.Environ(), wrapEnv+"=1")
+	}
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		t.Fatalf("memgate: run %v: %v: %s", append([]string{filepath.Base(bin)}, args...), err, stderr.String())
+		t.Fatalf("memgate: run %v: %v: %s", name, err, stderr.String())
 	}
-	rss, ok := peakRSS(cmd.ProcessState)
-	if !ok {
-		t.Fatalf("memgate: run %v: no peak RSS on %s", append([]string{filepath.Base(bin)}, args...), runtime.GOOS)
+	if runtime.GOOS != "linux" {
+		rss, ok := peakRSS(cmd.ProcessState)
+		if !ok {
+			t.Fatalf("memgate: run %v: no peak RSS on %s", name, runtime.GOOS)
+		}
+		return stdout.Len(), rss
 	}
-	return stdout.Len(), rss
+	errText := strings.TrimRight(stderr.String(), "\n")
+	last := errText[strings.LastIndex(errText, "\n")+1:]
+	n, err := strconv.ParseUint(strings.TrimPrefix(last, wrapPrefix), 10, 64)
+	if !strings.HasPrefix(last, wrapPrefix) || err != nil {
+		t.Fatalf("memgate: run %v: wrapper gave no peak RSS: %s", name, stderr.String())
+	}
+	return stdout.Len(), n
 }
 
 // TestMemGate is the RSS1 gate: on darwin and linux (other platforms
