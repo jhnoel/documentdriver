@@ -23,7 +23,8 @@ import (
 // for the fields given; chunk CC2 adds Visio-authored connectors).
 // A free end (from/to) is placed at the view point and freed: its
 // Connect row and end formula go, its V becomes the point, and
-// its trigger cell is freed as for "none". A point glue
+// its trigger cell is freed as for "none". A point with a glue
+// writes the point and glues. A point glue
 // (from_glue/to_glue "s2:2") writes the create form
 // (PAR(PNT(Sheet.N!Connections.Xk, ...)) on the end's cells and a
 // Connect row) and moves the end to the site, with the trigger
@@ -60,12 +61,8 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 	if d.Kind == doc.Stencil {
 		return nil, "", cli.Errorf(cli.CodeOperationFailed, "at", "%s is in a stencil: stencils cannot be edited", shapeAddr)
 	}
-	if s.From != nil && s.FromGlue != nil {
-		return nil, "", cli.Errorf(cli.CodeOperationFailed, "from_glue", "connector takes from or from_glue, not both")
-	}
-	if s.To != nil && s.ToGlue != nil {
-		return nil, "", cli.Errorf(cli.CodeOperationFailed, "to_glue", "connector takes to or to_glue, not both")
-	}
+	// A from with a from_glue (and a to with a to_glue) is accepted,
+	// as pptx does: the end is written at the point and glued.
 	if s.From != nil && !addFinite(s.From) {
 		return nil, "", cli.Errorf(cli.CodeOperationFailed, "from", "from must hold finite numbers")
 	}
@@ -88,7 +85,7 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 	}
 	wanted := map[string]bool{shapeAddr: true}
 	for _, req := range []endRequest{beginReq, endReq} {
-		if req.present && !req.freePoint && !req.freeGlue {
+		if req.glued {
 			wanted[req.glue.target] = true
 		}
 	}
@@ -150,7 +147,7 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 	// formulas already in the wanted form: a Connector with
 	// the row but no formula (V5 stores none) is a real
 	// write, not an identity.
-	if beginReq.present && !beginReq.freePoint && !beginReq.freeGlue {
+	if beginReq.glued && !beginReq.pointGiven {
 		if target, point, whole, present := currentGlue(pg.root, a.Shape, true); present && target == beginReq.glue.id && whole == beginReq.isWhole() && (whole || point == beginReq.glue.point) {
 			wantFormula := glueFormula(beginReq.glue.id, beginReq.glue.point)
 			if beginReq.isWhole() {
@@ -163,7 +160,7 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 			}
 		}
 	}
-	if endReq.present && !endReq.freePoint && !endReq.freeGlue {
+	if endReq.glued && !endReq.pointGiven {
 		if target, point, whole, present := currentGlue(pg.root, a.Shape, false); present && target == endReq.glue.id && whole == endReq.isWhole() && (whole || point == endReq.glue.point) {
 			wantFormula := glueFormula(endReq.glue.id, endReq.glue.point)
 			if endReq.isWhole() {
@@ -177,17 +174,33 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 		}
 	}
 	beginView, endView := curBeginView, curEndView
-	if beginReq.freePoint {
+	var beginSite, endSite geom.Pt
+	var beginHasSite, endHasSite bool
+	if beginReq.pointGiven {
 		beginView = geom.Pt{X: s.From[0] * scale, Y: s.From[1] * scale}
-	} else if beginReq.glue.hasPoint {
+		if beginReq.glued && beginReq.glue.hasPoint {
+			beginSite, err = addEndView(nil, true, beginReq.glue, located, "from", "from_glue", pg.height, scale)
+			if err != nil {
+				return nil, "", err
+			}
+			beginHasSite = true
+		}
+	} else if beginReq.glued && beginReq.glue.hasPoint {
 		beginView, err = addEndView(nil, true, beginReq.glue, located, "from", "from_glue", pg.height, scale)
 		if err != nil {
 			return nil, "", err
 		}
 	}
-	if endReq.freePoint {
+	if endReq.pointGiven {
 		endView = geom.Pt{X: s.To[0] * scale, Y: s.To[1] * scale}
-	} else if endReq.glue.hasPoint {
+		if endReq.glued && endReq.glue.hasPoint {
+			endSite, err = addEndView(nil, true, endReq.glue, located, "to", "to_glue", pg.height, scale)
+			if err != nil {
+				return nil, "", err
+			}
+			endHasSite = true
+		}
+	} else if endReq.glued && endReq.glue.hasPoint {
 		endView, err = addEndView(nil, true, endReq.glue, located, "to", "to_glue", pg.height, scale)
 		if err != nil {
 			return nil, "", err
@@ -197,21 +210,33 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 		if !hasDynamicMaster(r, h) {
 			return nil, "", wholeGlueRefusal(shapeAddr, "from_glue")
 		}
-		beginView, err = wholeEndView(beginReq.glue, located, endView, "from_glue", pg.height)
-		if err != nil {
-			return nil, "", err
+		if beginReq.pointGiven {
+			if err := validateGlueTarget(beginReq.glue, located, "from_glue"); err != nil {
+				return nil, "", err
+			}
+		} else {
+			beginView, err = wholeEndView(beginReq.glue, located, endView, "from_glue", pg.height)
+			if err != nil {
+				return nil, "", err
+			}
 		}
 	}
 	if endReq.isWhole() {
 		if !hasDynamicMaster(r, h) {
 			return nil, "", wholeGlueRefusal(shapeAddr, "to_glue")
 		}
-		endView, err = wholeEndView(endReq.glue, located, beginView, "to_glue", pg.height)
-		if err != nil {
-			return nil, "", err
+		if endReq.pointGiven {
+			if err := validateGlueTarget(endReq.glue, located, "to_glue"); err != nil {
+				return nil, "", err
+			}
+		} else {
+			endView, err = wholeEndView(endReq.glue, located, beginView, "to_glue", pg.height)
+			if err != nil {
+				return nil, "", err
+			}
 		}
 	}
-	if err := checkConnectorEditable(r, h, shapeAddr); err != nil {
+	if err := checkConnectorEditable(r, h, shapeAddr, endsCheckField(beginReq, endReq)); err != nil {
 		return nil, "", err
 	}
 	beginEnd, err := desiredEnd(beginReq, cur, loc, beginView, pg.height, vsd.CellBeginX, vsd.CellBeginY, "from", true)
@@ -222,7 +247,7 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 	if err != nil {
 		return nil, "", err
 	}
-	tr, err := evalTransform(r, h, shapeAddr, beginEnd.X, beginEnd.Y, endEnd.X, endEnd.Y)
+	tr, err := evalTransform(r, h, shapeAddr, endsCheckField(beginReq, endReq), beginEnd.X, beginEnd.Y, endEnd.X, endEnd.Y)
 	if err != nil {
 		return nil, "", err
 	}
@@ -241,10 +266,10 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 		PinX: tr.pinX, PinY: tr.pinY, Width: tr.width, Height: tr.height,
 		LocPinX: tr.locPinX, LocPinY: tr.locPinY, Angle: tr.angle,
 	}
-	if err := checkEndFormulas(beginEnd, cur, vsd.CellBeginX, vsd.CellBeginY); err != nil {
+	if err := checkEndFormulas(shapeAddr, endsFieldFor(beginReq, true), beginEnd, cur, vsd.CellBeginX, vsd.CellBeginY); err != nil {
 		return nil, "", err
 	}
-	if err := checkEndFormulas(endEnd, cur, vsd.CellEndX, vsd.CellEndY); err != nil {
+	if err := checkEndFormulas(shapeAddr, endsFieldFor(endReq, false), endEnd, cur, vsd.CellEndX, vsd.CellEndY); err != nil {
 		return nil, "", err
 	}
 	changed, err := ws.SetConnectorEnds(shapeAddr, desired)
@@ -268,29 +293,33 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 		changed = true
 	}
 	if beginReq.present {
-		if beginReq.freePoint || beginReq.freeGlue {
+		if beginReq.glued {
+			if c, err := writeTriggerGlue(ws, r, h, shapeAddr, cellBegTrigger, beginReq.glue.id); err != nil {
+				return nil, "", err
+			} else if c {
+				changed = true
+			}
+		} else {
 			if c, err := freeTrigger(ws, part, r, h, shapeAddr, cellBegTrigger, node); err != nil {
 				return nil, "", err
 			} else if c {
 				changed = true
 			}
-		} else if c, err := writeTriggerGlue(ws, r, h, shapeAddr, cellBegTrigger, beginReq.glue.id); err != nil {
-			return nil, "", err
-		} else if c {
-			changed = true
 		}
 	}
 	if endReq.present {
-		if endReq.freePoint || endReq.freeGlue {
+		if endReq.glued {
+			if c, err := writeTriggerGlue(ws, r, h, shapeAddr, cellEndTrigger, endReq.glue.id); err != nil {
+				return nil, "", err
+			} else if c {
+				changed = true
+			}
+		} else {
 			if c, err := freeTrigger(ws, part, r, h, shapeAddr, cellEndTrigger, node); err != nil {
 				return nil, "", err
 			} else if c {
 				changed = true
 			}
-		} else if c, err := writeTriggerGlue(ws, r, h, shapeAddr, cellEndTrigger, endReq.glue.id); err != nil {
-			return nil, "", err
-		} else if c {
-			changed = true
 		}
 	}
 	if beginEnd.X != beginX || beginEnd.Y != beginY || endEnd.X != endX || endEnd.Y != endY {
@@ -303,15 +332,21 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 	if !changed {
 		return nil, "", nil
 	}
-	stale := ""
+	var staleParts []string
 	if beginEnd.X != beginX || beginEnd.Y != beginY || endEnd.X != endX || endEnd.Y != endY {
 		if isDynamicConnector(r, h) {
-			stale = shapeAddr + " route"
+			staleParts = append(staleParts, shapeAddr+" route")
 		} else if s := endsStale(node, shapeAddr); s != "" {
-			stale = s
+			staleParts = append(staleParts, s)
 		}
 	}
-	return []string{shapeAddr}, stale, nil
+	if beginReq.pointGiven && beginReq.glued && endOffSite(beginReq, beginSite, beginHasSite, beginView, located, pg.height) {
+		staleParts = append(staleParts, shapeAddr+" begin left stale (stale-connector)")
+	}
+	if endReq.pointGiven && endReq.glued && endOffSite(endReq, endSite, endHasSite, endView, located, pg.height) {
+		staleParts = append(staleParts, shapeAddr+" end left stale (stale-connector)")
+	}
+	return []string{shapeAddr}, strings.Join(staleParts, "; "), nil
 }
 
 // wholeEndView returns the cached whole-glue end of one request
@@ -363,38 +398,131 @@ func materialiseTransform(ws *edit.Workspace, r *inherit.Resolver, h *inherit.Sh
 }
 
 // endRequest is one end's setEnds input: a free point, a glue to a
-// shape (point when hasPoint, whole otherwise), or "none".
+// shape (point when hasPoint, whole otherwise), or "none". A point
+// with a glue is pointGiven and glued: the end is written at the
+// point and glued.
 type endRequest struct {
-	freePoint bool
-	freeGlue  bool
-	glue      addGlue
-	present   bool
+	freePoint  bool
+	freeGlue   bool
+	glued      bool
+	pointGiven bool
+	glue       addGlue
+	present    bool
 }
 
 // isWhole reports whether the request is whole-shape glue: a glue
 // with no connection point.
 func (req endRequest) isWhole() bool {
-	return req.present && !req.freePoint && !req.freeGlue && !req.glue.hasPoint
+	return req.glued && !req.glue.hasPoint
 }
 
 // parseEndRequest parses one end's from/from_glue pair into an
-// endRequest: a free point, "none", or a glue reference.
+// endRequest: a free point, "none", or a glue reference. A point
+// with a glue (or "none") is the point with the glue (or free).
 func parseEndRequest(point []float64, glue *string, aliases map[string]string, pageAddr string, container uint32, dup int, glueField string) (endRequest, error) {
-	if point != nil {
-		return endRequest{freePoint: true, present: true}, nil
-	}
+	pointGiven := point != nil
 	if glue == nil {
-		return endRequest{}, nil
+		if !pointGiven {
+			return endRequest{}, nil
+		}
+		return endRequest{freePoint: true, pointGiven: true, present: true}, nil
 	}
 	raw := *glue
 	if raw == "none" {
+		if pointGiven {
+			return endRequest{freePoint: true, pointGiven: true, present: true}, nil
+		}
 		return endRequest{freeGlue: true, present: true}, nil
 	}
 	g, err := addParseGlue(raw, aliases, pageAddr, container, dup, glueField)
 	if err != nil {
 		return endRequest{}, err
 	}
-	return endRequest{glue: g, present: true}, nil
+	req := endRequest{glued: true, glue: g, present: true}
+	if pointGiven {
+		req.pointGiven = true
+	}
+	return req, nil
+}
+
+// endsFieldFor returns the plan field a formula refusal on one end
+// of req is reported at: the glue field when the end is glued or
+// freed with "none", otherwise the point field (from or to).
+func endsFieldFor(req endRequest, begin bool) string {
+	if req.glued || req.freeGlue {
+		if begin {
+			return "from_glue"
+		}
+		return "to_glue"
+	}
+	if begin {
+		return "from"
+	}
+	return "to"
+}
+
+// endsCheckField returns the plan field a transform refusal of the
+// ends write is reported at: the first present end's field, from
+// or from_glue for the begin and to or to_glue for the end.
+func endsCheckField(beginReq, endReq endRequest) string {
+	if beginReq.present {
+		return endsFieldFor(beginReq, true)
+	}
+	return endsFieldFor(endReq, false)
+}
+
+// validateGlueTarget reports the missing glue target of g as
+// not_found at field, and an unreadable target as
+// operation_failed there, for a whole-shape glue whose cached end
+// is the point (no edge view is computed).
+func validateGlueTarget(g addGlue, located map[string]addLocated, field string) error {
+	loc, ok := located[g.target]
+	if !ok {
+		return cli.Errorf(cli.CodeNotFound, field, "no shape %s: not found", g.target)
+	}
+	if !loc.ok {
+		return cli.Errorf(cli.CodeOperationFailed, field, "%s has no readable transform", g.target)
+	}
+	return nil
+}
+
+// endOffSite reports whether the end written at point is stale
+// against its glue: a point glue farther than GlueTolerance from
+// its site, or a whole-shape glue farther than GlueTolerance
+// outside its target's box. A site or box that cannot be derived
+// is not stale.
+func endOffSite(req endRequest, site geom.Pt, hasSite bool, point geom.Pt, located map[string]addLocated, height float64) bool {
+	if req.glue.hasPoint {
+		if !hasSite {
+			return false
+		}
+		return math.Hypot(point.X-site.X, point.Y-site.Y) > place.GlueTolerance
+	}
+	loc, ok := located[req.glue.target]
+	if !ok || !loc.ok {
+		return false
+	}
+	box, err := place.Box(loc.f, loc.t, height)
+	if err != nil {
+		return false
+	}
+	inv, ok := box.Matrix().Invert()
+	if !ok {
+		return false
+	}
+	local := inv.Apply(point)
+	dx, dy := 0.0, 0.0
+	if local.X < 0 {
+		dx = -local.X
+	} else if local.X > box.W {
+		dx = local.X - box.W
+	}
+	if local.Y < 0 {
+		dy = -local.Y
+	} else if local.Y > box.H {
+		dy = local.Y - box.H
+	}
+	return math.Hypot(dx, dy) > place.GlueTolerance
 }
 
 // endsCurrent reads a connector's effective cells through the
@@ -468,8 +596,9 @@ const walkGlueFormula = "_WALKGLUE"
 // its stored coordinates, formula and Connect rows; a free point or
 // "none" frees it; a point glue writes the PAR(PNT(...)) formula;
 // a whole-shape glue writes the _WALKGLUE formula and targets the
-// whole shape. Begin reports whether the end is the begin.
-// Coordinates are parent inches.
+// whole shape. A point with a glue writes the point and the glue.
+// Begin reports whether the end is the begin. Coordinates are
+// parent inches.
 func desiredEnd(req endRequest, cur endsCurrent, loc addLocated, view geom.Pt, height float64, xName, yName, pointField string, begin bool) (edit.GlueEnd, error) {
 	if !req.present {
 		x, _ := cur.number(xName)
@@ -485,13 +614,13 @@ func desiredEnd(req endRequest, cur endsCurrent, loc addLocated, view geom.Pt, h
 	if !ok {
 		return edit.GlueEnd{}, cli.Errorf(cli.CodeOperationFailed, pointField, "the end cannot be placed")
 	}
-	if req.freePoint {
-		return edit.GlueEnd{X: x, Y: y}, nil
+	if req.glued {
+		if req.isWhole() {
+			return edit.GlueEnd{X: x, Y: y, Glue: true, Whole: true, Target: req.glue.id, Formula: walkFormula(begin)}, nil
+		}
+		return edit.GlueEnd{X: x, Y: y, Glue: true, Target: req.glue.id, Point: req.glue.point, Formula: glueFormula(req.glue.id, req.glue.point)}, nil
 	}
-	if req.isWhole() {
-		return edit.GlueEnd{X: x, Y: y, Glue: true, Whole: true, Target: req.glue.id, Formula: walkFormula(begin)}, nil
-	}
-	return edit.GlueEnd{X: x, Y: y, Glue: true, Target: req.glue.id, Point: req.glue.point, Formula: glueFormula(req.glue.id, req.glue.point)}, nil
+	return edit.GlueEnd{X: x, Y: y}, nil
 }
 
 // glueFormula returns the point-glue formula of one end:
@@ -511,10 +640,10 @@ func isGlueFormula(f string) bool {
 
 // checkEndFormulas refuses writing an end whose current X or Y
 // formula is outside the allow list and is not a glue formula this
-// chunk replaces, naming the cell and formula. An end whose
-// desired value and formula already match is not written, so it
-// passes as an identity.
-func checkEndFormulas(end edit.GlueEnd, cur endsCurrent, xName, yName string) error {
+// chunk replaces, in the formula refusal form at field. An end
+// whose desired value and formula already match is not written, so
+// it passes as an identity.
+func checkEndFormulas(shapeAddr, field string, end edit.GlueEnd, cur endsCurrent, xName, yName string) error {
 	if end.KeepFormula {
 		return nil
 	}
@@ -532,7 +661,7 @@ func checkEndFormulas(end edit.GlueEnd, cur endsCurrent, xName, yName string) er
 		if !has || f == "" || formula.Allowed(f) || isGlueFormula(f) {
 			continue
 		}
-		return cli.Errorf(cli.CodeOperationFailed, "at", "%s F=%s is outside the allow list", tc.name, f)
+		return formulaRefusal(shapeAddr, field, []formulaCell{{name: tc.name, formula: f}})
 	}
 	return nil
 }

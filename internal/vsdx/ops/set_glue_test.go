@@ -342,10 +342,9 @@ func TestSetGlueAlias(t *testing.T) {
 }
 
 // TestSetGlueRefusals checks the refusals: a missing glue target
-// and a missing connection point are not_found at the glue field,
-// a non-1-D shape and a from with a from_glue are
-// operation_failed, and an end cell with a GUARD formula is
-// operation_failed naming the cell and formula.
+// and a missing connection point are not_found at the glue field, a
+// non-1-D shape is operation_failed, and an end cell with a GUARD
+// formula is operation_failed naming the cell and formula.
 func TestSetGlueRefusals(t *testing.T) {
 	for _, tc := range []struct {
 		name string
@@ -356,7 +355,6 @@ func TestSetGlueRefusals(t *testing.T) {
 		{"missing-target", &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("s99:1")}, cli.CodeNotFound, "to_glue"},
 		{"missing-point", &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("s2:9")}, cli.CodeNotFound, "to_glue"},
 		{"not-1d", &ObjectSetSpec{At: "page0/s1", From: []float64{0, 0}}, cli.CodeOperationFailed, "at"},
-		{"from-and-glue", &ObjectSetSpec{At: "page0/s4", From: []float64{0, 0}, FromGlue: glueStr("s2:1")}, cli.CodeOperationFailed, "from_glue"},
 		{"missing-shape", &ObjectSetSpec{At: "page0/s99", To: []float64{0, 0}}, cli.CodeNotFound, "at"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -391,11 +389,48 @@ func TestSetGlueRefusals(t *testing.T) {
 		if !errors.As(err, &ce) {
 			t.Fatalf("setEnds: error %v, want *cli.Error", err)
 		}
-		if ce.Code != cli.CodeOperationFailed {
-			t.Errorf("got %s, want operation_failed", ce.Code)
+		if ce.Code != cli.CodeOperationFailed || ce.Path != "to_glue" {
+			t.Errorf("got %s at %q, want operation_failed at to_glue", ce.Code, ce.Path)
 		}
-		if !strings.Contains(ce.Message, "EndX") || !strings.Contains(ce.Message, "GUARD(7)") {
-			t.Errorf("message %q does not name cell EndX and GUARD(7)", ce.Message)
+		if !strings.Contains(ce.Message, "EndX") || !strings.Contains(ce.Message, "is bound to a formula vsdx does not evaluate") {
+			t.Errorf("message %q does not name cell EndX in the formula refusal form", ce.Message)
+		}
+		if ce.Detail != "EndX F=GUARD(7)" {
+			t.Errorf("detail = %q, want EndX F=GUARD(7)", ce.Detail)
+		}
+	})
+	t.Run("from-and-glue", func(t *testing.T) {
+		out, changed, stale, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", From: []float64{0, 0}, FromGlue: glueStr("s2:1")}, nil)
+		if err != nil {
+			t.Fatalf("setEnds: %v", err)
+		}
+		if !slices.Equal(changed, []string{"page0/s4"}) {
+			t.Errorf("changed = %v, want [page0/s4]", changed)
+		}
+		if !strings.Contains(stale, "page0/s4") || !strings.Contains(stale, "begin") || !strings.Contains(stale, "stale-connector") {
+			t.Errorf("stale = %q, want it to name page0/s4 begin and stale-connector (stale-values)", stale)
+		}
+		page := glueRead(t, out)
+		s4 := glueFind(t, page, "page0/s4")
+		if s4.FromGlue != "s2:1" {
+			t.Errorf("s4 from_glue = %q, want s2:1", s4.FromGlue)
+		}
+		gluePt(t, "s4 from", s4.From, [2]float64{0, 0})
+		found := false
+		for _, raw := range page.Hazards {
+			var h struct {
+				Kind string `json:"kind"`
+				ID   string `json:"id"`
+			}
+			if err := json.Unmarshal(raw, &h); err != nil {
+				t.Fatalf("decode hazard: %v", err)
+			}
+			if h.Kind == "stale-connector" && h.ID == "page0/s4" {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("hazards %s, want a stale-connector for page0/s4", page.Hazards)
 		}
 	})
 }

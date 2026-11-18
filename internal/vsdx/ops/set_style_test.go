@@ -263,7 +263,7 @@ func TestSetStyleUntargeted(t *testing.T) {
 // TestSetStyleErrors checks the refusals: a missing shape and a
 // missing alias are not_found at at, a master, Foreign and invalid
 // values are operation_failed, and a cell outside the allow list is
-// operation_failed at at naming the cell and formula.
+// in the formula refusal form at fill.
 func TestSetStyleErrors(t *testing.T) {
 	for _, tc := range []struct {
 		fixture string
@@ -306,11 +306,14 @@ func TestSetStyleErrors(t *testing.T) {
 		spec := &ObjectSetSpec{At: "page0/s1", Fill: &PaintSpec{Hex: "#00FF00"}}
 		_, _, err = setStyle(w, spec, nil, "pt")
 		var ce *cli.Error
-		if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "at" {
-			t.Fatalf("formula refusal: got %v, want operation_failed at at", err)
+		if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "fill" {
+			t.Fatalf("formula refusal: got %v, want operation_failed at fill", err)
 		}
-		if !strings.Contains(ce.Message, "FillForegnd") || !strings.Contains(ce.Message, "Width*0.5") {
-			t.Errorf("refusal = %q, want it to name FillForegnd and Width*0.5", ce.Message)
+		if !strings.Contains(ce.Message, "FillForegnd") || !strings.Contains(ce.Message, "is bound to a formula vsdx does not evaluate") {
+			t.Errorf("refusal = %q, want it to name FillForegnd in the formula refusal form", ce.Message)
+		}
+		if ce.Detail != "FillForegnd F=Width*0.5" {
+			t.Errorf("detail = %q, want FillForegnd F=Width*0.5", ce.Detail)
 		}
 	})
 }

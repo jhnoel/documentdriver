@@ -1,14 +1,19 @@
 package ops_test
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
 
+	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/plan"
 	"github.com/jhnoel/documentdriver/internal/vsdx/apply"
+	"github.com/jhnoel/documentdriver/internal/vsdx/edit"
+	"github.com/jhnoel/documentdriver/internal/vsdx/ops"
+	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsdxtest"
 )
 
@@ -26,6 +31,31 @@ func TestPageSetOffPageApply(t *testing.T) {
 	want := plan.Hazard{Kind: "off-page", ID: "page0/s1", Detail: "box [108,-54,72,36] lies outside the page [0,0,792,612]", New: true}
 	if !slices.Contains(res.Hazards, want) {
 		t.Errorf("hazards = %+v, want them to include %+v", res.Hazards, want)
+	}
+}
+
+// TestPageSetFormulaDetail checks the CC10 detail form: a PageWidth
+// outside the allow list is operation_failed at size with detail.
+func TestPageSetFormulaDetail(t *testing.T) {
+	src := vsdxtest.Fixture(t, "v1-minimal")
+	w, err := edit.Begin(src)
+	if err != nil {
+		t.Fatalf("Begin: %v", err)
+	}
+	defer w.Tx().Rollback()
+	if err := w.SetCells("page0", []edit.Cell{{N: vsd.CellPageWidth, V: "8.5", F: "User.DefaultWidth"}}); err != nil {
+		t.Fatalf("SetCells: %v", err)
+	}
+	_, _, _, _, err = (&ops.PageSetSpec{At: "page0", Size: []float64{792, 612}}).Run(w, map[string]string{}, "pt", nil)
+	var ce *cli.Error
+	if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "size" {
+		t.Fatalf("page.set: got %v, want operation_failed at size", err)
+	}
+	if !strings.Contains(ce.Message, "PageWidth") || !strings.Contains(ce.Message, "is bound to a formula vsdx does not evaluate") {
+		t.Errorf("message = %q, want it to name PageWidth in the formula refusal form", ce.Message)
+	}
+	if ce.Detail != "PageWidth F=User.DefaultWidth" {
+		t.Errorf("detail = %q, want PageWidth F=User.DefaultWidth", ce.Detail)
 	}
 }
 

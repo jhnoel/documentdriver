@@ -13,6 +13,7 @@ import (
 	"github.com/jhnoel/documentdriver/internal/geom"
 	"github.com/jhnoel/documentdriver/internal/render"
 	"github.com/jhnoel/documentdriver/internal/vsdx/read"
+	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
 
 var renderCommand = &cli.Command{
@@ -42,6 +43,9 @@ func runRender(p *cli.Parsed, stdout io.Writer) error {
 	page, out := p.Get("page"), p.Get("out")
 	if page == "" {
 		return cli.Errorf(cli.CodeUsage, "--page", "render needs --page")
+	}
+	if err := checkPageValue(page, "--page", vsd.KindPage); err != nil {
+		return err
 	}
 	if out == "" {
 		return cli.Errorf(cli.CodeUsage, "--out", "render needs -o, the PNG to write")

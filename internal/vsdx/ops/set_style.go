@@ -184,23 +184,24 @@ func loadStyleShape(ws *edit.Workspace, a vsd.Address, addr string) (*styleShape
 // styleCells builds the cells setStyle writes for the fill and line
 // of s on st, in Visio order, skipping a field whose effective value
 // already equals the wanted one, and reports an operation_failed
-// fault at at when a cell to be written is outside formula.Allowed.
+// fault when a cell to be written is outside formula.Allowed, in the
+// formula refusal form at fill or line.
 func styleCells(st *styleShape, s *ObjectSetSpec, hex, color string, scale float64) ([]edit.Cell, error) {
 	var cells []edit.Cell
 	if s.Fill != nil {
 		if s.Fill.None {
 			if !stylePatternIs(st, vsd.CellFillPattern, 0) {
-				if err := styleCheck(st, vsd.CellFillPattern); err != nil {
-					return nil, err
+				if c, ok := styleRefused(st, vsd.CellFillPattern); ok {
+					return nil, formulaRefusal(st.addr, "fill", []formulaCell{c})
 				}
 				cells = append(cells, edit.Cell{N: vsd.CellFillPattern, V: "0"})
 			}
 		} else if cur, derived := styleFillHex(st); !derived || cur != hex {
-			if err := styleCheck(st, vsd.CellFillForegnd); err != nil {
-				return nil, err
+			if c, ok := styleRefused(st, vsd.CellFillForegnd); ok {
+				return nil, formulaRefusal(st.addr, "fill", []formulaCell{c})
 			}
-			if err := styleCheck(st, vsd.CellFillPattern); err != nil {
-				return nil, err
+			if c, ok := styleRefused(st, vsd.CellFillPattern); ok {
+				return nil, formulaRefusal(st.addr, "fill", []formulaCell{c})
 			}
 			cells = append(cells,
 				edit.Cell{N: vsd.CellFillForegnd, V: hex},
@@ -212,8 +213,8 @@ func styleCells(st *styleShape, s *ObjectSetSpec, hex, color string, scale float
 	}
 	if s.Line.None {
 		if !stylePatternIs(st, vsd.CellLinePattern, 0) {
-			if err := styleCheck(st, vsd.CellLinePattern); err != nil {
-				return nil, err
+			if c, ok := styleRefused(st, vsd.CellLinePattern); ok {
+				return nil, formulaRefusal(st.addr, "line", []formulaCell{c})
 			}
 			cells = append(cells, edit.Cell{N: vsd.CellLinePattern, V: "0"})
 		}
@@ -235,26 +236,26 @@ func styleLineCells(st *styleShape, s *ObjectSetSpec, color string, scale float6
 		return cells, nil
 	}
 	if color != "" {
-		if err := styleCheck(st, vsd.CellLineColor); err != nil {
-			return nil, err
+		if c, ok := styleRefused(st, vsd.CellLineColor); ok {
+			return nil, formulaRefusal(st.addr, "line", []formulaCell{c})
 		}
 		cells = append(cells, edit.Cell{N: vsd.CellLineColor, V: color})
 	}
 	if s.Line.W != nil {
-		if err := styleCheck(st, vsd.CellLineWeight); err != nil {
-			return nil, err
+		if c, ok := styleRefused(st, vsd.CellLineWeight); ok {
+			return nil, formulaRefusal(st.addr, "line", []formulaCell{c})
 		}
 		cells = append(cells, edit.Cell{N: vsd.CellLineWeight, V: vsd.FormatInches(*s.Line.W * scale / vsd.PointsPerInch)})
 	}
 	switch {
 	case s.Line.Dash != "":
-		if err := styleCheck(st, vsd.CellLinePattern); err != nil {
-			return nil, err
+		if c, ok := styleRefused(st, vsd.CellLinePattern); ok {
+			return nil, formulaRefusal(st.addr, "line", []formulaCell{c})
 		}
 		cells = append(cells, edit.Cell{N: vsd.CellLinePattern, V: s.Line.Dash})
 	case (none || themed) && (s.Line.W != nil || color != ""):
-		if err := styleCheck(st, vsd.CellLinePattern); err != nil {
-			return nil, err
+		if c, ok := styleRefused(st, vsd.CellLinePattern); ok {
+			return nil, formulaRefusal(st.addr, "line", []formulaCell{c})
 		}
 		cells = append(cells, edit.Cell{N: vsd.CellLinePattern, V: "1"})
 	}
@@ -344,15 +345,15 @@ func styleColorCell(st *styleShape, name string) (string, bool) {
 	return st.res.Doc().Color(v)
 }
 
-// styleCheck reports an operation_failed fault at at when the
-// effective cell name of st may not be written: its formula is
-// outside formula.Allowed, naming the cell and formula.
-func styleCheck(st *styleShape, name string) error {
+// styleRefused reports whether the effective cell name of st may
+// not be written: its formula is outside formula.Allowed. It
+// returns the cell for the formula refusal form.
+func styleRefused(st *styleShape, name string) (formulaCell, bool) {
 	cell, _, ok := st.res.Cell(st.shape, sheet.ShapeCell(name))
 	if !ok || formula.Allowed(cell.F) {
-		return nil
+		return formulaCell{}, false
 	}
-	return cli.Errorf(cli.CodeOperationFailed, "at", "%s %s F=%s is outside the allow list", st.addr, name, cell.F)
+	return formulaCell{name: name, formula: cell.F}, true
 }
 
 // styleSetName writes name as the Name and NameU attributes of st's

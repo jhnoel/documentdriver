@@ -151,7 +151,8 @@ func TestObjectMoveV4Group(t *testing.T) {
 
 // TestObjectMoveV2Refused checks the V2 s4 row: the group child's
 // PinX formula Sheet.5!Width*0.25 is outside the allow list, so the
-// move is operation_failed naming PinX and the formula.
+// move is operation_failed at ops[0].at naming PinX, with the
+// formula in detail.
 func TestObjectMoveV2Refused(t *testing.T) {
 	path := vsdxtest.Fixture(t, "v2-master")
 	_, err := apply.Run(path, parsePlan(t, `{"ops":[{"op":"object.move","at":"page0/s4","dx":72}]}`), apply.Options{Out: filepath.Join(t.TempDir(), "out.vsdx")})
@@ -159,11 +160,14 @@ func TestObjectMoveV2Refused(t *testing.T) {
 	if !errors.As(err, &ce) {
 		t.Fatalf("error %v, want *cli.Error", err)
 	}
-	if ce.Code != cli.CodeOperationFailed {
-		t.Errorf("code = %s, want operation_failed", ce.Code)
+	if ce.Code != cli.CodeOperationFailed || ce.Path != "ops[0].at" {
+		t.Errorf("got %s at %q, want operation_failed at ops[0].at", ce.Code, ce.Path)
 	}
-	if !strings.Contains(ce.Message, "PinX") || !strings.Contains(ce.Message, "Sheet.5!Width*0.25") {
-		t.Errorf("message %q names neither PinX nor its formula", ce.Message)
+	if !strings.Contains(ce.Message, "PinX") || !strings.Contains(ce.Message, "is bound to a formula vsdx does not evaluate") {
+		t.Errorf("message %q does not name PinX in the formula refusal form", ce.Message)
+	}
+	if ce.Detail != "PinX F=Sheet.5!Width*0.25" {
+		t.Errorf("detail = %q, want PinX F=Sheet.5!Width*0.25", ce.Detail)
 	}
 }
 

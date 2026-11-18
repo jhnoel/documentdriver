@@ -269,7 +269,7 @@ func TestSetTransformUntargeted(t *testing.T) {
 // not_found at at, a master shape, a 1-D shape and an unreadable
 // transform are operation_failed at at, a non-finite rot is
 // operation_failed at rot, a non-finite box at box, and a cell
-// outside the allow list names the cell and formula at at.
+// outside the allow list is in the formula refusal form at box.
 func TestSetTransformErrors(t *testing.T) {
 	for _, tc := range []struct {
 		fixture string
@@ -307,11 +307,14 @@ func TestSetTransformErrors(t *testing.T) {
 		spec := &ObjectSetSpec{At: "page0/s4", Box: []float64{360, 324, 144, 72}}
 		_, _, err = setTransform(w, spec, nil, "pt")
 		var ce *cli.Error
-		if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "at" {
-			t.Fatalf("formula refusal: got %v, want operation_failed at at", err)
+		if !errors.As(err, &ce) || ce.Code != cli.CodeOperationFailed || ce.Path != "box" {
+			t.Fatalf("formula refusal: got %v, want operation_failed at box", err)
 		}
-		if !strings.Contains(ce.Message, "PinX") || !strings.Contains(ce.Message, "Sheet.5!Width*0.25") {
-			t.Errorf("refusal = %q, want it to name PinX and Sheet.5!Width*0.25", ce.Message)
+		if !strings.Contains(ce.Message, "PinX") || !strings.Contains(ce.Message, "is bound to a formula vsdx does not evaluate") {
+			t.Errorf("refusal = %q, want it to name PinX in the formula refusal form", ce.Message)
+		}
+		if ce.Detail != "PinX F=Sheet.5!Width*0.25" {
+			t.Errorf("detail = %q, want PinX F=Sheet.5!Width*0.25", ce.Detail)
 		}
 	})
 }

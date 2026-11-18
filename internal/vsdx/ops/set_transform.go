@@ -27,8 +27,9 @@ import (
 // in the closed grammar (LocPin formulas, Geometry and Connections
 // rows) are rewritten, materialising master dependents as
 // F="Inh". A cell outside formula.Allowed is refused with
-// operation_failed at at, naming the cell and formula, before
-// anything is written. A 1-D shape, whose transform is its ends, is
+// operation_failed at the field written (box, rot, flip_h or
+// flip_v), in the formula refusal form, before anything is
+// written. A 1-D shape, whose transform is its ends, is
 // operation_failed at at. Stale names dependents RecomputeShape left
 // stale and connector ends MoveShape left stale, for apply's
 // stale-values report. A write whose stored cells already show the
@@ -128,8 +129,8 @@ func setTransform(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]strin
 				}
 			}
 		}
-		if err := transformRefusal(want); err != nil {
-			return nil, "", err
+		if c, ok := transformRefused(want); ok {
+			return nil, "", formulaRefusal(shapeAddr, transformField(s), []formulaCell{c})
 		}
 		cells = append(cells, edit.Cell{N: want.name, V: formatted})
 		changedNames = append(changedNames, want.name)
@@ -268,15 +269,16 @@ func transformLocWrite(r *inherit.Resolver, h *inherit.Shape, name string, cell 
 	return formula.Allowed(cell.F)
 }
 
-// transformRefusal reports whether writing want's cell is outside
+// transformRefused reports whether writing want's cell is outside
 // the allow list: its effective formula must be on the decision (c)
-// list (formula.Allowed). The refusal names the cell and its formula.
-func transformRefusal(want transformWant) error {
+// list (formula.Allowed). It returns the refused cell for the
+// formula refusal form.
+func transformRefused(want transformWant) (formulaCell, bool) {
 	if !want.present {
-		return nil
+		return formulaCell{}, false
 	}
 	if formula.Allowed(want.cell.F) {
-		return nil
+		return formulaCell{}, false
 	}
-	return cli.Errorf(cli.CodeOperationFailed, "at", "%s F=%s is outside the allow list", want.name, want.cell.F)
+	return formulaCell{name: want.name, formula: want.cell.F}, true
 }

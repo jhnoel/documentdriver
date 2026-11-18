@@ -201,12 +201,6 @@ func checkObjectAdd(s *ObjectAddSpec) (string, string, bool) {
 	if s.Kind == "connector" && s.To == nil && s.ToGlue == "" {
 		return "connector needs to or to_glue", "to", true
 	}
-	if s.Kind == "connector" && s.From != nil && s.FromGlue != "" {
-		return "connector takes from or from_glue, not both", "from_glue", true
-	}
-	if s.Kind == "connector" && s.To != nil && s.ToGlue != "" {
-		return "connector takes to or to_glue, not both", "to_glue", true
-	}
 	if s.FromGlue != "" && !glueOK(s.FromGlue, false) {
 		return "from_glue must name a shape or $name, with an optional point", "from_glue", true
 	}

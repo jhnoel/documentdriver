@@ -109,7 +109,8 @@ func canonicalShape(a vsd.Address) string {
 // propValueRefusal reports whether f is a formula the writes allow:
 // absent, Inh, No Formula, THEMEVAL() or THEMEGUARD(...), or a
 // constant number with an optional unit. Anything else is refused
-// with the cell and formula in the detail.
+// in the formula refusal form at value, with the cell and formula
+// in the detail.
 func propValueRefusal(row, f string, hasF bool) error {
 	if !hasF || f == "" || f == vsd.FormulaInherited || f == vsd.FormulaNone {
 		return nil
@@ -120,7 +121,9 @@ func propValueRefusal(row, f string, hasF bool) error {
 	if isNumberConstant(f) {
 		return nil
 	}
-	return fmt.Errorf("Prop.%s.Value formula %q is not a constant", row, f)
+	e := cli.Errorf(cli.CodeOperationFailed, "value", "Prop.%s.Value is bound to a formula vsdx does not evaluate", row)
+	e.Detail = "Value F=" + f
+	return e
 }
 
 // isNumberConstant reports whether f is a constant number with an

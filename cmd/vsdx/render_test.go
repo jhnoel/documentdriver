@@ -302,13 +302,14 @@ func TestRenderNotFound(t *testing.T) {
 }
 
 // TestRenderUsage checks the RN2 usage rows: without --page or -o,
-// with a bad overlay or a bad scale, render fails with exit 2.
+// with a bad page, overlay or scale, render fails with exit 2.
 func TestRenderUsage(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		args []string
 	}{
 		{"no page", []string{"render", "x.vsdx", "-o", "x.png"}},
+		{"bad page", []string{"render", "x.vsdx", "--page", "slide1", "-o", "x.png"}},
 		{"no out", []string{"render", "x.vsdx", "--page", "page0"}},
 		{"bad overlay", []string{"render", "x.vsdx", "--page", "page0", "--overlay", "bogus", "-o", "x.png"}},
 		{"bad scale", []string{"render", "x.vsdx", "--page", "page0", "--scale", "0", "-o", "x.png"}},
@@ -324,6 +325,21 @@ func TestRenderUsage(t *testing.T) {
 				t.Errorf("stderr = %q, want a usage error", stderr.String())
 			}
 		})
+	}
+}
+
+// TestRenderPageUsage checks the CC10 row: render --page slide1
+// is usage at --page with the want hint.
+func TestRenderPageUsage(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	args := []string{"render", vsdxtest.Fixture(t, "v1-minimal"), "--page", "slide1", "-o", filepath.Join(t.TempDir(), "x.png")}
+	if code := run(args, &stdout, &stderr); code != 2 {
+		t.Fatalf("render slide1: exit %d, want 2: %s", code, stderr.String())
+	}
+	for _, want := range []string{`"code":"usage"`, `"path":"--page"`, `want page<id>, as read lists them`} {
+		if !strings.Contains(stderr.String(), want) {
+			t.Errorf("stderr = %q, want it to contain %s", stderr.String(), want)
+		}
 	}
 }
 
