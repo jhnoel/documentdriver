@@ -222,8 +222,13 @@ hang or exhaust memory.
 Measure before and after; do not optimise by intuition.
 
 - Cost is linear in the document. On an input of four times the units,
-  an operation may allocate at most 5.5 times the bytes and allocations
-  (time is reported, not checked), and peak live heap
+  an operation may allocate at most 5.5 times the bytes and allocations,
+  and its wall time grows linearly too (ratio at most 8): bytes and
+  allocations are deterministic, so they are enforced in every run,
+  while time ratios give their verdict only in `make scaling`
+  (`LAWS_TIME_VERDICT=1`, packages one at a time), because package-level
+  parallel load moves time ratios on linear work past the bound, and
+  are only logged in `make check`. Peak live heap
   and allocation stay within the docx budgets (`TestMemoryBudget`)
   **[enforced: `make scaling`, a `make ci` step, `TestScaling` in
   `internal/docx/apply`, `internal/docx/create` and `internal/pptx/apply` through

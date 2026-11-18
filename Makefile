@@ -208,24 +208,37 @@ vuln:
 race:
 	CGO_ENABLED=1 go test -race -timeout 60m ./...
 
+# SCALING_PKGS is every package with a test file that calls
+# laws.TimeScales or laws.Scales, found by the grep below (so a new
+# scaling family is picked up by adding its test, not by editing this
+# list). archtest TestTimeScalesInScalingTests checks the calls sit
+# in Test...Scaling... functions that do not call t.Parallel.
+SCALING_PKGS := ./internal/docx/apply ./internal/docx/create ./internal/pptx/apply ./internal/xlsx/read ./internal/xlsx/apply ./internal/xlsx/shift ./internal/vsdx/read $(shell grep -rl --include='*_test.go' -e 'laws.TimeScales' -e 'laws.Scales' internal cmd tools | xargs -n1 dirname | sort -u | sed 's|^|./|')
+
 # scaling is the scaling gate (internal/laws.Scales; every test whose
-# name starts TestScaling, so a family adds its own): create, read, find
-# and apply in docx (and create's families: tables, lists), read and
-# apply in pptx, each on inputs of 1,000 and
+# name starts TestScaling, so a family adds its own), in two parts:
+# bytes and allocations are deterministic and stay enforced in every
+# run, while time ratios (internal/laws.TimeScales) give their verdict
+# only here: LAWS_TIME_VERDICT=1 turns the logged ratio into a failure
+# and -p 1 runs packages one at a time, because package-level parallel
+# load moves time ratios on linear work past the bound (TSG). Create,
+# read, find and apply in docx (and create's families: tables, lists),
+# read and apply in pptx, each on inputs of 1,000 and
 # 4,000 units, may cost at most 5.5 times as much (bytes allocated and
-# allocations; time is reported only) on the larger. Linear work
-# gives about 4, quadratic 16. With it runs the docx memory budget
-# (TestMemoryBudget, laws.WithinMemory): peak live heap at checkpoints
-# and bytes allocated of each docx command at 4,000 paragraphs. The
-# checks are deterministic, so they hold on a loaded machine. It runs in
-# seconds; make test runs it too, this target runs it alone and uncached.
+# allocations) on the larger; time scales linearly (ratio at most 8).
+# Linear work gives about 4, quadratic 16. With it runs the docx
+# memory budget (TestMemoryBudget, laws.WithinMemory): peak live heap
+# at checkpoints and bytes allocated of each docx command at 4,000
+# paragraphs. It runs the TestScaling/TestMemoryBudget selection of
+# SCALING_PKGS; make test runs it too, this target runs it alone and
+# uncached.
 # With it runs the vsdx process-memory gate (tools/memgate, RSS1):
 # each of cmd/vsdx's read --page page0, read --detail full and find
 # runs 3 times on Generated(20000) and 3 on Generated(5000),
 # interleaved, every run at most twice the RM1 live-heap ceiling of
 # the same command, and the 20k/5k ratio of the largest runs at most 5.5 (darwin and linux; other platforms skip).
 scaling:
-	go test -count=1 -run '^(TestScaling|TestMemoryBudget)' ./internal/docx/apply ./internal/docx/create ./internal/pptx/apply ./internal/xlsx/read ./internal/xlsx/apply ./internal/xlsx/shift ./internal/vsdx/read
+	LAWS_TIME_VERDICT=1 go test -p 1 -count=1 -run 'Scaling|^TestMemoryBudget' $(SCALING_PKGS)
 	go test -count=1 -run '^TestMemGate$$' ./tools/memgate
 
 # repro builds each CLI of REPRO_CMDS twice from `git archive HEAD` in two
