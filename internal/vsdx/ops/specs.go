@@ -62,7 +62,7 @@ type ObjectAddSpec struct {
 	Shadow    *ShadowSpec    `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
 	Image     string         `json:"image,omitempty" plan:"optional" doc:"A picture's image: a local PNG or JPEG file path (absolute, or relative to the working directory), or a media part as read shows image (/visio/media/image1.png)."`
 	Crop      []float64      `json:"crop,omitempty" plan:"optional" doc:"A picture's crop [l, t, r, b] in percent of the image, as read shows crop; each 0 to under 100, l + r and t + b under 100."`
-	TextBlock *TextBlockSpec `json:"text_block,omitempty" plan:"optional" doc:"The text block: {valign, margins, background}, any non-empty subset, as read shows text_block; valign top, middle or bottom (VerticalAlign); margins one number for all four sides or [left, top, right, bottom] (not CSS order) in points (or the plan's units), each 0 or more (LeftMargin, TopMargin, RightMargin, BottomMargin); background \"none\", #RRGGBB, or {hex, transparency} with transparency 0 to 100 percent (TextBkgnd, TextBkgndTrans). Members left out keep their value. LibreOffice draws valign and margins, and the background only behind the letters and opaque (vsdx help render)."`
+	TextBlock *TextBlockSpec `json:"text_block,omitempty" plan:"optional" doc:"The text block: {box, angle, valign, margins, background}, any non-empty subset, as read shows text_block; box [x, y, width, height] the block's place on the page in view points (or the plan's units), y down, before rotation, as an object's box (TxtPinX, TxtPinY, TxtWidth, TxtHeight, TxtLocPinX, TxtLocPinY); angle the text's angle on the page in degrees, as rot (TxtAngle); valign top, middle or bottom (VerticalAlign); margins one number for all four sides or [left, top, right, bottom] (not CSS order) in points (or the plan's units), each 0 or more (LeftMargin, TopMargin, RightMargin, BottomMargin); background \"none\", #RRGGBB, or {hex, transparency} with transparency 0 to 100 percent (TextBkgnd, TextBkgndTrans). Members left out keep their value. LibreOffice draws valign and margins, and the background only behind the letters and opaque (vsdx help render)."`
 	img       *imageInput    // the checked image (CheckImages)
 }
 
@@ -83,7 +83,7 @@ type ObjectSetSpec struct {
 	Shadow    *ShadowSpec    `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
 	Image     *string        `json:"image,omitempty" plan:"optional" doc:"A picture's image: a local PNG or JPEG file path (absolute, or relative to the working directory), or a media part as read shows image (/visio/media/image1.png)."`
 	Crop      []float64      `json:"crop,omitempty" plan:"optional" doc:"A picture's crop [l, t, r, b] in percent of the image, as read shows crop; each 0 to under 100, l + r and t + b under 100."`
-	TextBlock *TextBlockSpec `json:"text_block,omitempty" plan:"optional" doc:"The text block: {valign, margins, background}, any non-empty subset, as read shows text_block; valign top, middle or bottom (VerticalAlign); margins one number for all four sides or [left, top, right, bottom] (not CSS order) in points (or the plan's units), each 0 or more (LeftMargin, TopMargin, RightMargin, BottomMargin); background \"none\", #RRGGBB, or {hex, transparency} with transparency 0 to 100 percent (TextBkgnd, TextBkgndTrans). Members left out keep their value. LibreOffice draws valign and margins, and the background only behind the letters and opaque (vsdx help render)."`
+	TextBlock *TextBlockSpec `json:"text_block,omitempty" plan:"optional" doc:"The text block: {box, angle, valign, margins, background}, any non-empty subset, as read shows text_block; box [x, y, width, height] the block's place on the page in view points (or the plan's units), y down, before rotation, as an object's box (TxtPinX, TxtPinY, TxtWidth, TxtHeight, TxtLocPinX, TxtLocPinY); angle the text's angle on the page in degrees, as rot (TxtAngle); valign top, middle or bottom (VerticalAlign); margins one number for all four sides or [left, top, right, bottom] (not CSS order) in points (or the plan's units), each 0 or more (LeftMargin, TopMargin, RightMargin, BottomMargin); background \"none\", #RRGGBB, or {hex, transparency} with transparency 0 to 100 percent (TextBkgnd, TextBkgndTrans). Members left out keep their value. LibreOffice draws valign and margins, and the background only behind the letters and opaque (vsdx help render)."`
 	img       *imageInput    // the checked image (CheckImages)
 }
 
@@ -136,11 +136,15 @@ type ShadowSpec struct {
 // HelpType names ShadowSpec's plan type in help.
 func (ShadowSpec) HelpType() string { return `object|"none"` }
 
-// TextBlockSpec is a text block: VAlign "top", "middle" or "bottom"
-// ("" leaves it), Margins left, top, right and bottom in the plan's
-// units (nil leaves them; a single number gives all four), and
-// Background (nil leaves it).
+// TextBlockSpec is a text block: Box [x, y, width, height] its place
+// on the page in the plan's units, y down, before rotation, and Angle
+// its baseline's angle in degrees (nil leaves each); VAlign "top",
+// "middle" or "bottom" ("" leaves it), Margins left, top, right and
+// bottom in the plan's units (nil leaves them; a single number gives
+// all four), and Background (nil leaves it).
 type TextBlockSpec struct {
+	Box        []float64
+	Angle      *float64
 	VAlign     string
 	Margins    []float64
 	Background *TextBgSpec

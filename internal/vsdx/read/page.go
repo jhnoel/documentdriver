@@ -333,6 +333,8 @@ func shadowJSONOf(s *model.Shadow, in bool) *shadowJSON {
 
 // textBlockJSON is an object's text block as read shows it.
 type textBlockJSON struct {
+	Box        []json.Number `json:"box,omitempty"`
+	Angle      json.Number   `json:"angle,omitempty"`
 	VAlign     string        `json:"valign,omitempty"`
 	Margins    []json.Number `json:"margins,omitempty"`
 	Background any           `json:"background,omitempty"`
@@ -345,11 +347,18 @@ type textBgJSON struct {
 	Transparency json.Number `json:"transparency,omitempty"`
 }
 
-// textBlockJSONOf shows a text block: valign, margins in the selected
-// units and background "none" or {hex, transparency}, each when
-// derived.
+// textBlockJSONOf shows a text block: box (the block's place on the
+// page) and angle (when not 0) in the selected units, valign, margins
+// and background "none" or {hex, transparency}, each when derived.
 func textBlockJSONOf(tb *model.TextBlockInfo, in bool) *textBlockJSON {
 	j := &textBlockJSON{}
+	if tb.HasBox {
+		b := tb.Box
+		j.Box = boxJSON(&b, in)
+		if b.Rot != 0 {
+			j.Angle = json.Number(geom.FormatNum(b.Rot))
+		}
+	}
 	if tb.HasVAlign {
 		j.VAlign = tb.VAlign
 	}

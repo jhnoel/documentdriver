@@ -925,6 +925,12 @@ type textBlockValue struct {
 	hasBg, bgNone bool
 	bgHex         string
 	bgTrans       float64
+	box           geom.Box
+	hasBox        bool
+	// shape is the object's own box (not shown), from which Vary
+	// places a block on an object that has none.
+	shape    geom.Box
+	hasShape bool
 }
 
 // textBlockSuite is the text block suite: object.set text_block, one
@@ -948,13 +954,21 @@ func textBlockSuite() *laws.Suite[textBlockValue] {
 					out = append(out, laws.Value[textBlockValue]{Target: laws.Target{Part: lp.part, Addr: o.ID}, V: textBlockValue{
 						valign: tb.VAlign, hasVAlign: tb.HasVAlign, margins: tb.Margins, hasMargins: tb.HasMargins,
 						hasBg: tb.HasBg, bgNone: tb.BgNone, bgHex: tb.BgHex, bgTrans: tb.BgTrans,
+						box: tb.Box, hasBox: tb.HasBox,
 					}})
+					if o.Box != nil {
+						out[len(out)-1].V.shape, out[len(out)-1].V.hasShape = *o.Box, true
+					}
 				}
 			}
 			return out, nil
 		},
 		Show: func(v textBlockValue) string {
 			s := v.valign + fmt.Sprintf(" %v", v.margins)
+			if v.hasBox {
+				b := v.box
+				s += " box " + geom.FormatNum(b.X) + " " + geom.FormatNum(b.Y) + " " + geom.FormatNum(b.W) + " " + geom.FormatNum(b.H) + " at " + geom.FormatNum(geom.NormDeg(b.Rot))
+			}
 			switch {
 			case !v.hasBg:
 			case v.bgNone:
@@ -972,6 +986,11 @@ func textBlockSuite() *laws.Suite[textBlockValue] {
 			if v.hasMargins {
 				spec.Margins = v.margins[:]
 			}
+			if v.hasBox {
+				spec.Box = []float64{v.box.X, v.box.Y, v.box.W, v.box.H}
+				a := v.box.Rot
+				spec.Angle = &a
+			}
 			if v.hasBg {
 				tr := v.bgTrans
 				spec.Background = &ops.TextBgSpec{None: v.bgNone, Hex: v.bgHex, Transparency: &tr}
@@ -982,6 +1001,19 @@ func textBlockSuite() *laws.Suite[textBlockValue] {
 			next := map[string]string{"top": "middle", "middle": "bottom", "bottom": "top", "": "top"}
 			m := float64(rng.IntN(20))
 			out := textBlockValue{valign: next[cur.valign], hasVAlign: true, margins: [4]float64{m, m + 1, m + 2, m + 3}, hasMargins: true, hasBg: true}
+			switch {
+			case cur.hasBox:
+				// Move the block 6 pt right and turn it 15 degrees.
+				out.box, out.hasBox = cur.box, true
+				out.box.X += 6
+				out.box.Rot = geom.NormDeg(cur.box.Rot + 15)
+			case cur.hasShape && cur.shape.W > 1 && cur.shape.H > 1:
+				// Put the block over the shape's top edge, half its
+				// height, as a region title.
+				b := cur.shape
+				out.box = geom.Box{X: b.X, Y: b.Y - b.H/4, W: b.W, H: b.H / 2, Rot: b.Rot}
+				out.hasBox = true
+			}
 			if cur.hasBg && !cur.bgNone {
 				out.bgNone = true
 			} else {

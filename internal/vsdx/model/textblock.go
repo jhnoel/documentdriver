@@ -3,6 +3,8 @@ package model
 import (
 	"strconv"
 
+	"github.com/jhnoel/documentdriver/internal/vsdx/place"
+
 	"github.com/jhnoel/documentdriver/internal/vsdx/inherit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/sheet"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
@@ -34,6 +36,33 @@ func (c *textBlockCells) cell(name string) (sheet.Cell, bool) {
 	return v, true
 }
 
+// textBoxCells are the text transform cells; storing any of them
+// places the block (TextBlockInfo.Box).
+var textBoxCells = [...]string{vsd.CellTxtPinX, vsd.CellTxtPinY, vsd.CellTxtWidth, vsd.CellTxtHeight, vsd.CellTxtLocPinX, vsd.CellTxtLocPinY, vsd.CellTxtAngle}
+
+// textBlockBox sets tb.Box when the shape or its master stores a text
+// transform cell: place.TextBox of its effective cells, the frame the
+// drawing uses. A shape whose own transform is not derived
+// shows no box.
+func textBlockBox(tb *TextBlockInfo, c *textBlockCells, r *inherit.Resolver, s *inherit.Shape, f place.Frame, pageH float64) {
+	stored := false
+	for _, name := range textBoxCells {
+		if _, origin, ok := r.Cell(s, sheet.ShapeCell(name)); ok && (origin == inherit.Local || origin == inherit.Inherited || origin == inherit.Master) {
+			stored = true
+		}
+	}
+	if !stored {
+		return
+	}
+	t, _, ok := transformOf(r, s)
+	if !ok {
+		return
+	}
+	tb.Box = place.TextBox(textCells(r, s, t), t, f, pageH)
+	tb.HasBox = true
+	c.local = true
+}
+
 // textBlockOmit records that member of the text block, stored as v,
 // is not shown.
 func textBlockOmit(o *Object, member, v string) {
@@ -56,7 +85,7 @@ func textBlockOmit(o *Object, member, v string) {
 // text. The origin is in origins.text_block when Local. A member that
 // is themed or does not parse is left out with text_block.<member> in
 // omitted, and one no sheet stores is left out silently.
-func textBlockInfoOf(o *Object, r *inherit.Resolver, s *inherit.Shape, all bool) {
+func textBlockInfoOf(o *Object, r *inherit.Resolver, s *inherit.Shape, f place.Frame, pageH float64, all bool) {
 	if o.Kind != Shape && o.Kind != Group && o.Kind != Connector {
 		return
 	}
@@ -111,8 +140,9 @@ func textBlockInfoOf(o *Object, r *inherit.Resolver, s *inherit.Shape, all bool)
 			}
 		}
 	}
+	textBlockBox(&tb, &c, r, s, f, pageH)
 	tb.Local = c.local
-	if !tb.Local && !(all && o.HasText) || (!tb.HasVAlign && !tb.HasMargins && !tb.HasBg) {
+	if !tb.Local && !(all && o.HasText) || (!tb.HasVAlign && !tb.HasMargins && !tb.HasBg && !tb.HasBox) {
 		return
 	}
 	o.TextBlock = &tb

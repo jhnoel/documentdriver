@@ -1,7 +1,6 @@
 package model
 
 import (
-	"math"
 	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/geom"
@@ -67,31 +66,8 @@ func textBlockOf(d *Drawing, r *inherit.Resolver, s *inherit.Shape, t place.Tran
 		return
 	}
 	body, _ := text.Parse(node)
-	num := func(name string, def float64) float64 {
-		if v, ok := shapeNumber(r, s, name); ok {
-			return v
-		}
-		return def
-	}
-	tw := num(vsd.CellTxtWidth, t.Width)
-	th := num(vsd.CellTxtHeight, t.Height)
-	px := num(vsd.CellTxtPinX, t.Width/2)
-	py := num(vsd.CellTxtPinY, t.Height/2)
-	lx := num(vsd.CellTxtLocPinX, tw/2)
-	ly := num(vsd.CellTxtLocPinY, th/2)
-	ang := num(vsd.CellTxtAngle, 0)
-	tb := &TextBlock{W: tw * vsd.PointsPerInch, H: th * vsd.PointsPerInch}
-	// Block points (y down) to block inches (y up), to the shape's
-	// local space, to the view.
-	toBlock := geom.Scale(1.0/vsd.PointsPerInch, -1.0/vsd.PointsPerInch).Then(geom.Translate(0, th))
-	local := geom.Translate(-lx, -ly).Then(geom.Rotate(ang * 180 / math.Pi)).Then(geom.Translate(px, py))
-	frame := toBlock.Then(local).Then(t.Local()).Then(f.M).Then(place.View(pageH))
-	if frame.A*frame.D-frame.B*frame.C < 0 {
-		// A flipped shape does not mirror its text: reflect the block
-		// about its vertical centre line.
-		frame = geom.Scale(-1, 1).Then(geom.Translate(tb.W, 0)).Then(frame)
-	}
-	tb.Frame = frame
+	frame, w, h := textFrame(r, s, t, f, pageH)
+	tb := &TextBlock{W: w, H: h, Frame: frame}
 	for i, name := range [4]string{vsd.CellLeftMargin, vsd.CellTopMargin, vsd.CellRightMargin, vsd.CellBottomMargin} {
 		if v, ok := shapeNumber(r, s, name); ok {
 			tb.Margin[i] = v * vsd.PointsPerInch
@@ -137,6 +113,33 @@ func textBlockOf(d *Drawing, r *inherit.Resolver, s *inherit.Shape, t place.Tran
 		tb.Paras = append(tb.Paras, tp)
 	}
 	d.Text = tb
+}
+
+// textCells returns the effective text transform cells of the shape
+// (place.TextCells); a cell no sheet stores takes the value of
+// Visio's default formula (place.DefaultText).
+func textCells(r *inherit.Resolver, s *inherit.Shape, t place.Transform) place.TextCells {
+	c := place.DefaultText(t)
+	num := func(name string, def float64) float64 {
+		if v, ok := shapeNumber(r, s, name); ok {
+			return v
+		}
+		return def
+	}
+	c.W = num(vsd.CellTxtWidth, c.W)
+	c.H = num(vsd.CellTxtHeight, c.H)
+	c.PinX = num(vsd.CellTxtPinX, c.PinX)
+	c.PinY = num(vsd.CellTxtPinY, c.PinY)
+	c.LocPinX = num(vsd.CellTxtLocPinX, c.W/2)
+	c.LocPinY = num(vsd.CellTxtLocPinY, c.H/2)
+	c.Angle = num(vsd.CellTxtAngle, 0)
+	return c
+}
+
+// textFrame returns the frame of the shape's text block and its width
+// and height in points (place.TextFrame of its effective cells).
+func textFrame(r *inherit.Resolver, s *inherit.Shape, t place.Transform, f place.Frame, pageH float64) (geom.Affine, float64, float64) {
+	return place.TextFrame(textCells(r, s, t), t, f, pageH)
 }
 
 // rowKeys maps the row IX of each effective row of section to its key.

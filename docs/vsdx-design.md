@@ -1501,3 +1501,50 @@ from a character no font has; on the bitmap font it fails 1944 times),
 fontTools), `TestParseTruncated`, `FuzzParse`. The LibreOffice
 comparisons stay within bound (figure 0.02% and 0.52% unmatched, text
 block 0.39% and 0.00%, paths unchanged).
+
+## 18. Placing the text block (2026-11-25, owner sign-off pending)
+
+Patent figures put a label outside its shape's geometry: a region's
+title on its border, an arrow's label beside its line, a numeral at a
+leader's end. `text_block.box` `[x, y, w, h]` and `text_block.angle`
+place it, in page view points like `box`, `from`, `to` and `points`,
+so an agent derives a label's place from what `read` shows without
+frame arithmetic, and the same form works for 2-D and 1-D shapes. The
+peer's suggestion was the shape's local space; page space was chosen
+because 1-D shapes' local frames run along the line (Visio's `Width` is
+the length) and a rotated shape's local frame is turned, both of which
+an agent would have to invert.
+
+`place.TextFrame`, `place.TextBox` and `place.TextCellsFor` hold the
+geometry once for read, the drawing view and the writer: the frame is
+the drawing's (the block's own space through `TxtLocPin`, `TxtAngle`,
+`TxtPin`, the shape's transform and its parents', a flipped shape's
+text reflected so it is not mirrored), and `TextCellsFor` its inverse
+pinned at the block centre (`TestTextCellsForProperty`: 5000 random
+shapes, angles, flips and group frames round-trip to 1e-6).
+
+Cells, as Visio stores them (corpus survey): moved 2-D text keeps plain
+`TxtPinX`/`TxtPinY` values, `TxtLocPinX`/`TxtLocPinY` with
+`TxtWidth*0.5`/`TxtHeight*0.5` (the most common form: 173 TxtLocPinX cells), and
+Dynamic connectors with moved text store `Controls.TextPosition` `X`
+and `Y` with `XDyn`, `YDyn` and the pins as F="Inh" caches (every
+sampled connector with a local TextPosition row). The writer stores all seven cells the first time it places a
+block: an absent `TxtPinX` is `Width*0.5` to Visio but 0 to
+LibreOffice (an arrow label drew at the line's start until it was
+written). The edit layer gained `SetRowCells` for the named row.
+
+LibreOffice 26.2 draws placed and turned blocks on rectangles,
+master-less connectors, open paths and a Visio Dynamic connector whose
+text was moved, as the Go renderer does (placement page: 0.00% and
+0.04% unmatched). A white background on a region title clears the
+border in both: LibreOffice behind the letters only, the Go renderer
+over the text and its margins.
+
+Tests: `TestTextBoxPlacements` (the three placements and an angle,
+cell values derived by hand from the geometry, identity, angle alone),
+`TestTextBoxPlanErrors`, `TestTextBoxDynamicConnector` (corpus:
+TextPosition and caches, identity, the TEXTHEIGHT refusal),
+`TestReadSVGTextPlacement`, `TestTextCellsForProperty`,
+`TestTextBoxDefault`, the law suite's box (16 inverse read-backs fail
+when the box is dropped) and the placement page in the LibreOffice
+comparison. Each was seen to fail with its code removed.

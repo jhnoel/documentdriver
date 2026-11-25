@@ -2,6 +2,7 @@ package ops_test
 
 import (
 	"encoding/json"
+	"math"
 	"os"
 	"slices"
 	"strconv"
@@ -294,4 +295,154 @@ func TestTextRunsVisioForm(t *testing.T) {
 	if !slices.Equal(styles, []string{"1", "0", "2", "0"}) {
 		t.Errorf("Style per row = %v, want [1 0 2 0]", styles)
 	}
+}
+
+// TestTextBoxPlacements checks text_block box on the three placements
+// patent figures use, and an angle, written on a blank page (11 in
+// high): read shows each box as written, writing it back changes
+// nothing, and the cells are Visio's text transform cells in the
+// shape's local inches (y up from its bottom left, along the line for
+// a connector), derived by hand from the geometry:
+//   - a region title on the top border of the rect [60, 80, 300, 160]:
+//     box [110, 72, 200, 16], centre (210, 80) is local (150, 160) pt
+//     = TxtPinX 2.0833333333333335, TxtPinY 2.2222222222222223 in;
+//   - an arrow label 12 pt above the connector (60, 320)-(360, 320):
+//     box [160, 300, 100, 16], centre (210, 308) is 150 pt along the
+//     line and 12 pt to its left = TxtPinX 2.0833333333333335,
+//     TxtPinY 0.16666666666666696 in;
+//   - a numeral at the free end of the leader (420, 140)-(480, 100),
+//     an open polyline whose box is [420, 100, 60, 40]: box
+//     [482, 86, 30, 18], centre (497, 95) is local (77, 45) pt =
+//     TxtPinX 1.0694444444444444, TxtPinY 0.625 in;
+//   - every placed block TxtWidth and TxtHeight its size over 72,
+//     TxtLocPinX and TxtLocPinY half of them with Visio's
+//     TxtWidth*0.5 and TxtHeight*0.5, TxtAngle 0.
+func TestTextBoxPlacements(t *testing.T) {
+	out, _ := refusalOut(t, vsdxtest.Blank(t), `{"ops":[
+		{"op":"object.add","at":"page0","geom":"rect","box":[60,80,300,160],"html":"<p>Region 300</p>","fill":{"pattern":"hatch_up","bg":"#FFFFFF"},"text_block":{"box":[110,72,200,16],"background":"#FFFFFF"}},
+		{"op":"object.add","at":"page0","kind":"connector","from":[60,320],"to":[360,320],"html":"<p>signal 310</p>","text_block":{"box":[160,300,100,16]}},
+		{"op":"object.add","at":"page0","geom":"polyline","points":[[420,140],[480,100]],"html":"<p>312</p>","text_block":{"box":[482,86,30,18],"margins":0}},
+		{"op":"object.add","at":"page0","geom":"rect","box":[400,250,120,80],"html":"<p>turned</p>","text_block":{"box":[400,280,120,20],"angle":30}}]}`)
+	for id, want := range map[string]string{
+		"page0/s1": `{"box":[110,72,200,16],"valign":"middle","margins":[4,4,4,4],"background":{"hex":"#FFFFFF"}}`,
+		"page0/s2": `{"box":[160,300,100,16],"valign":"middle","margins":[4,4,4,4]}`,
+		"page0/s3": `{"box":[482,86,30,18],"valign":"middle","margins":[0,0,0,0]}`,
+		"page0/s4": `{"box":[400,280,120,20],"angle":30,"valign":"middle","margins":[4,4,4,4]}`,
+	} {
+		if got := string(readObj(t, out, id)["text_block"]); got != want {
+			t.Errorf("%s text_block = %s, want %s", id, got, want)
+		}
+	}
+	for _, c := range []struct {
+		id         uint32
+		pinX, pinY string
+		w, h       string
+	}{
+		{1, "2.0833333333333335", "2.2222222222222223", "2.7777777777777777", "0.2222222222222222"},
+		{2, "2.0833333333333335", "0.16666666666666696", "1.3888888888888888", "0.2222222222222222"},
+		{3, "1.0694444444444444", "0.625", "0.4166666666666667", "0.25"},
+	} {
+		cells := shapeCells(t, out, c.id)
+		num := func(v string) float64 {
+			f, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				t.Fatalf("s%d: %q is not a number", c.id, v)
+			}
+			return f
+		}
+		for name, want := range map[string]string{
+			"TxtPinX": c.pinX, "TxtPinY": c.pinY, "TxtWidth": c.w, "TxtHeight": c.h, "TxtAngle": "0",
+			"TxtLocPinX": strconv.FormatFloat(num(c.w)/2, 'g', -1, 64), "TxtLocPinY": strconv.FormatFloat(num(c.h)/2, 'g', -1, 64),
+		} {
+			got, ok := cells[name]
+			if !ok || math.Abs(num(got[0])-num(want)) > 1e-12 || got[1] != "" {
+				t.Errorf("s%d %s = %q, want %s in", c.id, name, got, want)
+			}
+		}
+		if cells["TxtLocPinX"][2] != "TxtWidth*0.5" || cells["TxtLocPinY"][2] != "TxtHeight*0.5" || cells["TxtPinX"][2] != "" {
+			t.Errorf("s%d formulas: LocPinX %q LocPinY %q PinX %q, want Visio's TxtWidth*0.5, TxtHeight*0.5 and none", c.id, cells["TxtLocPinX"][2], cells["TxtLocPinY"][2], cells["TxtPinX"][2])
+		}
+	}
+	if _, changed := refusalOut(t, out, `{"ops":[
+		{"op":"object.set","at":"page0/s1","text_block":{"box":[110,72,200,16]}},
+		{"op":"object.set","at":"page0/s2","text_block":{"box":[160,300,100,16]}},
+		{"op":"object.set","at":"page0/s3","text_block":{"box":[482,86,30,18]}},
+		{"op":"object.set","at":"page0/s4","text_block":{"box":[400,280,120,20],"angle":30}}]}`); len(changed) != 0 {
+		t.Errorf("writing back read's boxes: changed = %v, want none", changed)
+	}
+	// angle alone turns the block about its centre.
+	turned, _ := refusalOut(t, out, `{"ops":[{"op":"object.set","at":"page0/s1","text_block":{"angle":90}}]}`)
+	if got := string(readObj(t, turned, "page0/s1")["text_block"]); !strings.HasPrefix(got, `{"box":[110,72,200,16],"angle":90,`) {
+		t.Errorf("after angle 90: text_block = %s", got)
+	}
+}
+
+// TestTextBoxPlanErrors checks the plan-shape faults of box and angle.
+func TestTextBoxPlanErrors(t *testing.T) {
+	for _, c := range []struct{ tb, code, path string }{
+		{`{"box":[0,0,10]}`, "invalid_operation", "ops[0].text_block.box"},
+		{`{"box":[0,0,0,10]}`, "invalid_operation", "ops[0].text_block.box"},
+		{`{"box":[0,0,10,-1]}`, "invalid_operation", "ops[0].text_block.box"},
+		{`{"angle":"30"}`, "invalid_plan", "ops[0].text_block.angle"},
+	} {
+		_, errs := ops.ParsePlan([]byte(`{"ops":[{"op":"object.set","at":"page0/s1","text_block":` + c.tb + `}]}`))
+		if len(errs) != 1 || errs[0].Code != c.code || errs[0].Path != c.path {
+			t.Errorf("text_block %s: errs = %v, want one %s at %s", c.tb, errs, c.code, c.path)
+		}
+	}
+}
+
+// TestTextBoxDynamicConnector checks moving the text of a Visio-drawn
+// Dynamic connector (dave-howard-vsdx test9_rect_and_line.vsdx s3,
+// whose master sets TxtPinX and TxtPinY from Controls.TextPosition):
+// the move writes the control's X and Y, with the pins and XDyn, YDyn
+// as F="Inh" caches, as Visio stores moved connector text (the corpus's
+// Dynamic connectors with moved text); read shows the new box; writing
+// it back changes nothing; and a new size, which the master's
+// TEXTHEIGHT formula owns, is refused at text_block.
+func TestTextBoxDynamicConnector(t *testing.T) {
+	src := corpusFile(t, "dave-howard-vsdx/tests/test9_rect_and_line.vsdx")
+	if got := string(readObj(t, src, "page0/s3")["text_block"]); !strings.HasPrefix(got, `{"box":[135.91,181.12,40,17.6]`) {
+		t.Fatalf("source s3 text_block = %s", got)
+	}
+	out, changed := refusalOut(t, src, `{"ops":[{"op":"object.set","at":"page0/s3","text_block":{"box":[135.91,140,40,17.6]}}]}`)
+	if len(changed) != 1 {
+		t.Fatalf("changed = %v, want s3", changed)
+	}
+	if got := string(readObj(t, out, "page0/s3")["text_block"]); !strings.HasPrefix(got, `{"box":[135.91,140,40,17.6]`) {
+		t.Errorf("moved s3 text_block = %s", got)
+	}
+	cells := shapeCells(t, out, 3)
+	if cells["TxtPinX"][2] != "Inh" || cells["TxtPinY"][2] != "Inh" {
+		t.Errorf("TxtPinX %q TxtPinY %q, want F=Inh caches", cells["TxtPinX"], cells["TxtPinY"])
+	}
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var ctrl map[string][3]string
+	for sec := range textSetShapeNode(t, data, 3).ElementsSeq() {
+		if n, _ := sec.Attr("N"); sec.Local() != vsd.ElemSection || n != "Controls" {
+			continue
+		}
+		for row := range sec.ElementsSeq() {
+			if n, _ := row.Attr("N"); n != "TextPosition" {
+				continue
+			}
+			ctrl = map[string][3]string{}
+			for c := range row.ElementsSeq() {
+				n, _ := c.Attr("N")
+				v, _ := c.Attr("V")
+				f, _ := c.Attr("F")
+				ctrl[n] = [3]string{v, "", f}
+			}
+		}
+	}
+	if ctrl == nil || ctrl["X"][0] != cells["TxtPinX"][0] || ctrl["Y"][0] != cells["TxtPinY"][0] || ctrl["X"][2] != "" || ctrl["YDyn"] != [3]string{cells["TxtPinY"][0], "", "Inh"} {
+		t.Errorf("Controls.TextPosition = %v, want X and Y the pins (no formula), XDyn and YDyn their F=Inh caches", ctrl)
+	}
+	if _, changed := refusalOut(t, out, `{"ops":[{"op":"object.set","at":"page0/s3","text_block":{"box":[135.91,140,40,17.6]}}]}`); len(changed) != 0 {
+		t.Errorf("identity: changed = %v", changed)
+	}
+	expectRefusal(t, out, `{"ops":[{"op":"object.set","at":"page0/s3","text_block":{"box":[135.91,140,40,30]}}]}`, "text_block", "TxtHeight is bound to a formula")
 }

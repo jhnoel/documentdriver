@@ -17,7 +17,7 @@ var marginCells = [4]string{vsd.CellLeftMargin, vsd.CellTopMargin, vsd.CellRight
 
 // setTextBlock applies s.TextBlock to the shape at s.At (resolved
 // through aliases) and returns the changed address when it wrote
-// anything: valign as VerticalAlign 0, 1 or 2; margins (in the plan's
+// anything: box and angle through textBoxCells; valign as VerticalAlign 0, 1 or 2; margins (in the plan's
 // units) as LeftMargin, TopMargin, RightMargin and BottomMargin in
 // inches with U="PT", the form Visio stores; background "none" as
 // TextBkgnd 0 (and TextBkgndTrans 0 when one is stored that is not),
@@ -91,11 +91,27 @@ func setTextBlock(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]strin
 			return nil, "", formulaRefusal(addr, "text_block", []formulaCell{fc})
 		}
 	}
-	if len(cells) == 0 {
+	var control []edit.Cell
+	if tb.Box != nil || tb.Angle != nil {
+		// The box's cells are checked against the Formulas rule as
+		// they are built (textBoxCells keeps Visio's own formulas).
+		w, err := textBoxCells(ws, st, a, addr, tb, scale)
+		if err != nil {
+			return nil, "", err
+		}
+		cells = append(cells, w.cells...)
+		control = w.control
+	}
+	if len(cells) == 0 && len(control) == 0 {
 		return nil, "", nil
 	}
 	if err := ws.SetCells(addr, cells); err != nil {
 		return nil, "", err
+	}
+	if len(control) > 0 {
+		if err := ws.SetRowCells(addr, controlsSection, textPositionRow, control); err != nil {
+			return nil, "", err
+		}
 	}
 	return []string{addr}, "", nil
 }

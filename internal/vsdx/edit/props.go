@@ -287,17 +287,24 @@ func findChild(parent *tree.Node, elem, name string) *tree.Node {
 }
 
 // ensurePropertySection returns the shape's Property Section,
-// creating it in schema order when the shape has none: the existing
-// section when there is one, else a new Section created by a Parse
-// and a SlotEnd insert, as SetText does for sections.
+// creating it in schema order when the shape has none
+// (ensureSection).
 func (w *Workspace) ensurePropertySection(part string, shapeNode *tree.Node) (*tree.Node, error) {
-	if s := findChild(shapeNode, vsd.ElemSection, vsd.SectionProperty); s != nil {
+	return w.ensureSection(part, shapeNode, vsd.SectionProperty)
+}
+
+// ensureSection returns the shape's Section named name, creating it in
+// schema order when the shape has none: the existing section when
+// there is one, else a new Section created by a Parse and a SlotEnd
+// insert, as SetText does for sections.
+func (w *Workspace) ensureSection(part string, shapeNode *tree.Node, name string) (*tree.Node, error) {
+	if s := findChild(shapeNode, vsd.ElemSection, name); s != nil {
 		return s, nil
 	}
-	frag := []byte("<Section N='" + vsd.SectionProperty + "'/>")
+	frag := []byte("<Section N='" + name + "'/>")
 	nodes, err := w.core.Parse(shapeNode, frag, nil)
 	if err != nil {
-		return nil, fmt.Errorf("vsdx edit: Property section: %w", err)
+		return nil, fmt.Errorf("vsdx edit: %s section: %w", name, err)
 	}
 	if len(nodes) != 1 || nodes[0].Kind() != tree.ElementNode || !isElem(nodes[0], vsd.ElemSection) {
 		return nil, fmt.Errorf("vsdx edit: section fragment is not a single Section element")

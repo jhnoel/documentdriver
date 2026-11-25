@@ -597,8 +597,10 @@ func (s *PageSetSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 	})
 }
 
-// DecodePlan implements cli.PlanDecoder: an object {valign, margins,
-// background} with at least one member. valign is top, middle or
+// DecodePlan implements cli.PlanDecoder: an object {box, angle,
+// valign, margins, background} with at least one member. box is four
+// finite numbers with positive width and height, angle finite
+// degrees; valign is top, middle or
 // bottom; margins one number (all four sides) or four, each finite and
 // 0 or more; background "none", #RRGGBB, or {hex, transparency} with
 // transparency 0 to 100. A value out of range is an invalid_operation
@@ -607,16 +609,40 @@ func (s *PageSetSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 func (tb *TextBlockSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 	*tb = TextBlockSpec{}
 	if v.Kind != cli.Object {
-		d.Fail(cli.CodeInvalidPlan, path, v, "expected an object {valign, margins, background}, found %s", v.Kind)
+		d.Fail(cli.CodeInvalidPlan, path, v, "expected an object {box, angle, valign, margins, background}, found %s", v.Kind)
 		return
 	}
 	if len(v.Members) == 0 {
-		d.Fail(cli.CodeInvalidPlan, path, v, "text_block needs valign, margins or background")
+		d.Fail(cli.CodeInvalidPlan, path, v, "text_block needs box, angle, valign, margins or background")
 		return
 	}
 	for _, m := range v.Members {
 		mp := cli.Join(path, m.Key)
 		switch m.Key {
+		case "box":
+			var b []float64
+			n := len(d.Errs())
+			d.Value(m.Value, mp, &b)
+			if len(d.Errs()) > n {
+				continue
+			}
+			if len(b) != 4 || !addFinite(b) || !(b[2] > 0) || !(b[3] > 0) {
+				d.Add(cli.Errorf(cli.CodeInvalidOperation, mp, "box: want [x, y, width, height], finite, with positive width and height"), m.Value)
+				continue
+			}
+			tb.Box = b
+		case "angle":
+			var a float64
+			n := len(d.Errs())
+			d.Value(m.Value, mp, &a)
+			if len(d.Errs()) > n {
+				continue
+			}
+			if math.IsNaN(a) || math.IsInf(a, 0) {
+				d.Add(cli.Errorf(cli.CodeInvalidOperation, mp, "angle: want a finite number of degrees"), m.Value)
+				continue
+			}
+			tb.Angle = &a
 		case "valign":
 			var s string
 			n := len(d.Errs())
@@ -635,7 +661,7 @@ func (tb *TextBlockSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 			tb.Background = decodeTextBg(m.Value, mp, d)
 		default:
 			er := cli.Errorf(cli.CodeInvalidPlan, mp, "unknown field %q", m.Key)
-			er.Hint = "fields: valign, margins, background"
+			er.Hint = "fields: box, angle, valign, margins, background"
 			d.Add(er, m.Value)
 		}
 	}

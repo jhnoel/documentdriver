@@ -551,9 +551,32 @@ no op writes them.
     path also shows `line.begin` and `line.end` as connectors do.
 - **Text blocks.** `text_block` on object.add and object.set (shapes,
   groups and connectors; not pictures, refused like `fill`) is an
-  object with any non-empty subset of `valign`, `margins` and
-  `background`; members left out keep their value, and writing back
-  what `read` shows changes nothing:
+  object with any non-empty subset of `box`, `angle`, `valign`,
+  `margins` and `background`; members left out keep their value, and
+  writing back what `read` shows changes nothing:
+  - `box` `[x, y, width, height]` is the block's place on the page in
+    view points (or the plan's units), y down, as an object's `box`:
+    the rectangle before rotation, its centre where the block's centre
+    lands; `angle` is the text's angle on the page in degrees, as
+    `rot` is measured (0 is level text, whatever the shape's own
+    rotation). They place a label anywhere relative to its shape: a
+    region title on its border, an arrow label beside its line (a
+    connector's or open path's block is in the same page coordinates),
+    a reference numeral at a leader's end. Stored as the text
+    transform cells in the shape's local inches: `TxtPinX`, `TxtPinY`
+    (the centre), `TxtWidth`, `TxtHeight`, `TxtLocPinX` and
+    `TxtLocPinY` (half the size, with Visio's `TxtWidth*0.5` and
+    `TxtHeight*0.5`) and `TxtAngle`, every one of them the first time
+    a block is placed, as Visio stores moved text. On a shape whose
+    `TxtPinX` and `TxtPinY` follow its `Controls.TextPosition` handle
+    (Visio's Dynamic connector), the handle's `X` and `Y` are written
+    and the pins and the handle's `XDyn` and `YDyn` hold the value as
+    inherited caches (`F="Inh"`), as the corpus's Dynamic connectors
+    with moved text store it. A part of the box equal to what `read`
+    shows (the centre, the size, the angle) keeps its cells, so a cell
+    bound to a formula vsdx does not evaluate (a master's
+    `TEXTHEIGHT(TheText,TxtWidth)`) refuses only when the plan changes
+    it (the Formulas rule, `operation_failed` at `text_block`).
   - `valign` `"top"`, `"middle"` or `"bottom"`: `VerticalAlign` 0, 1, 2.
   - `margins` one number for all four sides or `[left, top, right,
     bottom]` (pptx `text.insets` order, not CSS order) in points (or
@@ -571,7 +594,9 @@ no op writes them.
   - A value outside these is `invalid_operation` at the member; an
     unknown member, `{}` or another JSON kind is `invalid_plan`. The
     Formulas rule applies to each cell written.
-  - `read` shows `text_block` `{"valign", "margins", "background"}`,
+  - `read` shows `text_block` `{"box", "angle", "valign", "margins",
+    "background"}` (`box` when the shape or its master stores a text
+    transform cell, `angle` when it is not 0),
     each member from the effective cell (shape, master, style), when
     the shape or its master stores one of the cells (values from the
     style sheets alone are not shown, as `html` shows only the text's
@@ -583,10 +608,14 @@ no op writes them.
     `TxtLocPinY` or `TxtAngle` (Visio's default formulas), including
     for a closed `polyline` or `curve` given `html` (a diamond holds its
     own label).
-  - LibreOffice (`render --renderer libreoffice`) draws `valign` and
-    `margins`, and draws a background only behind the letters, opaque
-    (it ignores `TextBkgndTrans`); `--renderer svg` draws all three as
-    above. Measured on LibreOffice 26.2.
+  - LibreOffice (`render --renderer libreoffice`) draws `valign`,
+    `margins`, and a placed and turned `box` on rectangles, connectors
+    (master-less and Dynamic connector) and paths; it draws a
+    background only behind the letters, opaque (it ignores
+    `TextBkgndTrans`), which is enough to clear a border under a
+    region title but not the margins around it. `--renderer svg` draws
+    all of them as above, the background over the text and its
+    margins. Measured on LibreOffice 26.2.
 - **Text runs.** Text a plan writes (object.add `html`, text.set) is
   stored as Visio stores it: Character and Paragraph rows numbered in
   text order from 0, one row for each stretch of one format, each

@@ -38,9 +38,9 @@ draw it, and the result's renderer says which one did:
                LibreOffice 26.2: it draws a shape's whole text in the
                formatting of its last run (Visio-written text too), so a
                label with mixed sizes or bold words shows one style; it
-               honours text_block valign and margins, but draws a
-               background only behind the letters (no margins) and
-               opaque (no transparency).
+               honours text_block box, angle, valign and margins, but
+               draws a background only behind the letters (no margins)
+               and opaque (no transparency).
   svg          the drawing read --format svg writes, rasterised in Go with
                no other program: the same paths, hatches, dashes, arrowheads
                and pictures, and text drawn with embedded open fonts

@@ -15,7 +15,7 @@ func fillObject(o *Object, r *inherit.Resolver, s *inherit.Shape, f place.Frame,
 	pathOf(o, r, s, f, pageH)
 	paint(o, r, s)
 	textOf(o, r, s)
-	textBlockInfoOf(o, r, s, opt.Draw || opt.Full)
+	textBlockInfoOf(o, r, s, f, pageH, opt.Draw || opt.Full)
 	if opt.Draw {
 		drawingOf(o, r, s, f, pageH)
 	}

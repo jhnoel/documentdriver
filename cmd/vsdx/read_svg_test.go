@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"image/png"
+	"math"
 	"os"
 	"path/filepath"
 	"slices"
@@ -45,6 +46,17 @@ const textBlockPlan = `{"ops":[
 {"op":"object.add","at":"page0","geom":"polyline","closed":true,"points":[[300,340],[420,420],[300,500],[180,420]],"html":"<p>Decide 212</p>","line":{"w":1}}
 ]}`
 
+// placementPlan is the text placement page: a region title on its
+// rect's top border with a white background, an arrow label above a
+// horizontal connector, a numeral at the free end of a leader line,
+// and a label turned 30 degrees.
+const placementPlan = `{"ops":[
+{"op":"object.add","at":"page0","geom":"rect","box":[60,80,300,160],"html":"<p>Region 300</p>","fill":{"pattern":"hatch_up","bg":"#FFFFFF"},"text_block":{"box":[110,72,200,16],"background":"#FFFFFF","margins":[2,0,2,0]}},
+{"op":"object.add","at":"page0","kind":"connector","from":[60,320],"to":[360,320],"line":{"end":"triangle"},"html":"<p>signal 310</p>","text_block":{"box":[160,300,100,16]}},
+{"op":"object.add","at":"page0","geom":"polyline","points":[[420,140],[480,100]],"html":"<p>312</p>","text_block":{"box":[482,86,30,18],"margins":0}},
+{"op":"object.add","at":"page0","geom":"rect","box":[400,250,120,80],"html":"<p>turned 314</p>","text_block":{"box":[400,280,120,20],"angle":30}}
+]}`
+
 // svgPage is one of the drawing test's pages: its plan, the fill
 // pattern of each patterned object, the arrowheads it draws, the
 // words its text shows and, by object, the number of dashes its line
@@ -58,9 +70,9 @@ type svgPage struct {
 	dashes   map[string]int
 }
 
-// svgPages returns the drawing test's three pages: the render test's
-// plan (every named pattern and the four test shapes), the figure and
-// the text block page.
+// svgPages returns the drawing test's four pages: the render test's
+// plan (every named pattern and the four test shapes), the figure, the
+// text block page and the text placement page.
 func svgPages() []svgPage {
 	_, _, bell, sine, arc := renderPathsInputs()
 	paths := svgPage{name: "paths", plan: renderPathsPlan(bell, sine, arc), patterns: map[string]string{}, heads: 3}
@@ -79,7 +91,82 @@ func svgPages() []svgPage {
 		patterns: map[string]string{"page0/s5": "hatch_up"},
 		words:    []string{"Top", "Middle", "Bottom", "Margin", "Hatched", "210", "Decide", "212"},
 	}
-	return []svgPage{paths, fig, tb}
+	place := svgPage{name: "placement", plan: placementPlan, heads: 1,
+		patterns: map[string]string{"page0/s1": "hatch_up"},
+		words:    []string{"Region", "300", "signal", "310", "312", "turned", "314"},
+	}
+	return []svgPage{paths, fig, tb, place}
+}
+
+// TestReadSVGTextPlacement checks where the drawing view puts placed
+// text blocks (placementPlan): the region title's line on the rect's
+// top border (y 80) with a white background behind it that covers the
+// border and is drawn first; the arrow label above its line (y 320)
+// and centred on x 210; the numeral beside the leader's free end
+// (497, 95); and the turned label's text rotated by 30 degrees.
+func TestReadSVGTextPlacement(t *testing.T) {
+	file := createDrawing(t, t.TempDir(), "placement", placementPlan)
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"read", file, "--page", "page0", "--format", "svg"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("read --format svg: exit %d: %s", code, stderr.String())
+	}
+	d, err := tree.ParseString(stdout.String())
+	if err != nil {
+		t.Fatalf("not well formed: %v", err)
+	}
+	texts := map[string]svgText{}
+	matrix := map[string]string{}
+	var bg [][2]float64
+	bgFirst := false
+	svgElements(d.Root(), func(n *tree.Node, group string) {
+		switch n.Local() {
+		case "path":
+			if role, _ := n.Attr("data-role"); role == "text-background" && group == "page0/s1" {
+				data, _ := n.Attr("d")
+				bg = pathPoints(t, data)
+				_, seen := texts[group]
+				bgFirst = !seen
+			}
+		case "text":
+			x, _ := n.Attr("x")
+			y, _ := n.Attr("y")
+			m, _ := n.Attr("transform")
+			xf, _ := strconv.ParseFloat(x, 64)
+			yf, _ := strconv.ParseFloat(y, 64)
+			px, py := applyMatrix(t, m, xf, yf)
+			texts[group] = svgText{group, px, py}
+			matrix[group] = m
+		}
+	})
+	title, label, num := texts["page0/s1"], texts["page0/s2"], texts["page0/s3"]
+	// A 12 pt line is 14.4 pt high with its 12 pt text centred in it
+	// and the baseline 0.8 of 12 below the text's top, so a line
+	// centred on 80 has its baseline at 80 - 7.2 + 1.2 + 9.6 = 83.6.
+	if math.Abs(title.x-210) > 0.5 || math.Abs(title.y-83.6) > 0.5 {
+		t.Errorf("region title anchor (%.2f, %.2f), want (210, 83.6): centred on the top border", title.x, title.y)
+	}
+	if math.Abs(label.x-210) > 0.5 || label.y > 320-2 || label.y < 300 {
+		t.Errorf("arrow label anchor (%.2f, %.2f), want x 210 and the baseline above the line at y 320", label.x, label.y)
+	}
+	if math.Abs(num.x-497) > 0.5 || math.Abs(num.y-98.6) > 0.5 {
+		t.Errorf("numeral anchor (%.2f, %.2f), want (497, 98.6) beside the leader's end", num.x, num.y)
+	}
+	if len(bg) != 4 || !bgFirst {
+		t.Fatalf("title background %v (drawn first %v), want a box drawn before the text", bg, bgFirst)
+	}
+	minY, maxY := bg[0][1], bg[0][1]
+	for _, p := range bg {
+		minY, maxY = min(minY, p[1]), max(maxY, p[1])
+	}
+	if !(minY < 80 && maxY > 80) {
+		t.Errorf("title background y %.2f to %.2f does not cover the border at y 80", minY, maxY)
+	}
+	// rotate(30): the text matrix's first column is (cos 30, sin 30).
+	ax, ay := applyMatrix(t, matrix["page0/s4"], 1, 0)
+	ox, oy := applyMatrix(t, matrix["page0/s4"], 0, 0)
+	if got := math.Atan2(ay-oy, ax-ox) * 180 / math.Pi; math.Abs(got-30) > 0.01 {
+		t.Errorf("turned label at %.3f degrees, want 30", got)
+	}
 }
 
 // svgText is one text line of the drawing: its object and its anchor

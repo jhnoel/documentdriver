@@ -150,10 +150,10 @@ type Shadow struct {
 
 // TextBlockInfo is an object's effective text block: VAlign "top",
 // "middle" or "bottom" (HasVAlign), Margins left, top, right and
-// bottom in points (HasMargins, all four derived), and the background
-// (HasBg): BgNone, or BgHex "#RRGGBB" with BgTrans in percent. Local
-// is true when the shape or its master stores one of the cells (a
-// value other than the style sheets').
+// bottom in points (HasMargins, all four derived), the background
+// (HasBg): BgNone, or BgHex "#RRGGBB" with BgTrans in percent, and the
+// block's place (Box). Local is true when the shape or its master
+// stores one of the cells (a value other than the style sheets').
 type TextBlockInfo struct {
 	VAlign                string
 	HasVAlign, HasMargins bool
@@ -162,6 +162,12 @@ type TextBlockInfo struct {
 	BgHex                 string
 	BgTrans               float64
 	Local                 bool
+	// Box is the text block's rectangle on the page, view points y
+	// down, before its rotation (Rot, degrees as an object's rot), its
+	// centre where the block's centre lands (HasBox: the shape or its
+	// master stores a Txt* cell).
+	Box    geom.Box
+	HasBox bool
 }
 
 // Prop is one effective shape data row.
