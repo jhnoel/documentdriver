@@ -128,11 +128,11 @@ func TestPatternFillWriteRead(t *testing.T) {
 	if got, want := fillOf(t, back, "page0/s1"), `{"hex":"#0000FF","pattern":"grid","bg":{"hex":"#FFFFFF"}}`; got != want {
 		t.Errorf("pattern over solid = %s, want %s", got, want)
 	}
-	clear, _ := refusalOut(t, back, `{"ops":[{"op":"object.set","at":"page0/s1","fill":{"pattern":"grid","hex":"#0000FF"}}]}`)
-	if got, want := fillOf(t, clear, "page0/s1"), `{"hex":"#0000FF","pattern":"grid","bg":"none"}`; got != want {
+	clearBg, _ := refusalOut(t, back, `{"ops":[{"op":"object.set","at":"page0/s1","fill":{"pattern":"grid","hex":"#0000FF"}}]}`)
+	if got, want := fillOf(t, clearBg, "page0/s1"), `{"hex":"#0000FF","pattern":"grid","bg":"none"}`; got != want {
 		t.Errorf("default background = %s, want %s", got, want)
 	}
-	none, _ := refusalOut(t, clear, `{"ops":[{"op":"object.set","at":"page0/s1","fill":"none"}]}`)
+	none, _ := refusalOut(t, clearBg, `{"ops":[{"op":"object.set","at":"page0/s1","fill":"none"}]}`)
 	if got := fillOf(t, none, "page0/s1"); got != `"none"` {
 		t.Errorf("fill none = %s", got)
 	}

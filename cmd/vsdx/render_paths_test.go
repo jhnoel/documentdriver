@@ -65,7 +65,7 @@ func renderPathsPlan(bell, sine, arc [][]float64) string {
 // Visio: Visio draws the patterns from its own bitmaps.
 func TestRenderPatternsAndPaths(t *testing.T) {
 	needRenderer(t)
-	bellY := func(x float64) float64 { return 560 - 120*math.Exp(-math.Pow((x-192)/36, 2)/2) }
+	bellY := func(x float64) float64 { z := (x - 192) / 36; return 560 - 120*math.Exp(-z*z/2) }
 	sineY := func(x float64) float64 { return 480 - 30*math.Sin((x-340)/25) }
 	var bell, sine, arc [][]float64
 	for x := 72.0; x <= 312; x += 6 {
