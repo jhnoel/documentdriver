@@ -134,16 +134,15 @@ type textField struct {
 
 // loadTextShape reads the target shape of address a from the working
 // tree of its page: the shape node from the core's tree (so a prior
-// op's text is visible), indexed through inherit against the document
-// opened on the working package (masters and styles, which no op has
-// changed here). It refuses stencils, Foreign and guide shapes, and
+// op's text is visible), indexed through inherit against the
+// workspace's document (ws.Doc: pages an earlier op added included;
+// masters and styles as opened, which no op changes). It refuses stencils, Foreign and guide shapes, and
 // reports a missing page or shape as not_found at at and an unreadable
 // page part as unreadable_target.
 func loadTextShape(ws *edit.Workspace, a vsd.Address, resolved string) (*textShape, error) {
-	d, err := doc.Open(ws.Package())
-	if err != nil {
-		return nil, err
-	}
+	// The workspace's document has the pages earlier operations
+	// added; doc.Open of the package does not.
+	d := ws.Doc()
 	if d.Kind == doc.Stencil {
 		return nil, cli.Errorf(cli.CodeOperationFailed, "at", "%s is in a stencil: stencils cannot be edited", resolved)
 	}

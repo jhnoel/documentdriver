@@ -204,6 +204,14 @@ func pagesPartName(pkg *opc.Package, docPart string) (string, error) {
 // the working copy through plan.Tx (Commit, CommitTo, Finish*).
 func (w *Workspace) Tx() *plan.Tx { return w.tx }
 
+// Doc returns the drawing as the workspace keeps it: the document
+// opened with the workspace, whose page list the page operations keep
+// current (page.add, page.rename, page.delete, page.reorder,
+// page.set), so a page an earlier operation of the plan added is in
+// it. doc.Open of Package reads the parts as they were opened and
+// lacks such a page. Callers must not modify it.
+func (w *Workspace) Doc() *doc.Document { return w.doc }
+
 // Package returns the transaction's working copy.
 func (w *Workspace) Package() *opc.Package { return w.pkg }
 

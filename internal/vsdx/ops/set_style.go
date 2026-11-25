@@ -142,16 +142,16 @@ func styleLineSpec(s *ObjectSetSpec) (string, error) {
 }
 
 // loadStyleShape reads the target shape a of address addr from the
-// working tree of its page: the shape node from the core's tree (so a
-// prior op's writes are visible), its page part, and its resolver
+// working tree of its page, found through the workspace's document
+// (ws.Doc, so a page an earlier op added is found): the shape node from
+// the core's tree (so a prior op's writes are visible), its page part, and its resolver
 // shape, refusing stencils, Foreign and guide shapes, and reporting a
 // missing page or shape as not_found at at and an unreadable page part
 // as unreadable_target.
 func loadStyleShape(ws *edit.Workspace, a vsd.Address, addr string) (*styleShape, error) {
-	d, err := doc.Open(ws.Package())
-	if err != nil {
-		return nil, err
-	}
+	// The workspace's document has the pages earlier operations
+	// added; doc.Open of the package does not.
+	d := ws.Doc()
 	if d.Kind == doc.Stencil {
 		return nil, cli.Errorf(cli.CodeOperationFailed, "at", "%s is in a stencil: stencils cannot be edited", addr)
 	}

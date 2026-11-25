@@ -89,16 +89,16 @@ type replacePage struct {
 	addr string
 }
 
-// loadReplacePage opens the drawing of ws once and returns the page
+// loadReplacePage returns, through the workspace's document (ws.Doc,
+// which has the pages earlier ops added), the page
 // of address a (a shape's container, or the page itself) from the
 // working tree: a stencil is operation_failed at at, a missing page
 // is not_found at at, and a page with no part or a part that is not
 // PageContents is unreadable_target.
 func loadReplacePage(ws *edit.Workspace, a vsd.Address, resolved string) (*replacePage, error) {
-	d, err := doc.Open(ws.Package())
-	if err != nil {
-		return nil, err
-	}
+	// The workspace's document has the pages earlier operations
+	// added; doc.Open of the package does not.
+	d := ws.Doc()
 	if d.Kind == doc.Stencil {
 		return nil, cli.Errorf(cli.CodeOperationFailed, "at", "%s is in a stencil: stencils cannot be edited", resolved)
 	}

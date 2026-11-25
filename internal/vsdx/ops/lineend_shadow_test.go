@@ -15,11 +15,17 @@ import (
 // readObj returns object id of page0 of path as decoded JSON.
 func readObj(t *testing.T, path, id string) map[string]json.RawMessage {
 	t.Helper()
+	return readPageObj(t, path, "page0", id)
+}
+
+// readPageObj returns object id of page pageID of path as decoded JSON.
+func readPageObj(t *testing.T, path, pageID, id string) map[string]json.RawMessage {
+	t.Helper()
 	b, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	out, err := read.Page(b, "sha256:x", "page0", read.Options{})
+	out, err := read.Page(b, "sha256:x", pageID, read.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +40,7 @@ func readObj(t *testing.T, path, id string) map[string]json.RawMessage {
 			return o
 		}
 	}
-	t.Fatalf("%s not on page0", id)
+	t.Fatalf("%s not on %s", id, pageID)
 	return nil
 }
 
