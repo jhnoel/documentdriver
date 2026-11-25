@@ -8,6 +8,7 @@ import (
 	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/geom"
 	"github.com/jhnoel/documentdriver/internal/vsdx/edit"
+	"github.com/jhnoel/documentdriver/internal/vsdx/path"
 	"github.com/jhnoel/documentdriver/internal/vsdx/sheet"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
@@ -19,12 +20,23 @@ func styleIsConnector(st *styleShape) bool {
 	return ok
 }
 
+// styleIsOpenPath reports whether st is a master-less shape whose
+// geometry is an open polyline or curve in the form vsdx writes
+// (path.Parse), the shapes read shows line ends on besides connectors.
+func styleIsOpenPath(st *styleShape) bool {
+	if st.shape == nil || st.shape.HasMaster || st.shape.HasMShape {
+		return false
+	}
+	g, ok := path.Parse(st.node)
+	return ok && (g.Kind == path.Polyline || g.Kind == path.Curve) && !g.Closed
+}
+
 // lineEndCells returns the cells that write line.begin and line.end
 // of s on st (docs/contract.md §3, Line ends): a name maps to its
 // stored index, an index string is accepted only when it equals the
 // shown arrow (and then writes nothing), a size left out keeps the
 // size, and a value equal to the effective one writes nothing. A
-// line end on a shape that is not a connector, an index the table
+// line end on a shape that is neither a connector nor an open path, an index the table
 // does not name, and a cell bound to a formula vsdx does not evaluate
 // are operation_failed at the field.
 func lineEndCells(st *styleShape, s *ObjectSetSpec) ([]edit.Cell, error) {
@@ -43,8 +55,8 @@ func lineEndCells(st *styleShape, s *ObjectSetSpec) ([]edit.Cell, error) {
 		if e.spec == nil {
 			continue
 		}
-		if !styleIsConnector(st) {
-			return nil, cli.Errorf(cli.CodeOperationFailed, e.field, "%s is not a connector: line ends apply to connectors (1-D shapes) only", st.addr)
+		if !styleIsConnector(st) && !styleIsOpenPath(st) {
+			return nil, cli.Errorf(cli.CodeOperationFailed, e.field, "%s is not a connector or an open path: line ends apply to connectors (1-D shapes) and open polylines and curves only", st.addr)
 		}
 		cur, hasCur := styleStoredCell(st, e.arrow)
 		curKey := ""

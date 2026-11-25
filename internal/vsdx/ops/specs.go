@@ -46,13 +46,15 @@ type ObjectAddSpec struct {
 	As       string      `json:"as,omitempty" plan:"optional" doc:"A name for the new shape; later operations write $name for it."`
 	Kind     string      `json:"kind,omitempty" plan:"optional" doc:"connector for a master-less straight connector, picture for a picture; absent for a shape."`
 	Master   string      `json:"master,omitempty" plan:"optional" doc:"A master address (master2) or the master's name as read shows it."`
-	Geom     string      `json:"geom,omitempty" plan:"optional" doc:"rect or ellipse for a master-less shape."`
+	Geom     string      `json:"geom,omitempty" plan:"optional" doc:"rect or ellipse (placed by box or pin), or polyline or curve (placed by points), for a master-less shape."`
+	Points   [][]float64 `json:"points,omitempty" plan:"optional" doc:"A polyline's or curve's points [[x, y], ...] in view points (or the plan's units), y down, as read shows points; the shape's box is their bounds. A curve passes through every point (a Catmull-Rom spline stored as RelCubBezTo rows)."`
+	Closed   bool        `json:"closed,omitempty" plan:"optional" doc:"true: the polyline or curve returns to its first point and may be filled; absent or false: an open path, which takes line begin and end arrowheads, as read shows closed."`
 	Box      []float64   `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box; for a 2-D master or geom shape."`
 	Pin      []float64   `json:"pin,omitempty" plan:"optional" doc:"[x, y], the centre in view points (input only: read shows box); for a 2-D master or geom shape. Without box, a geom shape is 72 x 72 pt and a master instance takes the master's size."`
 	Name     string      `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
 	HTML     *string     `json:"html,omitempty" plan:"optional" doc:"The shape's text as HTML (help html), as read shows html."`
-	Fill     *PaintSpec  `json:"fill,omitempty" plan:"optional" doc:"\"none\" or {hex: #RRGGBB}, as read shows fill."`
-	Line     *LineSpec   `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors only) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
+	Fill     *PaintSpec  `json:"fill,omitempty" plan:"optional" doc:"\"none\", {hex: #RRGGBB} for a solid fill, or a pattern fill {pattern, hex, bg} as read shows fill: pattern a name (hatch_up, hatch_down, grid, cross_hatch, horizontal, vertical, dots, hatch_up_fine, hatch_down_fine, grid_fine, cross_hatch_fine, horizontal_fine, vertical_fine) or a FillPattern number 2 to 24, hex the pattern colour (default #000000), bg the background #RRGGBB, {hex} or \"none\" (default \"none\": clear)."`
+	Line     *LineSpec   `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors, open polylines and open curves) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
 	From     []float64   `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector or 1-D master."`
 	To       []float64   `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector or 1-D master."`
 	FromGlue string      `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows from_glue."`
@@ -71,8 +73,8 @@ type ObjectSetSpec struct {
 	FlipH    *bool       `json:"flip_h,omitempty" plan:"optional" doc:"Flip horizontally, as read shows flip_h."`
 	FlipV    *bool       `json:"flip_v,omitempty" plan:"optional" doc:"Flip vertically, as read shows flip_v."`
 	Name     *string     `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
-	Fill     *PaintSpec  `json:"fill,omitempty" plan:"optional" doc:"\"none\" or {hex: #RRGGBB}, as read shows fill."`
-	Line     *LineSpec   `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors only) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
+	Fill     *PaintSpec  `json:"fill,omitempty" plan:"optional" doc:"\"none\", {hex: #RRGGBB} for a solid fill, or a pattern fill {pattern, hex, bg} as read shows fill: pattern a name (hatch_up, hatch_down, grid, cross_hatch, horizontal, vertical, dots, hatch_up_fine, hatch_down_fine, grid_fine, cross_hatch_fine, horizontal_fine, vertical_fine) or a FillPattern number 2 to 24, hex the pattern colour (default #000000), bg the background #RRGGBB, {hex} or \"none\" (default \"none\": clear)."`
+	Line     *LineSpec   `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors, open polylines and open curves) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
 	From     []float64   `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector."`
 	To       []float64   `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector."`
 	FromGlue *string     `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows from_glue."`
@@ -83,10 +85,17 @@ type ObjectSetSpec struct {
 	img      *imageInput // the checked image (CheckImages)
 }
 
-// PaintSpec is a fill: "none" or {"hex": "#RRGGBB"}, as read shows it.
+// PaintSpec is a fill: "none", {"hex": "#RRGGBB"} (solid), or a
+// pattern fill {"pattern", "hex", "bg"}, as read shows it. After
+// decoding, Pattern is the stored FillPattern number ("" for solid),
+// Hex the colour (a pattern's defaults to #000000), and a pattern's
+// background is BgNone (the default) or BgHex.
 type PaintSpec struct {
-	None bool
-	Hex  string
+	None    bool
+	Hex     string
+	Pattern string
+	BgNone  bool
+	BgHex   string
 }
 
 // HelpType names PaintSpec's plan type in help.
@@ -188,7 +197,9 @@ var objectAddRules = []string{
 	"image and crop go with kind picture",
 	"picture takes no master, geom, fill, line, html, shadow, from, to, from_glue or to_glue",
 	"picture needs image",
-	"geom must be rect or ellipse",
+	"geom must be rect, ellipse, polyline or curve",
+	pathAddRules[0], pathAddRules[1], pathAddRules[2], pathAddRules[3],
+	pathAddRules[4], pathAddRules[5], pathAddRules[6],
 	"master must be a master address or a master name",
 	"object.add takes master or geom, not both",
 	"connector takes no master",

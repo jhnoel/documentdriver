@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"ops\":[{\"op\":\"object.add\",\"at\":\"page0\",\"geom\":\"curve\",\"closed\":true,\"points\":[[0,0],[10,5],[3,9],[0,0]],\"fill\":{\"pattern\":\"dots\"},\"line\":{\"w\":1}}]}")

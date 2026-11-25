@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
+	"github.com/jhnoel/documentdriver/internal/vsdx/path"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
 
@@ -124,8 +125,14 @@ func sizeOK(s []float64) bool { return len(s) == 2 && s[0] > 0 && s[1] > 0 }
 // orientationOK reports whether s is portrait or landscape.
 func orientationOK(s string) bool { return s == "portrait" || s == "landscape" }
 
-// geomOK reports whether s is rect or ellipse.
-func geomOK(s string) bool { return s == "rect" || s == "ellipse" }
+// geomOK reports whether s is rect, ellipse, polyline or curve.
+func geomOK(s string) bool {
+	return s == path.Rect || s == path.Ellipse || isPathGeom(s)
+}
+
+// isPathGeom reports whether s is a geom placed by points (polyline or
+// curve) rather than by box or pin.
+func isPathGeom(s string) bool { return s == path.Polyline || s == path.Curve }
 
 // checkObjectAdd reports the first rule object.add breaks: its
 // message and its field relative to the operation, or false.
@@ -146,7 +153,10 @@ func checkObjectAdd(s *ObjectAddSpec) (string, string, bool) {
 		return "image and crop go with kind picture", "image", true
 	}
 	if s.Geom != "" && !geomOK(s.Geom) {
-		return "geom must be rect or ellipse", "geom", true
+		return "geom must be rect, ellipse, polyline or curve", "geom", true
+	}
+	if msg, field, bad := checkPathAdd(s); bad {
+		return msg, field, true
 	}
 	if s.Master != "" && !masterOK(s.Master) {
 		return "master must be a master address or a master name", "master", true
@@ -188,7 +198,7 @@ func checkObjectAdd(s *ObjectAddSpec) (string, string, bool) {
 		if s.ToGlue != "" {
 			return "shape takes no to_glue", "to_glue", true
 		}
-		if s.Box == nil && s.Pin == nil {
+		if s.Box == nil && s.Pin == nil && !isPathGeom(s.Geom) {
 			return "shape needs box or pin", "box", true
 		}
 	}

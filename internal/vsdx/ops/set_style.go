@@ -29,7 +29,8 @@ type styleShape struct {
 // setStyle applies the style fields of s (fill, line and name) to the
 // shape at s.At, which it resolves through aliases, and returns the
 // changed address when it wrote anything. Fill "none" writes
-// FillPattern 0 and a hex writes FillForegnd with FillPattern 1; line
+// FillPattern 0, a hex writes FillForegnd with FillPattern 1 and a
+// pattern fill its cells (fillCells); line
 // "none" writes LinePattern 0 and a line writes LineWeight in inches
 // for w (in the plan's units), LineColor for color and LinePattern for
 // dash, adding LinePattern 1 when a weight or colour would otherwise
@@ -206,16 +207,14 @@ func styleCells(st *styleShape, s *ObjectSetSpec, hex, color string, scale float
 				}
 				cells = append(cells, edit.Cell{N: vsd.CellFillPattern, V: "0"})
 			}
-		} else if cur, derived := styleFillHex(st); !derived || cur != hex {
-			if c, ok := styleRefused(st, vsd.CellFillForegnd); ok {
-				return nil, formulaRefusal(st.addr, "fill", []formulaCell{c})
+		} else if !styleFillMatches(st, s.Fill, hex) {
+			fill := fillCells(s.Fill, hex)
+			for _, c := range fill {
+				if fc, ok := styleRefused(st, c.N); ok {
+					return nil, formulaRefusal(st.addr, "fill", []formulaCell{fc})
+				}
 			}
-			if c, ok := styleRefused(st, vsd.CellFillPattern); ok {
-				return nil, formulaRefusal(st.addr, "fill", []formulaCell{c})
-			}
-			cells = append(cells,
-				edit.Cell{N: vsd.CellFillForegnd, V: hex},
-				edit.Cell{N: vsd.CellFillPattern, V: "1"})
+			cells = append(cells, fill...)
 		}
 	}
 	if s.Line == nil {

@@ -68,9 +68,13 @@ const (
 	CellLayerMember = "LayerMember"
 	CellFillForegnd = "FillForegnd"
 	CellFillPattern = "FillPattern"
-	CellLineColor   = "LineColor"
-	CellLineWeight  = "LineWeight"
-	CellLinePattern = "LinePattern"
+	CellFillBkgnd   = "FillBkgnd"
+	// CellFillBkgndTrans is the background's transparency, a fraction
+	// from 0 (opaque) to 1 (clear).
+	CellFillBkgndTrans = "FillBkgndTrans"
+	CellLineColor      = "LineColor"
+	CellLineWeight     = "LineWeight"
+	CellLinePattern    = "LinePattern"
 
 	CellBeginArrow       = "BeginArrow"
 	CellEndArrow         = "EndArrow"
@@ -93,4 +97,36 @@ const (
 var (
 	ArrowNames = map[string]string{"0": "none", "4": "triangle", "5": "stealth"}
 	ArrowIndex = map[string]string{"none": "0", "triangle": "4", "stealth": "5"}
+)
+
+// FillPatternNames maps the stored FillPattern numbers the contract
+// names (docs/contract.md §3, Pattern fills) to their names;
+// FillPatternIndex is the reverse. A pattern from FillPatternMin to
+// FillPatternMax not in the table is shown as its stored number. The
+// numbers are the Fill dialog's pattern list in order (0 transparent,
+// 1 solid, 2 "Dark upward diagonal", ...), and LibreOffice's import
+// (libvisio) draws each as the hatch the name says, except dots (8)
+// and cross_hatch_fine (24), which it draws as a dense triple hatch.
+// That Visio draws them so is Visio unconfirmed (VE19).
+var (
+	FillPatternNames = map[string]string{
+		"2": "hatch_up", "3": "grid", "4": "cross_hatch", "5": "hatch_down",
+		"6": "horizontal", "7": "vertical", "8": "dots",
+		"19": "horizontal_fine", "20": "vertical_fine", "21": "hatch_down_fine",
+		"22": "hatch_up_fine", "23": "grid_fine", "24": "cross_hatch_fine",
+	}
+	FillPatternIndex = map[string]string{
+		"hatch_up": "2", "grid": "3", "cross_hatch": "4", "hatch_down": "5",
+		"horizontal": "6", "vertical": "7", "dots": "8",
+		"horizontal_fine": "19", "vertical_fine": "20", "hatch_down_fine": "21",
+		"hatch_up_fine": "22", "grid_fine": "23", "cross_hatch_fine": "24",
+	}
+)
+
+// FillPatternMin and FillPatternMax bound the stored FillPattern
+// numbers that are patterns (MS-VSDX FillPattern cell: 0 none, 1
+// solid, 2 to 24 patterns, 25 to 40 gradients).
+const (
+	FillPatternMin = 2
+	FillPatternMax = 24
 )

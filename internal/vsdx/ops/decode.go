@@ -1,6 +1,9 @@
 package ops
 
 import (
+	"maps"
+	"math"
+	"slices"
 	"strings"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
@@ -59,10 +62,17 @@ func decodeFields(v *cli.Value, path string, d *cli.Decoder, fields []planField)
 	}
 }
 
-// DecodePlan implements cli.PlanDecoder: "none" or {"hex": "#RRGGBB"},
-// with an invalid_operation fault at hex for a colour that is not
-// #RRGGBB and an invalid_plan fault at fill for any other form.
+// DecodePlan implements cli.PlanDecoder: "none", {"hex": "#RRGGBB"}
+// (solid), or a pattern fill {"pattern", "hex", "bg"} (docs/contract.md
+// §3, Pattern fills): pattern a name of vsd.FillPatternIndex or a
+// FillPattern number from 2 to 24 (a number or its string), hex the
+// pattern's colour (default #000000), bg the background, a colour
+// (#RRGGBB or {"hex"}) or "none" (the default). A colour that is not
+// #RRGGBB and a pattern that is neither are invalid_operation faults
+// at the member; an unknown member, a missing hex on a solid fill and
+// any other form are invalid_plan faults.
 func (p *PaintSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
+	*p = PaintSpec{}
 	if v.Kind == cli.String {
 		if v.Str != "none" {
 			e := cli.Errorf(cli.CodeInvalidOperation, path, "fill %q: want \"none\" or a colour object", v.Str)
@@ -70,40 +80,132 @@ func (p *PaintSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 			return
 		}
 		p.None = true
-		p.Hex = ""
 		return
 	}
 	if v.Kind != cli.Object {
 		d.Fail(cli.CodeInvalidPlan, path, v, "expected \"none\" or an object, found %s", v.Kind)
 		return
 	}
-	seen := false
+	seenHex, seenPattern, seenBg := false, false, false
 	for _, m := range v.Members {
-		if m.Key != "hex" {
+		switch m.Key {
+		case "hex":
+			seenHex = true
+			if hex, ok := decodeFillColor(m.Value, cli.Join(path, "hex"), d, false); ok {
+				p.Hex = hex
+			}
+		case "pattern":
+			seenPattern = true
+			p.Pattern = decodeFillPattern(m.Value, cli.Join(path, "pattern"), d)
+		case "bg":
+			seenBg = true
+			bgPath := cli.Join(path, "bg")
+			if m.Value.Kind == cli.String && m.Value.Str == "none" {
+				p.BgNone = true
+			} else if hex, ok := decodeFillColor(m.Value, bgPath, d, true); ok {
+				p.BgHex = hex
+			}
+		default:
 			e := cli.Errorf(cli.CodeInvalidPlan, cli.Join(path, m.Key), "unknown field %q", m.Key)
-			e.Hint = "fields: hex"
+			e.Hint = "fields: hex, pattern, bg"
 			d.Add(e, m.Value)
-			continue
 		}
-		seen = true
-		var hex string
-		n := len(d.Errs())
-		d.Value(m.Value, cli.Join(path, "hex"), &hex)
-		if len(d.Errs()) > n {
-			continue
-		}
-		upper, ok := vsd.Color(hex)
-		if !ok {
-			e := cli.Errorf(cli.CodeInvalidOperation, cli.Join(path, "hex"), "hex %q is not #RRGGBB", hex)
-			d.Add(e, m.Value)
-			continue
-		}
-		p.None = false
-		p.Hex = upper
 	}
-	if !seen {
+	switch {
+	case seenPattern:
+		if !seenHex {
+			p.Hex = defaultPatternHex
+		}
+		if !seenBg {
+			p.BgNone = true
+		}
+	case seenBg:
+		d.Fail(cli.CodeInvalidPlan, cli.Join(path, "bg"), v, "bg needs pattern: a solid fill has no background")
+	case !seenHex:
 		d.Fail(cli.CodeInvalidPlan, cli.Join(path, "hex"), v, "missing field %q", "hex")
 	}
+}
+
+// defaultPatternHex is a pattern fill's colour when the plan gives
+// none: black, the colour of line art (docs/contract.md §3).
+const defaultPatternHex = "#000000"
+
+// decodeFillColor decodes a fill colour at path: a string "#RRGGBB",
+// or, when object is true (bg), also {"hex": "#RRGGBB"}; it returns the
+// upper-case hex and false after recording a fault.
+func decodeFillColor(v *cli.Value, path string, d *cli.Decoder, object bool) (string, bool) {
+	if object && v.Kind == cli.Object {
+		hex := ""
+		seen := false
+		for _, m := range v.Members {
+			if m.Key != "hex" {
+				e := cli.Errorf(cli.CodeInvalidPlan, cli.Join(path, m.Key), "unknown field %q", m.Key)
+				e.Hint = "fields: hex"
+				d.Add(e, m.Value)
+				return "", false
+			}
+			seen = true
+			n := len(d.Errs())
+			d.Value(m.Value, cli.Join(path, "hex"), &hex)
+			if len(d.Errs()) > n {
+				return "", false
+			}
+		}
+		if !seen {
+			d.Fail(cli.CodeInvalidPlan, cli.Join(path, "hex"), v, "missing field %q", "hex")
+			return "", false
+		}
+		path = cli.Join(path, "hex")
+		return checkFillHex(hex, path, v, d)
+	}
+	if v.Kind != cli.String {
+		want := "a string"
+		if object {
+			want = "\"none\", a string or an object"
+		}
+		d.Fail(cli.CodeInvalidPlan, path, v, "expected %s, found %s", want, v.Kind)
+		return "", false
+	}
+	return checkFillHex(v.Str, path, v, d)
+}
+
+// checkFillHex returns hex in upper case, or records an
+// invalid_operation fault at path when it is not #RRGGBB.
+func checkFillHex(hex, path string, v *cli.Value, d *cli.Decoder) (string, bool) {
+	upper, ok := vsd.Color(hex)
+	if !ok {
+		d.Add(cli.Errorf(cli.CodeInvalidOperation, path, "hex %q is not #RRGGBB", hex), v)
+		return "", false
+	}
+	return upper, true
+}
+
+// decodeFillPattern decodes a pattern at path to its stored FillPattern
+// number as a string: a name of vsd.FillPatternIndex, or a whole
+// number from vsd.FillPatternMin to vsd.FillPatternMax given as a
+// number or a string. Anything else is an invalid_operation fault
+// naming the names, and "" is returned.
+func decodeFillPattern(v *cli.Value, path string, d *cli.Decoder) string {
+	var text string
+	switch v.Kind {
+	case cli.String:
+		if n, ok := vsd.FillPatternIndex[v.Str]; ok {
+			return n
+		}
+		text = v.Str
+	case cli.Number:
+		text = v.Num
+	default:
+		d.Fail(cli.CodeInvalidPlan, path, v, "expected a pattern name or number, found %s", v.Kind)
+		return ""
+	}
+	if n, ok := vsd.Number(text); ok && n >= vsd.FillPatternMin && n <= vsd.FillPatternMax && n == math.Trunc(n) {
+		return vsd.FormatInches(n)
+	}
+	e := cli.Errorf(cli.CodeInvalidOperation, path, "pattern %q is not a pattern name or a number from %d to %d", text, vsd.FillPatternMin, vsd.FillPatternMax)
+	e.Hint = "names: " + strings.Join(slices.Sorted(maps.Keys(vsd.FillPatternIndex)), ", ")
+	d.Add(e, v)
+	return ""
 }
 
 // DecodePlan implements cli.PlanDecoder: "none" or an object with w, a
@@ -318,6 +420,8 @@ func (s *ObjectAddSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 		{Name: "geom", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Geom) }},
 		{Name: "box", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Box) }},
 		{Name: "pin", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Pin) }},
+		{Name: "points", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Points) }},
+		{Name: "closed", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Closed) }},
 		{Name: "name", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Name) }},
 		{Name: "html", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) {
 			var str string

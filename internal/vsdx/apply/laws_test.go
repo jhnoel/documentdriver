@@ -348,10 +348,15 @@ func boxSuite() *laws.Suite[boxValue] {
 	}
 }
 
-// fillValue is a fill as read shows it: none, or a hex colour.
+// fillValue is a fill as read shows it: none, a hex colour, or a
+// pattern (its name or number) in that colour over a clear (bgNone) or
+// coloured (bgHex) background.
 type fillValue struct {
-	none bool
-	hex  string
+	none    bool
+	hex     string
+	pattern string
+	bgNone  bool
+	bgHex   string
 }
 
 // fillSuite is the fill suite: object.set fill.
@@ -369,31 +374,53 @@ func fillSuite() *laws.Suite[fillValue] {
 					if o.Fill == nil || !lawWritableKind(o.Kind) {
 						continue
 					}
+					f := o.Fill
+					if f.Pattern != "" && !f.BgNone && f.BgHex == "" {
+						// A background read does not derive cannot
+						// be sent back (docs/contract.md §3).
+						continue
+					}
 					out = append(out, laws.Value[fillValue]{
 						Target: laws.Target{Part: lp.part, Addr: o.ID},
-						V:      fillValue{none: o.Fill.None, hex: o.Fill.Hex},
+						V:      fillValue{none: f.None, hex: f.Hex, pattern: f.Pattern, bgNone: f.BgNone, bgHex: f.BgHex},
 					})
 				}
 			}
 			return out, nil
 		},
 		Show: func(v fillValue) string {
-			if v.none {
+			switch {
+			case v.none:
 				return "none"
+			case v.pattern == "":
+				return v.hex
+			case v.bgNone:
+				return v.hex + " " + v.pattern + " on none"
 			}
-			return v.hex
+			return v.hex + " " + v.pattern + " on " + v.bgHex
 		},
 		Set: func(t laws.Target, v fillValue) laws.Op {
-			return &ops.ObjectSetSpec{At: t.Addr, Fill: &ops.PaintSpec{None: v.none, Hex: v.hex}}
+			spec := &ops.PaintSpec{None: v.none, Hex: v.hex, BgNone: v.bgNone, BgHex: v.bgHex}
+			if v.pattern != "" {
+				spec.Pattern = v.pattern
+				if n, ok := vsd.FillPatternIndex[v.pattern]; ok {
+					spec.Pattern = n
+				}
+			}
+			return &ops.ObjectSetSpec{At: t.Addr, Fill: spec}
 		},
 		Vary: func(_ *rand.Rand, _ laws.Target, cur fillValue) fillValue {
-			if cur.none {
+			// none and pattern vary to a solid colour, solid to a
+			// pattern, so the suite writes and reads back all three.
+			switch {
+			case cur.none, cur.pattern != "" && cur.hex != "#00FF00":
 				return fillValue{hex: "#00FF00"}
+			case cur.pattern != "":
+				return fillValue{hex: "#FF0000"}
+			case cur.hex == "#000000":
+				return fillValue{hex: "#FF0000", pattern: "cross_hatch", bgHex: "#FFFFFF"}
 			}
-			if cur.hex != "#00FF00" {
-				return fillValue{hex: "#00FF00"}
-			}
-			return fillValue{hex: "#FF0000"}
+			return fillValue{hex: "#000000", pattern: "hatch_up", bgNone: true}
 		},
 		Apply:   lawApply,
 		Refused: lawRefused,

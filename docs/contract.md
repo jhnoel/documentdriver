@@ -288,8 +288,8 @@ no op writes them.
 
 | Op | Fields |
 | --- | --- |
-| `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector; `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector, point glue only (whole-shape glue needs the Dynamic connector master); `kind: "picture"` with `image` (a file path, below) and `box` or `pin`, and optionally `crop` and `name`: a picture, with no `fill`, `line`, `html`, `shadow` or connector fields (`invalid_operation` at the field). `shadow` is accepted with `master` and `geom`. No `rot`, `flip_h`, `flip_v` (set them with object.set). `pin` is input only (`read` shows `box`): with `pin` and no `box`, a `geom` shape is 72 x 72 pt, and a master instance takes the master's size: it stores only its pin and inherits the rest, which Visio accepting is **Visio unconfirmed (VE1)**. `master` by name matches `name` or `name_u` as `read` shows them; an address (`master2`) is taken as an address first, and when several masters share a name the first in stored order is used |
-| `object.set` (vsdx) | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `name`, `fill` (`"none"` or `{"hex":"#RRGGBB"}`), `line` (`"none"` or `{w, color, dash}`; `color` is `{"hex":"#RRGGBB"}` as `read` shows it, or the bare string `"#RRGGBB"`; `dash` the LinePattern number, as a number or the string `read` shows; and on a connector `begin` and `end`, below), `shadow` (`"none"` or `{color, transparency, offset}`, below), and for a connector `from`, `to`, `from_glue`, `to_glue`; for a picture `image` and `crop`. No `html` (use text.set) |
+| `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector; `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `geom` (`polyline`, `curve`) with `points` and optionally `closed` (below, Paths): a master-less path with no connection points, placed by its points, not `box` or `pin`; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector, point glue only (whole-shape glue needs the Dynamic connector master); `kind: "picture"` with `image` (a file path, below) and `box` or `pin`, and optionally `crop` and `name`: a picture, with no `fill`, `line`, `html`, `shadow` or connector fields (`invalid_operation` at the field). `shadow` is accepted with `master` and `geom`. No `rot`, `flip_h`, `flip_v` (set them with object.set). `pin` is input only (`read` shows `box`): with `pin` and no `box`, a `geom` shape is 72 x 72 pt, and a master instance takes the master's size: it stores only its pin and inherits the rest, which Visio accepting is **Visio unconfirmed (VE1)**. `master` by name matches `name` or `name_u` as `read` shows them; an address (`master2`) is taken as an address first, and when several masters share a name the first in stored order is used |
+| `object.set` (vsdx) | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `name`, `fill` (`"none"`, `{"hex":"#RRGGBB"}` or a pattern fill, below), `line` (`"none"` or `{w, color, dash}`; `color` is `{"hex":"#RRGGBB"}` as `read` shows it, or the bare string `"#RRGGBB"`; `dash` the LinePattern number, as a number or the string `read` shows; and on a connector `begin` and `end`, below), `shadow` (`"none"` or `{color, transparency, offset}`, below), and for a connector `from`, `to`, `from_glue`, `to_glue`; for a picture `image` and `crop`. No `html` (use text.set) |
 | `object.move` (vsdx) | `at`, `dx`, `dy` (each defaults to 0) |
 | `object.delete` (vsdx) | `at`. Connectors glued to the deleted shape lose that glue (their Connect rows and glue formulas are removed) and keep their end where it was; they appear in `changed` |
 | `object.reorder` (vsdx) | `at`, `to` (`front`, `back`, or an object of the same parent with `position`) |
@@ -376,11 +376,12 @@ no op writes them.
     end whose arrow cell is bound to a formula vsdx does not evaluate
     (a master's `GUARD(0)`) is refused. A themed arrow may be
     overridden.
-  - They apply to connectors only (any 1-D shape, with or without a
-    master, the Dynamic connector included). On any other kind
-    `begin` or `end` is `operation_failed` at the field: Visio draws
-    line ends on open paths, and vsdx does not derive whether a 2-D
-    shape's path is open.
+  - They apply to connectors (any 1-D shape, with or without a
+    master, the Dynamic connector included) and to open paths (Paths,
+    below). On any other shape `begin` or `end` is `operation_failed`
+    at the field: Visio draws line ends on open paths, and vsdx
+    derives that a 2-D shape's path is open only for the path form it
+    writes.
   - Arrow cells may be written while `line` is `"none"`; nothing is
     drawn until the line has a pattern, and `read` shows no `begin` or
     `end` on a line that is `"none"`.
@@ -416,6 +417,100 @@ no op writes them.
     `ShapeShdwType` 1 makes it use the shape's own offsets, and that
     `ShapeShdwShow` does not hide it, are **Visio unconfirmed
     (VE17)**.
+- **Pattern fills.** `fill` is `"none"`, `{"hex"}` (a solid fill,
+  FillPattern 1), or `{"pattern", "hex", "bg"}`, a pattern drawn in
+  `hex` over the background `bg`, for black-and-white line art:
+  - `pattern` is a name from the closed table, or the FillPattern
+    number 2 to 24 (a number or its string) for a pattern the table
+    does not name. The numbers are the Visio Fill dialog's pattern
+    list in order (0 transparent, 1 solid, 2 to 24 patterns, 25 to 40
+    gradients; MS-VSDX `FillPattern`); the names follow the dialog's:
+
+    | Name | FillPattern | Fill dialog name | LibreOffice draws |
+    | --- | --- | --- | --- |
+    | `hatch_up` | 2 | Dark upward diagonal | lines rising to the right, 0.1 in apart |
+    | `grid` | 3 | Large grid | horizontal and vertical lines, 0.1 in |
+    | `cross_hatch` | 4 | Large outlined diamond | both diagonals, 0.1 in |
+    | `hatch_down` | 5 | Dark downward diagonal | lines falling to the right, 0.1 in |
+    | `horizontal` | 6 | Dark horizontal | horizontal lines, 0.1 in |
+    | `vertical` | 7 | Dark vertical | vertical lines, 0.1 in |
+    | `dots` | 8 | Light 20% | a dense triple hatch, 0.05 in (LibreOffice has no dot fill) |
+    | `horizontal_fine` | 19 | Dark narrow horizontal | horizontal lines, 0.05 in |
+    | `vertical_fine` | 20 | Dark narrow vertical | vertical lines, 0.05 in |
+    | `hatch_down_fine` | 21 | Dark narrow downward diagonal | falling lines, 0.05 in |
+    | `hatch_up_fine` | 22 | Dark narrow upward diagonal | rising lines, 0.05 in |
+    | `grid_fine` | 23 | Small grid | grid, 0.05 in |
+    | `cross_hatch_fine` | 24 | Small outlined diamond | a dense triple hatch, 0.05 in |
+
+    Spacing is the pattern's own: no cell scales a pattern, so density
+    is chosen by name (`_fine`). That Visio draws each pattern as its
+    dialog name says, at what spacing and line weight, and whether it
+    prints as vector hatching or a bitmap, is **Visio unconfirmed
+    (VE19)**. Names are added (additive, §11) as patterns are
+    confirmed.
+  - `hex` is the pattern's colour (`FillForegnd`), default `#000000`;
+    `bg` the background: a colour (`"#RRGGBB"` or `{"hex"}`, stored as
+    `FillBkgnd` with `FillBkgndTrans` 0) or `"none"`, a clear
+    background (`FillBkgndTrans` 1), the default, so what is beneath
+    shows between the strokes. `bg` without `pattern` is
+    `invalid_plan`; a pattern that is neither a name nor 2 to 24 is
+    `invalid_operation` at `fill.pattern`, hint: the names.
+  - A fill is written whole: a value different from what `read`
+    shows stores `FillForegnd`, the background cells (for a pattern)
+    and `FillPattern`; an equal value writes nothing. A solid `{"hex"}`
+    on a pattern fill makes it solid (FillPattern 1). The Formulas
+    rule applies to each cell written.
+  - `read` shows a FillPattern from 2 to 24 as
+    `{"hex", "pattern", "bg"}`: the name, or the number as a string;
+    `bg` `"none"` when the effective `FillBkgndTrans` is 1 or more,
+    otherwise the effective `FillBkgnd` (a partial transparency is
+    named in `omitted` as `fill.bg`; a background not derived is left
+    out, with `fill.bg` in `omitted`, and then a plan must give `bg`
+    to send the fill back unchanged). FillPattern 25 to 40 (gradients)
+    reads as before, `{"hex"}` of the foreground.
+- **Paths.** `geom: "polyline"` or `"curve"` adds a master-less 2-D
+  shape drawn through `points`, `[[x, y], ...]` in view points (or the
+  plan's units), y down, the frame `box` uses:
+  - Its box is the points' bounds; `box` and `pin` are refused with
+    it. At least 2 points (3 when `closed`), each two finite numbers,
+    spanning a positive width and height (a straight line is
+    `kind: "connector"`); when `closed`, a last point equal to the
+    first is dropped. Faults are `invalid_operation` at
+    `ops[n].points` (a bad point at `points[i]`).
+  - `polyline` joins the points with straight segments. `curve` is the
+    smooth curve through every point: the uniform Catmull-Rom spline
+    (at each point the tangent is a sixth of the chord between its
+    neighbours, an end point standing in for its missing neighbour,
+    wrapping round when closed), stored as cubic Béziers.
+  - `closed: true` returns to the first point and may be filled
+    (`fill`, including patterns); an open path (the default) takes no
+    `fill` other than `"none"` (`invalid_operation` at `fill`) and
+    takes `line.begin` and `line.end` arrowheads, at its first and last
+    point, as a connector does (on object.add and object.set; on a
+    closed path or any other 2-D shape they are refused as before).
+    `line` w, color and dash apply as to any shape.
+  - Stored as one Geometry section of relative rows (fractions of
+    `Width` and `Height`), so a later `box` scales the path: NoFill 1
+    when open and 0 when closed, `RelMoveTo` at the first point, then
+    `RelLineTo` per point (polyline) or `RelCubBezTo` per segment
+    (curve: `X`, `Y` the end, `A`, `B` and `C`, `D` the control
+    points), and for a closed path a last row back at the first point;
+    the shape refers to style 3 (Normal) as rect and ellipse do, has
+    no Connection section and no text unless `html` is given. These
+    rows are MS-VSDX's (`RelMoveTo_Type`, `RelLineTo_Type`,
+    `RelCubBezTo_Type`); no Visio-authored sample with
+    `RelCubBezTo` is in the corpus, so Visio's drawing of them is
+    **Visio unconfirmed (VE20)**. LibreOffice draws them.
+  - `read` shows, on a master-less shape whose own geometry is exactly
+    this form, `geom` (`polyline` or `curve`), `closed: true` for a
+    closed path (absent when open) and `points` in the plan's form,
+    each relative point placed through the shape's transform as a
+    connection site is (so after a resize or rotation the points shown
+    move with it). A curve is shown as `curve` only when its control
+    points are the spline's through its row ends, so the shown points
+    write back the same curve. Any other geometry (Visio's own, rect,
+    ellipse, a master instance) shows no `geom`, as before. An open
+    path also shows `line.begin` and `line.end` as connectors do.
 - **Pictures.** `image` names a local image file: a path, absolute
   or relative to the working directory (never to the plan file, also
   when the plan is `-`), read as the operating system resolves it
@@ -1273,7 +1368,10 @@ form in `read` output and in plans (`help values`).
   kind `other` with `--detail full`); vsdx adds `name_u` (when it
   differs), `master`, `text` (plain), `props`, `layers`, `glued`
   (control-handle glue, read only) and, with `--detail full`, `cells`
-  (the shape's own stored cells, `{"n","v","u","f"}`). Kinds: `shape`,
+  (the shape's own stored cells, `{"n","v","u","f"}`), and `geom`,
+  `closed` and `points` on a path vsdx writes (§3, Paths). `fill` is
+  `"none"`, `{"hex"}` or a pattern fill `{"hex","pattern","bg"}`
+  (§3, Pattern fills). Kinds: `shape`,
   `connector` (any 1-D shape), `group`, `picture`, `other`. `line`
   is `{w, color, dash}` with `dash` the LinePattern as stored, a
   string. A connector shows the `fill` it stores or inherits, as
@@ -1288,8 +1386,9 @@ form in `read` output and in plans (`help values`).
   the line style's, as every `line` value, with the origin in
   `origins.line`. An end whose arrow is stored as `Themed` is left
   out, with `line.begin` or `line.end` in `omitted`; a size that is
-  themed leaves `size` out of the entry the same way. Other kinds
-  show no `begin` or `end`.
+  themed leaves `size` out of the entry the same way. An open path
+  (§3, Paths) shows them the same way; other shapes show no `begin`
+  or `end`.
 - `shadow` is shown on a shape or group whose effective
   `ShdwPattern` is not 0: `{"color","transparency","offset"}` in the
   plan's form, each member from the effective cell (shape, master,

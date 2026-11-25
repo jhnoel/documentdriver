@@ -1,5 +1,5 @@
 // Package emit writes the XML of the things the writes create: a
-// master-less 2-D shape (rect, ellipse), a master-less straight
+// master-less 2-D shape (rect, ellipse, polyline, curve), a master-less straight
 // connector with its Connect rows, a Text element with its Character
 // and Paragraph rows, a page entry and an empty page. Every function is
 // pure (values in, bytes out) and escapes through xmlscan; the forms
@@ -14,7 +14,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jhnoel/documentdriver/internal/geom"
 	"github.com/jhnoel/documentdriver/internal/ooxml/xmlscan"
+	"github.com/jhnoel/documentdriver/internal/vsdx/path"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
 
@@ -34,9 +36,17 @@ type Shape struct {
 	FillHex, LineHex string
 	LineWeight       float64 // inches; 0 keeps the style's
 	Style            uint32
+	// Points and Closed are a polyline's or curve's path in relative
+	// units (fractions of Width and Height, y up), without the closing
+	// repeat; unused by rect and ellipse.
+	Points []geom.Pt
+	Closed bool
 }
 
-// ShapeXML returns the Shape element: transform cells (LocPinX and
+// ShapeXML returns the Shape element. For a polyline or curve it is
+// the transform, fill and line cells and the path's Geometry section
+// (writePathGeometry), with no Connection section. Otherwise it is:
+// transform cells (LocPinX and
 // LocPinY with formulas Width*k, Height*k and their values), fill and
 // line cells when set, a Connection section of four points (X1 top
 // centre, X2 right middle, X3 bottom centre, X4 left middle, with
@@ -48,8 +58,14 @@ type Shape struct {
 // Angle or LineWeight, and a negative LineWeight, naming the field;
 // a zero LineWeight keeps the style's. Chunk K3F.
 func ShapeXML(s Shape) ([]byte, error) {
-	if s.Geom != "rect" && s.Geom != "ellipse" {
-		return nil, fmt.Errorf("vsdx: emit ShapeXML: unknown geom %q (want rect or ellipse)", s.Geom)
+	isPath := s.Geom == path.Polyline || s.Geom == path.Curve
+	if s.Geom != path.Rect && s.Geom != path.Ellipse && !isPath {
+		return nil, fmt.Errorf("vsdx: emit ShapeXML: unknown geom %q (want rect, ellipse, polyline or curve)", s.Geom)
+	}
+	if isPath {
+		if err := checkPath(s.Points, s.Closed); err != nil {
+			return nil, err
+		}
 	}
 	if math.IsNaN(s.PinX) || math.IsInf(s.PinX, 0) {
 		return nil, fmt.Errorf("vsdx: emit ShapeXML: PinX %v is not finite", s.PinX)
@@ -127,6 +143,11 @@ func ShapeXML(s Shape) ([]byte, error) {
 	}
 	if s.LineWeight != 0 {
 		writeCell(&b, vsd.CellLineWeight, vsd.FormatInches(s.LineWeight))
+	}
+	if isPath {
+		writePathGeometry(&b, s.Geom, s.Points, s.Closed)
+		b.WriteString("</Shape>")
+		return []byte(b.String()), nil
 	}
 	b.WriteString("<Section N='Connection'>")
 	writeConnectionRow(&b, 0, s.Width*0.5, "Width*0.5", s.Height, "Height*1")

@@ -71,27 +71,41 @@ type Object struct {
 	FromGlue     string
 	ToGlue       string
 	Fill         *Paint
-	Line         *Line
-	Shadow       *Shadow
-	Picture      *PictureInfo // kind picture: its image, media facts and crop
-	HTML         string
-	HasText      bool
-	Text         string // plain text, as find matches it
-	Props        []Prop
-	Layers       []string // layer addresses
-	Sites        []Site
-	Glued        []Glued // Connects from this shape's non-end cells (Controls.Row_1)
-	Z            int
-	Origins      map[string]inherit.Origin
-	Cells        []RawCell // --detail full: the shape's own stored cells
-	Omitted      []Omission
-	Node         *tree.Node
+	// Geom is the shape's geometry form when it is a path vsdx writes
+	// (path.Parse on a master-less shape): polyline or curve; ""
+	// otherwise. Points (view points, y down) and Closed are
+	// a polyline's or curve's path.
+	Geom    string
+	Points  []geom.Pt
+	Closed  bool
+	Line    *Line
+	Shadow  *Shadow
+	Picture *PictureInfo // kind picture: its image, media facts and crop
+	HTML    string
+	HasText bool
+	Text    string // plain text, as find matches it
+	Props   []Prop
+	Layers  []string // layer addresses
+	Sites   []Site
+	Glued   []Glued // Connects from this shape's non-end cells (Controls.Row_1)
+	Z       int
+	Origins map[string]inherit.Origin
+	Cells   []RawCell // --detail full: the shape's own stored cells
+	Omitted []Omission
+	Node    *tree.Node
 }
 
-// Paint is a fill: None, or a colour "#RRGGBB" (Hex).
+// Paint is a fill: None, or a colour "#RRGGBB" (Hex), solid or, when
+// Pattern is set, the foreground of that pattern (its name from
+// vsd.FillPatternNames, or the stored number) over a background:
+// BgNone when the background is clear, else BgHex ("" when not
+// derived).
 type Paint struct {
-	None bool
-	Hex  string
+	None    bool
+	Hex     string
+	Pattern string
+	BgNone  bool
+	BgHex   string
 }
 
 // Line is a line: None, or its weight in points, colour and Visio

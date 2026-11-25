@@ -83,6 +83,16 @@ type hexJSON struct {
 	Hex string `json:"hex"`
 }
 
+// patternJSON is a pattern fill as read shows it (docs/contract.md §3,
+// Pattern fills): the foreground colour, the pattern's name or stored
+// number, and the background, a colour or "none" (left out when not
+// derived).
+type patternJSON struct {
+	Hex     string `json:"hex"`
+	Pattern string `json:"pattern"`
+	Bg      any    `json:"bg,omitempty"`
+}
+
 // lineJSON is a line as read shows it.
 type lineJSON struct {
 	W     json.Number  `json:"w,omitempty"`
@@ -164,6 +174,9 @@ type objectJSON struct {
 	Rot      json.Number       `json:"rot,omitempty"`
 	FlipH    bool              `json:"flip_h,omitempty"`
 	FlipV    bool              `json:"flip_v,omitempty"`
+	Geom     string            `json:"geom,omitempty"`
+	Closed   bool              `json:"closed,omitempty"`
+	Points   [][]json.Number   `json:"points,omitempty"`
 	From     []json.Number     `json:"from,omitempty"`
 	To       []json.Number     `json:"to,omitempty"`
 	FromGlue string            `json:"from_glue,omitempty"`
@@ -244,6 +257,16 @@ func fillJSON(p *model.Paint) any {
 	}
 	if p.Hex == "" {
 		return nil
+	}
+	if p.Pattern != "" {
+		pj := patternJSON{Hex: p.Hex, Pattern: p.Pattern}
+		switch {
+		case p.BgNone:
+			pj.Bg = "none"
+		case p.BgHex != "":
+			pj.Bg = hexJSON{Hex: p.BgHex}
+		}
+		return pj
 	}
 	return hexJSON{Hex: p.Hex}
 }
@@ -340,6 +363,10 @@ func objectJSONOf(obj *model.Object, in, full bool) objectJSON {
 			j.Rot = json.Number(geom.FormatNum(obj.Box.Rot))
 		}
 		j.FlipH, j.FlipV = obj.Box.FlipH, obj.Box.FlipV
+	}
+	j.Geom, j.Closed = obj.Geom, obj.Closed
+	for i := range obj.Points {
+		j.Points = append(j.Points, pointJSON(&obj.Points[i], in))
 	}
 	j.From, j.To = pointJSON(obj.From, in), pointJSON(obj.To, in)
 	for _, g := range obj.Glued {

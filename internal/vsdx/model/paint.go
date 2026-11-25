@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/jhnoel/documentdriver/internal/vsdx/inherit"
+	"github.com/jhnoel/documentdriver/internal/vsdx/path"
 	"github.com/jhnoel/documentdriver/internal/vsdx/sheet"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
@@ -17,7 +18,7 @@ func paint(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 	}
 	paintFill(o, r, s)
 	paintLine(o, r, s)
-	if o.Kind == Connector {
+	if o.Kind == Connector || ((o.Geom == path.Polyline || o.Geom == path.Curve) && !o.Closed) {
 		paintLineEnds(o, r, s)
 	}
 	if o.Kind == Shape || o.Kind == Group {
@@ -27,13 +28,15 @@ func paint(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 
 // paintFill sets o's fill from the effective FillPattern and
 // FillForegnd cells of s: a pattern of 0 is fill none, otherwise the
-// foreground colour through paintColor. A Themed pattern (checked
+// foreground colour through paintColor, and a pattern from 2 to 24
+// also its name and background (paintBackground). A Themed pattern (checked
 // before the pattern is parsed as a number), a themed or
 // unresolvable foreground, or a pattern that is not a number, leaves
 // the fill out with an omission; a foreground no sheet stores leaves
 // it out silently when no pattern is stored either. The fill's origin
 // is the most inherited of the pattern and foreground cells' origins.
 func paintFill(o *Object, r *inherit.Resolver, s *inherit.Shape) {
+	patternN := 1.0
 	pattern, patternOrigin, patternOk := r.Cell(s, sheet.ShapeCell(vsd.CellFillPattern))
 	if patternOk {
 		if pattern.V == vsd.ValueThemed {
@@ -50,6 +53,7 @@ func paintFill(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 			setOrigin(o, "fill", patternOrigin)
 			return
 		}
+		patternN = n
 	}
 	fore, foreOrigin, foreOk := r.Cell(s, sheet.ShapeCell(vsd.CellFillForegnd))
 	if !foreOk {
@@ -68,7 +72,54 @@ func paintFill(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 		return
 	}
 	o.Fill = &Paint{Hex: hex}
-	setOrigin(o, "fill", boxOrigin(patternOrigin, foreOrigin))
+	best := boxOrigin(patternOrigin, foreOrigin)
+	if patternN >= vsd.FillPatternMin && patternN <= vsd.FillPatternMax && patternN == float64(int(patternN)) {
+		key := vsd.FormatInches(patternN)
+		o.Fill.Pattern = key
+		if name, named := vsd.FillPatternNames[key]; named {
+			o.Fill.Pattern = name
+		}
+		best = boxOrigin(best, paintBackground(o, r, s))
+	}
+	setOrigin(o, "fill", best)
+}
+
+// paintBackground sets the background of o's pattern fill from the
+// effective FillBkgndTrans and FillBkgnd cells: a transparency of 1
+// (fully clear) is BgNone; otherwise the background colour through
+// paintColor, left out with a fill.bg omission when it is themed,
+// unresolvable or not stored, and noted as fill.bg when a partial
+// transparency is not shown. It returns the origin of the cells used.
+func paintBackground(o *Object, r *inherit.Resolver, s *inherit.Shape) inherit.Origin {
+	var best inherit.Origin
+	trans := 0.0
+	if t, to, ok := r.Cell(s, sheet.ShapeCell(vsd.CellFillBkgndTrans)); ok {
+		v, isNum := vsd.Number(t.V)
+		if !isNum {
+			o.Omitted = append(o.Omitted, Omission{Prop: "fill.bg", Reason: shadowReason(t.V)})
+			return best
+		}
+		trans, best = v, to
+	}
+	if trans >= 1 {
+		o.Fill.BgNone = true
+		return best
+	}
+	bg, bo, ok := r.Cell(s, sheet.ShapeCell(vsd.CellFillBkgnd))
+	if !ok {
+		o.Omitted = append(o.Omitted, Omission{Prop: "fill.bg", Reason: vsd.CellFillBkgnd + " not stored"})
+		return best
+	}
+	hex, okc := paintColor(r, bg.V)
+	if !okc || bg.V == vsd.ValueThemed {
+		o.Omitted = append(o.Omitted, Omission{Prop: "fill.bg", Reason: shadowReason(bg.V)})
+		return best
+	}
+	o.Fill.BgHex = hex
+	if trans > 0 {
+		o.Omitted = append(o.Omitted, Omission{Prop: "fill.bg", Reason: vsd.CellFillBkgndTrans + " " + vsd.FormatInches(trans) + " not shown"})
+	}
+	return boxOrigin(best, bo)
 }
 
 // paintLine sets o's line from the effective LinePattern, LineWeight

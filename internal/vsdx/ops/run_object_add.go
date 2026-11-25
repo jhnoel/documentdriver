@@ -682,12 +682,23 @@ func (s *ObjectAddSpec) addShape(ws *edit.Workspace, r *inherit.Resolver, d *doc
 			return "", nil, nil, "", err
 		}
 	} else {
-		tr, err := addPlannedTransform(s, frame, pg.height, 0.5, 0.5, scale, "box")
+		placed, pts := s, []geom.Pt(nil)
+		if isPathGeom(s.Geom) {
+			placed, pts = pathBoxSpec(s)
+		}
+		tr, err := addPlannedTransform(placed, frame, pg.height, 0.5, 0.5, scale, "box")
 		if err != nil {
 			return "", nil, nil, "", err
 		}
 		shape := emit.Shape{ID: newID, Name: s.Name, Geom: s.Geom, PinX: tr.PinX, PinY: tr.PinY, Width: tr.Width, Height: tr.Height, LocPinX: tr.LocPinX, LocPinY: tr.LocPinY, Angle: tr.Angle, FlipX: tr.FlipX, FlipY: tr.FlipY, Style: 3}
-		if s.Fill != nil && !s.Fill.None {
+		if pts != nil {
+			rel, err := relPoints(pts, scale, tr, frame, pg.height)
+			if err != nil {
+				return "", nil, nil, "", err
+			}
+			shape.Points, shape.Closed = rel, s.Closed
+		}
+		if s.Fill != nil && !s.Fill.None && s.Fill.Pattern == "" {
 			shape.FillHex = s.Fill.Hex
 		}
 		if s.Line != nil && !s.Line.None {
@@ -1347,15 +1358,15 @@ func addText(ws *edit.Workspace, addr string, html *string) error {
 	return nil
 }
 
-// addPaint writes fill and line overrides not already in the fragment.
+// addPaint writes fill and line overrides not already in the fragment
+// (a pattern fill is never in it).
 func addPaint(ws *edit.Workspace, addr string, s *ObjectAddSpec, emitted bool) error {
 	var cells []edit.Cell
 	if s.Fill != nil {
 		if s.Fill.None {
 			cells = append(cells, edit.Cell{N: vsd.CellFillPattern, V: "0"})
-		} else if !emitted {
-			cells = append(cells, edit.Cell{N: vsd.CellFillForegnd, V: s.Fill.Hex})
-			cells = append(cells, edit.Cell{N: vsd.CellFillPattern, V: "1"})
+		} else if !emitted || s.Fill.Pattern != "" {
+			cells = append(cells, fillCells(s.Fill, s.Fill.Hex)...)
 		}
 	}
 	if s.Line != nil {

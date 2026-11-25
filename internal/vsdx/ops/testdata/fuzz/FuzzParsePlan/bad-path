@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"ops\":[{\"op\":\"object.add\",\"at\":\"page0\",\"geom\":\"polyline\",\"points\":[[0,0],[1e308,1],[-1e308,2]],\"line\":{\"end\":\"triangle\"}}]}")

@@ -43,7 +43,7 @@ func (d *OpDef) Implemented() bool {
 // implemented when its run_<name>.go gives its spec a Run method; this
 // table does not change when one lands.
 var Ops = []OpDef{
-	{Name: "object.add", Summary: "add a shape (from a master, or a rect or ellipse) or a straight connector", New: func() Spec { return &ObjectAddSpec{} }},
+	{Name: "object.add", Summary: "add a shape (from a master, or a rect, ellipse, polyline or curve), a straight connector or a picture", New: func() Spec { return &ObjectAddSpec{} }},
 	{Name: "object.set", Summary: "set an object's box, rotation, flips, name, fill, line, ends or glue", New: func() Spec { return &ObjectSetSpec{} }},
 	{Name: "text.set", Summary: "replace a shape's text with HTML", New: func() Spec { return &TextSetSpec{} }},
 	{Name: "prop.add", Summary: "add a shape data row", New: func() Spec { return &PropAddSpec{} }},

@@ -946,7 +946,7 @@ S0's ctypes extraction runs over the Visio-authored subset
 per entry; a type seen in fewer files stays out of the table and the
 code that needs it waits (S0 reports which).
 
-### Visio experiments (VE1 to VE18; not yet run, dependent claims labelled Visio unconfirmed)
+### Visio experiments (VE1 to VE20; not yet run, dependent claims labelled Visio unconfirmed)
 
 Fixtures under `testdata/vsdx/experiments`, written by a Go generator,
 with a README of what to look for; run by the owner if and when a Visio
@@ -973,6 +973,8 @@ labelled "LibreOffice ...: Visio unconfirmed" as xlsx did.
 | VE16 | Does Visio accept `Background='1'` and `BackPage='<ID>'` as vsdx writes them; does it require background pages after foreground pages; does it accept a background that itself has a background; what does it draw when the two pages differ in size? |
 | VE17 | Does Visio show a shadow for `ShdwPattern` 1 with `ShapeShdwType` 1 and local offsets; what do `ShapeShdwShow` 0, 1 and 2 do; which offset applies when `ShapeShdwType` is 0? |
 | VE18 | Does Visio open a page picture vsdx added (PNG, JPEG) without repair, and crop by `ImgOffsetX/Y`, `ImgWidth/Height` in the sense the contract states? |
+| VE19 | Does Visio draw FillPattern 2 to 8 and 19 to 24 as the Fill dialog names them (contract §3, Pattern fills), at what spacing and line weight, does `FillBkgndTrans` 1 make the background clear, and do the patterns print and export to PDF as vector hatching or as bitmaps? |
+| VE20 | Does Visio open and draw a master-less shape whose one Geometry section is `RelMoveTo` then `RelLineTo` or `RelCubBezTo` rows as vsdx writes them (NoFill 1 open, 0 closed), with line ends on the open ones, and does a resize scale the rows? |
 
 ### What cannot be verified without real Visio
 
@@ -1185,3 +1187,68 @@ each write stores, and its grounding:
   corpus test's LibreOffice step, and the Aspose drawing moves the
   pinned CC1 corpus tables; the fetch script gained single-file source
   kinds for later use.
+
+## 14. Pattern fills and paths (2026-11-24, owner sign-off pending)
+
+For patent-style line art (37 CFR 1.84: black and white, hatching in
+place of colour), `fill` gains patterns and `object.add` gains
+`geom: "polyline"` and `"curve"` (contract §3, Pattern fills and
+Paths). What each write stores, and its grounding:
+
+- **Patterns**: `FillPattern` 2 to 24, `FillForegnd`, `FillBkgnd`,
+  `FillBkgndTrans` (visio.xsd cell alternatives lines 180-186; cell
+  types lines 691-736; MS-VSDX FillPattern: 0 none, 1 solid, 2 to 24
+  patterns, 25 to 40 gradients). The name table follows the order of
+  the Visio Fill dialog's pattern list as published by a Visio MVP
+  (bVisual, "Using Custom Fill Patterns from a List", 2021: position
+  in the list is the FillPattern value), and LibreOffice's importer
+  (libvisio `VSDContentCollector::_fillAndShadowProperties`, read as
+  a summary, not verbatim) maps them to hatches: 2 single 45 deg,
+  3 double 0 deg, 4 double 45 deg, 5 single 315 deg, 6 single 0 deg,
+  7 single 90 deg at 0.1 in; 8 to 12, 17, 18 and 24 triple at 0.05 in;
+  13 to 16 and 19 to 22 single at 0.05 in; 23 double at 0.05 in; a
+  `FillBkgndTrans` of 1 leaves the background out. The render test
+  (`TestRenderPatternsAndPaths` in `cmd/vsdx`) confirms that drawing
+  for every named pattern, the rising and falling slant of the
+  diagonals, and the clear and white backgrounds. The vsdx corpus was not on the
+  machine this was written on, so it was not searched for patterns;
+  Visio's drawing is VE19. The libvisio table also shows what is
+  lost in LibreOffice: Visio's stipples (8 to 12, the `dots` name)
+  become a dense triple hatch, and patterns of the same direction
+  differ only in spacing.
+- **Density**: no ShapeSheet cell scales a fill pattern, so density
+  is the choice between a pattern and its `_fine` sibling (the
+  dialog's "narrow" and "small" variants). `cross_hatch_fine` (24)
+  is the one LibreOffice draws differently from its name.
+- **Paths**: one Geometry section of `RelMoveTo`, `RelLineTo` and
+  `RelCubBezTo` rows (visio.xsd lines 3507-3517 and 3767-3783),
+  relative to Width and Height as the rect form's `RelLineTo` rows
+  (the form of 460 corpus rows), so the cells hold plain values and a
+  resize scales them. Bézier rows over `NURBSTo`: `NURBSTo` needs the
+  `NURBS()` formula in its E cell, which libvisio parses but which
+  is a formula vsdx would write and Visio would have to evaluate;
+  `RelCubBezTo` is plain cells. Over `SplineStart`/`SplineKnot`:
+  libvisio turns splines into NURBS anyway. The curve is the uniform
+  Catmull-Rom spline, the simplest smooth curve through the points
+  whose segments are cubic Béziers exactly, so the stored curve is
+  the drawn curve in both renderers; `internal/vsdx/path.CurveSegs`
+  is its one definition, used to write and to recognise.
+- **Read**: `path.Parse` recognises only the form vsdx writes (one
+  section, plain cells, curve controls equal to the spline's), so
+  `geom`, `closed` and `points` are a derived fact, never a guess at
+  someone else's geometry. Rect and ellipse are not shown: read never
+  showed them, and a master instance's geometry is not derived, so
+  showing them on master-less shapes only would be uneven.
+- **Line ends** on an open path use the connector cells
+  (`BeginArrow`, `EndArrow`, sizes) and refusals; they are allowed on
+  a 2-D shape only when `path.Parse` says it is an open path.
+- **Solid over a pattern**: object.set `{"hex"}` used to compare only
+  the foreground colour, so on a pattern fill of that colour it wrote
+  nothing (consistent with the old read, which showed any non-zero
+  pattern as `{"hex"}`). Now that read shows patterns, it compares
+  the pattern too and writes FillPattern 1.
+- **Pattern read of existing drawings**: a shape whose effective
+  FillPattern is 2 to 24 used to read as `{"hex"}` of its foreground;
+  it now reads as a pattern fill. This changes what `read` shows for
+  such drawings (an added key `pattern` and `bg` on `fill`), which the
+  owner signs off with the contract change.
