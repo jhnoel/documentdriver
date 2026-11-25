@@ -42,47 +42,49 @@ const htmlRule = "html must be in the text grammar (help html)"
 // connector (Kind "connector" with From/To or glue), at a page or
 // group, with optional text and name.
 type ObjectAddSpec struct {
-	At       string      `json:"at" doc:"A page or group address as read shows it (page0 or page0/s1), or $name."`
-	As       string      `json:"as,omitempty" plan:"optional" doc:"A name for the new shape; later operations write $name for it."`
-	Kind     string      `json:"kind,omitempty" plan:"optional" doc:"connector for a master-less straight connector, picture for a picture; absent for a shape."`
-	Master   string      `json:"master,omitempty" plan:"optional" doc:"A master address (master2) or the master's name as read shows it."`
-	Geom     string      `json:"geom,omitempty" plan:"optional" doc:"rect or ellipse (placed by box or pin), or polyline or curve (placed by points), for a master-less shape."`
-	Points   [][]float64 `json:"points,omitempty" plan:"optional" doc:"A polyline's or curve's points [[x, y], ...] in view points (or the plan's units), y down, as read shows points; the shape's box is their bounds. A curve passes through every point (a Catmull-Rom spline stored as RelCubBezTo rows)."`
-	Closed   bool        `json:"closed,omitempty" plan:"optional" doc:"true: the polyline or curve returns to its first point and may be filled; absent or false: an open path, which takes line begin and end arrowheads, as read shows closed."`
-	Box      []float64   `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box; for a 2-D master or geom shape."`
-	Pin      []float64   `json:"pin,omitempty" plan:"optional" doc:"[x, y], the centre in view points (input only: read shows box); for a 2-D master or geom shape. Without box, a geom shape is 72 x 72 pt and a master instance takes the master's size."`
-	Name     string      `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
-	HTML     *string     `json:"html,omitempty" plan:"optional" doc:"The shape's text as HTML (help html), as read shows html."`
-	Fill     *PaintSpec  `json:"fill,omitempty" plan:"optional" doc:"\"none\", {hex: #RRGGBB} for a solid fill, or a pattern fill {pattern, hex, bg} as read shows fill: pattern a name (hatch_up, hatch_down, grid, cross_hatch, horizontal, vertical, dots, hatch_up_fine, hatch_down_fine, grid_fine, cross_hatch_fine, horizontal_fine, vertical_fine) or a FillPattern number 2 to 24, hex the pattern colour (default #000000), bg the background #RRGGBB, {hex} or \"none\" (default \"none\": clear)."`
-	Line     *LineSpec   `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors, open polylines and open curves) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
-	From     []float64   `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector or 1-D master."`
-	To       []float64   `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector or 1-D master."`
-	FromGlue string      `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows from_glue."`
-	ToGlue   string      `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows to_glue."`
-	Shadow   *ShadowSpec `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
-	Image    string      `json:"image,omitempty" plan:"optional" doc:"A picture's image: a local PNG or JPEG file path (absolute, or relative to the working directory), or a media part as read shows image (/visio/media/image1.png)."`
-	Crop     []float64   `json:"crop,omitempty" plan:"optional" doc:"A picture's crop [l, t, r, b] in percent of the image, as read shows crop; each 0 to under 100, l + r and t + b under 100."`
-	img      *imageInput // the checked image (CheckImages)
+	At        string         `json:"at" doc:"A page or group address as read shows it (page0 or page0/s1), or $name."`
+	As        string         `json:"as,omitempty" plan:"optional" doc:"A name for the new shape; later operations write $name for it."`
+	Kind      string         `json:"kind,omitempty" plan:"optional" doc:"connector for a master-less straight connector, picture for a picture; absent for a shape."`
+	Master    string         `json:"master,omitempty" plan:"optional" doc:"A master address (master2) or the master's name as read shows it."`
+	Geom      string         `json:"geom,omitempty" plan:"optional" doc:"rect or ellipse (placed by box or pin), or polyline or curve (placed by points), for a master-less shape."`
+	Points    [][]float64    `json:"points,omitempty" plan:"optional" doc:"A polyline's or curve's points [[x, y], ...] in view points (or the plan's units), y down, as read shows points; the shape's box is their bounds. A curve passes through every point (a Catmull-Rom spline stored as RelCubBezTo rows)."`
+	Closed    bool           `json:"closed,omitempty" plan:"optional" doc:"true: the polyline or curve returns to its first point and may be filled; absent or false: an open path, which takes line begin and end arrowheads, as read shows closed."`
+	Box       []float64      `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box; for a 2-D master or geom shape."`
+	Pin       []float64      `json:"pin,omitempty" plan:"optional" doc:"[x, y], the centre in view points (input only: read shows box); for a 2-D master or geom shape. Without box, a geom shape is 72 x 72 pt and a master instance takes the master's size."`
+	Name      string         `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
+	HTML      *string        `json:"html,omitempty" plan:"optional" doc:"The shape's text as HTML (help html), as read shows html."`
+	Fill      *PaintSpec     `json:"fill,omitempty" plan:"optional" doc:"\"none\", {hex: #RRGGBB} for a solid fill, or a pattern fill {pattern, hex, bg} as read shows fill: pattern a name (hatch_up, hatch_down, grid, cross_hatch, horizontal, vertical, dots, hatch_up_fine, hatch_down_fine, grid_fine, cross_hatch_fine, horizontal_fine, vertical_fine) or a FillPattern number 2 to 24, hex the pattern colour (default #000000), bg the background #RRGGBB, {hex} or \"none\" (default \"none\": clear)."`
+	Line      *LineSpec      `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors, open polylines and open curves) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
+	From      []float64      `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector or 1-D master."`
+	To        []float64      `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector or 1-D master."`
+	FromGlue  string         `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows from_glue."`
+	ToGlue    string         `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, or $name with an optional point, as read shows to_glue."`
+	Shadow    *ShadowSpec    `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
+	Image     string         `json:"image,omitempty" plan:"optional" doc:"A picture's image: a local PNG or JPEG file path (absolute, or relative to the working directory), or a media part as read shows image (/visio/media/image1.png)."`
+	Crop      []float64      `json:"crop,omitempty" plan:"optional" doc:"A picture's crop [l, t, r, b] in percent of the image, as read shows crop; each 0 to under 100, l + r and t + b under 100."`
+	TextBlock *TextBlockSpec `json:"text_block,omitempty" plan:"optional" doc:"The text block: {valign, margins, background}, any non-empty subset, as read shows text_block; valign top, middle or bottom (VerticalAlign); margins one number for all four sides or [left, top, right, bottom] (not CSS order) in points (or the plan's units), each 0 or more (LeftMargin, TopMargin, RightMargin, BottomMargin); background \"none\", #RRGGBB, or {hex, transparency} with transparency 0 to 100 percent (TextBkgnd, TextBkgndTrans). Members left out keep their value. LibreOffice draws valign and margins, and the background only behind the letters and opaque (vsdx help render)."`
+	img       *imageInput    // the checked image (CheckImages)
 }
 
 // ObjectSetSpec is object.set (the fields create and P2 share first).
 type ObjectSetSpec struct {
-	At       string      `json:"at" doc:"A shape address as read shows it (page0/s1), or $name."`
-	Box      []float64   `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box."`
-	Rot      *float64    `json:"rot,omitempty" plan:"optional" doc:"Rotation in degrees, as read shows rot."`
-	FlipH    *bool       `json:"flip_h,omitempty" plan:"optional" doc:"Flip horizontally, as read shows flip_h."`
-	FlipV    *bool       `json:"flip_v,omitempty" plan:"optional" doc:"Flip vertically, as read shows flip_v."`
-	Name     *string     `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
-	Fill     *PaintSpec  `json:"fill,omitempty" plan:"optional" doc:"\"none\", {hex: #RRGGBB} for a solid fill, or a pattern fill {pattern, hex, bg} as read shows fill: pattern a name (hatch_up, hatch_down, grid, cross_hatch, horizontal, vertical, dots, hatch_up_fine, hatch_down_fine, grid_fine, cross_hatch_fine, horizontal_fine, vertical_fine) or a FillPattern number 2 to 24, hex the pattern colour (default #000000), bg the background #RRGGBB, {hex} or \"none\" (default \"none\": clear)."`
-	Line     *LineSpec   `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors, open polylines and open curves) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
-	From     []float64   `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector."`
-	To       []float64   `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector."`
-	FromGlue *string     `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows from_glue."`
-	ToGlue   *string     `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows to_glue."`
-	Shadow   *ShadowSpec `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
-	Image    *string     `json:"image,omitempty" plan:"optional" doc:"A picture's image: a local PNG or JPEG file path (absolute, or relative to the working directory), or a media part as read shows image (/visio/media/image1.png)."`
-	Crop     []float64   `json:"crop,omitempty" plan:"optional" doc:"A picture's crop [l, t, r, b] in percent of the image, as read shows crop; each 0 to under 100, l + r and t + b under 100."`
-	img      *imageInput // the checked image (CheckImages)
+	At        string         `json:"at" doc:"A shape address as read shows it (page0/s1), or $name."`
+	Box       []float64      `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box."`
+	Rot       *float64       `json:"rot,omitempty" plan:"optional" doc:"Rotation in degrees, as read shows rot."`
+	FlipH     *bool          `json:"flip_h,omitempty" plan:"optional" doc:"Flip horizontally, as read shows flip_h."`
+	FlipV     *bool          `json:"flip_v,omitempty" plan:"optional" doc:"Flip vertically, as read shows flip_v."`
+	Name      *string        `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
+	Fill      *PaintSpec     `json:"fill,omitempty" plan:"optional" doc:"\"none\", {hex: #RRGGBB} for a solid fill, or a pattern fill {pattern, hex, bg} as read shows fill: pattern a name (hatch_up, hatch_down, grid, cross_hatch, horizontal, vertical, dots, hatch_up_fine, hatch_down_fine, grid_fine, cross_hatch_fine, horizontal_fine, vertical_fine) or a FillPattern number 2 to 24, hex the pattern colour (default #000000), bg the background #RRGGBB, {hex} or \"none\" (default \"none\": clear)."`
+	Line      *LineSpec      `json:"line,omitempty" plan:"optional" doc:"\"none\" or {w, color, dash, begin, end}, as read shows line; color is {hex: #RRGGBB} as read shows it, or the bare string #RRGGBB; dash is the LinePattern number as a number or string; begin and end (connectors, open polylines and open curves) are the arrowheads at from and to: \"none\", a name (triangle, stealth) or {arrow, size}, size 0 to 6."`
+	From      []float64      `json:"from,omitempty" plan:"optional" doc:"[x, y] begin end in view points, as read shows from; for a connector."`
+	To        []float64      `json:"to,omitempty" plan:"optional" doc:"[x, y] end end in view points, as read shows to; for a connector."`
+	FromGlue  *string        `json:"from_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows from_glue."`
+	ToGlue    *string        `json:"to_glue,omitempty" plan:"optional" doc:"s12:3, s12 for the whole shape, $name with an optional point, or none, as read shows to_glue."`
+	Shadow    *ShadowSpec    `json:"shadow,omitempty" plan:"optional" doc:"\"none\" or {color, transparency, offset} (shapes and groups): color #RRGGBB or {hex}, transparency 0 to 100 percent, offset [dx, dy] in points (or the plan's units), y down. On an object with no shadow all three are needed."`
+	Image     *string        `json:"image,omitempty" plan:"optional" doc:"A picture's image: a local PNG or JPEG file path (absolute, or relative to the working directory), or a media part as read shows image (/visio/media/image1.png)."`
+	Crop      []float64      `json:"crop,omitempty" plan:"optional" doc:"A picture's crop [l, t, r, b] in percent of the image, as read shows crop; each 0 to under 100, l + r and t + b under 100."`
+	TextBlock *TextBlockSpec `json:"text_block,omitempty" plan:"optional" doc:"The text block: {valign, margins, background}, any non-empty subset, as read shows text_block; valign top, middle or bottom (VerticalAlign); margins one number for all four sides or [left, top, right, bottom] (not CSS order) in points (or the plan's units), each 0 or more (LeftMargin, TopMargin, RightMargin, BottomMargin); background \"none\", #RRGGBB, or {hex, transparency} with transparency 0 to 100 percent (TextBkgnd, TextBkgndTrans). Members left out keep their value. LibreOffice draws valign and margins, and the background only behind the letters and opaque (vsdx help render)."`
+	img       *imageInput    // the checked image (CheckImages)
 }
 
 // PaintSpec is a fill: "none", {"hex": "#RRGGBB"} (solid), or a
@@ -133,6 +135,27 @@ type ShadowSpec struct {
 
 // HelpType names ShadowSpec's plan type in help.
 func (ShadowSpec) HelpType() string { return `object|"none"` }
+
+// TextBlockSpec is a text block: VAlign "top", "middle" or "bottom"
+// ("" leaves it), Margins left, top, right and bottom in the plan's
+// units (nil leaves them; a single number gives all four), and
+// Background (nil leaves it).
+type TextBlockSpec struct {
+	VAlign     string
+	Margins    []float64
+	Background *TextBgSpec
+}
+
+// HelpType names TextBlockSpec's plan type in help.
+func (TextBlockSpec) HelpType() string { return "object" }
+
+// TextBgSpec is a text background: None, or Hex "#RRGGBB" (upper case)
+// with an optional Transparency in percent.
+type TextBgSpec struct {
+	None         bool
+	Hex          string
+	Transparency *float64
+}
 
 // TextSetSpec is text.set: replace a shape's tried text with HTML.
 // Delete lists field addresses of the shape's shown text that the
@@ -195,7 +218,7 @@ var objectAddRules = []string{
 	"as must match [A-Za-z_][A-Za-z0-9_]*",
 	"kind must be connector or picture",
 	"image and crop go with kind picture",
-	"picture takes no master, geom, fill, line, html, shadow, from, to, from_glue or to_glue",
+	"picture takes no master, geom, fill, line, html, shadow, from, to, from_glue, to_glue or text_block",
 	"picture needs image",
 	"geom must be rect, ellipse, polyline or curve",
 	pathAddRules[0], pathAddRules[1], pathAddRules[2], pathAddRules[3],

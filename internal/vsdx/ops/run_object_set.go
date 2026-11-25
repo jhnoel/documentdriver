@@ -14,7 +14,8 @@ import (
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
 
-// Run applies object.set: it calls setTransform, setStyle and setEnds
+// Run applies object.set: it calls setTransform, setStyle,
+// setTextBlock, setPicture and setEnds
 // for the fields the spec gives, in that order, and merges their
 // changed and stale reports into one. Changed holds each changed
 // address once, in the order the fields first changed it, and stale
@@ -29,6 +30,7 @@ func (s *ObjectSetSpec) Run(ws *edit.Workspace, aliases map[string]string, units
 	for _, step := range []func() ([]string, string, error){
 		func() ([]string, string, error) { return setTransform(ws, s, aliases, units) },
 		func() ([]string, string, error) { return setStyle(ws, s, aliases, units) },
+		func() ([]string, string, error) { return setTextBlock(ws, s, aliases, units) },
 		func() ([]string, string, error) { return setPicture(ws, s, aliases) },
 		func() ([]string, string, error) {
 			if endsIdentity(ws, s, aliases, units) {

@@ -915,6 +915,89 @@ func textSuite() *laws.Suite[string] {
 	}
 }
 
+// textBlockValue is a text block as the model derives it: each
+// member with whether it is derived.
+type textBlockValue struct {
+	valign        string
+	hasVAlign     bool
+	margins       [4]float64
+	hasMargins    bool
+	hasBg, bgNone bool
+	bgHex         string
+	bgTrans       float64
+}
+
+// textBlockSuite is the text block suite: object.set text_block, one
+// target per object with text, its effective (inherited included)
+// valign, margins and background.
+func textBlockSuite() *laws.Suite[textBlockValue] {
+	return &laws.Suite[textBlockValue]{
+		Name: "text_block",
+		Read: func(path string) ([]laws.Value[textBlockValue], error) {
+			pages, err := lawPages(path)
+			if err != nil {
+				return nil, err
+			}
+			var out []laws.Value[textBlockValue]
+			for _, lp := range pages {
+				for _, o := range lp.page.Objects {
+					tb := o.TextBlock
+					if tb == nil || !lawWritableKind(o.Kind) {
+						continue
+					}
+					out = append(out, laws.Value[textBlockValue]{Target: laws.Target{Part: lp.part, Addr: o.ID}, V: textBlockValue{
+						valign: tb.VAlign, hasVAlign: tb.HasVAlign, margins: tb.Margins, hasMargins: tb.HasMargins,
+						hasBg: tb.HasBg, bgNone: tb.BgNone, bgHex: tb.BgHex, bgTrans: tb.BgTrans,
+					}})
+				}
+			}
+			return out, nil
+		},
+		Show: func(v textBlockValue) string {
+			s := v.valign + fmt.Sprintf(" %v", v.margins)
+			switch {
+			case !v.hasBg:
+			case v.bgNone:
+				s += " bg none"
+			default:
+				s += fmt.Sprintf(" bg %s %v%%", v.bgHex, v.bgTrans)
+			}
+			return s
+		},
+		Set: func(t laws.Target, v textBlockValue) laws.Op {
+			spec := &ops.TextBlockSpec{}
+			if v.hasVAlign {
+				spec.VAlign = v.valign
+			}
+			if v.hasMargins {
+				spec.Margins = v.margins[:]
+			}
+			if v.hasBg {
+				tr := v.bgTrans
+				spec.Background = &ops.TextBgSpec{None: v.bgNone, Hex: v.bgHex, Transparency: &tr}
+			}
+			return &ops.ObjectSetSpec{At: t.Addr, TextBlock: spec}
+		},
+		Vary: func(rng *rand.Rand, _ laws.Target, cur textBlockValue) textBlockValue {
+			next := map[string]string{"top": "middle", "middle": "bottom", "bottom": "top", "": "top"}
+			m := float64(rng.IntN(20))
+			out := textBlockValue{valign: next[cur.valign], hasVAlign: true, margins: [4]float64{m, m + 1, m + 2, m + 3}, hasMargins: true, hasBg: true}
+			if cur.hasBg && !cur.bgNone {
+				out.bgNone = true
+			} else {
+				out.bgHex, out.bgTrans = "#FFFF00", 25
+			}
+			return out
+		},
+		Apply:   lawApply,
+		Refused: lawRefused,
+		Units:   edit.Units(),
+		Owns:    lawOwnsShape,
+		Fail:    lawFail,
+		Budget:  3,
+	}
+}
+
 // propValue is one shape data value as read shows it, with its type.
 type propValue struct {
 	typ    string
@@ -1162,6 +1245,7 @@ func lawSuiteRuns() []lawSuiteRun {
 		mk("page-name", func(t *testing.T, src string, rep *laws.Report) { pageNameSuite().Check(t, src, 21, rep) }),
 		mk("page-size", func(t *testing.T, src string, rep *laws.Report) { pageSizeSuite().Check(t, src, 22, rep) }),
 		mk("page-orientation", func(t *testing.T, src string, rep *laws.Report) { pageOrientationSuite().Check(t, src, 23, rep) }),
+		mk("text_block", func(t *testing.T, src string, rep *laws.Report) { textBlockSuite().Check(t, src, 24, rep) }),
 	}
 }
 

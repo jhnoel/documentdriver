@@ -449,6 +449,11 @@ func (s *ObjectAddSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 		}},
 		{Name: "image", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Image) }},
 		{Name: "crop", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Crop) }},
+		{Name: "text_block", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) {
+			tb := &TextBlockSpec{}
+			tb.DecodePlan(mv, fp, dd)
+			s.TextBlock = tb
+		}},
 	})
 }
 
@@ -510,6 +515,11 @@ func (s *ObjectSetSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 			s.Image = &str
 		}},
 		{Name: "crop", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Crop) }},
+		{Name: "text_block", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) {
+			tb := &TextBlockSpec{}
+			tb.DecodePlan(mv, fp, dd)
+			s.TextBlock = tb
+		}},
 	})
 }
 
@@ -585,4 +595,141 @@ func (s *PageSetSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 		}},
 		{Name: "background_page", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.BackgroundPage) }},
 	})
+}
+
+// DecodePlan implements cli.PlanDecoder: an object {valign, margins,
+// background} with at least one member. valign is top, middle or
+// bottom; margins one number (all four sides) or four, each finite and
+// 0 or more; background "none", #RRGGBB, or {hex, transparency} with
+// transparency 0 to 100. A value out of range is an invalid_operation
+// fault at the member; an unknown member, an empty object and any
+// other form are invalid_plan faults.
+func (tb *TextBlockSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
+	*tb = TextBlockSpec{}
+	if v.Kind != cli.Object {
+		d.Fail(cli.CodeInvalidPlan, path, v, "expected an object {valign, margins, background}, found %s", v.Kind)
+		return
+	}
+	if len(v.Members) == 0 {
+		d.Fail(cli.CodeInvalidPlan, path, v, "text_block needs valign, margins or background")
+		return
+	}
+	for _, m := range v.Members {
+		mp := cli.Join(path, m.Key)
+		switch m.Key {
+		case "valign":
+			var s string
+			n := len(d.Errs())
+			d.Value(m.Value, mp, &s)
+			if len(d.Errs()) > n {
+				continue
+			}
+			if s != "top" && s != "middle" && s != "bottom" {
+				d.Add(cli.Errorf(cli.CodeInvalidOperation, mp, "valign %q: want top, middle or bottom", s), m.Value)
+				continue
+			}
+			tb.VAlign = s
+		case "margins":
+			tb.Margins = decodeMargins(m.Value, mp, d)
+		case "background":
+			tb.Background = decodeTextBg(m.Value, mp, d)
+		default:
+			er := cli.Errorf(cli.CodeInvalidPlan, mp, "unknown field %q", m.Key)
+			er.Hint = "fields: valign, margins, background"
+			d.Add(er, m.Value)
+		}
+	}
+}
+
+// decodeMargins decodes text margins: one number for all four sides or
+// [left, top, right, bottom], each finite and 0 or more; nil after a
+// fault.
+func decodeMargins(v *cli.Value, path string, d *cli.Decoder) []float64 {
+	var out []float64
+	n := len(d.Errs())
+	if v.Kind == cli.Number {
+		var x float64
+		d.Value(v, path, &x)
+		out = []float64{x, x, x, x}
+	} else {
+		d.Value(v, path, &out)
+	}
+	if len(d.Errs()) > n {
+		return nil
+	}
+	if len(out) != 4 || !addFinite(out) || slices.ContainsFunc(out, func(x float64) bool { return x < 0 }) {
+		d.Add(cli.Errorf(cli.CodeInvalidOperation, path, "margins: want one number or [left, top, right, bottom], finite and 0 or more"), v)
+		return nil
+	}
+	return out
+}
+
+// decodeTextBg decodes a text background: "none", "#RRGGBB", or
+// {"hex", "transparency"}; nil after a fault.
+func decodeTextBg(v *cli.Value, path string, d *cli.Decoder) *TextBgSpec {
+	switch v.Kind {
+	case cli.String:
+		if v.Str == "none" {
+			return &TextBgSpec{None: true}
+		}
+		hex, ok := vsd.Color(v.Str)
+		if !ok {
+			d.Add(cli.Errorf(cli.CodeInvalidOperation, path, "background %q: want \"none\", #RRGGBB or {hex, transparency}", v.Str), v)
+			return nil
+		}
+		return &TextBgSpec{Hex: hex}
+	case cli.Object:
+		bg := &TextBgSpec{}
+		ok := true
+		for _, m := range v.Members {
+			mp := cli.Join(path, m.Key)
+			switch m.Key {
+			case "hex":
+				var s string
+				n := len(d.Errs())
+				d.Value(m.Value, mp, &s)
+				if len(d.Errs()) > n {
+					ok = false
+					continue
+				}
+				hex, good := vsd.Color(s)
+				if !good {
+					d.Add(cli.Errorf(cli.CodeInvalidOperation, mp, "hex %q is not #RRGGBB", s), m.Value)
+					ok = false
+					continue
+				}
+				bg.Hex = hex
+			case "transparency":
+				var t float64
+				n := len(d.Errs())
+				d.Value(m.Value, mp, &t)
+				if len(d.Errs()) > n {
+					ok = false
+					continue
+				}
+				if math.IsNaN(t) || t < 0 || t > 100 {
+					d.Add(cli.Errorf(cli.CodeInvalidOperation, mp, "transparency %v: want 0 to 100", t), m.Value)
+					ok = false
+					continue
+				}
+				bg.Transparency = &t
+			default:
+				er := cli.Errorf(cli.CodeInvalidPlan, mp, "unknown field %q", m.Key)
+				er.Hint = "fields: hex, transparency"
+				d.Add(er, m.Value)
+				ok = false
+			}
+		}
+		if ok && bg.Hex == "" {
+			d.Fail(cli.CodeInvalidPlan, cli.Join(path, "hex"), v, "missing field %q", "hex")
+			return nil
+		}
+		if !ok {
+			return nil
+		}
+		return bg
+	default:
+		d.Fail(cli.CodeInvalidPlan, path, v, "expected \"none\", #RRGGBB or an object, found %s", v.Kind)
+		return nil
+	}
 }

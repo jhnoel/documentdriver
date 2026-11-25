@@ -325,8 +325,8 @@ no op writes them.
 
 | Op | Fields |
 | --- | --- |
-| `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector; `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `geom` (`polyline`, `curve`) with `points` and optionally `closed` (below, Paths): a master-less path with no connection points, placed by its points, not `box` or `pin`; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector, point glue only (whole-shape glue needs the Dynamic connector master); `kind: "picture"` with `image` (a file path, below) and `box` or `pin`, and optionally `crop` and `name`: a picture, with no `fill`, `line`, `html`, `shadow` or connector fields (`invalid_operation` at the field). `shadow` is accepted with `master` and `geom`. No `rot`, `flip_h`, `flip_v` (set them with object.set). `pin` is input only (`read` shows `box`): with `pin` and no `box`, a `geom` shape is 72 x 72 pt, and a master instance takes the master's size: it stores only its pin and inherits the rest, which Visio accepting is **Visio unconfirmed (VE1)**. `master` by name matches `name` or `name_u` as `read` shows them; an address (`master2`) is taken as an address first, and when several masters share a name the first in stored order is used |
-| `object.set` (vsdx) | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `name`, `fill` (`"none"`, `{"hex":"#RRGGBB"}` or a pattern fill, below), `line` (`"none"` or `{w, color, dash}`; `color` is `{"hex":"#RRGGBB"}` as `read` shows it, or the bare string `"#RRGGBB"`; `dash` the LinePattern number, as a number or the string `read` shows; and on a connector `begin` and `end`, below), `shadow` (`"none"` or `{color, transparency, offset}`, below), and for a connector `from`, `to`, `from_glue`, `to_glue`; for a picture `image` and `crop`. No `html` (use text.set) |
+| `object.add` (vsdx) | `at` (a page or group), `as`, `name`, `fill`, `line`, `html`, and one of: `master` (an address, `master2`, or the master's name as `read` shows it) with `box` or `pin` (`[x, y]`, the centre) for a 2-D master, or `from`/`to`/`from_glue`/`to_glue` for a 1-D master such as Dynamic connector; `geom` (`rect`, `ellipse`) with `box` or `pin`: a master-less shape with four connection points, 1 top, 2 right, 3 bottom, 4 left; `geom` (`polyline`, `curve`) with `points` and optionally `closed` (below, Paths): a master-less path with no connection points, placed by its points, not `box` or `pin`; `kind: "connector"` with `from`, `to`, `from_glue`, `to_glue`: a master-less straight connector, point glue only (whole-shape glue needs the Dynamic connector master); `kind: "picture"` with `image` (a file path, below) and `box` or `pin`, and optionally `crop` and `name`: a picture, with no `fill`, `line`, `html`, `shadow`, `text_block` or connector fields (`invalid_operation` at the field). `shadow` and `text_block` (below, Text blocks) are accepted with `master` and `geom`, and `text_block` also with `kind: "connector"`. No `rot`, `flip_h`, `flip_v` (set them with object.set). `pin` is input only (`read` shows `box`): with `pin` and no `box`, a `geom` shape is 72 x 72 pt, and a master instance takes the master's size: it stores only its pin and inherits the rest, which Visio accepting is **Visio unconfirmed (VE1)**. `master` by name matches `name` or `name_u` as `read` shows them; an address (`master2`) is taken as an address first, and when several masters share a name the first in stored order is used |
+| `object.set` (vsdx) | `at`, and at least one of `box`, `rot`, `flip_h`, `flip_v`, `name`, `fill` (`"none"`, `{"hex":"#RRGGBB"}` or a pattern fill, below), `line` (`"none"` or `{w, color, dash}`; `color` is `{"hex":"#RRGGBB"}` as `read` shows it, or the bare string `"#RRGGBB"`; `dash` the LinePattern number, as a number or the string `read` shows; and on a connector `begin` and `end`, below), `shadow` (`"none"` or `{color, transparency, offset}`, below), `text_block` (`{valign, margins, background}`, below), and for a connector `from`, `to`, `from_glue`, `to_glue`; for a picture `image` and `crop`. No `html` (use text.set) |
 | `object.move` (vsdx) | `at`, `dx`, `dy` (each defaults to 0) |
 | `object.delete` (vsdx) | `at`. Connectors glued to the deleted shape lose that glue (their Connect rows and glue formulas are removed) and keep their end where it was; they appear in `changed` |
 | `object.reorder` (vsdx) | `at`, `to` (`front`, `back`, or an object of the same parent with `position`) |
@@ -548,6 +548,56 @@ no op writes them.
     write back the same curve. Any other geometry (Visio's own, rect,
     ellipse, a master instance) shows no `geom`, as before. An open
     path also shows `line.begin` and `line.end` as connectors do.
+- **Text blocks.** `text_block` on object.add and object.set (shapes,
+  groups and connectors; not pictures, refused like `fill`) is an
+  object with any non-empty subset of `valign`, `margins` and
+  `background`; members left out keep their value, and writing back
+  what `read` shows changes nothing:
+  - `valign` `"top"`, `"middle"` or `"bottom"`: `VerticalAlign` 0, 1, 2.
+  - `margins` one number for all four sides or `[left, top, right,
+    bottom]` (pptx `text.insets` order, not CSS order) in points (or
+    the plan's units), each finite and 0 or more: `LeftMargin`,
+    `TopMargin`, `RightMargin`, `BottomMargin`, stored in inches with
+    `U="PT"` as Visio stores them. Visio's default (the Normal style)
+    is 4 pt.
+  - `background` `"none"` (`TextBkgnd` 0), `"#RRGGBB"`, or `{"hex",
+    "transparency"}` with transparency 0 to 100 percent: `TextBkgnd`
+    `#RRGGBB` and `TextBkgndTrans` the fraction (0 when not given).
+    Visio stores a colour index plus one in `TextBkgnd`, so 0 is no
+    background; vsdx writes the colour itself. The background covers
+    the text and its margins, not the whole block; that Visio draws it
+    so, and draws the `#RRGGBB` form, is **Visio unconfirmed (VE21)**.
+  - A value outside these is `invalid_operation` at the member; an
+    unknown member, `{}` or another JSON kind is `invalid_plan`. The
+    Formulas rule applies to each cell written.
+  - `read` shows `text_block` `{"valign", "margins", "background"}`,
+    each member from the effective cell (shape, master, style), when
+    the shape or its master stores one of the cells (values from the
+    style sheets alone are not shown, as `html` shows only the text's
+    own formatting); the origin is `origins.text_block`, and a themed
+    or unparsable member is left out with `text_block.<member>` in
+    `omitted`. A `TextBkgnd` no sheet stores is left out.
+  - The text block itself is the shape's box unless the shape stores
+    `TxtWidth`, `TxtHeight`, `TxtPinX`, `TxtPinY`, `TxtLocPinX`,
+    `TxtLocPinY` or `TxtAngle` (Visio's default formulas), including
+    for a closed `polyline` or `curve` given `html` (a diamond holds its
+    own label).
+  - LibreOffice (`render --renderer libreoffice`) draws `valign` and
+    `margins`, and draws a background only behind the letters, opaque
+    (it ignores `TextBkgndTrans`); `--renderer svg` draws all three as
+    above. Measured on LibreOffice 26.2.
+- **Text runs.** Text a plan writes (object.add `html`, text.set) is
+  stored as Visio stores it: Character and Paragraph rows numbered in
+  text order from 0, one row for each stretch of one format, each
+  `cp`/`pp` marker used once, and every row holding the same cells
+  (Character: `Font`, `Color`, `Style`, `Size`, `Strikethru`;
+  Paragraph: `IndFirst`, `IndLeft`, `IndRight`, `SpLine`, `SpBefore`,
+  `SpAfter`, `HorzAlign`, `Bullet`, `BulletStr`), a value the HTML
+  does not set holding the inherited value with `F="Inh"`, Visio's
+  form for an inherited cell, which `read` does not show as
+  formatting. `html` reads back unchanged. LibreOffice 26.2 still
+  draws a shape's whole text in its last row's formatting, Visio's
+  own files included (`vsdx help render`).
 - **Pictures.** `image` names a local image file: a path, absolute
   or relative to the working directory (never to the plan file, also
   when the plan is `-`), read as the operating system resolves it
@@ -1405,8 +1455,10 @@ form in `read` output and in plans (`help values`).
   kind `other` with `--detail full`); vsdx adds `name_u` (when it
   differs), `master`, `text` (plain), `props`, `layers`, `glued`
   (control-handle glue, read only) and, with `--detail full`, `cells`
-  (the shape's own stored cells, `{"n","v","u","f"}`), and `geom`,
-  `closed` and `points` on a path vsdx writes (§3, Paths). `fill` is
+  (the shape's own stored cells, `{"n","v","u","f"}`), `geom`,
+  `closed` and `points` on a path vsdx writes (§3, Paths), and
+  `text_block` when the shape or its master stores a text block cell
+  (§3, Text blocks). `fill` is
   `"none"`, `{"hex"}` or a pattern fill `{"hex","pattern","bg"}`
   (§3, Pattern fills). Kinds: `shape`,
   `connector` (any 1-D shape), `group`, `picture`, `other`. `line`

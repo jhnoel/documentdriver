@@ -1332,7 +1332,8 @@ func addNamedConnector(frag []byte, name string) []byte {
 	return out
 }
 
-// addText writes the HTML of one new shape through emit and SetText.
+// addText writes the HTML of one new shape through emit (in the
+// canonical row form, emit.CanonicalTextXML) and SetText.
 func addText(ws *edit.Workspace, addr string, html *string) error {
 	if html == nil {
 		return nil
@@ -1348,7 +1349,15 @@ func addText(ws *edit.Workspace, addr string, html *string) error {
 			}
 		}
 	}
-	sections, textEl, err := emit.TextXML(body, formats)
+	a, err := vsd.Parse(addr)
+	if err != nil {
+		return fmt.Errorf("vsdx object.add text %s: %w", addr, err)
+	}
+	st, err := loadStyleShape(ws, a, addr)
+	if err != nil {
+		return err
+	}
+	sections, textEl, err := emit.CanonicalTextXML(body, formats, textBase(st.res, st.shape))
 	if err != nil {
 		return cli.Errorf(cli.CodeOperationFailed, "html", "%s", err.Error())
 	}

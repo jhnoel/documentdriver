@@ -231,9 +231,14 @@ func (v *view) picture(ob *model.Object) {
 	v.add(render.Item{Kind: render.ImageItem, Image: &render.Image{Frame: frame, Type: typ, Data: data, Crop: crop}, Attrs: [][2]string{{"data-role", "picture"}, {"data-image", pic.Image}}})
 }
 
-// text lays out a text block and draws it.
-func (v *view) text(tb *model.TextBlock) {
+// text lays out a text block and draws it, over its text background
+// when info (the object's text block cells) shows a colour.
+func (v *view) text(tb *model.TextBlock, info *model.TextBlockInfo) {
 	box := render.TextBox{Frame: tb.Frame, W: tb.W, H: tb.H, Margin: tb.Margin, VAlign: tb.VAlign}
+	if info != nil && info.HasBg && !info.BgNone && info.BgTrans < 100 {
+		box.Background = info.BgHex
+		box.BgOpacity = 1 - info.BgTrans/100
+	}
 	for _, p := range tb.Paras {
 		rp := render.TextPara{Align: p.Align, Bullet: p.Bullet, LineSpacing: p.LineSpacing}
 		for _, r := range p.Runs {
@@ -248,7 +253,9 @@ func (v *view) text(tb *model.TextBlock) {
 		v.note(n)
 	}
 	for _, it := range items {
-		it.Attrs = append(it.Attrs, [2]string{"data-role", "text"})
+		if len(it.Attrs) == 0 {
+			it.Attrs = [][2]string{{"data-role", "text"}}
+		}
 		v.add(it)
 	}
 }

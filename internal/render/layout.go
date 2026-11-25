@@ -10,13 +10,16 @@ import (
 // TextBox is text to lay out in a block: Frame maps the block's space
 // (points, y down, origin at its top-left corner, W by H) to the page;
 // Margin is left, top, right and bottom; VAlign "top", "middle" or
-// "bottom".
+// "bottom"; Background "#RRGGBB" ("" for none), filled behind the
+// text at BgOpacity (0 is read as 1).
 type TextBox struct {
-	Frame  geom.Affine
-	W, H   float64
-	Margin [4]float64
-	VAlign string
-	Paras  []TextPara
+	Frame      geom.Affine
+	W, H       float64
+	Margin     [4]float64
+	VAlign     string
+	Paras      []TextPara
+	Background string
+	BgOpacity  float64
 }
 
 // TextPara is one paragraph: Align "left", "center", "right" or
@@ -117,6 +120,9 @@ func LayoutText(b TextBox) (items []Item, notes []string) {
 	case "bottom":
 		top += inner - total
 	}
+	if b.Background != "" {
+		items = append(items, textBackground(b, lines, avail, top, total))
+	}
 	y := top
 	for _, l := range lines {
 		h := lineHeight(l)
@@ -125,15 +131,7 @@ func LayoutText(b TextBox) (items []Item, notes []string) {
 		if len(l.pieces) == 0 {
 			continue
 		}
-		x, anchor, start := b.Margin[0], "start", b.Margin[0]
-		switch l.para.Align {
-		case "center":
-			x, anchor = b.Margin[0]+avail/2, "middle"
-			start = x - l.width/2
-		case "right":
-			x, anchor = b.W-b.Margin[2], "end"
-			start = x - l.width
-		}
+		x, anchor, start := lineStart(b, l, avail)
 		tl := &TextLine{Frame: b.Frame, X: x, Y: base, Anchor: anchor}
 		px := start
 		for _, pc := range l.pieces {
@@ -160,6 +158,48 @@ func LayoutText(b TextBox) (items []Item, notes []string) {
 		items = append(items, Item{Kind: TextItem, Text: tl})
 	}
 	return items, notes
+}
+
+// lineStart returns where line l of b is anchored: the x of its
+// anchor, the anchor ("start", "middle" or "end") and the x its text
+// starts at, for a line avail wide between the margins.
+func lineStart(b TextBox, l textLine, avail float64) (x float64, anchor string, start float64) {
+	x, anchor, start = b.Margin[0], "start", b.Margin[0]
+	switch l.para.Align {
+	case "center":
+		x, anchor = b.Margin[0]+avail/2, "middle"
+		start = x - l.width/2
+	case "right":
+		x, anchor = b.W-b.Margin[2], "end"
+		start = x - l.width
+	}
+	return x, anchor, start
+}
+
+// textBackground returns the fill of b's text background: the box
+// around its laid-out lines (from top, total high, each line from its
+// start to its width) grown by the block's margins and kept inside
+// the block, in b.Background at b.BgOpacity, marked data-role
+// text-background. Visio fills the text's own box with the margins
+// around it, not the whole block (docs/vsdx-design.md, Text blocks).
+func textBackground(b TextBox, lines []textLine, avail, top, total float64) Item {
+	x0, x1 := b.W, 0.0
+	for _, l := range lines {
+		if len(l.pieces) == 0 {
+			continue
+		}
+		_, _, start := lineStart(b, l, avail)
+		x0, x1 = min(x0, start), max(x1, start+l.width)
+	}
+	if x1 < x0 {
+		x0, x1 = b.Margin[0], b.Margin[0]
+	}
+	x0, x1 = max(x0-b.Margin[0], 0), min(x1+b.Margin[2], b.W)
+	y0, y1 := max(top-b.Margin[1], 0), min(top+total+b.Margin[3], b.H)
+	f := b.Frame
+	return Item{Kind: FillItem, Color: b.Background, Opacity: b.BgOpacity,
+		Path:  Polygon(f.Apply(geom.Pt{X: x0, Y: y0}), f.Apply(geom.Pt{X: x1, Y: y0}), f.Apply(geom.Pt{X: x1, Y: y1}), f.Apply(geom.Pt{X: x0, Y: y1})),
+		Attrs: [][2]string{{"data-role", "text-background"}}}
 }
 
 // lineHeight returns a line's height: its largest size times the

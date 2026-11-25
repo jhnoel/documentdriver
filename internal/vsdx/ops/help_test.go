@@ -74,7 +74,7 @@ func helpRuleCases() []struct {
 		{"object.add", &ObjectAddSpec{At: "page0", As: "1bad", Geom: "rect", Box: box}, "as must match [A-Za-z_][A-Za-z0-9_]*"},
 		{"object.add", &ObjectAddSpec{At: "page0", Kind: "shape", Geom: "rect", Box: box}, "kind must be connector or picture"},
 		{"object.add", &ObjectAddSpec{At: "page0", Geom: "rect", Box: []float64{0, 0, 1, 1}, Image: "x.png"}, "image and crop go with kind picture"},
-		{"object.add", &ObjectAddSpec{At: "page0", Kind: "picture", Image: "x.png", Box: []float64{0, 0, 1, 1}, Fill: &PaintSpec{None: true}}, "picture takes no master, geom, fill, line, html, shadow, from, to, from_glue or to_glue"},
+		{"object.add", &ObjectAddSpec{At: "page0", Kind: "picture", Image: "x.png", Box: []float64{0, 0, 1, 1}, Fill: &PaintSpec{None: true}}, "picture takes no master, geom, fill, line, html, shadow, from, to, from_glue, to_glue or text_block"},
 		{"object.add", &ObjectAddSpec{At: "page0", Kind: "picture", Box: []float64{0, 0, 1, 1}}, "picture needs image"},
 		{"object.add", &ObjectAddSpec{At: "page0", Geom: "triangle", Box: box}, "geom must be rect, ellipse, polyline or curve"},
 		{"object.add", &ObjectAddSpec{At: "page0", Geom: "rect", Box: box, Closed: true}, pathAddRules[0]},

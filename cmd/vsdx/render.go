@@ -34,7 +34,13 @@ draw it, and the result's renderer says which one did:
 
   libreoffice  headless LibreOffice, as pptx render draws a slide; soffice
                comes from DD_SOFFICE or PATH, with pdftoppm, mutool or gs.
-               LibreOffice draws the values the file caches.
+               LibreOffice draws the values the file caches. Measured on
+               LibreOffice 26.2: it draws a shape's whole text in the
+               formatting of its last run (Visio-written text too), so a
+               label with mixed sizes or bold words shows one style; it
+               honours text_block valign and margins, but draws a
+               background only behind the letters (no margins) and
+               opaque (no transparency).
   svg          the drawing read --format svg writes, rasterised in Go with
                no other program: the same paths, hatches, dashes, arrowheads
                and pictures, and text in a scaled 7x13 bitmap font at the

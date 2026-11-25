@@ -60,8 +60,9 @@ func (s *TextSetSpec) Run(ws *edit.Workspace, aliases map[string]string, _ strin
 	if text.Render(st.body, st.form, resolved) == text.Render(body, formats, resolved) {
 		return "", nil, nil, "", nil
 	}
+	body, formats = text.Renumber(body, formats)
 	filtered := textSetFilter(st, formats)
-	sections, textEl, err := emit.TextXML(body, filtered)
+	sections, textEl, err := emit.CanonicalTextXML(body, filtered, textBase(st.res, st.shape))
 	if err != nil {
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "html", "%s", err)
 	}

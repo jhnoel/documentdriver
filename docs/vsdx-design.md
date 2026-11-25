@@ -946,7 +946,7 @@ S0's ctypes extraction runs over the Visio-authored subset
 per entry; a type seen in fewer files stays out of the table and the
 code that needs it waits (S0 reports which).
 
-### Visio experiments (VE1 to VE20; not yet run, dependent claims labelled Visio unconfirmed)
+### Visio experiments (VE1 to VE21; not yet run, dependent claims labelled Visio unconfirmed)
 
 Fixtures under `testdata/vsdx/experiments`, written by a Go generator,
 with a README of what to look for; run by the owner if and when a Visio
@@ -975,6 +975,7 @@ labelled "LibreOffice ...: Visio unconfirmed" as xlsx did.
 | VE18 | Does Visio open a page picture vsdx added (PNG, JPEG) without repair, and crop by `ImgOffsetX/Y`, `ImgWidth/Height` in the sense the contract states? |
 | VE19 | Does Visio draw FillPattern 2 to 8 and 19 to 24 as the Fill dialog names them (contract §3, Pattern fills), at what spacing and line weight, does `FillBkgndTrans` 1 make the background clear, and do the patterns print and export to PDF as vector hatching or as bitmaps? |
 | VE20 | Does Visio open and draw a master-less shape whose one Geometry section is `RelMoveTo` then `RelLineTo` or `RelCubBezTo` rows as vsdx writes them (NoFill 1 open, 0 closed), with line ends on the open ones, and does a resize scale the rows? |
+| VE21 | Does Visio draw `TextBkgnd` stored as `#RRGGBB` (no formula) as that colour, at `TextBkgndTrans`, over the text and its margins rather than the whole text block; and does it read Character and Paragraph rows written with `F="Inh"` cells as inherited, showing the formatting vsdx's html says? |
 
 ### What cannot be verified without real Visio
 
@@ -1361,3 +1362,95 @@ import draws a Character row that stores no cells (vsdx writes
 row's style, so it shows "Controller 104 ..." all bold and carries an
 italic into later shapes; the drawing view and `read` show the file's
 values. Visio's drawing of either is unverified (no Visio here).
+
+## 16. Text blocks and text runs (2026-11-25, owner sign-off pending)
+
+Asked for by the patent-figure kit, which placed labels with blank
+paragraphs, separate white rectangles and invisible label shapes
+because the engine had no text block fields and its multi-run text
+drew wrongly in LibreOffice. Contract: §3, Text blocks and Text runs.
+
+### Text runs: what was wrong, and whose bug
+
+The engine numbered Character and Paragraph rows by format, not by
+position: a format used twice shared one row (`<cp IX='1'/>Bold<cp
+IX='0'/> plain <cp IX='2'/>it<cp IX='0'/> plain`), the format with no
+cells was row 0 written as an empty `<Row IX='0'/>`, and paragraph
+rows could appear out of order in the text (`<pp IX='1'/>…<pp
+IX='0'/>`). Visio never writes that: over the vsdx corpus, 59
+Visio-authored texts with more than one `cp`, none reuses a row, none
+is out of order and no Character row is empty; Visio's rows carry the
+full cell set (126 rows with 17 cells).
+
+libvisio (VSDXMLParserBase::readText, readCharIX; the same code from
+0.1.8 to master) reads text by character counts: each row's count is
+the number of characters after its marker, and the rows are applied
+in IX order. A reused row sums its stretches and lands them together,
+rows out of order format the wrong characters, an empty row element is
+skipped (readCharIX returns on an empty element), and the first row it
+does read becomes the shape's default style (the bold leak: a plain
+row 0 that is empty makes bold row 1 the default).
+
+The fix (`text.Renumber`, `emit.CanonicalTextXML`, used by object.add
+and text.set) writes Visio's form: rows in text order from 0, a new row
+where the format changes, each marker once, every row with the same
+cells, an inherited value as `V=<inherited> F="Inh"` (Visio's form for
+an inherited cell; read ignores it as formatting, so `html` round-trips;
+`formatsCells` already treats F="Inh" as not the owner's). The inherited
+value is the cell below the shape at that IX (master row, style chain),
+else the style chain's row 0 (a style sheet stores only row 0); Style,
+Strikethru and Bullet default to 0. text.replace still writes inside
+the existing rows and is unchanged.
+
+That fixes the markup, but LibreOffice 26.2.4.2 still draws a shape's
+whole text in its last row's format: converting to ODG gives one span
+style for the whole text. The same happens with Visio's own rows and
+Text transplanted into a shape (apache-poi 60973.vsdx page3 shape 137:
+three sizes, drawn all at the last one's 3 pt). So that part is a
+LibreOffice bug, documented in `help render`; the engine does not work
+around it (e.g. by splitting labels into shapes). Before the fix the
+four cases of `TestTextRunsVisioForm` drew wrong in LibreOffice in four
+different ways; after it they draw in one style each, as Visio's own
+text does there.
+
+Changed expectation: `TestTextSetInheritedItalic` (row CC11) asserted
+"no local Character row" when every value is inherited. The row is now
+written with F="Inh" cells only; html and the italic are unchanged.
+
+### Text block fields
+
+`text_block {valign, margins, background}` on object.add and
+object.set, grouped like `shadow` and pptx `text {anchor, insets}`
+(margins in pptx's inset order). Cells and forms are the corpus's:
+`VerticalAlign` 0/1/2; margins in inches with `U="PT"` (56 of the
+corpus's LeftMargin cells); `TextBkgnd` 0, `#RRGGBB` or a colour index
+plus one (as libvisio reads it), `TextBkgndTrans` a fraction. vsdx
+writes `#RRGGBB` without Visio's `RGB(…)+1` formula, which the Formulas
+rule would then refuse to overwrite (VE21).
+
+`read` shows `text_block` only when the shape or its master stores one
+of its cells. Showing it on every object with text (the style's
+values) cost a full read of Generated(5000) 13.7 MB more allocation
+(123.4 MB against a 123.0 MB budget) and BuildPage(30000) 2.7 MB more
+peak (121.4 MB against 120.0 MB); with the stored-only rule both are at
+the baseline (110.4 MB, 118.7 MB). The model keeps the block on every
+object with text only for the drawing view and `--detail full` (the
+law suite reads effective values from it).
+
+The drawing view lays text out in the block (TxtWidth and the rest, or
+the shape's box) with its margins and valign, and fills the background
+behind the laid-out lines grown by the margins, at 1 - transparency.
+LibreOffice draws valign and margins the same way; it draws the
+background as a character highlight behind the letters, opaque.
+
+Polygons: a closed polyline or curve already took `html`; its text
+block is its box, as Visio's default formulas give, so a diamond holds
+its own label (`TestTextBlockPolygon`, `TestReadSVGTextBlock`).
+
+Tests: `TestTextBlockWriteRead`, `TestTextBlockValign`,
+`TestTextBlockUnits`, `TestTextBlockPlanErrors`,
+`TestTextBlockPolygon`, `TestTextRunsVisioForm`, `TestRenumberProperty`,
+`TestTextBackground`, `TestReadSVGTextBlock`, the `text_block` law
+suite (18 targets on V1-V17: identity, inverse, atomicity, sequence)
+and the text block page in `TestRenderSVGMatchesLibreOffice`. Each new
+test was seen to fail with the code it checks removed.

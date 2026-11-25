@@ -92,34 +92,38 @@ const (
 )
 
 // Text block and text layout cells the drawing view reads
-// (model.Options.Draw): the text block's transform in the shape's
-// local space, its margins, its vertical alignment, the Character and
-// Paragraph cells of a row, and a Geometry section's flags.
+// (model.Options.Draw) and the text_block field writes: the text
+// block's transform in the shape's local space, its margins, its
+// vertical alignment, its background colour and transparency, the
+// Character and Paragraph cells of a row, and a Geometry section's
+// flags.
 const (
-	CellTxtPinX       = "TxtPinX"
-	CellTxtPinY       = "TxtPinY"
-	CellTxtWidth      = "TxtWidth"
-	CellTxtHeight     = "TxtHeight"
-	CellTxtLocPinX    = "TxtLocPinX"
-	CellTxtLocPinY    = "TxtLocPinY"
-	CellTxtAngle      = "TxtAngle"
-	CellLeftMargin    = "LeftMargin"
-	CellRightMargin   = "RightMargin"
-	CellTopMargin     = "TopMargin"
-	CellBottomMargin  = "BottomMargin"
-	CellVerticalAlign = "VerticalAlign"
-	CellCharFont      = "Font"
-	CellCharSize      = "Size"
-	CellCharColor     = "Color"
-	CellCharStyle     = "Style"
-	CellCharStrike    = "Strikethru"
-	CellParaHorzAlign = "HorzAlign"
-	CellParaBullet    = "Bullet"
-	CellParaBulletStr = "BulletStr"
-	CellParaSpLine    = "SpLine"
-	CellGeomNoFill    = "NoFill"
-	CellGeomNoLine    = "NoLine"
-	CellGeomNoShow    = "NoShow"
+	CellTxtPinX        = "TxtPinX"
+	CellTxtPinY        = "TxtPinY"
+	CellTxtWidth       = "TxtWidth"
+	CellTxtHeight      = "TxtHeight"
+	CellTxtLocPinX     = "TxtLocPinX"
+	CellTxtLocPinY     = "TxtLocPinY"
+	CellTxtAngle       = "TxtAngle"
+	CellLeftMargin     = "LeftMargin"
+	CellRightMargin    = "RightMargin"
+	CellTopMargin      = "TopMargin"
+	CellBottomMargin   = "BottomMargin"
+	CellVerticalAlign  = "VerticalAlign"
+	CellTextBkgnd      = "TextBkgnd"
+	CellTextBkgndTrans = "TextBkgndTrans"
+	CellCharFont       = "Font"
+	CellCharSize       = "Size"
+	CellCharColor      = "Color"
+	CellCharStyle      = "Style"
+	CellCharStrike     = "Strikethru"
+	CellParaHorzAlign  = "HorzAlign"
+	CellParaBullet     = "Bullet"
+	CellParaBulletStr  = "BulletStr"
+	CellParaSpLine     = "SpLine"
+	CellGeomNoFill     = "NoFill"
+	CellGeomNoLine     = "NoLine"
+	CellGeomNoShow     = "NoShow"
 )
 
 // ArrowNames maps the stored arrow indexes the contract names

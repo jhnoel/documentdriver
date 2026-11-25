@@ -111,7 +111,7 @@ func (v *view) object(ob *model.Object) {
 	}
 	v.strokes(ob, d)
 	if d.Text != nil {
-		v.text(d.Text)
+		v.text(d.Text, ob.TextBlock)
 	}
 }
 

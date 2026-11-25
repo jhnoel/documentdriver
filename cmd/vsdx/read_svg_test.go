@@ -32,6 +32,19 @@ const figurePlan = `{"ops":[
 {"op":"object.add","at":"page0","geom":"rect","box":[72,690,200,50],"html":"<p style=\"text-align:left\">Left top label</p>","line":"none"}
 ]}`
 
+// textBlockPlan is the text block page: labels at the top, middle and
+// bottom of equal boxes, a left-aligned label with a 30 pt left and
+// 20 pt top margin, a label with a white background on a hatch, and a
+// diamond (a closed polyline) holding its own label.
+const textBlockPlan = `{"ops":[
+{"op":"object.add","at":"page0","geom":"rect","box":[40,40,160,110],"html":"<p>Top label</p>","text_block":{"valign":"top"}},
+{"op":"object.add","at":"page0","geom":"rect","box":[220,40,160,110],"html":"<p>Middle label</p>","text_block":{"valign":"middle"}},
+{"op":"object.add","at":"page0","geom":"rect","box":[400,40,160,110],"html":"<p>Bottom label</p>","text_block":{"valign":"bottom"}},
+{"op":"object.add","at":"page0","geom":"rect","box":[40,190,240,110],"html":"<p style=\"text-align:left\">Margin label</p>","text_block":{"valign":"top","margins":[30,20,4,4]}},
+{"op":"object.add","at":"page0","geom":"rect","box":[320,190,240,110],"html":"<p>Hatched 210</p>","fill":{"pattern":"hatch_up","bg":"#FFFFFF"},"text_block":{"background":"#FFFFFF"}},
+{"op":"object.add","at":"page0","geom":"polyline","closed":true,"points":[[300,340],[420,420],[300,500],[180,420]],"html":"<p>Decide 212</p>","line":{"w":1}}
+]}`
+
 // svgPage is one of the drawing test's pages: its plan, the fill
 // pattern of each patterned object, the arrowheads it draws, the
 // words its text shows and, by object, the number of dashes its line
@@ -45,8 +58,9 @@ type svgPage struct {
 	dashes   map[string]int
 }
 
-// svgPages returns the drawing test's two pages: the render test's
-// plan (every named pattern and the four test shapes) and the figure.
+// svgPages returns the drawing test's three pages: the render test's
+// plan (every named pattern and the four test shapes), the figure and
+// the text block page.
 func svgPages() []svgPage {
 	_, _, bell, sine, arc := renderPathsInputs()
 	paths := svgPage{name: "paths", plan: renderPathsPlan(bell, sine, arc), patterns: map[string]string{}, heads: 3}
@@ -61,7 +75,92 @@ func svgPages() []svgPage {
 		words:    []string{"Sensor", "unit", "102", "Controller", "104", "wraps", "Memory", "106", "Region", "108", "Left", "label"},
 		dashes:   map[string]int{"page0/s7": 40, "page0/s8": 80},
 	}
-	return []svgPage{paths, fig}
+	tb := svgPage{name: "text_block", plan: textBlockPlan,
+		patterns: map[string]string{"page0/s5": "hatch_up"},
+		words:    []string{"Top", "Middle", "Bottom", "Margin", "Hatched", "210", "Decide", "212"},
+	}
+	return []svgPage{paths, fig, tb}
+}
+
+// svgText is one text line of the drawing: its object and its anchor
+// on the page.
+type svgText struct {
+	group string
+	x, y  float64
+}
+
+// TestReadSVGTextBlock checks where the drawing view puts text-block
+// text (textBlockPlan): the top, middle and bottom labels in that order
+// within equal boxes, each inside its box; the margin label starting
+// at least 30 pt from its box's left edge and 20 pt below its top; the
+// white background under the hatched label covering the label's anchor
+// and lying inside its box, drawn before the text; and the diamond's
+// label inside the diamond's bounding box, near its centre (its text
+// block is the bounding box).
+func TestReadSVGTextBlock(t *testing.T) {
+	file := createDrawing(t, t.TempDir(), "text_block", textBlockPlan)
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"read", file, "--page", "page0", "--format", "svg"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("read --format svg: exit %d: %s", code, stderr.String())
+	}
+	d, err := tree.ParseString(stdout.String())
+	if err != nil {
+		t.Fatalf("not well formed: %v", err)
+	}
+	texts := map[string]svgText{}
+	var bg [][2]float64
+	bgBeforeText := false
+	svgElements(d.Root(), func(n *tree.Node, group string) {
+		switch n.Local() {
+		case "path":
+			if role, _ := n.Attr("data-role"); role == "text-background" && group == "page0/s5" {
+				data, _ := n.Attr("d")
+				bg = pathPoints(t, data)
+				_, seen := texts["page0/s5"]
+				bgBeforeText = !seen
+			}
+		case "text":
+			x, _ := n.Attr("x")
+			y, _ := n.Attr("y")
+			m, _ := n.Attr("transform")
+			xf, _ := strconv.ParseFloat(x, 64)
+			yf, _ := strconv.ParseFloat(y, 64)
+			px, py := applyMatrix(t, m, xf, yf)
+			texts[group] = svgText{group, px, py}
+		}
+	})
+	for _, id := range []string{"page0/s1", "page0/s2", "page0/s3", "page0/s4", "page0/s5", "page0/s6"} {
+		if _, ok := texts[id]; !ok {
+			t.Fatalf("no text for %s", id)
+		}
+	}
+	top, mid, bot := texts["page0/s1"].y-40, texts["page0/s2"].y-40, texts["page0/s3"].y-40
+	if !(top < mid && mid < bot) || top < 4 || bot > 110-4 {
+		t.Errorf("baselines from the box tops: top %.1f, middle %.1f, bottom %.1f; want increasing, inside the 4 pt margins of a 110 pt box", top, mid, bot)
+	}
+	if mt := texts["page0/s4"]; mt.x < 40+30 || mt.y < 190+20 {
+		t.Errorf("margin label anchor (%.1f, %.1f), want x at least 70 and y at least 210", mt.x, mt.y)
+	}
+	if len(bg) != 4 {
+		t.Fatalf("text background points %v, want a 4-point box", bg)
+	}
+	minX, minY, maxX, maxY := bg[0][0], bg[0][1], bg[0][0], bg[0][1]
+	for _, p := range bg {
+		minX, minY, maxX, maxY = min(minX, p[0]), min(minY, p[1]), max(maxX, p[0]), max(maxY, p[1])
+	}
+	ht := texts["page0/s5"]
+	if ht.y < minY || ht.y > maxY || ht.x < minX || ht.x > maxX {
+		t.Errorf("hatched label anchor (%.1f, %.1f) outside its background [%.1f %.1f %.1f %.1f]", ht.x, ht.y, minX, minY, maxX, maxY)
+	}
+	if minX < 320 || maxX > 560 || minY < 190 || maxY > 300 || maxX-minX > 200 {
+		t.Errorf("background [%.1f %.1f %.1f %.1f], want inside the box [320 190 560 300] and around the text, not the whole box", minX, minY, maxX, maxY)
+	}
+	if !bgBeforeText {
+		t.Error("the text background is drawn after the text")
+	}
+	if dt := texts["page0/s6"]; dt.x < 180 || dt.x > 420 || dt.y < 400 || dt.y > 440 {
+		t.Errorf("diamond label anchor (%.1f, %.1f), want near the centre (300, 420) of its box", dt.x, dt.y)
+	}
 }
 
 // createDrawing writes plan's drawing in dir and returns its path.

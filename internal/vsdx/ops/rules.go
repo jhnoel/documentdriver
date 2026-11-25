@@ -249,7 +249,7 @@ func checkObjectSet(s *ObjectSetSpec) (string, string, bool) {
 	if s.ToGlue != nil && !glueOK(*s.ToGlue, true) {
 		return "to_glue must name a shape or $name, with an optional point, or none", "to_glue", true
 	}
-	if s.Box == nil && s.Rot == nil && s.FlipH == nil && s.FlipV == nil && s.Name == nil && s.Fill == nil && s.Line == nil && s.Shadow == nil && s.Image == nil && s.Crop == nil && s.From == nil && s.To == nil && s.FromGlue == nil && s.ToGlue == nil {
+	if s.Box == nil && s.Rot == nil && s.FlipH == nil && s.FlipV == nil && s.Name == nil && s.Fill == nil && s.Line == nil && s.Shadow == nil && s.Image == nil && s.Crop == nil && s.From == nil && s.To == nil && s.FromGlue == nil && s.ToGlue == nil && s.TextBlock == nil {
 		return "object.set needs a field to set", "", true
 	}
 	return "", "", false
@@ -417,10 +417,10 @@ func checkPictureAdd(s *ObjectAddSpec) (string, string, bool) {
 	}{
 		{s.Master != "", "master"}, {s.Geom != "", "geom"}, {s.Fill != nil, "fill"}, {s.Line != nil, "line"},
 		{s.HTML != nil, "html"}, {s.Shadow != nil, "shadow"}, {s.From != nil, "from"}, {s.To != nil, "to"},
-		{s.FromGlue != "", "from_glue"}, {s.ToGlue != "", "to_glue"},
+		{s.FromGlue != "", "from_glue"}, {s.ToGlue != "", "to_glue"}, {s.TextBlock != nil, "text_block"},
 	} {
 		if f.set {
-			return "picture takes no master, geom, fill, line, html, shadow, from, to, from_glue or to_glue", f.field, true
+			return "picture takes no master, geom, fill, line, html, shadow, from, to, from_glue, to_glue or text_block", f.field, true
 		}
 	}
 	if s.Image == "" {

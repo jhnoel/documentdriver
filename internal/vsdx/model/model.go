@@ -75,23 +75,28 @@ type Object struct {
 	// (path.Parse on a master-less shape): polyline or curve; ""
 	// otherwise. Points (view points, y down) and Closed are
 	// a polyline's or curve's path.
-	Geom    string
-	Points  []geom.Pt
-	Closed  bool
-	Line    *Line
-	Shadow  *Shadow
-	Picture *PictureInfo // kind picture: its image, media facts and crop
-	HTML    string
-	HasText bool
-	Text    string // plain text, as find matches it
-	Props   []Prop
-	Layers  []string // layer addresses
-	Sites   []Site
-	Glued   []Glued // Connects from this shape's non-end cells (Controls.Row_1)
-	Z       int
-	Origins map[string]inherit.Origin
-	Cells   []RawCell // --detail full: the shape's own stored cells
-	Omitted []Omission
+	Geom   string
+	Points []geom.Pt
+	Closed bool
+	Line   *Line
+	Shadow *Shadow
+	// TextBlock is the object's effective text block cells, set on a
+	// shape, group or connector that stores one of them (or whose
+	// master does), and with Options.Draw or Full on one with text;
+	// read shows it only when stored (TextBlockInfo.Local).
+	TextBlock *TextBlockInfo
+	Picture   *PictureInfo // kind picture: its image, media facts and crop
+	HTML      string
+	HasText   bool
+	Text      string // plain text, as find matches it
+	Props     []Prop
+	Layers    []string // layer addresses
+	Sites     []Site
+	Glued     []Glued // Connects from this shape's non-end cells (Controls.Row_1)
+	Z         int
+	Origins   map[string]inherit.Origin
+	Cells     []RawCell // --detail full: the shape's own stored cells
+	Omitted   []Omission
 	// Draw is the object's drawing (geometry and placed text), built
 	// only with Options.Draw.
 	Draw *Drawing
@@ -141,6 +146,22 @@ type Shadow struct {
 	HasColor, HasTrans, HasOffset bool
 	Transparency                  float64
 	Offset                        [2]float64
+}
+
+// TextBlockInfo is an object's effective text block: VAlign "top",
+// "middle" or "bottom" (HasVAlign), Margins left, top, right and
+// bottom in points (HasMargins, all four derived), and the background
+// (HasBg): BgNone, or BgHex "#RRGGBB" with BgTrans in percent. Local
+// is true when the shape or its master stores one of the cells (a
+// value other than the style sheets').
+type TextBlockInfo struct {
+	VAlign                string
+	HasVAlign, HasMargins bool
+	Margins               [4]float64
+	HasBg, BgNone         bool
+	BgHex                 string
+	BgTrans               float64
+	Local                 bool
 }
 
 // Prop is one effective shape data row.

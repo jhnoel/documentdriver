@@ -42,29 +42,42 @@ func TextXML(b text.Body, f text.Formats) (sections, textEl []byte, err error) {
 	sec.Grow(len(charSec) + len(paraSec))
 	sec.Write(charSec)
 	sec.Write(paraSec)
+	textEl, err = textElement(b, charSec != nil, paraSec != nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	return []byte(sec.String()), textEl, nil
+}
+
+// textElement writes the Text element of b: cp markers where the run's
+// row changes when chars is set, pp markers where the paragraph's row
+// changes when paras is set, line feeds between paragraphs (and after
+// the last when Terminated), U+2028 for a break and fld elements for
+// field runs.
+func textElement(b text.Body, chars, paras bool) ([]byte, error) {
 	var out strings.Builder
 	out.Grow(128 + 16*len(b.Paras))
 	out.WriteString("<" + vsd.ElemText + ">")
 	curCP, curPP := -1, -1
 	for i, para := range b.Paras {
 		if para.PP < -1 {
-			return nil, nil, fmt.Errorf("vsdx emit: TextXML: paragraph %d pp %d is below -1", i, para.PP)
+			return nil, fmt.Errorf("vsdx emit: TextXML: paragraph %d pp %d is below -1", i, para.PP)
 		}
 		if i > 0 {
 			out.WriteByte('\n')
 		}
-		if paraSec != nil && para.PP >= 0 && para.PP != curPP {
+		if paras && para.PP >= 0 && para.PP != curPP {
 			out.WriteString("<" + vsd.ElemParaMark + " IX='" + strconv.Itoa(para.PP) + "'/>")
 			curPP = para.PP
 		}
 		for j, run := range para.Runs {
 			if run.CP < -1 {
-				return nil, nil, fmt.Errorf("vsdx emit: TextXML: paragraph %d run %d cp %d is below -1", i, j, run.CP)
+				return nil, fmt.Errorf("vsdx emit: TextXML: paragraph %d run %d cp %d is below -1", i, j, run.CP)
 			}
 			if run.Field < -1 {
-				return nil, nil, fmt.Errorf("vsdx emit: TextXML: paragraph %d run %d field %d is below -1", i, j, run.Field)
+				return nil, fmt.Errorf("vsdx emit: TextXML: paragraph %d run %d field %d is below -1", i, j, run.Field)
 			}
-			if charSec != nil && run.CP >= 0 && run.CP != curCP {
+			if chars && run.CP >= 0 && run.CP != curCP {
 				out.WriteString("<" + vsd.ElemCharMark + " IX='" + strconv.Itoa(run.CP) + "'/>")
 				curCP = run.CP
 			}
@@ -72,7 +85,7 @@ func TextXML(b text.Body, f text.Formats) (sections, textEl []byte, err error) {
 			case run.Br:
 				out.WriteString("\u2028")
 			case run.Field < 0 && run.Ref != "":
-				return nil, nil, fmt.Errorf("vsdx emit: TextXML: paragraph %d run %d: field %s is not resolved to a Field row (the writing op maps it first)", i, j, run.Ref)
+				return nil, fmt.Errorf("vsdx emit: TextXML: paragraph %d run %d: field %s is not resolved to a Field row (the writing op maps it first)", i, j, run.Ref)
 			case run.Field >= 0:
 				out.WriteString("<" + vsd.ElemField + " IX='" + strconv.Itoa(run.Field) + "'>")
 				out.WriteString(xmlscan.EscapeText(run.Text))
@@ -86,7 +99,7 @@ func TextXML(b text.Body, f text.Formats) (sections, textEl []byte, err error) {
 		out.WriteByte('\n')
 	}
 	out.WriteString("</" + vsd.ElemText + ">")
-	return []byte(sec.String()), []byte(out.String()), nil
+	return []byte(out.String()), nil
 }
 
 // charSection returns the Character Section with rows 0..last for the

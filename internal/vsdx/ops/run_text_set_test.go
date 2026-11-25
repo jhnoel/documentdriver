@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -164,7 +165,7 @@ func textSetShapeNode(t *testing.T, data []byte, id uint32) *tree.Node {
 			return false
 		}
 		if n.Kind() == tree.ElementNode && n.Local() == vsd.ElemShape {
-			if v, ok := n.Attr("ID"); ok && v == "1" {
+			if v, ok := n.Attr("ID"); ok && v == strconv.FormatUint(uint64(id), 10) {
 				shape = n
 				return false
 			}
@@ -527,8 +528,11 @@ func TestTextSetFieldSentBackAndDeleted(t *testing.T) {
 
 // TestTextSetInheritedItalic checks the CC11 row: text.set
 // '<p><i>Step</i></p>' on V2 s1 (master text italic) gives local Text
-// 'Step', no local Character row, and html '<p>Step</p>' (the italic
-// is inherited, decision f).
+// 'Step' and html '<p>Step</p>' (the italic is inherited, decision f).
+// The local Character row 0 holds only inherited cells (F="Inh",
+// Visio's form, which read does not show): every row is written whole
+// so LibreOffice reads it as Visio does (docs/vsdx-design.md, Text
+// runs; this replaces the earlier "no local Character row").
 func TestTextSetInheritedItalic(t *testing.T) {
 	_, data := textSetRun(t, "v2-master", "page0/s1", `<p><i>Step</i></p>`)
 	obj := textSetObject(t, data, "page0", "page0/s1")
@@ -538,8 +542,25 @@ func TestTextSetInheritedItalic(t *testing.T) {
 	if got, _ := obj["text"].(string); got != "Step" {
 		t.Errorf("text = %q, want Step", got)
 	}
-	if rows := textSetSectionRows(t, data, 1, vsd.SectionCharacter); len(rows) != 0 {
-		t.Errorf("Character rows = %v, want none", rows)
+	if rows := textSetSectionRows(t, data, 1, vsd.SectionCharacter); len(rows) != 1 || rows[0] != "0" {
+		t.Errorf("Character rows = %v, want [0]", rows)
+	}
+	shape := textSetShapeNode(t, data, 1)
+	for c := range shape.ElementsSeq() {
+		if n, _ := c.Attr("N"); c.Local() != vsd.ElemSection || n != vsd.SectionCharacter {
+			continue
+		}
+		for r := range c.ElementsSeq() {
+			for cell := range r.ElementsSeq() {
+				name, _ := cell.Attr("N")
+				if f, _ := cell.Attr("F"); f != vsd.FormulaInherited {
+					t.Errorf("Character cell %s F = %q, want Inh (no local formatting)", name, f)
+				}
+				if v, _ := cell.Attr("V"); name == "Style" && v != "2" {
+					t.Errorf("Character Style V = %q, want the inherited 2 (italic)", v)
+				}
+			}
+		}
 	}
 }
 

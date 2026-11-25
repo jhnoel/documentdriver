@@ -162,41 +162,42 @@ type omissionJSON struct {
 
 // objectJSON is one object as read shows it, with keys in the golden layout order.
 type objectJSON struct {
-	ID       string            `json:"id"`
-	Kind     string            `json:"kind"`
-	Type     string            `json:"type,omitempty"`
-	Name     string            `json:"name,omitempty"`
-	NameU    string            `json:"name_u,omitempty"`
-	Master   string            `json:"master,omitempty"`
-	Parent   string            `json:"parent,omitempty"`
-	Hidden   bool              `json:"hidden,omitempty"`
-	Box      []json.Number     `json:"box,omitempty"`
-	Rot      json.Number       `json:"rot,omitempty"`
-	FlipH    bool              `json:"flip_h,omitempty"`
-	FlipV    bool              `json:"flip_v,omitempty"`
-	Geom     string            `json:"geom,omitempty"`
-	Closed   bool              `json:"closed,omitempty"`
-	Points   [][]json.Number   `json:"points,omitempty"`
-	From     []json.Number     `json:"from,omitempty"`
-	To       []json.Number     `json:"to,omitempty"`
-	FromGlue string            `json:"from_glue,omitempty"`
-	ToGlue   string            `json:"to_glue,omitempty"`
-	Glued    []gluedJSON       `json:"glued,omitempty"`
-	Fill     any               `json:"fill,omitempty"`
-	Line     any               `json:"line,omitempty"`
-	Shadow   *shadowJSON       `json:"shadow,omitempty"`
-	Image    string            `json:"image,omitempty"`
-	Media    *mediaJSON        `json:"media,omitempty"`
-	Crop     []json.Number     `json:"crop,omitempty"`
-	HTML     string            `json:"html,omitempty"`
-	Text     string            `json:"text,omitempty"`
-	Props    []propJSON        `json:"props,omitempty"`
-	Layers   []string          `json:"layers,omitempty"`
-	Sites    [][]json.Number   `json:"sites,omitempty"`
-	Z        *int              `json:"z,omitempty"`
-	Origins  map[string]string `json:"origins,omitempty"`
-	Cells    []cellJSON        `json:"cells,omitempty"`
-	Omitted  []omissionJSON    `json:"omitted,omitempty"`
+	ID        string            `json:"id"`
+	Kind      string            `json:"kind"`
+	Type      string            `json:"type,omitempty"`
+	Name      string            `json:"name,omitempty"`
+	NameU     string            `json:"name_u,omitempty"`
+	Master    string            `json:"master,omitempty"`
+	Parent    string            `json:"parent,omitempty"`
+	Hidden    bool              `json:"hidden,omitempty"`
+	Box       []json.Number     `json:"box,omitempty"`
+	Rot       json.Number       `json:"rot,omitempty"`
+	FlipH     bool              `json:"flip_h,omitempty"`
+	FlipV     bool              `json:"flip_v,omitempty"`
+	Geom      string            `json:"geom,omitempty"`
+	Closed    bool              `json:"closed,omitempty"`
+	Points    [][]json.Number   `json:"points,omitempty"`
+	From      []json.Number     `json:"from,omitempty"`
+	To        []json.Number     `json:"to,omitempty"`
+	FromGlue  string            `json:"from_glue,omitempty"`
+	ToGlue    string            `json:"to_glue,omitempty"`
+	Glued     []gluedJSON       `json:"glued,omitempty"`
+	Fill      any               `json:"fill,omitempty"`
+	Line      any               `json:"line,omitempty"`
+	Shadow    *shadowJSON       `json:"shadow,omitempty"`
+	TextBlock *textBlockJSON    `json:"text_block,omitempty"`
+	Image     string            `json:"image,omitempty"`
+	Media     *mediaJSON        `json:"media,omitempty"`
+	Crop      []json.Number     `json:"crop,omitempty"`
+	HTML      string            `json:"html,omitempty"`
+	Text      string            `json:"text,omitempty"`
+	Props     []propJSON        `json:"props,omitempty"`
+	Layers    []string          `json:"layers,omitempty"`
+	Sites     [][]json.Number   `json:"sites,omitempty"`
+	Z         *int              `json:"z,omitempty"`
+	Origins   map[string]string `json:"origins,omitempty"`
+	Cells     []cellJSON        `json:"cells,omitempty"`
+	Omitted   []omissionJSON    `json:"omitted,omitempty"`
 }
 
 // Page reads one page (or master, for an address master<N>) as JSON in
@@ -330,6 +331,51 @@ func shadowJSONOf(s *model.Shadow, in bool) *shadowJSON {
 	return j
 }
 
+// textBlockJSON is an object's text block as read shows it.
+type textBlockJSON struct {
+	VAlign     string        `json:"valign,omitempty"`
+	Margins    []json.Number `json:"margins,omitempty"`
+	Background any           `json:"background,omitempty"`
+}
+
+// textBgJSON is a text background colour: hex, and its transparency
+// in percent when not 0.
+type textBgJSON struct {
+	Hex          string      `json:"hex"`
+	Transparency json.Number `json:"transparency,omitempty"`
+}
+
+// textBlockJSONOf shows a text block: valign, margins in the selected
+// units and background "none" or {hex, transparency}, each when
+// derived.
+func textBlockJSONOf(tb *model.TextBlockInfo, in bool) *textBlockJSON {
+	j := &textBlockJSON{}
+	if tb.HasVAlign {
+		j.VAlign = tb.VAlign
+	}
+	if tb.HasMargins {
+		for _, m := range tb.Margins {
+			n := lengthNum(m, in)
+			if m == 0 {
+				n = "0"
+			}
+			j.Margins = append(j.Margins, n)
+		}
+	}
+	switch {
+	case !tb.HasBg:
+	case tb.BgNone:
+		j.Background = "none"
+	default:
+		bg := textBgJSON{Hex: tb.BgHex}
+		if tb.BgTrans != 0 {
+			bg.Transparency = json.Number(geom.FormatNum(tb.BgTrans))
+		}
+		j.Background = bg
+	}
+	return j
+}
+
 // propValue shows a shape data value as read shows it.
 func propValue(v any) any {
 	switch t := v.(type) {
@@ -375,6 +421,9 @@ func objectJSONOf(obj *model.Object, in, full bool) objectJSON {
 	j.Fill = fillJSON(obj.Fill)
 	j.Line = lineJSONOf(obj.Line, in)
 	j.Shadow = shadowJSONOf(obj.Shadow, in)
+	if tb := obj.TextBlock; tb != nil && tb.Local {
+		j.TextBlock = textBlockJSONOf(tb, in)
+	}
 	if pic := obj.Picture; pic != nil {
 		j.Image = pic.Image
 		j.Media = &mediaJSON{Type: pic.Type, Bytes: pic.Bytes, SHA256: pic.SHA256}

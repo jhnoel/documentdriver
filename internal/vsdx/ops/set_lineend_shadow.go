@@ -184,19 +184,23 @@ func shadowCells(st *styleShape, s *ObjectSetSpec, scale float64) ([]edit.Cell, 
 	return cells, nil
 }
 
-// addExtras writes the line ends and shadow of an object.add on the
-// shape it added (changed[0]) through setStyle, so object.add and
-// object.set share one write and one set of refusals. A connector
+// addExtras writes the line ends, shadow and text block of an
+// object.add on the shape it added (changed[0]) through setStyle and
+// setTextBlock, so object.add and object.set share one write and one
+// set of refusals. A connector
 // added with kind connector has no arrowheads unless s gives them.
 func addExtras(ws *edit.Workspace, s *ObjectAddSpec, changed []string, aliases map[string]string, units string) error {
 	hasEnds := s.Line != nil && (s.Line.Begin != nil || s.Line.End != nil)
-	if (!hasEnds && s.Shadow == nil) || len(changed) == 0 {
+	if (!hasEnds && s.Shadow == nil && s.TextBlock == nil) || len(changed) == 0 {
 		return nil
 	}
-	set := &ObjectSetSpec{At: changed[0], Shadow: s.Shadow}
+	set := &ObjectSetSpec{At: changed[0], Shadow: s.Shadow, TextBlock: s.TextBlock}
 	if hasEnds {
 		set.Line = &LineSpec{Begin: s.Line.Begin, End: s.Line.End}
 	}
-	_, _, err := setStyle(ws, set, aliases, units)
+	if _, _, err := setStyle(ws, set, aliases, units); err != nil {
+		return err
+	}
+	_, _, err := setTextBlock(ws, set, aliases, units)
 	return err
 }

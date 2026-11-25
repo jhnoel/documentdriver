@@ -92,3 +92,25 @@ func FormatInches(f float64) string {
 func Degrees(rad float64) float64 {
 	return geom.NormDeg(-rad * 180 / math.Pi)
 }
+
+// TextBackground interprets a stored TextBkgnd value: a number below 1
+// is no background (none), #RRGGBB is that colour (hex), and a number
+// n of 1 or more is the colour of index n-1 (index; Visio stores the
+// index plus one so that 0 is transparent, as libvisio reads it). ok
+// is false for anything else, Themed included.
+func TextBackground(v string) (none bool, hex string, index int, ok bool) {
+	if h, isHex := Color(v); isHex {
+		return false, h, -1, true
+	}
+	n, isNum := Number(v)
+	if !isNum {
+		return false, "", -1, false
+	}
+	if n < 1 {
+		return true, "", -1, true
+	}
+	if n > 255 {
+		return false, "", -1, false
+	}
+	return false, "", int(n) - 1, true
+}
