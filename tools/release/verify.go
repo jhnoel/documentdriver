@@ -27,7 +27,8 @@ const dataDescriptorFlag = 0x8
 // verifyWheel checks a wheel against what makeWheel promises: RECORD lists
 // every other entry exactly once with its size and hash, and nothing
 // else; the WHEEL Tag lines are exactly tags, in order; METADATA names
-// the license the wheel carries; the binaries
+// the licence expression and every licence file, which the wheel
+// carries (the fonts' with the tools'); the binaries
 // are executable; and _digests.py records their SHA-256. It returns
 // the binaries by name.
 func verifyWheel(b []byte, pyVersion string, tags []string) (map[string][]byte, error) {
@@ -119,12 +120,18 @@ func verifyWheel(b []byte, pyVersion string, tags []string) (map[string][]byte, 
 	if got, want := string(entries[info+"/WHEEL"]), string(wheelMeta(tags)); got != want {
 		return nil, fmt.Errorf("WHEEL is %q, want %q", got, want)
 	}
-	if meta := string(entries[info+"/METADATA"]); !strings.HasPrefix(meta, "Metadata-Version: 2.4\n") ||
-		!strings.Contains(meta, "\nVersion: "+pyVersion+"\n") || !strings.Contains(meta, "\nLicense-File: "+licenseFile+"\n") {
-		return nil, fmt.Errorf("METADATA is not version 2.4 with Version %s and License-File %s", pyVersion, licenseFile)
+	meta := string(entries[info+"/METADATA"])
+	if !strings.HasPrefix(meta, "Metadata-Version: 2.4\n") || !strings.Contains(meta, "\nVersion: "+pyVersion+"\n") ||
+		!strings.Contains(meta, "\nLicense-Expression: "+licenseExpression+"\n") {
+		return nil, fmt.Errorf("METADATA is not version 2.4 with Version %s and License-Expression %s", pyVersion, licenseExpression)
 	}
-	if len(entries[info+"/licenses/"+licenseFile]) == 0 {
-		return nil, fmt.Errorf("the wheel has no %s/licenses/%s", info, licenseFile)
+	for _, l := range licenseFiles {
+		if !strings.Contains(meta, "\nLicense-File: "+l.Name+"\n") {
+			return nil, fmt.Errorf("METADATA names no License-File %s", l.Name)
+		}
+		if len(entries[info+"/licenses/"+l.Name]) == 0 {
+			return nil, fmt.Errorf("the wheel has no %s/licenses/%s", info, l.Name)
+		}
 	}
 	bins := map[string][]byte{}
 	for name, data := range entries {

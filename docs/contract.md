@@ -23,13 +23,20 @@ page is the target; `docs/plan.md` says what is implemented.
 <tool> create [<plan.json|->] [--dry-run] -o <out>  xlsx, vsdx: a new workbook or drawing, optionally with a plan applied
 <tool> xml   <file> <address>            pptx, vsdx: source bytes of one object
 <tool> render <file> ... -o <out.png>    pptx, vsdx: picture of a slide or page
-<tool> help [<command>|ops|<op>|html|schema|values]   same text as --help
+<tool> help [<command>|ops|<op>|html|schema|values|fonts]   same text as --help
 <tool> --version
 ```
 
 **xlsx** has `read`, `find`, `apply`, `create`, `help` and `--version`;
 there is no `xml` or `render`. Its help topics are `ops`, `<op>` and
 `values` (the cell value forms of §7a); it has no `html` topic.
+**vsdx** also has `help fonts`: the fonts it embeds for
+`render --renderer svg` (Carlito, Liberation Sans and Serif under the
+SIL Open Font License 1.1, DejaVu Sans under the Bitstream Vera and
+Arev licences) with their notices and licence texts, so they travel
+with the binary; the wheel carries the same files under
+`.dist-info/licenses` (`License-Expression: Apache-2.0 AND OFL-1.1 AND
+Bitstream-Vera AND LicenseRef-Arev`).
 
 ```
 xlsx read  <file> [--range A] [--sheet sheet:Name] [--view cells|values|formulas] [--group] [--detail styles] [--kind workbook|names|tables|styles|comments] [--limit n]

@@ -1548,3 +1548,13 @@ TextPosition and caches, identity, the TEXTHEIGHT refusal),
 `TestTextBoxDefault`, the law suite's box (16 inverse read-backs fail
 when the box is dropped) and the placement page in the LibreOffice
 comparison. Each was seen to fail with its code removed.
+
+Packaging (owner approved embedding every font, 2026-11-25): each wheel
+carries `LICENSE`, `fonts/OFL.txt`, `fonts/LICENSE-DejaVu.txt` and
+`fonts/PROVENANCE.md` in `.dist-info/licenses`, each a `License-File`,
+under `License-Expression: Apache-2.0 AND OFL-1.1 AND Bitstream-Vera AND
+LicenseRef-Arev` (SPDX has no identifier for the Arev licence; PEP 639
+allows `LicenseRef-`). `verifyWheel` (every release) and
+`make release-smoke` refuse a wheel missing any of them. A binary
+copied without the wheel prints the notices and licence texts with
+`vsdx help fonts`.

@@ -23,6 +23,7 @@ def main():
     assert got == py_version, "installed version %s, want %s" % (got, py_version)
     assert documentdriver.__version__ == py_version, documentdriver.__version__
     assert documentdriver.names() == ["docx", "pptx", "vsdx", "xlsx"], documentdriver.names()
+    check_licences()
     for name in documentdriver.names():
         path = documentdriver.binary(name)
         out = subprocess.run([path, "--version"], capture_output=True, check=True).stdout
@@ -48,6 +49,27 @@ def main():
     else:
         raise AssertionError("binary('nope') did not raise ValueError")
     print("release-smoke OK: documentdriver %s" % py_version)
+
+
+LICENCE_FILES = ["LICENSE", "fonts/OFL.txt", "fonts/LICENSE-DejaVu.txt", "fonts/PROVENANCE.md"]
+
+
+def check_licences():
+    """The installed wheel names and carries the tools' and the
+    embedded fonts' licence files, under the combined expression."""
+    meta = metadata.metadata("documentdriver")
+    expr = meta.get("License-Expression")
+    want = "Apache-2.0 AND OFL-1.1 AND Bitstream-Vera AND LicenseRef-Arev"
+    assert expr == want, "License-Expression %r, want %r" % (expr, want)
+    named = meta.get_all("License-File") or []
+    files = {str(f): f for f in (metadata.files("documentdriver") or [])}
+    for name in LICENCE_FILES:
+        assert name in named, "METADATA names no License-File %s (has %s)" % (name, named)
+        path = [p for p in files if p.endswith(".dist-info/licenses/" + name)]
+        assert path, "the wheel has no licenses/%s" % name
+        text = files[path[0]].read_text(encoding="utf-8")
+        assert text.strip(), "licenses/%s is empty" % name
+    print("ok licences: %s" % ", ".join(LICENCE_FILES))
 
 
 def check_run(release):

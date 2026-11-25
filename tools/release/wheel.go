@@ -31,14 +31,35 @@ const pythonSource = "packaging/python/" + distName
 // .dist-info/licenses (PEP 639) and named by METADATA's License-File.
 const licenseFile = "LICENSE"
 
+// licenseFiles are the licence files every wheel carries in
+// .dist-info/licenses, each named by a License-File line: the
+// repository's license, and the licences and provenance of the fonts
+// the vsdx binary embeds (internal/render/fonts), at their source path
+// and their name in the wheel.
+var licenseFiles = []struct{ Source, Name string }{
+	{licenseFile, licenseFile},
+	{"internal/render/fonts/OFL.txt", "fonts/OFL.txt"},
+	{"internal/render/fonts/LICENSE-DejaVu.txt", "fonts/LICENSE-DejaVu.txt"},
+	{"internal/render/fonts/PROVENANCE.md", "fonts/PROVENANCE.md"},
+}
+
+// licenseExpression is the SPDX expression of everything a wheel
+// carries: the tools (Apache-2.0) and the embedded fonts, Carlito and
+// Liberation under the SIL Open Font License 1.1 and DejaVu Sans under
+// the Bitstream Vera licence and, for its glyphs from the Arev fonts,
+// the Arev licence, which has no SPDX identifier (LicenseRef-Arev,
+// PEP 639); DejaVu's own changes are public domain.
+const licenseExpression = "Apache-2.0 AND OFL-1.1 AND Bitstream-Vera AND LicenseRef-Arev"
+
 // projectURL is the public source repository, the wheel's Project-URL.
 const projectURL = "https://github.com/jhnoel/documentdriver"
 
 // pyPackage is what every wheel carries besides the binaries: the import
-// package sources and the license text.
+// package sources and the licence files (licenseFiles, named as in the
+// wheel's licenses directory).
 type pyPackage struct {
-	Files   []wheelFile
-	License []byte
+	Files    []wheelFile
+	Licenses []wheelFile
 }
 
 // zipTime is the modification time of every wheel entry: the earliest a
@@ -72,7 +93,7 @@ func recordHash(b []byte) string {
 }
 
 // readPackage reads the import package sources under root/pythonSource,
-// skipping caches and compiled files, and the repository's license.
+// skipping caches and compiled files, and the licence files.
 func readPackage(root string) (pyPackage, error) {
 	dir := filepath.Join(root, filepath.FromSlash(pythonSource))
 	var files []wheelFile
@@ -103,11 +124,15 @@ func readPackage(root string) (pyPackage, error) {
 	if err != nil {
 		return pyPackage{}, fmt.Errorf("read the Python package %s: %w", pythonSource, err)
 	}
-	license, err := os.ReadFile(filepath.Join(root, licenseFile)) //nolint:gosec // G304: the repository's own license
-	if err != nil {
-		return pyPackage{}, fmt.Errorf("read the license: %w", err)
+	var licenses []wheelFile
+	for _, l := range licenseFiles {
+		b, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(l.Source))) //nolint:gosec // G304: the repository's own licence files
+		if err != nil {
+			return pyPackage{}, fmt.Errorf("read the licence file %s: %w", l.Source, err)
+		}
+		licenses = append(licenses, wheelFile{Name: l.Name, Data: b})
 	}
-	return pyPackage{Files: files, License: license}, nil
+	return pyPackage{Files: files, Licenses: licenses}, nil
 }
 
 // digestsModule is the generated documentdriver/_digests.py: the version
@@ -125,6 +150,16 @@ func digestsModule(pyVersion string, bins map[string][]byte) []byte {
 	return []byte(b.String())
 }
 
+// licenseFileLines returns METADATA's License-File lines, one per
+// licence file in licenseFiles order.
+func licenseFileLines() string {
+	var b strings.Builder
+	for _, l := range licenseFiles {
+		b.WriteString("License-File: " + l.Name + "\n")
+	}
+	return b.String()
+}
+
 // metadata is the core metadata file (METADATA) of the wheel, version
 // 2.4 for License-Expression and License-File (PEP 639). The description
 // is PyPI's project page.
@@ -135,8 +170,8 @@ func metadata(pyVersion string, bins map[string][]byte) []byte {
 		"Version: " + pyVersion + "\n" +
 		"Summary: Read and edit Word, PowerPoint, Excel and Visio files from agents: the " + names + " CLIs as static binaries\n" +
 		"Keywords: docx,pptx,vsdx,xlsx,ooxml,office,agents\n" +
-		"License-Expression: Apache-2.0\n" +
-		"License-File: " + licenseFile + "\n" +
+		"License-Expression: " + licenseExpression + "\n" +
+		licenseFileLines() +
 		"Project-URL: Source, " + projectURL + "\n" +
 		"Project-URL: Contract, " + projectURL + "/blob/main/docs/contract.md\n" +
 		"Project-URL: Releasing, " + projectURL + "/blob/main/RELEASING.md\n" +
@@ -193,7 +228,7 @@ func wheelMeta(tags []string) []byte {
 
 // makeWheel builds the wheel for one platform: the import package, the
 // generated digests, the binaries under documentdriver/bin, and the
-// .dist-info files (the license under licenses/) with RECORD last. The bytes are a function of the
+// .dist-info files (the licence files under licenses/) with RECORD last. The bytes are a function of the
 // inputs: sorted entries, one fixed time, fixed modes.
 func makeWheel(pyVersion string, tags []string, pkg pyPackage, bins map[string][]byte) ([]byte, error) {
 	files := append([]wheelFile(nil), pkg.Files...)
@@ -206,8 +241,10 @@ func makeWheel(pyVersion string, tags []string, pkg pyPackage, bins map[string][
 	files = append(files,
 		wheelFile{Name: info + "/METADATA", Data: metadata(pyVersion, bins)},
 		wheelFile{Name: info + "/WHEEL", Data: wheelMeta(tags)},
-		wheelFile{Name: info + "/licenses/" + licenseFile, Data: pkg.License},
 	)
+	for _, l := range pkg.Licenses {
+		files = append(files, wheelFile{Name: info + "/licenses/" + l.Name, Data: l.Data})
+	}
 	var record strings.Builder
 	for _, f := range files {
 		fmt.Fprintf(&record, "%s,%s,%d\n", f.Name, recordHash(f.Data), len(f.Data))

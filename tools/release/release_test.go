@@ -97,8 +97,9 @@ func testPackage(t *testing.T) pyPackage {
 	if len(pkg.Files) == 0 || pkg.Files[0].Name != distName+"/__init__.py" {
 		t.Fatalf("package = %v, want documentdriver/__init__.py first", pkg.Files)
 	}
-	if !bytes.Contains(pkg.License, []byte("Apache License")) {
-		t.Fatalf("license = %.40q, want the Apache License", pkg.License)
+	if len(pkg.Licenses) != len(licenseFiles) || !bytes.Contains(pkg.Licenses[0].Data, []byte("Apache License")) ||
+		!bytes.Contains(pkg.Licenses[1].Data, []byte("SIL Open Font License")) || !bytes.Contains(pkg.Licenses[2].Data, []byte("Bitstream Vera")) {
+		t.Fatalf("licences = %d files, want LICENSE (Apache), fonts/OFL.txt (OFL) and fonts/LICENSE-DejaVu.txt (Bitstream Vera) first", len(pkg.Licenses))
 	}
 	return pkg
 }
@@ -212,5 +213,42 @@ func TestBuiltWheelRunsVersion(t *testing.T) {
 	}
 	if err := runWheelBinaries(got, dir, version); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// TestWheelLicences checks that a wheel carries the tools' and the
+// fonts' licence files under .dist-info/licenses with a License-File
+// line each and the combined licence expression, and that verifyWheel
+// refuses a wheel missing any one of them.
+func TestWheelLicences(t *testing.T) {
+	pkg := testPackage(t)
+	bins := map[string][]byte{"vsdx": []byte("vsdx binary")}
+	tags := []string{"macosx_11_0_arm64"}
+	w, err := makeWheel("1.2.3", tags, pkg, bins)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := verifyWheel(w, "1.2.3", tags); err != nil {
+		t.Fatalf("verifyWheel: %v", err)
+	}
+	meta := string(metadata("1.2.3", bins))
+	for _, want := range []string{
+		"License-Expression: Apache-2.0 AND OFL-1.1 AND Bitstream-Vera AND LicenseRef-Arev\n",
+		"License-File: LICENSE\n", "License-File: fonts/OFL.txt\n", "License-File: fonts/LICENSE-DejaVu.txt\n", "License-File: fonts/PROVENANCE.md\n",
+	} {
+		if !strings.Contains(meta, want) {
+			t.Errorf("METADATA lacks %q", want)
+		}
+	}
+	for i := range pkg.Licenses {
+		short := pkg
+		short.Licenses = append(append([]wheelFile(nil), pkg.Licenses[:i]...), pkg.Licenses[i+1:]...)
+		bad, err := makeWheel("1.2.3", tags, short, bins)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := verifyWheel(bad, "1.2.3", tags); err == nil || !strings.Contains(err.Error(), pkg.Licenses[i].Name) {
+			t.Errorf("a wheel without %s: verifyWheel = %v, want an error naming it", pkg.Licenses[i].Name, err)
+		}
 	}
 }

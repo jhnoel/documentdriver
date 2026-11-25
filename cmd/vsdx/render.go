@@ -47,7 +47,8 @@ draw it, and the result's renderer says which one did:
                (Carlito, Liberation Sans and Serif: the metrics of Calibri,
                Arial and Times New Roman; DejaVu Sans for characters they
                lack), each run in its face, size, bold and italic. Its
-               notes list what it left out or approximated.
+               notes list what it left out or approximated. The fonts and
+               their licences: vsdx help fonts.
 
 --renderer auto (the default) uses libreoffice when it is installed (DD_SOFFICE
 names a file that exists, or soffice is on PATH or in its usual place, and a
