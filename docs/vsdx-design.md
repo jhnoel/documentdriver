@@ -1252,3 +1252,112 @@ Paths). What each write stores, and its grounding:
   it now reads as a pattern fill. This changes what `read` shows for
   such drawings (an added key `pattern` and `bg` on `fill`), which the
   owner signs off with the contract change.
+
+## 15. The drawing view: read --format svg and render without LibreOffice (2026-11-25, owner sign-off pending)
+
+A patent-figure kit builds figures through vsdx inside Open WebUI Code
+Mode, which has no LibreOffice, so `render` could not show an agent its
+own figure. `read --format svg` and `render --renderer svg` draw the
+page from the read model instead (contract §1, vsdx). The layers:
+
+- **Model** (`internal/vsdx/model`, `Options.Draw`, built only for the
+  drawing): `Object.Draw` holds every effective Geometry section
+  (`inherit.Rows`, so a master instance draws its master's rows) as
+  paths in the view, from each cell's cached V, never an evaluated
+  formula: MoveTo, LineTo and the Rel forms, RelCubBezTo,
+  RelQuadBezTo, ArcTo (a circle through the ends and the bow point),
+  EllipticalArcTo (mapped to a circle by the axis angle and ratio),
+  Ellipse (four Béziers through conjugate diameters); PolylineTo,
+  NURBSTo and splines as a line to their end point, with a note. A
+  row's type comes from the stored row element of one of its cells.
+  The text block is the effective TxtPinX to TxtAngle (when no sheet
+  stores them, Visio's default: the shape's box) composed with the
+  shape's transform, unmirrored when the shape is flipped, with the
+  effective margins, VerticalAlign and each Character and Paragraph
+  row's effective font, size, colour, style bits and HorzAlign (the
+  HTML read shows carries only what the shape stores, so the drawing
+  cannot use it).
+- **Scene** (`internal/render`, shared engine): fills, solid strokes,
+  text lines and images, in points. `WriteSVG` writes it and
+  `Rasterise` draws it (signed-area accumulation, non-zero, after
+  font-rs; strokes as same-wound quads plus round joins), so the SVG
+  and the PNG draw the same marks; the rasteriser reads the scene,
+  not the SVG text, and needs no SVG parser.
+- **View** (`internal/vsdx/view`): model to scene. Hidden layers are
+  skipped; background pages are drawn under the page (up to 8).
+  Limits are `view.Limits`, shown in `help read`.
+
+Grounding and choices:
+
+- **No dash arrays, markers, clip paths or SVG patterns.** MuPDF
+  1.27.2 (`mutool draw`, the library behind PyMuPDF), on a test SVG:
+  `stroke-dasharray` ignored (solid line), `marker-end` ignored (no
+  arrowhead), `clip-path` ignored (lines drawn past the clip), and a
+  `fill="url(#pattern)"` (also with a `none` fallback) drawn solid
+  black. Text with tspans, font-weight, font-style and text-anchor
+  and `xlink:href` data-URI PNGs work. So dashes are segments,
+  arrowheads filled paths, hatches lines clipped here (`render.Hatch`,
+  non-zero, aligned to the page origin so neighbouring shapes line
+  up) and dots small squares. The contract asked for `<pattern>`s;
+  this is the documented reason not to use them. MuPDF also anchors
+  each tspan of a centred line on its own, so a line of several
+  styles places each span at an x from the width tables; one style
+  keeps the viewer's own anchoring.
+- **Patterns** follow §14's table: 0.1 in (7.2 pt) spacing for 2 to 7,
+  0.05 in for the rest, lines 0.5 pt; `dots` (8) as 1 pt dots 3.6 pt
+  apart in offset rows, where LibreOffice draws a triple hatch. 9 to
+  18, which the contract does not name, are dots of decreasing
+  density, with a note.
+- **Dashes** are libvisio's LinePattern table
+  (`VSDContentCollector::_lineProperties`, read verbatim): pattern 2
+  is 6 on, 3 off, 3 is 1 on, 3 off, ... 23, multiples of the line
+  weight (at least 0.5 pt here, so hairline dashes stay visible).
+- **Arrowheads** are libvisio's markers 4 (triangle,
+  `m10 0-10 20h20z`) and 5 (stealth, `m10 0-10 20q10,-5 20,0z`) at its
+  width for a weight of w inches, `0.1/(w*w+1) + 2.54w` inches (at
+  least 0.05 in), as long as wide; libvisio ignores BeginArrowSize and
+  EndArrowSize, and so does the view (a limit: Visio applies them).
+  The line stops inside the head (0.9 of its length for triangle, 0.75
+  for stealth) so a thick line does not show past the tip.
+- **Text widths** are the advance widths of printable ASCII from the
+  OFL fonts LibreOffice 26.2 bundles: Carlito (Calibri metrics),
+  Liberation Sans (Arial) and Liberation Serif (Times New Roman),
+  regular and bold (`metrics_table.go`, read from hmtx and cmap once;
+  Liberation Sans matches the published Helvetica widths, `A` 667). The
+  repository had no font metrics before. A face is classed by name;
+  others measure as Arial. Wrapping is greedy at spaces, a word wider
+  than the line is cut between characters, line height is 1.2 times
+  the largest size (or SpLine's percentage), the baseline 0.8 of the
+  size into the line. The PNG draws text with the overlays' 7x13
+  glyphs (`font7x13.go`) scaled to each character's advance: legible,
+  not the face.
+- **Renderer choice**: `--renderer auto` keeps LibreOffice where it is
+  installed (existing callers get the same picture) and falls back to
+  `svg` where it is not (Code Mode gets a picture, not an error); the
+  result's `renderer` says which drew it, and `libreoffice` still
+  refuses without LibreOffice. A `DD_SOFFICE` that names no file counts
+  as not installed for `auto`. No dependency was added: the standard
+  library has no vector rasteriser, so `internal/render` has one
+  (about 400 lines), and decodes pictures with `image/png`,
+  `image/jpeg` and `image/gif`.
+- **Bounds on untrusted input**: 4096 drawn geometry rows per object,
+  256 pieces per curve, 20,000 hatch lines or dots and 10^8 hatch
+  tests per area, 64 MiB per embedded picture, 40 million raster
+  pixels, 4096 text lines per block; each cut is a note.
+
+Evidence (2026-11-25): `TestRenderPatternsAndPaths` runs its checks
+(pattern ink, hatch slant, clear and white backgrounds, curve sample
+points) for both renderers; `TestRenderSVGMatchesLibreOffice` compares
+the svg renderer with LibreOffice on that page and on a figure-like
+page at scale 2 (2 pt tolerance, measured unmatched ink at most 2.2%,
+bound 4%; the derivation is in the test); `TestReadSVGStructure`
+checks the SVG without any renderer; `FuzzPageSVG` and
+`TestSceneProperty` check well-formed output and no panics. Dropping
+pattern fills fails the structure, comparison and paths tests;
+dropping arrowheads fails the structure test (the pixel comparison is
+too coarse for them, which is why they are counted). LibreOffice's own
+import draws a Character row that stores no cells (vsdx writes
+`<Row IX='0'/>` for the plain run after a bold one) with the previous
+row's style, so it shows "Controller 104 ..." all bold and carries an
+italic into later shapes; the drawing view and `read` show the file's
+values. Visio's drawing of either is unverified (no Visio here).

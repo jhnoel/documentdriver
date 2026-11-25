@@ -43,29 +43,65 @@ xlsx create [<plan.json|->] [--dry-run] [--recalc] -o <out>
 there is no `schema` or `values` topic.
 
 ```
-vsdx read   <file> [--page pageN | --master masterN] [--detail sites|full] [--ids ids] [--region x,y,w,h] [--units pt|in]
+vsdx read   <file> [--page pageN | --master masterN] [--format json|svg] [--detail sites|full] [--ids ids] [--region x,y,w,h] [--units pt|in]
 vsdx find   <file> <query> [--ignore-case] [--page pageN] [--limit n]
 vsdx xml    <file> <address>
 vsdx media  <file> <address> -o <out>
 vsdx apply  <file> <plan.json|-> [--dry-run] [-o <out>] [--changed ids|full]
 vsdx create [<plan.json|->] [--dry-run] -o <out>
-vsdx render <file> --page pageN -o <out.png> [--overlay ids,sites,glue] [--ids ids] [--scale n]
+vsdx render <file> --page pageN -o <out.png> [--overlay ids,sites,glue] [--ids ids] [--scale n] [--renderer auto|libreoffice|svg]
 ```
 
 - Files: `.vsdx`, `.vsdm` (VBA copied through), `.vstx` and `.vstm`
   are read and edited; `.vssx` and `.vssm` (stencils) are read only:
   their masters, and `pages` is `[]`.
-- `read` has no `--format svg`: there is no Visio geometry renderer.
-  `render` rasterises one page through headless LibreOffice, with
-  pptx render's flags. Its result is `{"saved", "px", "size",
-  "scale", "hidden", "key"}`: the PNG written, its `[w, h]` in
-  pixels, the page's `[w, h]` in points, the pixels per point, whether
-  the page is hidden, and the numbered marks of `--overlay`
-  (`[{"n", "id"}]`). LibreOffice draws the values the file caches, so
-  the picture is for checking, not proof. `soffice` comes from
-  `DD_SOFFICE` or `PATH` (with a PDF rasteriser: `pdftoppm`, `mutool`
-  or `gs`); without them `render` is `operation_failed`, path `-o`,
-  and nothing is written, as xlsx `--recalc` is at `--recalc`.
+- `read --format svg` (with `--page` or `--master`; owner sign-off
+  pending) writes the page as a self-contained SVG document in points
+  instead of JSON: the drawing view. It is drawn from the read model's
+  effective values (master, style and theme inheritance; the values
+  Visio last cached), the page's background pages first: every
+  Geometry section of every visible object (rows MoveTo, LineTo, the
+  Rel forms, ArcTo, EllipticalArcTo, Ellipse and RelCubBezTo; a
+  PolylineTo, NURBSTo or spline row as a straight line to its end),
+  solid and pattern fills, lines with their LinePattern and
+  arrowheads, shadows, text wrapped in its text block with its
+  margins, alignment and character styles, and pictures as data-URI
+  images. Each object is a `<g id="page0/s5" data-kind="shape">`;
+  its marks carry `data-role` (`fill`, `pattern-bg`, `pattern`,
+  `line`, `arrowhead`, `text`, `picture`, `shadow`), and the root
+  carries `data-base`, `data-page`, `data-units` (`pt`) and
+  `data-notes` (`[{"at", "reason"}]`, read's notes and what the
+  drawing left out or approximated). It uses only paths, solid
+  strokes, text and images: dashes are drawn as segments, arrowheads
+  as filled paths and patterns as hatch lines or dots clipped to the
+  shape, because common rasterisers (MuPDF, behind PyMuPDF) ignore
+  `stroke-dasharray`, markers, clip paths and SVG patterns (measured
+  with MuPDF 1.27.2: a `<pattern>` fill draws solid black). Text
+  wrapping uses width tables of Carlito, Liberation Sans and
+  Liberation Serif (metric-compatible with Calibri, Arial and Times
+  New Roman), so it is approximate in a viewer with other fonts.
+  `--ids` and `--region` keep objects as for JSON; `--detail` and
+  `--units` with `--format svg` are `usage`. What it never draws is
+  listed in `help read`.
+- `render` rasterises one page with one of two renderers (owner
+  sign-off pending for `--renderer` and the two result keys):
+  `libreoffice`, headless LibreOffice, with pptx render's flags, and
+  `svg`, the `read --format svg` drawing rasterised in Go with no
+  other program (text in a scaled 7x13 bitmap font at the estimated
+  widths). `--renderer auto`, the default, is `libreoffice` when it
+  is installed (`DD_SOFFICE` names a file that exists, or `soffice`
+  is on `PATH` or in its usual place, with a PDF rasteriser:
+  `pdftoppm`, `mutool` or `gs`) and `svg` otherwise. Its result is
+  `{"saved", "px", "size", "scale", "hidden", "key", "renderer",
+  "notes"}`: the PNG written, its `[w, h]` in pixels, the page's
+  `[w, h]` in points, the pixels per point, whether the page is
+  hidden, the numbered marks of `--overlay` (`[{"n", "id"}]`), the
+  renderer that drew it, and (for `svg`) what it left out
+  (`[{"at", "reason"}]`; always `[]` for `libreoffice`). Either
+  picture draws the values the file caches and is for checking, not
+  proof of what Visio draws. `--renderer libreoffice` without
+  LibreOffice is `operation_failed`, path `-o`, and nothing is
+  written, as xlsx `--recalc` is at `--recalc`.
 - `--page` and `--master` take an address as `read` lists it; any
   other value is `usage` at the flag, exit 2; a page address the
   drawing lacks is `not_found` at the flag.
@@ -98,7 +134,8 @@ vsdx render <file> --page pageN -o <out.png> [--overlay ids,sites,glue] [--ids i
   or logs, on success or failure. Things worth knowing that are not
   errors are in the result (`hazards`).
 - The exceptions are outputs that are not JSON by request: `pptx read
-  --format svg`, `pptx xml`, and `--help` text.
+  --format svg`, `vsdx read --format svg`, `pptx xml`, `vsdx xml`, and
+  `--help` text.
 - The result object is the top-level value; there is no `outcome` wrapper.
   Success and failure are told apart by the exit code and the stream.
 
@@ -1567,7 +1604,7 @@ Real files have defects the tool did not make. The rule:
 - **vsdx** in v1 (deferred, not refused by name unless listed in §3):
   writing hyperlinks, comments (not read either), layers, group
   create/ungroup, object.duplicate, master import and editing
-  masters; `read --format svg`; formula and ShapeSheet cell writes
+  masters; formula and ShapeSheet cell writes
   (there is no `cell.set`); arrow styles beyond `triangle` and
   `stealth`, and line ends on 2-D shapes; shadow blur, oblique and
   scaled shadows, the page's default shadow, and shadows on

@@ -1,6 +1,7 @@
 package read
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -8,7 +9,9 @@ import (
 	"unicode/utf8"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
+	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 	"github.com/jhnoel/documentdriver/internal/opc"
+	"github.com/jhnoel/documentdriver/internal/render"
 	"github.com/jhnoel/documentdriver/internal/repo"
 )
 
@@ -181,6 +184,49 @@ func FuzzFind(f *testing.F) {
 		// that folding changes.
 		if utf8.ValidString(q) && len(folded.Matches) < len(exact.Matches) {
 			t.Fatalf("%q: %d matches ignoring case, %d exact", q, len(folded.Matches), len(exact.Matches))
+		}
+	})
+}
+
+// FuzzPageSVG draws the first two pages of the v1-minimal package
+// whose page, pages and document members are arbitrary (seeded with
+// V1, V2 and V5, as FuzzRead): for every page the drawing view builds,
+// the SVG is well formed with an svg root, and rasterising it at a
+// small scale fails only with an error, never a panic. Inputs larger
+// than 64KB are skipped, as in FuzzRead.
+func FuzzPageSVG(f *testing.F) {
+	for _, fx := range lawFixtures {
+		page, pages, doc := fuzzFixtureMembers(f, fx)
+		f.Add(page, pages, doc)
+	}
+	f.Fuzz(func(t *testing.T, page, pages, doc string) {
+		if len(page)+len(pages)+len(doc) > 64*1024 {
+			return
+		}
+		input := packageWithMembers(t, page, pages, doc)
+		sum, err := Document(input, "B")
+		if err != nil {
+			return
+		}
+		for i, p := range sum.Pages {
+			if i == 2 {
+				break
+			}
+			scene, _, err := PageScene(input, "B", p.ID, Options{})
+			if err != nil {
+				continue
+			}
+			var buf bytes.Buffer
+			if err := render.WriteSVG(&buf, scene); err != nil {
+				t.Fatalf("%s: WriteSVG: %v", p.ID, err)
+			}
+			d, err := tree.Parse(buf.Bytes())
+			if err != nil || d.Root() == nil || d.Root().Local() != "svg" {
+				t.Fatalf("%s: SVG not well formed: %v", p.ID, err)
+			}
+			if _, _, err := render.Rasterise(scene, 0.25); err != nil {
+				continue
+			}
 		}
 	})
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/opc"
 	"github.com/jhnoel/documentdriver/internal/vsdx/read"
+	"github.com/jhnoel/documentdriver/internal/vsdx/view"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
 
@@ -21,6 +22,7 @@ var readCommand = &cli.Command{
 	Flags: []cli.Flag{
 		{Name: "page", Value: "pageN", Help: "show this page's objects (page0: the page's stored ID)"},
 		{Name: "master", Value: "masterN", Help: "show this master's objects (read only)"},
+		{Name: "format", Value: "json|svg", Enum: []string{"json", "svg"}, Help: "the view: JSON (default) or a drawing of the page as SVG"},
 		{Name: "detail", Value: "sites|full", Enum: []string{"sites", "full"}, Help: "add connection sites, or origins and stored cells"},
 		{Name: "ids", Value: "ids", Help: "only these objects and their descendants (page0/s12,page0/s13)"},
 		{Name: "region", Value: "x,y,w,h", Help: "only objects whose box intersects this one"},
@@ -32,7 +34,36 @@ background, size, orientation, object count) and the masters. With
 their effective values after master and style inheritance, the glue
 between them (connections), its layers and hazards. Lengths are points
 on a page whose origin is the top-left corner, y down, unless --units
-in. Every result starts with base, the file's hash, and has notes.`,
+in. Every result starts with base, the file's hash, and has notes.
+
+With --format svg (and --page or --master) it writes the page as a
+self-contained SVG in points instead (the drawing view, the one render
+rasterises without LibreOffice): each object a <g id="page0/s5"> with
+data-kind, drawn from the same effective values (master, style and
+theme inheritance; the values Visio last cached) over the page's
+background pages. Everything is plain paths, solid strokes, text and
+embedded data-URI images: dashes are short segments, arrowheads filled
+paths and pattern fills explicit hatch lines or dots clipped to the
+shape, because rasterisers such as MuPDF (PyMuPDF) ignore dash arrays,
+markers, clipping and SVG patterns. The root's data-notes lists what
+was left out or approximated, as read's notes do. Text is wrapped with
+estimated widths (Carlito, Liberation Sans and Liberation Serif
+metrics, matching Calibri, Arial and Times New Roman), so a line may
+break a word early or late in another viewer. --ids and --region keep
+objects as they do for JSON; --detail and --units do not apply.
+
+The drawing's limits:
+` + limitsHelp(),
+}
+
+// limitsHelp returns the drawing view's limits (view.Limits) as help
+// lines.
+func limitsHelp() string {
+	var b strings.Builder
+	for _, l := range view.Limits {
+		b.WriteString("  - " + l + "\n")
+	}
+	return strings.TrimSuffix(b.String(), "\n")
 }
 
 // readInput reads the drawing the caller named, once, and opens it
@@ -90,7 +121,18 @@ func runRead(p *cli.Parsed, stdout io.Writer) error {
 			return err
 		}
 	}
+	svg := p.Get("format") == "svg"
+	if svg {
+		for _, f := range []string{"detail", "units"} {
+			if p.Has(f) {
+				return cli.Errorf(cli.CodeUsage, "--"+f, "--%s does not go with --format svg", f)
+			}
+		}
+	}
 	if !p.Has("page") && !p.Has("master") {
+		if svg {
+			return cli.Errorf(cli.CodeUsage, "--format", "--format svg goes with --page or --master")
+		}
 		for _, f := range []string{"detail", "ids", "region", "units"} {
 			if p.Has(f) {
 				return cli.Errorf(cli.CodeUsage, "--"+f, "--%s goes with --page or --master", f)
@@ -136,6 +178,16 @@ func runRead(p *cli.Parsed, stdout io.Writer) error {
 		Detail: p.Get("detail"),
 		IDs:    ids,
 		Region: region,
+	}
+	if svg {
+		bw := bufio.NewWriter(stdout)
+		if err := read.WritePageSVG(bw, input, base, address, opts); err != nil {
+			return cli.Wrap(cli.CodeInvalidDocument, "", err)
+		}
+		if err := bw.Flush(); err != nil {
+			return cli.Errorf(cli.CodeIO, "", "write the result: %v", err)
+		}
+		return nil
 	}
 	// Without --pretty the page streams to stdout through a bufio
 	// writer (chunk RM3); with it the buffered path keeps the bytes

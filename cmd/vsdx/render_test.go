@@ -409,15 +409,17 @@ func TestRenderUnreadable(t *testing.T) {
 	}
 }
 
-// TestRenderNoSoffice checks the row: render finds soffice from
-// DD_SOFFICE (then PATH), as xlsx --recalc does; when LibreOffice
-// cannot run (here DD_SOFFICE names a missing file) render is
-// operation_failed, exit 1, and writes nothing.
+// TestRenderNoSoffice checks the row: render --renderer libreoffice
+// finds soffice from DD_SOFFICE (then PATH), as xlsx --recalc does;
+// when LibreOffice cannot run (here DD_SOFFICE names a missing file)
+// it is operation_failed, exit 1, and writes nothing. (The default,
+// --renderer auto, draws with the svg renderer instead:
+// TestRenderAutoWithoutSoffice.)
 func TestRenderNoSoffice(t *testing.T) {
 	t.Setenv("DD_SOFFICE", filepath.Join(t.TempDir(), "no-soffice"))
 	out := filepath.Join(t.TempDir(), "x.png")
 	var stdout, stderr bytes.Buffer
-	args := []string{"render", vsdxtest.Fixture(t, "v1-minimal"), "--page", "page0", "-o", out}
+	args := []string{"render", vsdxtest.Fixture(t, "v1-minimal"), "--page", "page0", "--renderer", "libreoffice", "-o", out}
 	if code := run(args, &stdout, &stderr); code != 1 {
 		t.Fatalf("render without soffice: exit %d, want 1: %s", code, stderr.String())
 	}

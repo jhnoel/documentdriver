@@ -92,7 +92,10 @@ type Object struct {
 	Origins map[string]inherit.Origin
 	Cells   []RawCell // --detail full: the shape's own stored cells
 	Omitted []Omission
-	Node    *tree.Node
+	// Draw is the object's drawing (geometry and placed text), built
+	// only with Options.Draw.
+	Draw *Drawing
+	Node *tree.Node
 }
 
 // Paint is a fill: None, or a colour "#RRGGBB" (Hex), solid or, when

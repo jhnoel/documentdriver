@@ -14,6 +14,9 @@ func fillObject(o *Object, r *inherit.Resolver, s *inherit.Shape, f place.Frame,
 	pathOf(o, r, s, f, pageH)
 	paint(o, r, s)
 	textOf(o, r, s)
+	if opt.Draw {
+		drawingOf(o, r, s, f, pageH)
+	}
 	var propsOmitted []Omission
 	o.Props, propsOmitted = readProps(o.ID, r, s)
 	o.Omitted = append(o.Omitted, propsOmitted...)

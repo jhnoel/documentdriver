@@ -27,14 +27,25 @@ var renderCommand = &cli.Command{
 		{Name: "overlay", Value: "ids,sites,glue", Help: "marks to draw"},
 		{Name: "ids", Value: "ids", Help: "limit the marks to these objects and their descendants"},
 		{Name: "scale", Value: "n", Help: "pixels per point (default 1.5)"},
+		{Name: "renderer", Value: "auto|libreoffice|svg", Enum: []string{"auto", "libreoffice", "svg"}, Help: "who draws the page: auto (default; LibreOffice when installed, else svg), libreoffice, or svg (the read --format svg drawing, rasterised in Go)"},
 	},
-	Help: `Rasterises one page through headless LibreOffice to the PNG named by -o
-(required), as pptx render does a slide; soffice comes from DD_SOFFICE or
-PATH, and without it render is operation_failed and writes nothing. LibreOffice draws the values
-the file caches and ignores what only Visio computes; the render is for
-checking, not proof. Overlays come from the read model, in the page's
-coordinates.`,
-}
+	Help: `Rasterises one page to the PNG named by -o (required). Two renderers
+draw it, and the result's renderer says which one did:
+
+  libreoffice  headless LibreOffice, as pptx render draws a slide; soffice
+               comes from DD_SOFFICE or PATH, with pdftoppm, mutool or gs.
+               LibreOffice draws the values the file caches.
+  svg          the drawing read --format svg writes, rasterised in Go with
+               no other program: the same paths, hatches, dashes, arrowheads
+               and pictures, and text in a scaled 7x13 bitmap font at the
+               estimated widths (legible, not the face). Its notes list what
+               it left out or approximated.
+
+--renderer auto (the default) uses libreoffice when it is installed (DD_SOFFICE
+names a file that exists, or soffice is on PATH or in its usual place, and a
+PDF rasteriser is on PATH) and svg otherwise; libreoffice without LibreOffice is operation_failed and writes
+nothing. Either picture is for checking, not proof of what Visio draws.
+Overlays come from the read model, in the page's coordinates.`}
 
 // runRender rasterises one page to a PNG and writes the JSON result.
 // The page is located before LibreOffice runs, so an unknown page is
@@ -71,14 +82,9 @@ func runRender(p *cli.Parsed, stdout io.Writer) error {
 	if err != nil {
 		return cli.Wrap(cli.CodeOperationFailed, "", err)
 	}
-	renderer, err := render.New(os.Getenv("DD_SOFFICE"))
+	img, used, notes, err := drawPage(p, input, info, scale)
 	if err != nil {
-		return rendererError(err)
-	}
-	defer renderer.Close()
-	img, err := renderPage(renderer, p.Args[0], info, scale)
-	if err != nil {
-		return cli.Wrap(cli.CodeOperationFailed, "-o", err)
+		return err
 	}
 	result := render.Result{Saved: out, Size: [2]json.Number{json.Number(geom.FormatNum(info.W)), json.Number(geom.FormatNum(info.H))}, Scale: scale, Key: []render.KeyEntry{}}
 	if overlay.IDs || overlay.Sites || overlay.Glue {
@@ -98,11 +104,68 @@ func runRender(p *cli.Parsed, stdout io.Writer) error {
 		return cli.Errorf(cli.CodeIO, "--out", "write the picture: %v", err)
 	}
 	result.Px = [2]int{img.Bounds().Dx(), img.Bounds().Dy()}
-	j, err := cli.Marshal(result)
+	j, err := cli.Marshal(renderResult{Result: result, Renderer: used, Notes: notes})
 	if err != nil {
 		return err
 	}
 	return cli.WriteJSON(stdout, j, p.Has("pretty"))
+}
+
+// renderResult is vsdx render's result: pptx render's fields, then
+// the renderer that drew the picture ("libreoffice" or "svg") and the
+// notes on what it left out (always empty for libreoffice, whose
+// omissions are not known).
+type renderResult struct {
+	render.Result
+	Renderer string      `json:"renderer"`
+	Notes    []read.Note `json:"notes"`
+}
+
+// drawPage draws page info of input with the renderer --renderer
+// selects, returning the picture, the renderer used and its notes.
+func drawPage(p *cli.Parsed, input []byte, info read.PageInfo, scale float64) (*image.RGBA, string, []read.Note, error) {
+	choice := p.Get("renderer")
+	if choice == "" {
+		choice = "auto"
+	}
+	if choice != "svg" {
+		env := os.Getenv("DD_SOFFICE")
+		renderer, err := render.New(env)
+		if err == nil && choice == "auto" && env != "" {
+			// auto takes LibreOffice only when DD_SOFFICE names a file
+			// that exists; libreoffice tries it and reports the failure.
+			if st, statErr := os.Stat(env); statErr != nil || st.IsDir() {
+				if closeErr := renderer.Close(); closeErr != nil {
+					return nil, "", nil, cli.Errorf(cli.CodeIO, "", "remove the render's temporary files: %v", closeErr)
+				}
+				err = render.ErrNoSoffice
+			}
+		}
+		switch {
+		case err == nil:
+			defer renderer.Close()
+			img, err := renderPage(renderer, p.Args[0], info, scale)
+			if err != nil {
+				return nil, "", nil, cli.Wrap(cli.CodeOperationFailed, "-o", err)
+			}
+			return img, "libreoffice", []read.Note{}, nil
+		case choice == "libreoffice":
+			return nil, "", nil, rendererError(err)
+		}
+	}
+	scene, notes, err := read.PageScene(input, "", info.Page, read.Options{})
+	if err != nil {
+		return nil, "", nil, cli.Wrap(cli.CodeOperationFailed, "", err)
+	}
+	img, rnotes, err := render.Rasterise(scene, scale)
+	if err != nil {
+		return nil, "", nil, cli.Wrap(cli.CodeOperationFailed, "--scale", err)
+	}
+	for _, n := range rnotes {
+		at, reason, _ := strings.Cut(n, ": ")
+		notes = append(notes, read.Note{At: at, Reason: reason})
+	}
+	return img, "svg", notes, nil
 }
 
 // idList splits a comma-separated --ids value into trimmed addresses.
@@ -177,6 +240,6 @@ func pageMarks(input []byte, page string, ids []string, sites bool) ([]render.Ma
 // --recalc is at --recalc without LibreOffice.
 func rendererError(err error) *cli.Error {
 	e := &cli.Error{Code: cli.CodeOperationFailed, Path: "-o", Message: err.Error(), Cause: err}
-	e.Hint = "install LibreOffice (and pdftoppm, mutool or gs) or set DD_SOFFICE"
+	e.Hint = "install LibreOffice (and pdftoppm, mutool or gs) or set DD_SOFFICE, or use --renderer svg"
 	return e
 }

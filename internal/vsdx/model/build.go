@@ -25,7 +25,10 @@ import (
 // Checkpoint, when not nil, is called with "walk" after the walk and
 // "link" after the glue pass: the memory gate's mark.
 type Options struct {
-	Sites, Full  bool
+	Sites, Full bool
+	// Draw builds Object.Draw (the geometry sections and the text
+	// block the drawing view draws); read's JSON never needs it.
+	Draw         bool
 	ReleaseNodes bool
 	Checkpoint   func(name string)
 }

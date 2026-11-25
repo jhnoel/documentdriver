@@ -91,6 +91,37 @@ const (
 	CellShapeShdwScale   = "ShapeShdwScaleFactor"
 )
 
+// Text block and text layout cells the drawing view reads
+// (model.Options.Draw): the text block's transform in the shape's
+// local space, its margins, its vertical alignment, the Character and
+// Paragraph cells of a row, and a Geometry section's flags.
+const (
+	CellTxtPinX       = "TxtPinX"
+	CellTxtPinY       = "TxtPinY"
+	CellTxtWidth      = "TxtWidth"
+	CellTxtHeight     = "TxtHeight"
+	CellTxtLocPinX    = "TxtLocPinX"
+	CellTxtLocPinY    = "TxtLocPinY"
+	CellTxtAngle      = "TxtAngle"
+	CellLeftMargin    = "LeftMargin"
+	CellRightMargin   = "RightMargin"
+	CellTopMargin     = "TopMargin"
+	CellBottomMargin  = "BottomMargin"
+	CellVerticalAlign = "VerticalAlign"
+	CellCharFont      = "Font"
+	CellCharSize      = "Size"
+	CellCharColor     = "Color"
+	CellCharStyle     = "Style"
+	CellCharStrike    = "Strikethru"
+	CellParaHorzAlign = "HorzAlign"
+	CellParaBullet    = "Bullet"
+	CellParaBulletStr = "BulletStr"
+	CellParaSpLine    = "SpLine"
+	CellGeomNoFill    = "NoFill"
+	CellGeomNoLine    = "NoLine"
+	CellGeomNoShow    = "NoShow"
+)
+
 // ArrowNames maps the stored arrow indexes the contract names
 // (docs/contract.md §3, Line ends) to their names; ArrowIndex is the
 // reverse. An index not in the table is shown as its stored string.

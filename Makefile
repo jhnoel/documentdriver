@@ -153,6 +153,7 @@ FUZZ_TARGETS = \
 	./internal/vsdx/text:FuzzText \
 	./internal/vsdx/read:FuzzRead \
 	./internal/vsdx/read:FuzzFind \
+	./internal/vsdx/read:FuzzPageSVG \
 	./internal/vsdx/ops:FuzzParsePlan \
 	./cmd/vsdx:FuzzCommandLine
 

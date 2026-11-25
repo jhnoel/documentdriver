@@ -61,13 +61,21 @@ func renderPathsPlan(bell, sine, arc [][]float64) string {
 // arc are drawn through sample points of their own formulas and not
 // at points away from them; the trapezoid's inside is hatched. With
 // DD_RENDER_KEEP set to a directory the PNG and drawing are copied
-// there for a person to look at. LibreOffice is a render check, not
-// Visio: Visio draws the patterns from its own bitmaps.
+// there for a person to look at. It runs once per renderer: through
+// LibreOffice (skipped without it) and through the svg renderer (the
+// read --format svg drawing rasterised in Go), which needs nothing.
+// Neither is Visio: Visio draws the patterns from its own bitmaps.
 func TestRenderPatternsAndPaths(t *testing.T) {
-	needRenderer(t)
-	bellY := func(x float64) float64 { z := (x - 192) / 36; return 560 - 120*math.Exp(-z*z/2) }
-	sineY := func(x float64) float64 { return 480 - 30*math.Sin((x-340)/25) }
-	var bell, sine, arc [][]float64
+	for _, renderer := range []string{"libreoffice", "svg"} {
+		t.Run(renderer, func(t *testing.T) { renderPatternsAndPaths(t, renderer) })
+	}
+}
+
+// renderPathsInputs returns the render test's sample curves and the
+// formulas of the bell and sine.
+func renderPathsInputs() (bellY, sineY func(float64) float64, bell, sine, arc [][]float64) {
+	bellY = func(x float64) float64 { z := (x - 192) / 36; return 560 - 120*math.Exp(-z*z/2) }
+	sineY = func(x float64) float64 { return 480 - 30*math.Sin((x-340)/25) }
 	for x := 72.0; x <= 312; x += 6 {
 		bell = append(bell, []float64{x, bellY(x)})
 	}
@@ -78,6 +86,16 @@ func TestRenderPatternsAndPaths(t *testing.T) {
 		a := float64(i) * math.Pi / 16
 		arc = append(arc, []float64{400 + 80*math.Cos(a), 720 - 80*math.Sin(a)})
 	}
+	return bellY, sineY, bell, sine, arc
+}
+
+// renderPatternsAndPaths is TestRenderPatternsAndPaths for one
+// renderer.
+func renderPatternsAndPaths(t *testing.T, renderer string) {
+	if renderer == "libreoffice" {
+		needRenderer(t)
+	}
+	bellY, sineY, bell, sine, arc := renderPathsInputs()
 	dir := t.TempDir()
 	plan := filepath.Join(dir, "plan.json")
 	if err := os.WriteFile(plan, []byte(renderPathsPlan(bell, sine, arc)), 0o600); err != nil {
@@ -88,9 +106,9 @@ func TestRenderPatternsAndPaths(t *testing.T) {
 	if code := run([]string{"create", plan, "-o", file}, &stdout, &stderr); code != 0 {
 		t.Fatalf("create: exit %d: %s", code, stderr.String())
 	}
-	out := filepath.Join(dir, "paths.png")
+	out := filepath.Join(dir, "paths-"+renderer+".png")
 	stdout.Reset()
-	if code := run([]string{"render", file, "--page", "page0", "--scale", "3", "-o", out}, &stdout, &stderr); code != 0 {
+	if code := run([]string{"render", file, "--page", "page0", "--scale", "3", "--renderer", renderer, "-o", out}, &stdout, &stderr); code != 0 {
 		t.Fatalf("render: exit %d: %s", code, stderr.String())
 	}
 	if keep := os.Getenv("DD_RENDER_KEEP"); keep != "" {
@@ -208,7 +226,7 @@ func TestRenderPatternsAndPaths(t *testing.T) {
 	if ink := share([4]float64{120, 700, 60, 50}, dark); ink < 0.03 || ink > 0.7 {
 		t.Errorf("trapezoid: %.0f%% of its inside is inked, want a hatch", ink*100)
 	}
-	if !strings.Contains(stdout.String(), `"saved"`) {
-		t.Errorf("render stdout = %q", stdout.String())
+	if !strings.Contains(stdout.String(), `"saved"`) || !strings.Contains(stdout.String(), `"renderer":"`+renderer+`"`) {
+		t.Errorf("render stdout = %q, want saved and renderer %s", stdout.String(), renderer)
 	}
 }
