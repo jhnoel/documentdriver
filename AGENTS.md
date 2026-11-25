@@ -207,7 +207,8 @@ hang or exhaust memory.
   (`FuzzIndex` in `internal/vsdx/sheet`), the vsdx text layout (`FuzzText` in
   `internal/vsdx/text`), vsdx read and find (`FuzzRead`, `FuzzFind` in
   `internal/vsdx/read`), vsdx plans (`FuzzParsePlan` in `internal/vsdx/ops`),
-  and the vsdx command line (`FuzzCommandLine` in `cmd/vsdx`). Each keeps a seed corpus in its package's
+  the vsdx command line (`FuzzCommandLine` in `cmd/vsdx`), and the
+  embedded font reader (`FuzzParse` in `internal/render/ttf`). Each keeps a seed corpus in its package's
   `testdata/fuzz`, which `make check` runs as tests **[enforced for the
   seeds; `make fuzz` (FUZZTIME, default 10s per target) fuzzes them, to
   run on a schedule in CI; add a new parser's target to `FUZZ_TARGETS`

@@ -1329,9 +1329,9 @@ Grounding and choices:
   others measure as Arial. Wrapping is greedy at spaces, a word wider
   than the line is cut between characters, line height is 1.2 times
   the largest size (or SpLine's percentage), the baseline 0.8 of the
-  size into the line. The PNG draws text with the overlays' 7x13
-  glyphs (`font7x13.go`) scaled to each character's advance: legible,
-  not the face.
+  size into the line. The PNG drew text with the overlays' 7x13
+  glyphs scaled to each advance until §17 replaced them with the
+  embedded fonts' outlines.
 - **Renderer choice**: `--renderer auto` keeps LibreOffice where it is
   installed (existing callers get the same picture) and falls back to
   `svg` where it is not (Code Mode gets a picture, not an error); the
@@ -1454,3 +1454,50 @@ Tests: `TestTextBlockWriteRead`, `TestTextBlockValign`,
 suite (18 targets on V1-V17: identity, inverse, atomicity, sequence)
 and the text block page in `TestRenderSVGMatchesLibreOffice`. Each new
 test was seen to fail with the code it checks removed.
+
+## 17. Outline fonts in the Go renderer (2026-11-25, owner decision pending on embedding)
+
+Code Mode has no LibreOffice, so `--renderer svg` (and `auto`) is the
+picture its agents check. The 7x13 bitmap font drew a box for every
+character outside printable ASCII: `•`, `₀`, `→`, `…`, Greek, primes.
+
+The renderer now fills glyph outlines from embedded fonts
+(`internal/render/fonts`, unmodified, with `OFL.txt`,
+`LICENSE-DejaVu.txt` and `PROVENANCE.md`): Carlito, Liberation Sans and
+Liberation Serif, each in four styles (the faces the width tables came
+from, so ASCII widths are unchanged: `TestEmbeddedFonts` compares every
+printable character with the old tables), and DejaVu Sans as the
+fallback (`⇒` and `′` are not in Carlito or Liberation). A run is drawn
+in its face's family, weight and slant; a character that face lacks
+comes from the other families in the same style, then DejaVu Sans; one
+no font has is left out with a note naming it, never a box. Widths for
+layout come from the same fonts (italic now from the italic faces).
+Glyphs are unhinted and not kerned.
+
+The reader is `internal/render/ttf`, standard library only: the table
+directory, head, maxp, hhea, hmtx, cmap formats 4 and 12, loca and glyf
+with composite glyphs (offsets, scales, 2x2 transforms; point matching
+is not applied), every read bounds-checked, components nested at most 8
+deep and at most 65536 points per glyph. Over 8401 glyphs of three of
+the fonts its contours, point counts, coordinate sums and advances
+equal fontTools'. `golang.org/x/image` (opentype, vector) would have
+done this but breaks the standard-library rule (`make norequire`); the
+rasteriser already had the anti-aliased non-zero fill the glyphs need.
+
+Cost: the fonts are 6.4 MB, embedded in the vsdx binary (and so in
+each wheel). They are third-party binaries committed to the repository,
+which AGENTS.md's data rules do not cover (they allow small authored
+fixtures): that is the owner's call. Options if 6.4 MB is too much:
+drop Liberation Serif (1.5 MB; Times-like faces would draw as Arial) or
+the italic faces (2.1 MB; italic drawn upright). Subsetting is not an
+option without renaming Carlito (its Reserved Font Name binds modified
+versions).
+
+Tests: `TestGlyphCoverage` (each of about 270 characters, ASCII,
+Latin-1, Greek, arrows, sub- and superscript digits, punctuation and
+maths signs, in 3 families by 4 styles, must ink the picture and differ
+from a character no font has; on the bitmap font it fails 1944 times),
+`TestMissingGlyphNote`, `TestEmbeddedFonts`, `TestParse` (values from
+fontTools), `TestParseTruncated`, `FuzzParse`. The LibreOffice
+comparisons stay within bound (figure 0.02% and 0.52% unmatched, text
+block 0.39% and 0.00%, paths unchanged).

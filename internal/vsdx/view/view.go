@@ -31,8 +31,7 @@ type Options struct {
 // Limits lists what the view never draws or draws only approximately,
 // whatever the page holds; help and the docs show it.
 var Limits = []string{
-	"text is wrapped with Carlito, Liberation Sans and Liberation Serif widths (metric-compatible with Calibri, Arial and Times New Roman); other faces are measured as Arial, so a line may break a word early or late",
-	"text in the PNG is drawn with a 7x13 bitmap font scaled to each character's width, not the face itself",
+	"text is wrapped and drawn with the embedded Carlito, Liberation Sans and Liberation Serif (metric-compatible with Calibri, Arial and Times New Roman); other faces are drawn as Arial, so a line may break a word early or late; a character those lack comes from DejaVu Sans, and one no embedded font has is left out with a note; glyphs are unhinted and not kerned",
 	"dashes follow LibreOffice's LinePattern table, multiples of the line weight",
 	"arrowheads are drawn at LibreOffice's size for the line weight; BeginArrowSize and EndArrowSize are not applied; only triangle (4) and stealth (5) have their own shape, other arrows are drawn as triangles",
 	"patterns 9 to 18, which the contract does not name, are drawn as dots",

@@ -233,7 +233,7 @@ func wrapPara(p *TextPara, avail float64) []textLine {
 			last := &cur.pieces[n-1]
 			trimmed := strings.TrimRightFunc(last.text, unicode.IsSpace)
 			if trimmed != last.text {
-				w := TextWidth(last.run.Font, last.run.Bold, runSize(last.run), trimmed)
+				w := TextWidth(last.run.Font, last.run.Bold, last.run.Italic, runSize(last.run), trimmed)
 				cur.width -= last.width - w
 				last.text, last.width = trimmed, w
 			}
@@ -256,7 +256,7 @@ func wrapPara(p *TextPara, avail float64) []textLine {
 	words, breaks := splitWords(p)
 	if p.Bullet != "" && len(words) > 0 {
 		r := words[0].pieces[0].run
-		bw := TextWidth(r.Font, r.Bold, runSize(r), p.Bullet+" ")
+		bw := TextWidth(r.Font, r.Bold, r.Italic, runSize(r), p.Bullet+" ")
 		words[0].pieces = append([]piece{{run: r, text: p.Bullet + " ", width: bw}}, words[0].pieces...)
 		words[0].width += bw
 	}
@@ -316,7 +316,7 @@ func splitWords(p *TextPara) (words []word, breaks []bool) {
 				sp := ch == ' ' || ch == '\t'
 				if inSpace && !sp {
 					t := seg[start:i]
-					w := TextWidth(r.Font, r.Bold, size, t)
+					w := TextWidth(r.Font, r.Bold, r.Italic, size, t)
 					cur.pieces = append(cur.pieces, piece{run: r, text: t, width: w})
 					cur.space += w
 					push()
@@ -325,7 +325,7 @@ func splitWords(p *TextPara) (words []word, breaks []bool) {
 				if sp && !inSpace {
 					t := seg[start:i]
 					if t != "" {
-						w := TextWidth(r.Font, r.Bold, size, t)
+						w := TextWidth(r.Font, r.Bold, r.Italic, size, t)
 						cur.pieces = append(cur.pieces, piece{run: r, text: t, width: w})
 						cur.width += cur.space + w
 						cur.space = 0
@@ -335,7 +335,7 @@ func splitWords(p *TextPara) (words []word, breaks []bool) {
 				inSpace = sp
 			}
 			if t := seg[start:]; t != "" {
-				w := TextWidth(r.Font, r.Bold, size, t)
+				w := TextWidth(r.Font, r.Bold, r.Italic, size, t)
 				cur.pieces = append(cur.pieces, piece{run: r, text: t, width: w})
 				if inSpace {
 					cur.space += w
@@ -365,7 +365,7 @@ func splitLong(w word, avail float64) []word {
 		start := 0
 		acc := 0.0
 		for i, ch := range pc.text {
-			cw := RuneWidth(r.Font, r.Bold, ch) * size
+			cw := RuneWidth(r.Font, r.Bold, r.Italic, ch) * size
 			if i > start && cur.width+acc+cw > avail+1e-6 {
 				cur.pieces = append(cur.pieces, piece{run: r, text: pc.text[start:i], width: acc})
 				cur.width += acc

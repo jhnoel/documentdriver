@@ -43,9 +43,11 @@ draw it, and the result's renderer says which one did:
                opaque (no transparency).
   svg          the drawing read --format svg writes, rasterised in Go with
                no other program: the same paths, hatches, dashes, arrowheads
-               and pictures, and text in a scaled 7x13 bitmap font at the
-               estimated widths (legible, not the face). Its notes list what
-               it left out or approximated.
+               and pictures, and text drawn with embedded open fonts
+               (Carlito, Liberation Sans and Serif: the metrics of Calibri,
+               Arial and Times New Roman; DejaVu Sans for characters they
+               lack), each run in its face, size, bold and italic. Its
+               notes list what it left out or approximated.
 
 --renderer auto (the default) uses libreoffice when it is installed (DD_SOFFICE
 names a file that exists, or soffice is on PATH or in its usual place, and a

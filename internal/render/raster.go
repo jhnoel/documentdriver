@@ -9,8 +9,12 @@ import (
 	_ "image/jpeg" // decode JPEG pictures
 	_ "image/png"  // decode PNG pictures
 	"math"
+	"slices"
+	"strings"
+	"unicode"
 
 	"github.com/jhnoel/documentdriver/internal/geom"
+	"github.com/jhnoel/documentdriver/internal/render/ttf"
 )
 
 // MaxRasterPixels bounds the pixels Rasterise allocates (about 160 MB
@@ -27,9 +31,10 @@ const maxImagePixels = 50_000_000
 // the pure-Go counterpart of WriteSVG: the same items, anti-aliased
 // with non-zero fills, butt-capped round-joined strokes, images
 // resampled from their decoded pixels (PNG, JPEG and GIF), and text
-// drawn with the overlays' 7x13 bitmap glyphs scaled to each
-// character's advance from the width tables (legible, not the face
-// itself). Notes say what it could not draw.
+// filled from the outlines of the embedded fonts (package fonts: the
+// metric-compatible open faces of Calibri, Arial and Times, and DejaVu
+// Sans for what they lack), unhinted. Notes say what it could not
+// draw.
 func Rasterise(s *Scene, scale float64) (*image.RGBA, []string, error) {
 	if !(scale > 0) || math.IsInf(scale, 0) {
 		return nil, nil, fmt.Errorf("render: scale %v is not positive", scale)
@@ -60,9 +65,10 @@ func Rasterise(s *Scene, scale float64) (*image.RGBA, []string, error) {
 
 // canvas is an image being drawn at scale pixels per point.
 type canvas struct {
-	img   *image.RGBA
-	scale float64
-	acc   []float32
+	img    *image.RGBA
+	scale  float64
+	acc    []float32
+	glyphs map[glyphKey]Path
 }
 
 // parseHex parses "#RRGGBB", black when it does not parse.
@@ -115,7 +121,7 @@ func (c *canvas) item(it *Item) string {
 		}
 		c.fill(strokePolys(Flatten(c.toPx(it.Path), 0.2), w), parseHex(it.Color), op)
 	case TextItem:
-		c.text(it.Text)
+		return c.text(it.Text)
 	case ImageItem:
 		return c.image(it.Image)
 	}
@@ -321,71 +327,147 @@ func accLine(acc []float32, w, h int, x0, y0, x1, y1 float64) {
 	}
 }
 
-// glyphCapRows is how many rows of a 7x13 glyph capital letters span,
-// and capHeight their height as a fraction of the font size (about
-// Calibri's and Arial's): together they size a glyph's pixel.
-const (
-	glyphCapRows = 9
-	capHeight    = 0.68
-)
+// glyphKey names one glyph of one embedded font.
+type glyphKey struct {
+	font  *ttf.Font
+	glyph int
+}
 
-// text draws a text line with the scaled bitmap glyphs.
-func (c *canvas) text(t *TextLine) {
+// text fills a text line's glyph outlines (glyphFor: each run's face,
+// weight and slant, falling back by coverage), each at its advance,
+// and returns a note naming the characters no embedded font has,
+// which are left out.
+func (c *canvas) text(t *TextLine) string {
 	if t == nil {
-		return
+		return ""
 	}
 	starts := spanStarts(t)
 	toPx := t.Frame.Then(geom.Scale(c.scale, c.scale))
+	var missing []rune
 	for si, sp := range t.Spans {
 		x := starts[si]
 		col := parseHex(sp.Color)
-		cell := sp.Size * capHeight / glyphCapRows
+		class := faceClass(sp.Family)
 		var polys []Poly
 		for _, r := range sp.Text {
-			adv := RuneWidth(sp.Family, sp.Bold, r) * sp.Size
-			g := glyph7x13[len(glyph7x13)-1]
-			switch {
-			case r >= 0x20 && r < 0x7f:
-				g = glyph7x13[r-0x20]
-			case r == ' ':
-				g = glyph7x13[0]
+			if r == '\t' {
+				x += RuneWidth(sp.Family, sp.Bold, sp.Italic, r) * sp.Size
+				continue
 			}
-			// The glyph's six columns fill the advance less a seventh,
-			// centred; its rows sit on the baseline.
-			cw := adv / fontAdvance
-			left := x + cw/2
-			for row, bits := range g {
-				yTop := t.Y - float64(fontAscent-row)*cell
-				for col := 0; col < fontWidth; {
-					if bits&(0x80>>col) == 0 {
-						col++
-						continue
-					}
-					start := col
-					for col < fontWidth && bits&(0x80>>col) != 0 {
-						col++
-					}
-					xa := left + float64(start)*cw
-					xb := left + float64(col)*cw
-					if sp.Bold {
-						xb += cw * 0.6
-					}
-					ya, yb := yTop, yTop+cell
-					shear := func(px, py float64) geom.Pt {
-						if sp.Italic {
-							px += (t.Y - py) * 0.2
-						}
-						return toPx.Apply(geom.Pt{X: px, Y: py})
-					}
-					polys = append(polys, oriented(Poly{Pts: []geom.Pt{
-						shear(xa, ya), shear(xb, ya), shear(xb, yb), shear(xa, yb),
-					}, Closed: true}))
+			f, g := glyphFor(class, sp.Bold, sp.Italic, r)
+			if f == nil {
+				if !unicode.IsSpace(r) && !slices.Contains(missing, r) && len(missing) < 16 {
+					missing = append(missing, r)
 				}
+				continue
 			}
-			x += adv
+			k := 1 / float64(f.UnitsPerEm()) * sp.Size
+			m := geom.Affine{A: k, D: -k, E: x, F: t.Y}.Then(toPx)
+			polys = append(polys, c.glyph(glyphKey{f, g}, m)...)
+			x += float64(f.Advance(g)) * k
 		}
 		c.fill(polys, col, 1)
 	}
+	if len(missing) == 0 {
+		return ""
+	}
+	var b strings.Builder
+	b.WriteString("text: no embedded font has")
+	for _, r := range missing {
+		fmt.Fprintf(&b, " U+%04X", r)
+	}
+	b.WriteString(" (left out)")
+	return b.String()
+}
+
+// glyph returns the outline of glyph k placed by m (design units to
+// pixels) as flattened polygons, decoding each glyph once per canvas.
+func (c *canvas) glyph(k glyphKey, m geom.Affine) []Poly {
+	if c.glyphs == nil {
+		c.glyphs = map[glyphKey]Path{}
+	}
+	p, ok := c.glyphs[k]
+	if !ok {
+		contours, err := k.font.Outline(k.glyph)
+		if err == nil {
+			p = contourPath(contours)
+		}
+		c.glyphs[k] = p
+	}
+	placed := make(Path, len(p))
+	for i, s := range p {
+		placed[i] = Seg{Op: s.Op, P: [3]geom.Pt{m.Apply(s.P[0]), m.Apply(s.P[1]), m.Apply(s.P[2])}}
+	}
+	return Flatten(placed, 0.1)
+}
+
+// contourPath converts TrueType contours (quadratic, with implied
+// on-curve points between two control points) to a closed path in
+// design units, each quadratic as the equal cubic.
+func contourPath(cs []ttf.Contour) Path {
+	var p Path
+	for _, c := range cs {
+		n := len(c)
+		if n == 0 {
+			continue
+		}
+		pt := func(q ttf.Point) geom.Pt { return geom.Pt{X: q.X, Y: q.Y} }
+		mid := func(a, b ttf.Point) ttf.Point { return ttf.Point{X: (a.X + b.X) / 2, Y: (a.Y + b.Y) / 2, On: true} }
+		// Start at an on-curve point (or the midpoint of the first two
+		// control points).
+		first := -1
+		for i, q := range c {
+			if q.On {
+				first = i
+				break
+			}
+		}
+		var start ttf.Point
+		if first >= 0 {
+			start = c[first]
+		} else {
+			first, start = 0, mid(c[0], c[1%n])
+		}
+		p = p.MoveTo(pt(start))
+		cur := start
+		var ctrl *ttf.Point
+		for i := 1; i <= n; i++ {
+			q := c[(first+i)%n]
+			if i == n && first < 0 {
+				q = start
+			}
+			switch {
+			case q.On && ctrl == nil:
+				p = p.LineTo(pt(q))
+				cur = q
+			case q.On:
+				p = quadTo(p, cur, *ctrl, q)
+				cur, ctrl = q, nil
+			case ctrl == nil:
+				cc := q
+				ctrl = &cc
+			default:
+				m := mid(*ctrl, q)
+				p = quadTo(p, cur, *ctrl, m)
+				cur = m
+				cc := q
+				ctrl = &cc
+			}
+		}
+		if ctrl != nil {
+			p = quadTo(p, cur, *ctrl, start)
+		}
+		p = append(p, Seg{Op: 'Z'})
+	}
+	return p
+}
+
+// quadTo appends the quadratic from a through control q to b, as the
+// equal cubic.
+func quadTo(p Path, a, q, b ttf.Point) Path {
+	c1 := geom.Pt{X: a.X + 2*(q.X-a.X)/3, Y: a.Y + 2*(q.Y-a.Y)/3}
+	c2 := geom.Pt{X: b.X + 2*(q.X-b.X)/3, Y: b.Y + 2*(q.Y-b.Y)/3}
+	return append(p, Seg{Op: 'C', P: [3]geom.Pt{c1, c2, {X: b.X, Y: b.Y}}})
 }
 
 // image draws an image item by sampling the decoded pixels at each

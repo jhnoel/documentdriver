@@ -6,17 +6,18 @@ import (
 	"github.com/jhnoel/documentdriver/internal/ascii"
 )
 
-// metricClass is which width table measures a face.
+// metricClass is which embedded family draws a face.
 type metricClass uint8
 
-// The width tables: Calibri-like, Arial-like and Times-like.
+// The families: Calibri-like (Carlito), Arial-like (Liberation Sans)
+// and Times-like (Liberation Serif).
 const (
 	classCalibri metricClass = iota
 	classSans
 	classSerif
 )
 
-// faceClass returns the width table for a face name: Calibri and
+// faceClass returns the embedded family that draws a face name: Calibri and
 // Carlito (and an unnamed face, Visio's default theme font being
 // Calibri) measure as Carlito; Times, Times New Roman, Georgia,
 // Cambria, Liberation Serif and Garamond-like serif faces as
@@ -36,7 +37,7 @@ func faceClass(face string) metricClass {
 }
 
 // Family returns the CSS font-family list for a face: the face itself,
-// then the metric-compatible open face the width tables come from,
+// then the metric-compatible open face the renderer measures with,
 // then the generic family, so a viewer without the face draws text of
 // the width the layout assumed.
 func Family(face string) string {
@@ -62,46 +63,26 @@ func Family(face string) string {
 	return quoted(face) + ", Arial, 'Liberation Sans', sans-serif"
 }
 
-// table returns the width table of a class and weight.
-func table(c metricClass, bold bool) *[95]uint16 {
-	switch {
-	case c == classCalibri && bold:
-		return &carlitoBold
-	case c == classCalibri:
-		return &carlitoRegular
-	case c == classSerif && bold:
-		return &serifBold
-	case c == classSerif:
-		return &serifRegular
-	case bold:
-		return &sansBold
+// RuneWidth returns the advance of r in ems in a face, weight and
+// slant: the advance of the glyph the renderer draws for it
+// (glyphFor: the face's font, else the fallback by coverage), a tab
+// four spaces, and 0 for a character no embedded font has.
+func RuneWidth(face string, bold, italic bool, r rune) float64 {
+	if r == '\t' {
+		return 4 * RuneWidth(face, bold, italic, ' ')
 	}
-	return &sansRegular
-}
-
-// RuneWidth returns the advance of r in ems for a face: the table's
-// width for printable ASCII, a full em for CJK and other wide
-// characters, the width of "n" for any other character (an
-// approximation: the tables hold ASCII only).
-func RuneWidth(face string, bold bool, r rune) float64 {
-	t := table(faceClass(face), bold)
-	switch {
-	case r >= ' ' && r <= '~':
-		return float64(t[r-' ']) / 1000
-	case r == '\t':
-		return 4 * float64(t[0]) / 1000
-	case r >= 0x1100 && (r <= 0x115F || (r >= 0x2E80 && r <= 0xA4CF) || (r >= 0xAC00 && r <= 0xD7A3) ||
-		(r >= 0xF900 && r <= 0xFAFF) || (r >= 0xFF00 && r <= 0xFF60)):
-		return 1
+	f, g := glyphFor(faceClass(face), bold, italic, r)
+	if f == nil {
+		return 0
 	}
-	return float64(t['n'-' ']) / 1000
+	return float64(f.Advance(g)) / float64(f.UnitsPerEm())
 }
 
 // TextWidth returns the width of s in points at size points.
-func TextWidth(face string, bold bool, size float64, s string) float64 {
+func TextWidth(face string, bold, italic bool, size float64, s string) float64 {
 	w := 0.0
 	for _, r := range s {
-		w += RuneWidth(face, bold, r)
+		w += RuneWidth(face, bold, italic, r)
 	}
 	return w * size
 }

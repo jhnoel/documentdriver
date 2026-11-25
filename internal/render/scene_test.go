@@ -149,7 +149,7 @@ func TestLayoutWrapAndAlign(t *testing.T) {
 			}
 			w := 0.0
 			for _, sp := range l.Spans {
-				w += TextWidth(sp.Family, sp.Bold, sp.Size, sp.Text)
+				w += TextWidth(sp.Family, sp.Bold, sp.Italic, sp.Size, sp.Text)
 				words = append(words, strings.Fields(sp.Text)...)
 			}
 			if w > 112+1e-9 {
@@ -184,7 +184,7 @@ func TestLayoutLongWord(t *testing.T) {
 	for _, it := range items {
 		if it.Kind == TextItem {
 			n++
-			if w := TextWidth(it.Text.Spans[0].Family, false, 12, it.Text.Spans[0].Text); w > 40+1e-9 {
+			if w := TextWidth(it.Text.Spans[0].Family, false, false, 12, it.Text.Spans[0].Text); w > 40+1e-9 {
 				t.Errorf("line %q is %.1f wide, want <= 40", it.Text.Spans[0].Text, w)
 			}
 		}

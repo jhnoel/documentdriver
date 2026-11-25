@@ -268,7 +268,7 @@ func spanStarts(t *TextLine) []float64 {
 	width := 0.0
 	ws := make([]float64, len(t.Spans))
 	for i, sp := range t.Spans {
-		ws[i] = TextWidth(sp.Family, sp.Bold, sp.Size, sp.Text)
+		ws[i] = TextWidth(sp.Family, sp.Bold, sp.Italic, sp.Size, sp.Text)
 		width += ws[i]
 	}
 	x := t.X

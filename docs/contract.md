@@ -87,8 +87,9 @@ vsdx render <file> --page pageN -o <out.png> [--overlay ids,sites,glue] [--ids i
   sign-off pending for `--renderer` and the two result keys):
   `libreoffice`, headless LibreOffice, with pptx render's flags, and
   `svg`, the `read --format svg` drawing rasterised in Go with no
-  other program (text in a scaled 7x13 bitmap font at the estimated
-  widths). `--renderer auto`, the default, is `libreoffice` when it
+  other program (text drawn with embedded open fonts metric-compatible
+  with Calibri, Arial and Times New Roman, DejaVu Sans for characters
+  they lack). `--renderer auto`, the default, is `libreoffice` when it
   is installed (`DD_SOFFICE` names a file that exists, or `soffice`
   is on `PATH` or in its usual place, with a PDF rasteriser:
   `pdftoppm`, `mutool` or `gs`) and `svg` otherwise. Its result is
