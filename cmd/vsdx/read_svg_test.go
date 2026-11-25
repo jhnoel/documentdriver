@@ -57,6 +57,19 @@ const placementPlan = `{"ops":[
 {"op":"object.add","at":"page0","geom":"rect","box":[400,250,120,80],"html":"<p>turned 314</p>","text_block":{"box":[400,280,120,20],"angle":30}}
 ]}`
 
+// groupPlan is the group page: the patent kit's labelled hatched box
+// (a 1.5 pt outline rect carrying its label over 0.35 pt hatch lines
+// clipped to it) grouped, then resized to most of the page.
+const groupPlan = `{"ops":[
+{"op":"object.add","at":"page0","geom":"polyline","points":[[100,160],[160,100]],"line":{"w":0.35},"as":"h1"},
+{"op":"object.add","at":"page0","geom":"polyline","points":[[100,220],[220,100]],"line":{"w":0.35},"as":"h2"},
+{"op":"object.add","at":"page0","geom":"polyline","points":[[160,220],[280,100]],"line":{"w":0.35},"as":"h3"},
+{"op":"object.add","at":"page0","geom":"polyline","points":[[220,220],[300,140]],"line":{"w":0.35},"as":"h4"},
+{"op":"object.add","at":"page0","geom":"rect","box":[100,100,200,120],"html":"<p>Memory 106</p>","line":{"w":1.5},"fill":"none","text_block":{"background":"#FFFFFF"},"as":"box"},
+{"op":"group.create","at":["$h1","$h2","$h3","$h4","$box"],"as":"g"},
+{"op":"object.set","at":"$g","box":[40,40,520,700]}
+]}`
+
 // svgPage is one of the drawing test's pages: its plan, the fill
 // pattern of each patterned object, the arrowheads it draws, the
 // words its text shows and, by object, the number of dashes its line
@@ -70,9 +83,9 @@ type svgPage struct {
 	dashes   map[string]int
 }
 
-// svgPages returns the drawing test's four pages: the render test's
+// svgPages returns the drawing test's five pages: the render test's
 // plan (every named pattern and the four test shapes), the figure, the
-// text block page and the text placement page.
+// text block page, the text placement page and the group page.
 func svgPages() []svgPage {
 	_, _, bell, sine, arc := renderPathsInputs()
 	paths := svgPage{name: "paths", plan: renderPathsPlan(bell, sine, arc), patterns: map[string]string{}, heads: 3}
@@ -95,7 +108,8 @@ func svgPages() []svgPage {
 		patterns: map[string]string{"page0/s1": "hatch_up"},
 		words:    []string{"Region", "300", "signal", "310", "312", "turned", "314"},
 	}
-	return []svgPage{paths, fig, tb, place}
+	group := svgPage{name: "group", plan: groupPlan, words: []string{"Memory", "106"}}
+	return []svgPage{paths, fig, tb, place, group}
 }
 
 // TestReadSVGTextPlacement checks where the drawing view puts placed

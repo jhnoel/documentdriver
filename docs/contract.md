@@ -327,6 +327,7 @@ touched.
 | `text` | `text.set`, `text.replace` |
 | `prop` | `prop.add`, `prop.set`, `prop.delete` |
 | `page` | `page.add`, `page.rename`, `page.delete`, `page.reorder`, `page.set` |
+| `group` | `group.create`, `group.ungroup` (pptx's names and fields) |
 
 Layers are read only: `read` lists them and an object's `layers`;
 no op writes them.
@@ -387,12 +388,54 @@ no op writes them.
   put a stale end back on its site, send `to` (or `from`) with the
   glue, or set the glue to `none` and then to the site again.
   vsdx does not move point-glued ends itself (§12).
-- **Groups.** box or object.move on a group carries its children: a
-  resize changes only the group's frame, and the children keep their
-  stored local positions and sizes, which are measured from the
-  group's lower-left corner, so their shown `y` changes. `changed`
-  lists the group and then every descendant whose shown values
-  changed.
+- **Groups.** box or object.move on a group carries its children. A
+  resize changes the group's frame and, for a child cell bound to the
+  group's size by Visio's formula `Sheet.<group>!Width*k` or
+  `Sheet.<group>!Height*k` (what Visio's Group command and
+  `group.create` write), sets it to the group's new Width or Height
+  times k, so the children scale with the group as in Visio, and
+  recomputes the child's dependents; other children keep their stored
+  local positions and sizes, which are measured from the group's
+  lower-left corner, so their shown `y` changes. `changed` lists the
+  group and then every descendant whose shown values changed.
+- **Creating and removing groups.** `group.create {at, as, name}`
+  groups two or more shapes (2-D shapes, connectors, pictures,
+  groups) of one container, the page or one group, as Visio's Group
+  command does (corpus survey):
+  - The group is a `Type="Group"` shape with no geometry, styles 3,
+    its box the bounds of its members (each 2-D member's box corners,
+    each 1-D member's ends; at least 0.01 in a side), its pin at the
+    centre (`LocPinX` `Width*0.5`, `LocPinY` `Height*0.5`), no rotation
+    or flip, `ResizeMode` 0. It takes the frontmost member's place in
+    paint order; the members move into it in their paint order and
+    keep their IDs, addresses, text, data, glue and own formatting (a
+    hatch line keeps its weight).
+  - Each member's place is stored in the group's space: a 2-D
+    member's `PinX`, `PinY`, `Width` and `Height` and a 1-D member's
+    `BeginX`, `BeginY`, `EndX` and `EndY` with
+    `Sheet.<group>!Width*k`/`Height*k` (k to 12 significant digits),
+    except a cell whose formula vsdx does not evaluate (a glued end, a
+    connector's `(BeginX+EndX)/2` pin), whose value moves and formula
+    stays. `read` shows every member where it was. `changed`: the
+    group, then the members; `as` names the group.
+  - Refused (`operation_failed` at `at` or `at[i]`): members of
+    different containers, the refusals of object.delete (masters,
+    stencils, containers and lists and their members, a sub-shape a
+    master instance inherits), a scaled page, a member whose
+    transform is not derived.
+  - `group.ungroup {at}` moves a group's children into its container
+    where the group stood and removes it; each child keeps the box (or
+    ends) `read` showed, its cells rewritten in the container's space
+    and its formulas on the group dropped. It refuses a shape that is
+    not a group, a master instance, a group with text or shape data
+    (which would be deleted) and a group a Connect row names.
+    `changed`: the children; `deleted`: the group.
+  - LibreOffice draws created, resized and ungrouped groups as the Go
+    renderer does (the group page of the render comparison matches to
+    0.00%). That Visio reads the written groups as its own, and that
+    double-clicking a member edits its text (the default
+    `IsTextEditTarget` with no `GroupProperties` section), is
+    **Visio unconfirmed (VE22)**.
 - **Line ends.** `line.begin` and `line.end` are the arrowheads at a
   connector's `from` and `to` ends (Visio's Begin and End). Each is
   `"none"` or `{"arrow", "size"}`:
@@ -1691,8 +1734,8 @@ Real files have defects the tool did not make. The rule:
   translates plans and results for parity runs; the binaries do not.
 - MCP, WASM and language bindings. Agents run the binaries.
 - **vsdx** in v1 (deferred, not refused by name unless listed in §3):
-  writing hyperlinks, comments (not read either), layers, group
-  create/ungroup, object.duplicate, master import and editing
+  writing hyperlinks, comments (not read either), layers,
+  object.duplicate, master import and editing
   masters; formula and ShapeSheet cell writes
   (there is no `cell.set`); arrow styles beyond `triangle` and
   `stealth`, and line ends on 2-D shapes; shadow blur, oblique and

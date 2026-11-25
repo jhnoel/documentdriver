@@ -148,6 +148,10 @@ func helpRuleCases() []struct {
 		{"page.delete", &PageDeleteSpec{At: "x"}, "at must be a page address or $name"},
 		{"page.reorder", &PageReorderSpec{At: "x", To: "page1", Position: "before"}, "at must be a page address or $name"},
 		{"page.reorder", &PageReorderSpec{At: "page0", To: "x", Position: "before"}, "to must be a page address or $name"},
+		{"group.create", &GroupCreateSpec{At: []string{"page0/s1"}}, "at must list two or more shapes"},
+		{"group.create", &GroupCreateSpec{At: []string{"page0/s1", "page0/s1"}}, "at must not name a shape twice"},
+		{"group.create", &GroupCreateSpec{At: []string{"page0/s1", "page0/s2"}, As: "1bad"}, "as must match [A-Za-z_][A-Za-z0-9_]*"},
+		{"group.ungroup", &GroupUngroupSpec{At: "page0"}, "at must be a shape address or $name"},
 	}
 }
 

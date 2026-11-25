@@ -58,6 +58,8 @@ var Ops = []OpDef{
 	{Name: "prop.delete", Summary: "delete a shape data row (hide a master's with Del)", New: func() Spec { return &PropDeleteSpec{} }},
 	{Name: "page.delete", Summary: "delete a page", New: func() Spec { return &PageDeleteSpec{} }},
 	{Name: "page.reorder", Summary: "move a page before or after another", New: func() Spec { return &PageReorderSpec{} }},
+	{Name: "group.create", Summary: "group shapes of one container into a new group", New: func() Spec { return &GroupCreateSpec{} }},
+	{Name: "group.ungroup", Summary: "move a group's children into its container and remove the group", New: func() Spec { return &GroupUngroupSpec{} }},
 }
 
 // index is the op table's index, built once.

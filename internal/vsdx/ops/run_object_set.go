@@ -14,8 +14,9 @@ import (
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
 )
 
-// Run applies object.set: it calls setTransform, setStyle,
-// setTextBlock, setPicture and setEnds
+// Run applies object.set: it calls setTransform, scaleGroupChildren
+// (when the transform changed), setStyle, setTextBlock, setPicture and
+// setEnds
 // for the fields the spec gives, in that order, and merges their
 // changed and stale reports into one. Changed holds each changed
 // address once, in the order the fields first changed it, and stale
@@ -27,8 +28,24 @@ import (
 func (s *ObjectSetSpec) Run(ws *edit.Workspace, aliases map[string]string, units string, _ ids.Source) (string, []string, []string, string, error) {
 	var changed []string
 	var staleParts []string
+	resized := false
 	for _, step := range []func() ([]string, string, error){
-		func() ([]string, string, error) { return setTransform(ws, s, aliases, units) },
+		func() ([]string, string, error) {
+			c, stale, err := setTransform(ws, s, aliases, units)
+			resized = len(c) > 0
+			return c, stale, err
+		},
+		func() ([]string, string, error) {
+			if !resized {
+				// The group's box is what it was: nothing to scale.
+				return nil, "", nil
+			}
+			c, stale, err := scaleGroupChildren(ws, s, aliases)
+			if len(stale) > 0 {
+				return c, strings.Join(stale, ", ") + " left stale", err
+			}
+			return c, "", err
+		},
 		func() ([]string, string, error) { return setStyle(ws, s, aliases, units) },
 		func() ([]string, string, error) { return setTextBlock(ws, s, aliases, units) },
 		func() ([]string, string, error) { return setPicture(ws, s, aliases) },

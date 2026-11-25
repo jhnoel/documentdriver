@@ -946,7 +946,7 @@ S0's ctypes extraction runs over the Visio-authored subset
 per entry; a type seen in fewer files stays out of the table and the
 code that needs it waits (S0 reports which).
 
-### Visio experiments (VE1 to VE21; not yet run, dependent claims labelled Visio unconfirmed)
+### Visio experiments (VE1 to VE22; not yet run, dependent claims labelled Visio unconfirmed)
 
 Fixtures under `testdata/vsdx/experiments`, written by a Go generator,
 with a README of what to look for; run by the owner if and when a Visio
@@ -976,6 +976,7 @@ labelled "LibreOffice ...: Visio unconfirmed" as xlsx did.
 | VE19 | Does Visio draw FillPattern 2 to 8 and 19 to 24 as the Fill dialog names them (contract §3, Pattern fills), at what spacing and line weight, does `FillBkgndTrans` 1 make the background clear, and do the patterns print and export to PDF as vector hatching or as bitmaps? |
 | VE20 | Does Visio open and draw a master-less shape whose one Geometry section is `RelMoveTo` then `RelLineTo` or `RelCubBezTo` rows as vsdx writes them (NoFill 1 open, 0 closed), with line ends on the open ones, and does a resize scale the rows? |
 | VE21 | Does Visio draw `TextBkgnd` stored as `#RRGGBB` (no formula) as that colour, at `TextBkgndTrans`, over the text and its margins rather than the whole text block; and does it read Character and Paragraph rows written with `F="Inh"` cells as inherited, showing the formatting vsdx's html says? |
+| VE22 | Does Visio open a group `group.create` writes (Type Group, no geometry, `ResizeMode` 0, no `GroupProperties` section) as its own: members scale with it through their `Sheet.<id>!Width*k` cells, a double-click on a member edits that member's text, and the group selects first? |
 
 ### What cannot be verified without real Visio
 
@@ -1558,3 +1559,52 @@ allows `LicenseRef-`). `verifyWheel` (every release) and
 `make release-smoke` refuse a wheel missing any of them. A binary
 copied without the wheel prints the notices and licence texts with
 `vsdx help fonts`.
+
+## 19. Groups: group.create and group.ungroup (2026-11-25, owner sign-off pending)
+
+The patent kit draws hatching as real lines with their own weight
+(LibreOffice's pattern fills are fixed hairlines whose densities are
+hard to tell apart in black-and-white reproduction), so a box and its
+hatch lines must be one object: moving or resizing the box carries the
+hatching. vsdx had no way to make a group.
+
+`group.create {at, as, name}` and `group.ungroup {at}` take pptx's
+names and fields (the contract's rule: pptx's keys where pptx has
+them). Wrapping existing shapes was chosen over `object.add kind:
+group`, because it is what Visio's Group command does and what the
+corpus's master-less groups record, and it needs no empty group.
+
+The written form is the corpus's (dave-howard-vsdx test6, test2,
+test_jinja: every master-less group): `Type='Group'`, styles 3, the
+transform cells, `LocPinX`/`LocPinY` `Width*0.5`/`Height*0.5`,
+`ResizeMode` 0, no Geometry, and members whose `PinX`, `PinY`, `Width`
+and `Height` are `Sheet.<group>!Width*k` and `Sheet.<group>!Height*k`.
+The edit layer gained `GroupShapes` and `Ungroup` on the core's
+`Insert`, `Move` and `Delete` (pptx's `GroupObjects` pattern: the group
+just after the frontmost member, the members moved in paint order,
+bytes unchanged), and the shape index is rebuilt after either.
+
+Because members carry those formulas, `object.set` box on a group now
+evaluates exactly that formula form on its children (and recurses into
+child groups), so a resize scales the hatching in vsdx as in Visio;
+this changes the earlier rule, under which children kept their local
+sizes, only for children bound to the group that way (none of the
+fixtures; Visio-authored groups' children are, and were read stale
+after a vsdx resize before). Scaling runs only when the transform
+changed, so sending back the box read shows writes nothing.
+
+`group.ungroup` rewrites each child from its page box (`place.Box` in
+the group, `place.Unplace` in the container: Unplace takes the LocPin
+as a fraction of the box, which the first version passed in inches)
+and drops formulas on the group; it refuses what it would destroy: the
+group's own text and data, and glue to or from the group.
+
+LibreOffice draws the groups as the Go renderer does, resized or not
+(the group page matches to 0.00% in the render comparison). Tests:
+`TestGroupHatchedBox` (the kit's case, formula factors derived by
+hand), `TestGroupResizeCarriesChildren`, `TestGroupUngroupRoundTrip`,
+`TestGroupRefusals`, `TestGroupProperty` (40 random drawings of
+rotated, flipped rectangles and connectors: grouped and ungrouped,
+every member shows what it showed; identity resize writes nothing) and
+the group page of `TestRenderSVGMatchesLibreOffice`. Each was seen to
+fail with its code removed.

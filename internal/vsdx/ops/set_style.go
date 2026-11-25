@@ -149,6 +149,20 @@ func styleLineSpec(s *ObjectSetSpec) (string, error) {
 // missing page or shape as not_found at at and an unreadable page part
 // as unreadable_target.
 func loadStyleShape(ws *edit.Workspace, a vsd.Address, addr string) (*styleShape, error) {
+	st, err := loadShapeSheet(ws, a, addr)
+	if err != nil {
+		return nil, err
+	}
+	if typ, _ := st.node.Attr("Type"); typ == vsd.ShapeTypeForeign || typ == vsd.ShapeTypeGuide {
+		return nil, cli.Errorf(cli.CodeOperationFailed, "at", "%s is a %s shape: style cannot be set", addr, typ)
+	}
+	return st, nil
+}
+
+// loadShapeSheet reads the shape a of address addr as loadStyleShape
+// does, Foreign and guide shapes included (their place cells are
+// written by group.create).
+func loadShapeSheet(ws *edit.Workspace, a vsd.Address, addr string) (*styleShape, error) {
 	// The workspace's document has the pages earlier operations
 	// added; doc.Open of the package does not.
 	d := ws.Doc()
@@ -185,9 +199,6 @@ func loadStyleShape(ws *edit.Workspace, a vsd.Address, addr string) (*styleShape
 	node := findTextShape(root, a.Shape, a.Dup)
 	if node == nil {
 		return nil, cli.Errorf(cli.CodeNotFound, "at", "no %s: not found", addr)
-	}
-	if typ, _ := node.Attr("Type"); typ == vsd.ShapeTypeForeign || typ == vsd.ShapeTypeGuide {
-		return nil, cli.Errorf(cli.CodeOperationFailed, "at", "%s is a %s shape: style cannot be set", addr, typ)
 	}
 	return &styleShape{addr: addr, part: entry.Part, node: node, res: inherit.New(d), shape: textShapeOf(node)}, nil
 }
