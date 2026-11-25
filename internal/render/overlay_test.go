@@ -41,7 +41,7 @@ func TestDrawScalesToImage(t *testing.T) {
 func TestDrawNumberedKey(t *testing.T) {
 	img := blank(960, 540)
 	var marks []Mark
-	for i := 0; i < denseThreshold+1; i++ {
+	for i := range denseThreshold + 1 {
 		marks = append(marks, Mark{ID: "s" + string(rune('A'+i)), Box: [4]float64{float64(i * 30), 50, 20, 20}})
 	}
 	key := Draw(img, 960, 540, marks, Overlay{IDs: true})

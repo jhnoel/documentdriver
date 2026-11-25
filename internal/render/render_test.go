@@ -129,8 +129,8 @@ func TestCropToPage(t *testing.T) {
 	// pattern holds a distinct colour at each of 8 by 6 pixels.
 	pattern := func() *image.RGBA {
 		img := image.NewRGBA(image.Rect(0, 0, 8, 6))
-		for y := 0; y < 6; y++ {
-			for x := 0; x < 8; x++ {
+		for y := range 6 {
+			for x := range 8 {
 				img.SetRGBA(x, y, color.RGBA{uint8(x), uint8(y), 0, 255})
 			}
 		}

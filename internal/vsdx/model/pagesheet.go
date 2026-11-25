@@ -240,7 +240,7 @@ func layerMembers(p *Page, v string) []string {
 		return nil
 	}
 	var out []string
-	for _, tok := range strings.Split(v, ";") {
+	for tok := range strings.SplitSeq(v, ";") {
 		tok = strings.TrimSpace(tok)
 		if tok == "" {
 			continue

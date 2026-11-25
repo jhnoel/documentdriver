@@ -3,6 +3,7 @@ package read
 import (
 	"bytes"
 	"io"
+	"slices"
 
 	"github.com/jhnoel/documentdriver/internal/cli"
 	"github.com/jhnoel/documentdriver/internal/opc"
@@ -71,8 +72,8 @@ func PageScene(input []byte, base, address string, o Options) (*render.Scene, []
 	// Background pages are drawn first, bottom-most first; their
 	// notes come before the page's own.
 	var under []render.Group
-	for i := len(backs.pages) - 1; i >= 0; i-- {
-		bs, bn := view.Build(backs.pages[i], vo)
+	for _, v := range slices.Backward(backs.pages) {
+		bs, bn := view.Build(v, vo)
 		under = append(under, bs.Groups...)
 		all = append(all, bn...)
 	}

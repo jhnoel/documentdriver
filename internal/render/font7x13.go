@@ -58,7 +58,7 @@ func drawText(img *image.RGBA, x, y int, s string, c color.RGBA) {
 			g = glyph7x13[r-0x20]
 		}
 		for row, bits := range g {
-			for col := 0; col < fontWidth; col++ {
+			for col := range fontWidth {
 				if bits&(0x80>>col) != 0 {
 					set(img, x+col, y+row, c)
 				}

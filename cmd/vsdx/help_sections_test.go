@@ -44,7 +44,7 @@ func TestHelpObjectSetRows(t *testing.T) {
 	// Every field line under fields: carries a note after ". ".
 	fields := text[strings.Index(text, "fields:\n")+len("fields:\n"):]
 	fields = fields[:strings.Index(fields, "\nrules:\n")]
-	for _, line := range strings.Split(strings.TrimSpace(fields), "\n") {
+	for line := range strings.SplitSeq(strings.TrimSpace(fields), "\n") {
 		if !strings.Contains(line, ". ") {
 			t.Errorf("object.set field line has no note: %q", line)
 		}

@@ -296,16 +296,16 @@ func parseSpan(span string, decls map[string]string) (*tree.Document, error) {
 		}
 	}
 	slices.Sort(needed)
-	var extra string
+	var extra strings.Builder
 	for _, name := range needed {
 		if !declared[name] {
-			extra += decls[name]
+			extra.WriteString(decls[name])
 		}
 	}
-	if extra == "" {
+	if extra.String() == "" {
 		return tree.ParseString(span)
 	}
-	return tree.ParseString(span[:t.NameEnd] + extra + span[t.NameEnd:])
+	return tree.ParseString(span[:t.NameEnd] + extra.String() + span[t.NameEnd:])
 }
 
 // walkSpan parses one top-level Shape span and walks its subtree

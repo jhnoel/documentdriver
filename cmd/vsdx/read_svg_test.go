@@ -6,6 +6,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -100,8 +101,8 @@ func svgElements(root *tree.Node, visit func(n *tree.Node, group string)) {
 		for c := range it.n.ElementsSeq() {
 			kids = append(kids, c)
 		}
-		for i := len(kids) - 1; i >= 0; i-- {
-			stack = append(stack, item{kids[i], group})
+		for _, kid := range slices.Backward(kids) {
+			stack = append(stack, item{kid, group})
 		}
 	}
 }
