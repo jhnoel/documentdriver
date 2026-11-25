@@ -589,6 +589,24 @@ no op writes them.
     `RelCubBezTo_Type`); no Visio-authored sample with
     `RelCubBezTo` is in the corpus, so Visio's drawing of them is
     **Visio unconfirmed (VE20)**. LibreOffice draws them.
+  - **Several paths.** `paths: [{"points", "closed"}, ...]` in place
+    of `points` and `closed` draws one polyline or curve of several
+    paths with one line style, as Visio-authored shapes do (a hatch of
+    disjoint lines clipped to a box, with no join along the outline):
+    one Geometry section per path, `IX` 0, 1, 2... in order, each in
+    the form above with its own NoFill (1 open, 0 closed). Each path
+    follows the rules of `points` and `closed` (faults at
+    `ops[n].paths[i].points`); the box is the bounds of every path;
+    `fill` needs at least one closed path (Visio fills only the closed
+    sections); `line.begin` and `line.end` are refused (which path's
+    ends they would mark is not defined); `paths` with `points` or
+    `closed` is `invalid_operation`. The text block is the box, so a
+    shape of several paths carries text and `text_block` as any other.
+    `read` shows `paths` (each `{"points"}`, with `closed: true` when
+    closed) on a shape of two or more sections in this form, and no
+    `points` or `closed`; a single path is shown as `points`, as
+    before. LibreOffice and the Go renderer draw every path (the
+    hatch page of the render comparison: 0.13% unmatched).
   - `read` shows, on a master-less shape whose own geometry is exactly
     this form, `geom` (`polyline` or `curve`), `closed: true` for a
     closed path (absent when open) and `points` in the plan's form,

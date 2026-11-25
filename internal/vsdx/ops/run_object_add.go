@@ -15,6 +15,7 @@ import (
 	"github.com/jhnoel/documentdriver/internal/vsdx/edit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/emit"
 	"github.com/jhnoel/documentdriver/internal/vsdx/inherit"
+	"github.com/jhnoel/documentdriver/internal/vsdx/path"
 	"github.com/jhnoel/documentdriver/internal/vsdx/place"
 	"github.com/jhnoel/documentdriver/internal/vsdx/sheet"
 	"github.com/jhnoel/documentdriver/internal/vsdx/text"
@@ -682,21 +683,21 @@ func (s *ObjectAddSpec) addShape(ws *edit.Workspace, r *inherit.Resolver, d *doc
 			return "", nil, nil, "", err
 		}
 	} else {
-		placed, pts := s, []geom.Pt(nil)
+		placed, subs := s, []path.Subpath(nil)
 		if isPathGeom(s.Geom) {
-			placed, pts = pathBoxSpec(s)
+			placed, subs = pathBoxSpec(s)
 		}
 		tr, err := addPlannedTransform(placed, frame, pg.height, 0.5, 0.5, scale, "box")
 		if err != nil {
 			return "", nil, nil, "", err
 		}
 		shape := emit.Shape{ID: newID, Name: s.Name, Geom: s.Geom, PinX: tr.PinX, PinY: tr.PinY, Width: tr.Width, Height: tr.Height, LocPinX: tr.LocPinX, LocPinY: tr.LocPinY, Angle: tr.Angle, FlipX: tr.FlipX, FlipY: tr.FlipY, Style: 3}
-		if pts != nil {
-			rel, err := relPoints(pts, scale, tr, frame, pg.height)
+		for _, sp := range subs {
+			rel, err := relPoints(sp.Points, scale, tr, frame, pg.height)
 			if err != nil {
 				return "", nil, nil, "", err
 			}
-			shape.Points, shape.Closed = rel, s.Closed
+			shape.Paths = append(shape.Paths, path.Subpath{Closed: sp.Closed, Points: rel})
 		}
 		if s.Fill != nil && !s.Fill.None && s.Fill.Pattern == "" {
 			shape.FillHex = s.Fill.Hex

@@ -148,6 +148,8 @@ func helpRuleCases() []struct {
 		{"page.delete", &PageDeleteSpec{At: "x"}, "at must be a page address or $name"},
 		{"page.reorder", &PageReorderSpec{At: "x", To: "page1", Position: "before"}, "at must be a page address or $name"},
 		{"page.reorder", &PageReorderSpec{At: "page0", To: "x", Position: "before"}, "to must be a page address or $name"},
+		{"object.add", &ObjectAddSpec{At: "page0", Geom: "polyline", Points: [][]float64{{0, 0}, {10, 10}}, Paths: []PathSpec{{Points: [][]float64{{0, 0}, {10, 10}}}}}, "paths takes the place of points and closed"},
+		{"object.add", &ObjectAddSpec{At: "page0", Geom: "polyline", Paths: []PathSpec{{Points: [][]float64{{0, 0}, {10, 10}}}, {Points: [][]float64{{0, 10}, {10, 0}}}}, Line: &LineSpec{End: &LineEndSpec{Arrow: "triangle"}}}, "a shape of several paths takes no line begin or end"},
 		{"group.create", &GroupCreateSpec{At: []string{"page0/s1"}}, "at must list two or more shapes"},
 		{"group.create", &GroupCreateSpec{At: []string{"page0/s1", "page0/s1"}}, "at must not name a shape twice"},
 		{"group.create", &GroupCreateSpec{At: []string{"page0/s1", "page0/s2"}, As: "1bad"}, "as must match [A-Za-z_][A-Za-z0-9_]*"},

@@ -41,6 +41,10 @@ type Shape struct {
 	// repeat; unused by rect and ellipse.
 	Points []geom.Pt
 	Closed bool
+	// Paths, when set, are a polyline's or curve's several paths, one
+	// Geometry section each (IX 0, 1, ...), in place of Points and
+	// Closed.
+	Paths []path.Subpath
 }
 
 // ShapeXML returns the Shape element. For a polyline or curve it is
@@ -63,8 +67,13 @@ func ShapeXML(s Shape) ([]byte, error) {
 		return nil, fmt.Errorf("vsdx: emit ShapeXML: unknown geom %q (want rect, ellipse, polyline or curve)", s.Geom)
 	}
 	if isPath {
-		if err := checkPath(s.Points, s.Closed); err != nil {
-			return nil, err
+		if len(s.Paths) == 0 {
+			s.Paths = []path.Subpath{{Closed: s.Closed, Points: s.Points}}
+		}
+		for _, p := range s.Paths {
+			if err := checkPath(p.Points, p.Closed); err != nil {
+				return nil, err
+			}
 		}
 	}
 	if math.IsNaN(s.PinX) || math.IsInf(s.PinX, 0) {
@@ -145,7 +154,9 @@ func ShapeXML(s Shape) ([]byte, error) {
 		writeCell(&b, vsd.CellLineWeight, vsd.FormatInches(s.LineWeight))
 	}
 	if isPath {
-		writePathGeometry(&b, s.Geom, s.Points, s.Closed)
+		for ix, p := range s.Paths {
+			writePathGeometry(&b, s.Geom, p.Points, p.Closed, ix)
+		}
 		b.WriteString("</Shape>")
 		return []byte(b.String()), nil
 	}

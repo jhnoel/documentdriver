@@ -8,16 +8,28 @@ import (
 )
 
 // pathBoxSpec returns a copy of a polyline or curve object.add s whose
-// box is its points' bounds (in the plan's units), for placing the
-// shape as a box is placed, and the points it stores (path.Normalize:
-// a closed path's repeated last point dropped). The rules have
+// box is the bounds of its points, or of every path's (in the plan's
+// units), for placing the shape as a box is placed, and the paths it
+// stores (path.Normalize: a closed path's repeated last point dropped),
+// one for points and closed. The rules have
 // checked the points.
-func pathBoxSpec(s *ObjectAddSpec) (*ObjectAddSpec, []geom.Pt) {
-	pts := path.Normalize(planPoints(s.Points), s.Closed)
-	lo, hi := path.Bounds(pts)
+func pathBoxSpec(s *ObjectAddSpec) (*ObjectAddSpec, []path.Subpath) {
+	var subs []path.Subpath
+	if s.Paths != nil {
+		for _, p := range s.Paths {
+			subs = append(subs, path.Subpath{Closed: p.Closed, Points: path.Normalize(planPoints(p.Points), p.Closed)})
+		}
+	} else {
+		subs = []path.Subpath{{Closed: s.Closed, Points: path.Normalize(planPoints(s.Points), s.Closed)}}
+	}
+	var all []geom.Pt
+	for _, sp := range subs {
+		all = append(all, sp.Points...)
+	}
+	lo, hi := path.Bounds(all)
 	c := *s
 	c.Box = []float64{lo.X, lo.Y, hi.X - lo.X, hi.Y - lo.Y}
-	return &c, pts
+	return &c, subs
 }
 
 // relPoints maps view points pts (in the plan's units, scaled to

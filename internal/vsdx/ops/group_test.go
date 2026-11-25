@@ -1,11 +1,13 @@
 package ops_test
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"math"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -298,4 +300,146 @@ func pageXML(t *testing.T, data []byte) string {
 		}
 	}
 	return b.String()
+}
+
+// hatchSegments returns n parallel segments of slope 1 on the page (x -
+// y constant, a "\" hatch with y down) clipped to the box [x0, y0, w,
+// h], spaced evenly over the box's x - y range, each [[x, y], [x, y]]
+// rounded to read's two decimals, as the patent kit clips its hatch.
+func hatchSegments(n int, x0, y0, w, h float64) [][][]float64 {
+	r := func(v float64) float64 { return math.Round(v*100) / 100 }
+	var out [][][]float64
+	for i := range n {
+		k := x0 - (y0 + h) + (float64(i)+0.5)*(w+h)/float64(n)
+		var pts [][]float64
+		for _, x := range []float64{x0, x0 + w} {
+			if y := x - k; y >= y0 && y <= y0+h {
+				pts = append(pts, []float64{r(x), r(y)})
+			}
+		}
+		for _, y := range []float64{y0, y0 + h} {
+			if x := y + k; x > x0 && x < x0+w {
+				pts = append(pts, []float64{r(x), r(y)})
+			}
+		}
+		slices.SortFunc(pts, func(a, b []float64) int { return cmp.Compare(a[0], b[0]) })
+		out = append(out, [][]float64{pts[0], pts[len(pts)-1]})
+	}
+	return out
+}
+
+// TestMultiPathHatch checks the kit's hatch as one shape of 12
+// disjoint clipped segments (object.add paths) grouped with its
+// labelled outline rect: read shows the 12 paths exactly as written
+// and no points; the shape stores one Geometry section per path, IX 0
+// to 11, each NoFill 1 (open) with a RelMoveTo and one RelLineTo; its
+// line weight is its own; resizing the group to twice its width scales
+// every segment's x about the group's left; and a shape of several
+// paths carries text (its block the bounds of its paths).
+func TestMultiPathHatch(t *testing.T) {
+	segs := hatchSegments(12, 100, 100, 240, 140)
+	var paths []string
+	for _, s := range segs {
+		b, _ := json.Marshal(s)
+		paths = append(paths, `{"points":`+string(b)+`}`)
+	}
+	plan := `{"ops":[
+		{"op":"object.add","at":"page0","geom":"polyline","paths":[` + strings.Join(paths, ",") + `],"line":{"w":0.35},"html":"<p>12</p>","as":"hatch"},
+		{"op":"object.add","at":"page0","geom":"rect","box":[100,100,240,140],"html":"<p>Memory 106</p>","line":{"w":1.5},"fill":"none","text_block":{"background":"#FFFFFF"},"as":"box"},
+		{"op":"group.create","at":["$hatch","$box"],"as":"g"}]}`
+	out, _ := refusalOut(t, vsdxtest.Blank(t), plan)
+	o := readObj(t, out, "page0/s1")
+	var got []struct {
+		Points [][]float64 `json:"points"`
+		Closed bool        `json:"closed"`
+	}
+	if err := json.Unmarshal(o["paths"], &got); err != nil {
+		t.Fatalf("paths %s: %v", o["paths"], err)
+	}
+	if len(got) != 12 {
+		t.Fatalf("%d paths, want 12", len(got))
+	}
+	for i, p := range got {
+		if p.Closed || !slices.EqualFunc(p.Points, segs[i], slices.Equal[[]float64]) {
+			t.Errorf("path %d = %v closed %v, want %v open", i, p.Points, p.Closed, segs[i])
+		}
+	}
+	if _, ok := o["points"]; ok {
+		t.Error("a shape of several paths shows points")
+	}
+	if got := string(o["line"]); !strings.HasPrefix(got, `{"w":0.35,`) {
+		t.Errorf("line = %s, want w 0.35", got)
+	}
+	if got := string(o["html"]); got != `"<p>12</p>"` {
+		t.Errorf("html = %s, want the shape's own text", got)
+	}
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n := 0
+	for sec := range textSetShapeNode(t, data, 1).ElementsSeq() {
+		if name, _ := sec.Attr("N"); sec.Local() != vsd.ElemSection || name != vsd.SectionGeometry {
+			continue
+		}
+		if ix, _ := sec.Attr("IX"); ix != strconv.Itoa(n) {
+			t.Errorf("section %d has IX %q", n, ix)
+		}
+		var rows []string
+		noFill := ""
+		for c := range sec.ElementsSeq() {
+			switch c.Local() {
+			case vsd.ElemCell:
+				if name, _ := c.Attr("N"); name == "NoFill" {
+					noFill, _ = c.Attr("V")
+				}
+			case vsd.ElemRow:
+				typ, _ := c.Attr("T")
+				rows = append(rows, typ)
+			}
+		}
+		if noFill != "1" || !slices.Equal(rows, []string{"RelMoveTo", "RelLineTo"}) {
+			t.Errorf("section %d: NoFill %q rows %v, want 1 and RelMoveTo, RelLineTo", n, noFill, rows)
+		}
+		n++
+	}
+	if n != 12 {
+		t.Errorf("%d Geometry sections, want 12", n)
+	}
+	resized, _ := refusalOut(t, out, `{"ops":[{"op":"object.set","at":"page0/s3","box":[100,100,480,140]}]}`)
+	if err := json.Unmarshal(readObj(t, resized, "page0/s1")["paths"], &got); err != nil {
+		t.Fatal(err)
+	}
+	for i, p := range got {
+		for j, pt := range p.Points {
+			want := 100 + 2*(segs[i][j][0]-100)
+			if math.Abs(pt[0]-want) > 0.011 || math.Abs(pt[1]-segs[i][j][1]) > 0.011 {
+				t.Errorf("resized path %d point %d = %v, want x %.2f, y %.2f", i, j, pt, want, segs[i][j][1])
+			}
+		}
+	}
+}
+
+// TestMultiPathRules checks the plan faults of paths.
+func TestMultiPathRules(t *testing.T) {
+	two := `[{"points":[[0,0],[10,10]]},{"points":[[0,10],[10,0]]}]`
+	for _, c := range []struct{ op, code, path string }{
+		{`"geom":"polyline","paths":` + two + `,"points":[[0,0],[1,1]]`, "invalid_operation", "ops[0].paths"},
+		{`"geom":"polyline","paths":[{"points":[[0,0],[10,"x"]]}]`, "invalid_plan", "ops[0].paths[0].points[1][1]"},
+		{`"geom":"polyline","paths":[{"points":[[0,0],[10,10]]},{"points":[[5,5]]}]`, "invalid_operation", "ops[0].paths[1].points"},
+		{`"geom":"polyline","paths":` + two + `,"fill":{"hex":"#FF0000"}`, "invalid_operation", "ops[0].fill"},
+		{`"geom":"polyline","paths":` + two + `,"line":{"end":"triangle"}`, "invalid_operation", "ops[0].line"},
+		{`"geom":"polyline","paths":[]`, "invalid_plan", "ops[0].paths"},
+		{`"geom":"polyline","paths":[{"pts":[[0,0],[1,1]]}]`, "invalid_plan", "ops[0].paths[0].pts"},
+		{`"geom":"rect","box":[0,0,10,10],"paths":` + two, "invalid_operation", "ops[0].paths"},
+	} {
+		_, errs := ops.ParsePlan([]byte(`{"ops":[{"op":"object.add","at":"page0",` + c.op + `}]}`))
+		if len(errs) == 0 || errs[0].Code != c.code || errs[0].Path != c.path {
+			t.Errorf("%s: errs = %v, want %s at %s", c.op, errs, c.code, c.path)
+		}
+	}
+	// A closed path among open ones may be filled.
+	if _, errs := ops.ParsePlan([]byte(`{"ops":[{"op":"object.add","at":"page0","geom":"polyline","paths":[{"points":[[0,0],[10,0],[10,10]],"closed":true},{"points":[[0,20],[10,30]]}],"fill":{"hex":"#FF0000"}}]}`)); len(errs) != 0 {
+		t.Errorf("a filled closed path among open ones: %v", errs)
+	}
 }

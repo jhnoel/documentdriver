@@ -18,7 +18,7 @@ func paint(o *Object, r *inherit.Resolver, s *inherit.Shape) {
 	}
 	paintFill(o, r, s)
 	paintLine(o, r, s)
-	if o.Kind == Connector || ((o.Geom == path.Polyline || o.Geom == path.Curve) && !o.Closed) {
+	if o.Kind == Connector || ((o.Geom == path.Polyline || o.Geom == path.Curve) && !o.Closed && o.Paths == nil) {
 		paintLineEnds(o, r, s)
 	}
 	if o.Kind == Shape || o.Kind == Group {

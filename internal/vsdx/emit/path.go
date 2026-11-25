@@ -25,16 +25,16 @@ func checkPath(pts []geom.Pt, closed bool) error {
 	return nil
 }
 
-// writePathGeometry writes the Geometry section of a polyline or curve
-// in the form path.Parse recognises: NoFill 1 when open and 0 when
-// closed, NoLine, NoShow, NoSnap and NoQuickDrag 0, a RelMoveTo at the
+// writePathGeometry writes Geometry section ix of a polyline or curve
+// (one section per path) in the form path.Parse recognises: NoFill 1
+// when open and 0 when closed, NoLine, NoShow, NoSnap and NoQuickDrag 0, a RelMoveTo at the
 // first point, then for a polyline one RelLineTo per further point and
 // for a curve one RelCubBezTo per path.CurveSegs segment (X, Y the end,
 // A, B the first control point, C, D the second: MS-VSDX RelCubBezTo,
 // visio.xsd line 3767); a closed path ends with a row back at the
 // first point. Every cell is a plain value of relative units.
-func writePathGeometry(b *strings.Builder, kind string, pts []geom.Pt, closed bool) {
-	b.WriteString("<Section N='Geometry' IX='0'>")
+func writePathGeometry(b *strings.Builder, kind string, pts []geom.Pt, closed bool, ix int) {
+	b.WriteString("<Section N='Geometry' IX='" + strconv.Itoa(ix) + "'>")
 	if closed {
 		writeCell(b, "NoFill", zero)
 	} else {
@@ -45,19 +45,19 @@ func writePathGeometry(b *strings.Builder, kind string, pts []geom.Pt, closed bo
 	writeCell(b, "NoSnap", zero)
 	writeCell(b, "NoQuickDrag", zero)
 	writeRelRow(b, "RelMoveTo", 1, pts[0], nil)
-	ix := 2
+	row := 2
 	if kind == path.Curve {
 		for _, s := range path.CurveSegs(pts, closed) {
-			writeRelRow(b, "RelCubBezTo", ix, s.End, &s)
-			ix++
+			writeRelRow(b, "RelCubBezTo", row, s.End, &s)
+			row++
 		}
 	} else {
 		for _, p := range pts[1:] {
-			writeRelRow(b, "RelLineTo", ix, p, nil)
-			ix++
+			writeRelRow(b, "RelLineTo", row, p, nil)
+			row++
 		}
 		if closed {
-			writeRelRow(b, "RelLineTo", ix, pts[0], nil)
+			writeRelRow(b, "RelLineTo", row, pts[0], nil)
 		}
 	}
 	b.WriteString("</Section>")

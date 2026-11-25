@@ -1608,3 +1608,36 @@ rotated, flipped rectangles and connectors: grouped and ungrouped,
 every member shows what it showed; identity resize writes nothing) and
 the group page of `TestRenderSVGMatchesLibreOffice`. Each was seen to
 fail with its code removed.
+
+## 20. Several paths in one shape (2026-11-25, owner sign-off pending)
+
+Patent hatching is N parallel lines clipped to a box with one line
+style. One path per shape left the kit two bad options: N connectors,
+or one polyline joining the lines along the outline (the joins show
+once the outline is dashed). Visio draws such a shape with several
+Geometry sections (32 shapes of the corpus have more than one, most of
+them master instances whose sections come from the master).
+
+`object.add` takes `paths: [{points, closed}, ...]` in place of
+`points` and `closed`; `emit` writes one section per path, IX 0 to
+n-1, each in the existing form with its own NoFill; `path.Parse` reads
+such sections back only when they are in that order and all of one
+kind (polyline or curve), and `read` shows `paths` for two or more.
+The drawing view already walked every Geometry section, so both
+renderers needed nothing. Arrowheads are refused on several paths
+(which path's ends would carry them is not defined); a fill needs one
+closed path.
+
+The read model's Object gained the paths as a pointer and three small
+fields were packed together: a plain slice field took Object from 512
+to 536 bytes, into the 576-byte size class, and BuildPage(30000)'s
+peak from 118.7 MB to 121.5 MB against a 120 MB budget; at 512 bytes
+it is 118.7 MB again.
+
+Tests: `TestMultiPathHatch` (12 clipped segments in one shape grouped
+with a labelled outline: read shows the 12 paths exactly, 12 sections
+IX 0 to 11 each NoFill 1 with RelMoveTo and RelLineTo, the line weight
+kept, text carried, a 2x group resize scales every segment),
+`TestMultiPathRules`, the help rule rows, and the hatch page of the
+LibreOffice comparison; each was seen to fail with its code removed
+(path.Parse refusing a second section; emit writing one).

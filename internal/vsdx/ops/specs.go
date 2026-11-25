@@ -49,6 +49,7 @@ type ObjectAddSpec struct {
 	Geom      string         `json:"geom,omitempty" plan:"optional" doc:"rect or ellipse (placed by box or pin), or polyline or curve (placed by points), for a master-less shape."`
 	Points    [][]float64    `json:"points,omitempty" plan:"optional" doc:"A polyline's or curve's points [[x, y], ...] in view points (or the plan's units), y down, as read shows points; the shape's box is their bounds. A curve passes through every point (a Catmull-Rom spline stored as RelCubBezTo rows)."`
 	Closed    bool           `json:"closed,omitempty" plan:"optional" doc:"true: the polyline or curve returns to its first point and may be filled; absent or false: an open path, which takes line begin and end arrowheads, as read shows closed."`
+	Paths     []PathSpec     `json:"paths,omitempty" plan:"optional" doc:"Several paths of one polyline or curve, in place of points and closed: [{points, closed}, ...], each as points and closed are, as read shows paths (one Geometry section each, e.g. a hatch of disjoint lines with one line style). The shape's box is the bounds of every path; it may be filled when one path is closed, and takes no arrowheads."`
 	Box       []float64      `json:"box,omitempty" plan:"optional" doc:"[x, y, width, height] in view points, y down, as read shows box; for a 2-D master or geom shape."`
 	Pin       []float64      `json:"pin,omitempty" plan:"optional" doc:"[x, y], the centre in view points (input only: read shows box); for a 2-D master or geom shape. Without box, a geom shape is 72 x 72 pt and a master instance takes the master's size."`
 	Name      string         `json:"name,omitempty" plan:"optional" doc:"The shape's name, as read shows name."`
@@ -99,6 +100,17 @@ type PaintSpec struct {
 	BgNone  bool
 	BgHex   string
 }
+
+// PathSpec is one path of a polyline or curve of several paths: its
+// points [[x, y], ...] in the plan's units, y down, and whether it is
+// closed.
+type PathSpec struct {
+	Points [][]float64
+	Closed bool
+}
+
+// HelpType names PathSpec's plan type in help.
+func (PathSpec) HelpType() string { return "object" }
 
 // HelpType names PaintSpec's plan type in help.
 func (PaintSpec) HelpType() string { return `object|"none"` }
@@ -226,7 +238,7 @@ var objectAddRules = []string{
 	"picture needs image",
 	"geom must be rect, ellipse, polyline or curve",
 	pathAddRules[0], pathAddRules[1], pathAddRules[2], pathAddRules[3],
-	pathAddRules[4], pathAddRules[5], pathAddRules[6],
+	pathAddRules[4], pathAddRules[5], pathAddRules[6], pathAddRules[7], pathAddRules[8],
 	"master must be a master address or a master name",
 	"object.add takes master or geom, not both",
 	"connector takes no master",

@@ -1,6 +1,8 @@
 package path
 
 import (
+	"strconv"
+
 	"github.com/jhnoel/documentdriver/internal/geom"
 	"github.com/jhnoel/documentdriver/internal/ooxml/tree"
 	"github.com/jhnoel/documentdriver/internal/vsdx/vsd"
@@ -10,8 +12,19 @@ import (
 // Kind (Rect, Ellipse, Polyline, Curve), whether a path is Closed, and
 // a path's Points in relative units (fractions of Width and Height,
 // y up from the shape's lower-left corner), without the closing repeat.
+// A polyline or curve may have several paths, one Geometry section
+// each: Paths holds them all in section order, and Closed and Points
+// are the first.
 type Geometry struct {
 	Kind   string
+	Closed bool
+	Points []geom.Pt
+	Paths  []Subpath
+}
+
+// Subpath is one path of a polyline or curve: whether it is closed and
+// its points in relative units, without the closing repeat.
+type Subpath struct {
 	Closed bool
 	Points []geom.Pt
 }
@@ -25,8 +38,10 @@ var ellipseFormulas = map[string]string{
 
 // Parse recognises the geometry a shape element stores locally, and
 // reports false when it is not exactly one of the forms vsdx writes:
-// one Geometry section, not deleted, NoLine and NoShow 0 or absent, and
-// rows of one form with plain numeric cells (no formulas):
+// a Geometry section, not deleted, NoLine and NoShow 0 or absent, and
+// rows of one form with plain numeric cells (no formulas), or, for a
+// polyline or curve, several such sections, IX 0, 1, 2... in order,
+// each one path of the same kind (a hatch of disjoint lines):
 //   - Rect: NoFill 0, RelMoveTo (0,0), RelLineTo (1,0) (1,1) (0,1) (0,0);
 //   - Ellipse: NoFill 0, one Ellipse row with emit's Width*/Height*
 //     formulas;
@@ -43,22 +58,44 @@ func Parse(shape *tree.Node) (Geometry, bool) {
 	if shape == nil {
 		return Geometry{}, false
 	}
-	var section *tree.Node
+	var out Geometry
+	n := 0
 	for c := range shape.ElementsSeq() {
 		if c.Local() != vsd.ElemSection {
 			continue
 		}
-		if n, _ := c.Attr("N"); n != vsd.SectionGeometry {
+		if name, _ := c.Attr("N"); name != vsd.SectionGeometry {
 			continue
 		}
-		if section != nil {
+		// Sections are stored in IX order, 0, 1, 2..., as emit writes
+		// them.
+		if ix, _ := c.Attr("IX"); ix != strconv.Itoa(n) {
 			return Geometry{}, false
 		}
-		section = c
+		g, ok := parseSection(c)
+		if !ok {
+			return Geometry{}, false
+		}
+		switch {
+		case n == 0:
+			out = g
+		case out.Kind != g.Kind || (g.Kind != Polyline && g.Kind != Curve):
+			// Several sections are one polyline or curve's paths.
+			return Geometry{}, false
+		}
+		if g.Kind == Polyline || g.Kind == Curve {
+			out.Paths = append(out.Paths, Subpath{Closed: g.Closed, Points: g.Points})
+		}
+		n++
 	}
-	if section == nil {
+	if n == 0 {
 		return Geometry{}, false
 	}
+	return out, true
+}
+
+// parseSection recognises one Geometry section (Parse's forms).
+func parseSection(section *tree.Node) (Geometry, bool) {
 	if v, ok := section.Attr("Del"); ok && v == "1" {
 		return Geometry{}, false
 	}

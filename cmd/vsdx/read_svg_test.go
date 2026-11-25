@@ -70,6 +70,16 @@ const groupPlan = `{"ops":[
 {"op":"object.set","at":"$g","box":[40,40,520,700]}
 ]}`
 
+// hatchPlan is the multi-path page: one shape of 12 disjoint hatch
+// segments clipped to a box (object.add paths, one Geometry section
+// each), grouped with its labelled outline rect and resized.
+const hatchPlan = `{"ops":[
+{"op":"object.add","at":"page0","geom":"polyline","paths":[{"points":[[100,224.17],[115.83,240]]},{"points":[[100,192.5],[147.5,240]]},{"points":[[100,160.83],[179.17,240]]},{"points":[[100,129.17],[210.83,240]]},{"points":[[102.5,100],[242.5,240]]},{"points":[[134.17,100],[274.17,240]]},{"points":[[165.83,100],[305.83,240]]},{"points":[[197.5,100],[337.5,240]]},{"points":[[229.17,100],[340,210.83]]},{"points":[[260.83,100],[340,179.17]]},{"points":[[292.5,100],[340,147.5]]},{"points":[[324.17,100],[340,115.83]]}],"line":{"w":0.35},"as":"hatch"},
+{"op":"object.add","at":"page0","geom":"rect","box":[100,100,240,140],"html":"<p>Memory 106</p>","line":{"w":1.5},"fill":"none","text_block":{"background":"#FFFFFF"},"as":"box"},
+{"op":"group.create","at":["$hatch","$box"],"as":"g"},
+{"op":"object.set","at":"$g","box":[40,40,520,520]}
+]}`
+
 // svgPage is one of the drawing test's pages: its plan, the fill
 // pattern of each patterned object, the arrowheads it draws, the
 // words its text shows and, by object, the number of dashes its line
@@ -83,9 +93,10 @@ type svgPage struct {
 	dashes   map[string]int
 }
 
-// svgPages returns the drawing test's five pages: the render test's
+// svgPages returns the drawing test's six pages: the render test's
 // plan (every named pattern and the four test shapes), the figure, the
-// text block page, the text placement page and the group page.
+// text block page, the text placement page, the group page and the
+// multi-path hatch page.
 func svgPages() []svgPage {
 	_, _, bell, sine, arc := renderPathsInputs()
 	paths := svgPage{name: "paths", plan: renderPathsPlan(bell, sine, arc), patterns: map[string]string{}, heads: 3}
@@ -109,7 +120,8 @@ func svgPages() []svgPage {
 		words:    []string{"Region", "300", "signal", "310", "312", "turned", "314"},
 	}
 	group := svgPage{name: "group", plan: groupPlan, words: []string{"Memory", "106"}}
-	return []svgPage{paths, fig, tb, place, group}
+	hatch := svgPage{name: "hatch", plan: hatchPlan, words: []string{"Memory", "106"}}
+	return []svgPage{paths, fig, tb, place, group, hatch}
 }
 
 // TestReadSVGTextPlacement checks where the drawing view puts placed

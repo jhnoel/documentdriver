@@ -177,6 +177,7 @@ type objectJSON struct {
 	Geom      string            `json:"geom,omitempty"`
 	Closed    bool              `json:"closed,omitempty"`
 	Points    [][]json.Number   `json:"points,omitempty"`
+	Paths     []pathJSON        `json:"paths,omitempty"`
 	From      []json.Number     `json:"from,omitempty"`
 	To        []json.Number     `json:"to,omitempty"`
 	FromGlue  string            `json:"from_glue,omitempty"`
@@ -331,6 +332,13 @@ func shadowJSONOf(s *model.Shadow, in bool) *shadowJSON {
 	return j
 }
 
+// pathJSON is one path of a polyline or curve of several paths, as
+// read shows it in paths: its points, and closed when it is closed.
+type pathJSON struct {
+	Points [][]json.Number `json:"points"`
+	Closed bool            `json:"closed,omitempty"`
+}
+
 // textBlockJSON is an object's text block as read shows it.
 type textBlockJSON struct {
 	Box        []json.Number `json:"box,omitempty"`
@@ -422,6 +430,17 @@ func objectJSONOf(obj *model.Object, in, full bool) objectJSON {
 	j.Geom, j.Closed = obj.Geom, obj.Closed
 	for i := range obj.Points {
 		j.Points = append(j.Points, pointJSON(&obj.Points[i], in))
+	}
+	var multi []model.PathInfo
+	if obj.Paths != nil {
+		multi = *obj.Paths
+	}
+	for _, sp := range multi {
+		pj := pathJSON{Closed: sp.Closed}
+		for i := range sp.Points {
+			pj.Points = append(pj.Points, pointJSON(&sp.Points[i], in))
+		}
+		j.Paths = append(j.Paths, pj)
 	}
 	j.From, j.To = pointJSON(obj.From, in), pointJSON(obj.To, in)
 	for _, g := range obj.Glued {

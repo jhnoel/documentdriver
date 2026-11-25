@@ -422,6 +422,7 @@ func (s *ObjectAddSpec) DecodePlan(v *cli.Value, path string, d *cli.Decoder) {
 		{Name: "pin", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Pin) }},
 		{Name: "points", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Points) }},
 		{Name: "closed", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Closed) }},
+		{Name: "paths", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { s.Paths = decodePaths(mv, fp, dd) }},
 		{Name: "name", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &s.Name) }},
 		{Name: "html", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) {
 			var str string
@@ -758,4 +759,25 @@ func decodeTextBg(v *cli.Value, path string, d *cli.Decoder) *TextBgSpec {
 		d.Fail(cli.CodeInvalidPlan, path, v, "expected \"none\", #RRGGBB or an object, found %s", v.Kind)
 		return nil
 	}
+}
+
+// decodePaths decodes object.add's paths: a non-empty array of
+// objects {points, closed}, points required. A value of another form,
+// an unknown member and a missing points are invalid_plan faults; the
+// points themselves are checked by the path rules.
+func decodePaths(v *cli.Value, path string, d *cli.Decoder) []PathSpec {
+	if v.Kind != cli.Array || len(v.Items) == 0 {
+		d.Fail(cli.CodeInvalidPlan, path, v, "expected a non-empty array of {points, closed}")
+		return nil
+	}
+	out := make([]PathSpec, len(v.Items))
+	for i, item := range v.Items {
+		ip := cli.Index(path, i)
+		ps := &out[i]
+		decodeFields(item, ip, d, []planField{
+			{Name: "points", Required: true, Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &ps.Points) }},
+			{Name: "closed", Decode: func(mv *cli.Value, fp string, dd *cli.Decoder) { dd.Value(mv, fp, &ps.Closed) }},
+		})
+	}
+	return out
 }

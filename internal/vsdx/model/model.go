@@ -54,7 +54,6 @@ type Page struct {
 // Object is one shape.
 type Object struct {
 	ID          string // address, page0/s5 or page0/s5~2
-	ShapeID     uint32
 	Kind        Kind
 	Type        string // the Type attribute as stored
 	Name, NameU string
@@ -75,9 +74,18 @@ type Object struct {
 	// (path.Parse on a master-less shape): polyline or curve; ""
 	// otherwise. Points (view points, y down) and Closed are
 	// a polyline's or curve's path.
-	Geom   string
-	Points []geom.Pt
-	Closed bool
+	Geom    string
+	Points  []geom.Pt
+	Closed  bool
+	ShapeID uint32
+	HasText bool
+	// Paths, for a polyline or curve of several paths (one Geometry
+	// section each), are all of them in section order; Points and
+	// Closed are then unset. A pointer, as most objects have none
+	// (the Object stays in the 512-byte size class, which
+	// TestBuildPagePeakMemory30000's budget measures). ShapeID,
+	// Closed and HasText sit together for the same reason.
+	Paths  *[]PathInfo
 	Line   *Line
 	Shadow *Shadow
 	// TextBlock is the object's effective text block cells, set on a
@@ -87,7 +95,6 @@ type Object struct {
 	TextBlock *TextBlockInfo
 	Picture   *PictureInfo // kind picture: its image, media facts and crop
 	HTML      string
-	HasText   bool
 	Text      string // plain text, as find matches it
 	Props     []Prop
 	Layers    []string // layer addresses
@@ -146,6 +153,13 @@ type Shadow struct {
 	HasColor, HasTrans, HasOffset bool
 	Transparency                  float64
 	Offset                        [2]float64
+}
+
+// PathInfo is one path of a polyline or curve of several paths: its
+// points in view points, y down, and whether it is closed.
+type PathInfo struct {
+	Points []geom.Pt
+	Closed bool
 }
 
 // TextBlockInfo is an object's effective text block: VAlign "top",
