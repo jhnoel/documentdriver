@@ -163,7 +163,7 @@ func TestParseErrors(t *testing.T) {
 // TestParseRoundTrip checks the chunk V2 property over generated
 // values: Parse(ShapeID(PageID(p, pd), s, d)) returns p, pd, s, d.
 func TestParseRoundTrip(t *testing.T) {
-	for i := 0; i < 256; i++ {
+	for i := range 256 {
 		p := uint32(i * 7919 % 100003)
 		pd := 1 + i%5
 		s := uint32(i * 104729 % 100003)

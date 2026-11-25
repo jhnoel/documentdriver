@@ -178,8 +178,7 @@ func Run(path string, p *ops.Plan, opt Options) (*plan.Result, error) {
 		return &res, nil
 	})
 	if gateErr != nil {
-		var gf *gateFailure
-		if errors.As(gateErr, &gf) {
+		if gf, ok := errors.AsType[*gateFailure](gateErr); ok {
 			return nil, invalidOutput(gf.introduced, firstOp)
 		}
 		return nil, invalidOutput(nil, firstOp)
@@ -260,12 +259,10 @@ func begin(path string, opt Options) (*plan.Tx, *edit.Workspace, error) {
 
 // openRefusal maps a failure to open the package or its drawing.
 func openRefusal(err error) error {
-	var ce *cli.Error
-	if errors.As(err, &ce) {
+	if ce, ok := errors.AsType[*cli.Error](err); ok {
 		return ce
 	}
-	var pe *os.PathError
-	if errors.As(err, &pe) {
+	if _, ok := errors.AsType[*os.PathError](err); ok {
 		return cli.Errorf(cli.CodeIO, "", "read the drawing: %v", err)
 	}
 	if errors.Is(err, opc.ErrLimit) {
@@ -282,8 +279,7 @@ func unwrapRun(err error) error { return err }
 // not_found or unreadable_target at ops[i]; anything else is internal.
 func opRefusal(i int, err error) error {
 	path := cli.Index("ops", i)
-	var ce *cli.Error
-	if errors.As(err, &ce) {
+	if ce, ok := errors.AsType[*cli.Error](err); ok {
 		full := path
 		if ce.Path != "" {
 			full = cli.Join(path, ce.Path)
@@ -303,8 +299,7 @@ func opRefusal(i int, err error) error {
 		e.Hint = "addresses are as `vsdx read` shows them, such as page0/s1"
 		return e
 	}
-	var u *edit.Unreadable
-	if errors.As(err, &u) {
+	if u, ok := errors.AsType[*edit.Unreadable](err); ok {
 		e := cli.Errorf(cli.CodeUnreadableTarget, path, "%s cannot be edited safely", u.Target)
 		e.Detail = u.Detail
 		return e
@@ -317,8 +312,7 @@ func commitError(err error) error {
 	if errors.Is(err, opc.ErrChangedOnDisk) {
 		return cli.Errorf(cli.CodeIO, "", "the drawing changed on disk while the plan ran; nothing was written")
 	}
-	var pe *os.PathError
-	if errors.As(err, &pe) {
+	if _, ok := errors.AsType[*os.PathError](err); ok {
 		return cli.Errorf(cli.CodeIO, "", "write the drawing: %v", err)
 	}
 	return err
@@ -499,9 +493,7 @@ func finishUnits(res *plan.Result, input, sealed []byte, units, base string, cha
 		if outErr == nil {
 			outParts[pageAddr] = out
 			outObjects[pageAddr] = out.objects
-			for id, raw := range out.props {
-				outProps[id] = raw
-			}
+			maps.Copy(outProps, out.props)
 			outHazards = append(outHazards, out.hazards...)
 		}
 		in, inErr := readPageParts(input, base, pageAddr, units)

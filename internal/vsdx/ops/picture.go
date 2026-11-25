@@ -106,8 +106,7 @@ func CheckImages(p *Plan) cli.Errors {
 		}
 		in, n, err := loadImage(*img)
 		if err != nil {
-			var ce *cli.Error
-			if errors.As(err, &ce) {
+			if ce, ok := errors.AsType[*cli.Error](err); ok {
 				ce.Path = cli.Join(at, "image")
 				errs = append(errs, ce)
 			}

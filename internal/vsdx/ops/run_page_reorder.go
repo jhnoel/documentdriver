@@ -38,8 +38,7 @@ func (s *PageReorderSpec) Run(ws *edit.Workspace, aliases map[string]string, _ s
 			}
 			return "", nil, nil, "", cli.Errorf(cli.CodeNotFound, field, "%s", err)
 		}
-		var un *edit.Unreadable
-		if errors.As(err, &un) {
+		if _, ok := errors.AsType[*edit.Unreadable](err); ok {
 			return "", nil, nil, "", err
 		}
 		return "", nil, nil, "", cli.Errorf(cli.CodeOperationFailed, "", "%s", strings.TrimPrefix(err.Error(), "vsdx edit: "))

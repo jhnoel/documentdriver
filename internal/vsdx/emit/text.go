@@ -284,8 +284,8 @@ func pointsInches(ix int, cell, value string) (string, error) {
 // lineHeightInches converts a line height (a percentage such as
 // "120%", stored as the negative multiple -1.2, or points) to inches.
 func lineHeightInches(ix int, value string) (string, error) {
-	if strings.HasSuffix(value, "%") {
-		percent, err := strconv.ParseFloat(strings.TrimSuffix(value, "%"), 64)
+	if before, ok := strings.CutSuffix(value, "%"); ok {
+		percent, err := strconv.ParseFloat(before, 64)
 		if err != nil || math.IsNaN(percent) || math.IsInf(percent, 0) {
 			return "", fmt.Errorf("vsdx emit: TextXML: row %d cell SpLine: %q is not a percentage or points", ix, value)
 		}

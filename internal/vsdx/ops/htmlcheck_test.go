@@ -70,7 +70,7 @@ func TestCheckHTML(t *testing.T) {
 	plan := &ops.Plan{Ops: []ops.Spec{
 		&ops.TextSetSpec{At: "page0/s1", HTML: `<p><a href="x">a</a></p>`},
 		&ops.PageRenameSpec{At: "page0", Name: "X"},
-		&ops.ObjectAddSpec{At: "page0", Geom: "rect", Box: []float64{0, 0, 10, 10}, HTML: ptr(`<p bogus="1">x</p>`)},
+		&ops.ObjectAddSpec{At: "page0", Geom: "rect", Box: []float64{0, 0, 10, 10}, HTML: new(`<p bogus="1">x</p>`)},
 		&ops.ObjectAddSpec{At: "page0", Geom: "rect", Box: []float64{0, 0, 10, 10}},
 		&ops.TextSetSpec{At: "page0/s1", HTML: `<p><b>Hello</b></p>`},
 	}}

@@ -28,10 +28,7 @@ func formulaRefusal(address, field string, cells []formulaCell) error {
 		names[i] = c.name
 	}
 	e := cli.Errorf(cli.CodeOperationFailed, field, "%s %s is bound to a formula vsdx does not evaluate", address, strings.Join(names, ", "))
-	limit := len(cells)
-	if limit > 10 {
-		limit = 10
-	}
+	limit := min(len(cells), 10)
 	parts := make([]string, limit)
 	for i := range parts {
 		parts[i] = cells[i].name + " F=" + cells[i].formula //nolint:gosec // G602: limit is min(len(cells), 10), so i is in range

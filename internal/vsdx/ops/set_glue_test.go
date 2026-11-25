@@ -96,9 +96,6 @@ func glueShapeXML(t *testing.T, path, addr string) string {
 	return string(raw)
 }
 
-// glueStr returns a pointer to s.
-func glueStr(s string) *string { return &s }
-
 // gluePageXML returns the bytes of the output's page1.xml part.
 func gluePageXML(t *testing.T, path string) string {
 	t.Helper()
@@ -152,7 +149,7 @@ func glueRun(t *testing.T, spec *ObjectSetSpec, aliases map[string]string) (out 
 // operation_failed.
 func TestSetGlueRows(t *testing.T) {
 	t.Run("s4-to-glue-s2-2", func(t *testing.T) {
-		out, changed, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("s2:2")}, nil)
+		out, changed, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", ToGlue: new("s2:2")}, nil)
 		if err != nil {
 			t.Fatalf("setEnds: %v", err)
 		}
@@ -187,7 +184,7 @@ func TestSetGlueRows(t *testing.T) {
 		}
 	})
 	t.Run("s3-from-glue-none", func(t *testing.T) {
-		out, changed, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s3", FromGlue: glueStr("none")}, nil)
+		out, changed, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s3", FromGlue: new("none")}, nil)
 		if err != nil {
 			t.Fatalf("setEnds: %v", err)
 		}
@@ -217,7 +214,7 @@ func TestSetGlueRows(t *testing.T) {
 		}
 	})
 	t.Run("whole-shape-on-master-less", func(t *testing.T) {
-		_, _, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("s2")}, nil)
+		_, _, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", ToGlue: new("s2")}, nil)
 		var ce *cli.Error
 		if !errors.As(err, &ce) {
 			t.Fatalf("whole-shape glue: error %v, want *cli.Error", err)
@@ -238,7 +235,7 @@ func TestSetGlueRows(t *testing.T) {
 // itself stores no end formula, so writing its existing glue
 // once is a real change, not an identity.)
 func TestSetGlueIdentity(t *testing.T) {
-	spec := &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("s2:2")}
+	spec := &ObjectSetSpec{At: "page0/s4", ToGlue: new("s2:2")}
 	src := vsdxtest.Fixture(t, "v5-glue")
 	w, err := edit.Begin(src)
 	if err != nil {
@@ -330,7 +327,7 @@ func TestSetGlueUnitsIn(t *testing.T) {
 // TestSetGlueAlias checks a $name glue target: an earlier alias
 // names s2, and to_glue "$a:2" glues as s2:2 does.
 func TestSetGlueAlias(t *testing.T) {
-	out, _, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("$a:2")}, map[string]string{"a": "page0/s2"})
+	out, _, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", ToGlue: new("$a:2")}, map[string]string{"a": "page0/s2"})
 	if err != nil {
 		t.Fatalf("setEnds: %v", err)
 	}
@@ -352,8 +349,8 @@ func TestSetGlueRefusals(t *testing.T) {
 		code string
 		path string
 	}{
-		{"missing-target", &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("s99:1")}, cli.CodeNotFound, "to_glue"},
-		{"missing-point", &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("s2:9")}, cli.CodeNotFound, "to_glue"},
+		{"missing-target", &ObjectSetSpec{At: "page0/s4", ToGlue: new("s99:1")}, cli.CodeNotFound, "to_glue"},
+		{"missing-point", &ObjectSetSpec{At: "page0/s4", ToGlue: new("s2:9")}, cli.CodeNotFound, "to_glue"},
 		{"not-1d", &ObjectSetSpec{At: "page0/s1", From: []float64{0, 0}}, cli.CodeOperationFailed, "at"},
 		{"missing-shape", &ObjectSetSpec{At: "page0/s99", To: []float64{0, 0}}, cli.CodeNotFound, "at"},
 	} {
@@ -384,7 +381,7 @@ func TestSetGlueRefusals(t *testing.T) {
 		if err := w.SetCells("page0/s4", []edit.Cell{{N: vsd.CellEndX, V: "7", F: "GUARD(7)"}}); err != nil {
 			t.Fatalf("SetCells: %v", err)
 		}
-		_, _, err = setEnds(w, &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("none")}, nil, "pt")
+		_, _, err = setEnds(w, &ObjectSetSpec{At: "page0/s4", ToGlue: new("none")}, nil, "pt")
 		var ce *cli.Error
 		if !errors.As(err, &ce) {
 			t.Fatalf("setEnds: error %v, want *cli.Error", err)
@@ -400,7 +397,7 @@ func TestSetGlueRefusals(t *testing.T) {
 		}
 	})
 	t.Run("from-and-glue", func(t *testing.T) {
-		out, changed, stale, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", From: []float64{0, 0}, FromGlue: glueStr("s2:1")}, nil)
+		out, changed, stale, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", From: []float64{0, 0}, FromGlue: new("s2:1")}, nil)
 		if err != nil {
 			t.Fatalf("setEnds: %v", err)
 		}
@@ -485,7 +482,7 @@ func TestSetGlueUntargeted(t *testing.T) {
 		t.Fatalf("integrity input: %v", err)
 	}
 	inPkg.Close()
-	out, _, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", ToGlue: glueStr("s2:2")}, nil)
+	out, _, _, err := glueRun(t, &ObjectSetSpec{At: "page0/s4", ToGlue: new("s2:2")}, nil)
 	if err != nil {
 		t.Fatalf("setEnds: %v", err)
 	}

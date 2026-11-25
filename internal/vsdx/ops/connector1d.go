@@ -338,8 +338,8 @@ func currentGlue(root *tree.Node, id uint32, begin bool) (target uint32, point i
 		if toCell == vsd.ToCellPin {
 			return toID, 0, true, true
 		}
-		if strings.HasPrefix(toCell, vsd.ToCellConnectionPfx) {
-			if n, err := strconv.Atoi(strings.TrimPrefix(toCell, vsd.ToCellConnectionPfx)); err == nil {
+		if after, ok0 := strings.CutPrefix(toCell, vsd.ToCellConnectionPfx); ok0 {
+			if n, err := strconv.Atoi(after); err == nil {
 				return toID, n, false, true
 			}
 		}

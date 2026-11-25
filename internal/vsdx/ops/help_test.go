@@ -51,9 +51,6 @@ func TestHelpRegistryComplete(t *testing.T) {
 	}
 }
 
-// strPtr returns a pointer to s.
-func strPtr(s string) *string { return &s }
-
 // helpRuleCases derive the rules list from the check methods'
 // messages: each case is a spec that breaks exactly that check, and
 // want is the message checkSpec returns for it. The html cases are
@@ -108,13 +105,13 @@ func helpRuleCases() []struct {
 		{"object.add", &ObjectAddSpec{At: "page0", Kind: "connector", From: pt}, "connector needs to or to_glue"},
 		{"object.add", &ObjectAddSpec{At: "page0", Kind: "connector", FromGlue: "bogus", To: pt2}, "from_glue must name a shape or $name, with an optional point"},
 		{"object.add", &ObjectAddSpec{At: "page0", Kind: "connector", From: pt, ToGlue: "bogus"}, "to_glue must name a shape or $name, with an optional point"},
-		{"object.add", &ObjectAddSpec{At: "page0", Geom: "rect", Box: box, HTML: strPtr("<bogus>x</bogus>")}, ""},
+		{"object.add", &ObjectAddSpec{At: "page0", Geom: "rect", Box: box, HTML: new("<bogus>x</bogus>")}, ""},
 		{"object.set", &ObjectSetSpec{At: "x", Box: box}, "at must be a shape address or $name"},
 		{"object.set", &ObjectSetSpec{At: "page0/s1", Box: []float64{0, 0, 0, 10}}, "box must be four numbers with positive width and height"},
 		{"object.set", &ObjectSetSpec{At: "page0/s1", Box: box, From: []float64{0}}, "from must be two numbers"},
 		{"object.set", &ObjectSetSpec{At: "page0/s1", Box: box, From: pt, To: []float64{0}}, "to must be two numbers"},
-		{"object.set", &ObjectSetSpec{At: "page0/s1", Box: box, FromGlue: strPtr("bogus")}, "from_glue must name a shape or $name, with an optional point, or none"},
-		{"object.set", &ObjectSetSpec{At: "page0/s1", Box: box, ToGlue: strPtr("bogus")}, "to_glue must name a shape or $name, with an optional point, or none"},
+		{"object.set", &ObjectSetSpec{At: "page0/s1", Box: box, FromGlue: new("bogus")}, "from_glue must name a shape or $name, with an optional point, or none"},
+		{"object.set", &ObjectSetSpec{At: "page0/s1", Box: box, ToGlue: new("bogus")}, "to_glue must name a shape or $name, with an optional point, or none"},
 		{"object.set", &ObjectSetSpec{At: "page0/s1"}, "object.set needs a field to set"},
 		{"text.set", &TextSetSpec{At: "x", HTML: "<p>x</p>"}, "at must be a shape address or $name"},
 		{"text.set", &TextSetSpec{At: "page0/s1", HTML: "<p>x</p>", Delete: []string{"x"}}, "delete must list field addresses or $name"},

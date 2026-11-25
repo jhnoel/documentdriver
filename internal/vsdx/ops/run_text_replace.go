@@ -2,6 +2,7 @@ package ops
 
 import (
 	"errors"
+	"slices"
 	"sort"
 	"strings"
 
@@ -487,8 +488,8 @@ func applyReplace(body text.Body, matches []replaceMatch, with string) text.Body
 		copy(runs, para.Runs)
 		paras[i] = text.Para{PP: para.PP, Runs: runs}
 	}
-	for j := len(matches) - 1; j >= 0; j-- {
-		m := matches[j]
+	for _, m := range slices.Backward(matches) {
+
 		para := &paras[m.para]
 		start := &para.Runs[m.ks]
 		start.Text = start.Text[:m.os] + with + para.Runs[m.ke].Text[m.oe:]
@@ -514,8 +515,7 @@ func (st *replaceShape) write(ws *edit.Workspace, matches []replaceMatch, with s
 		if errors.Is(err, edit.ErrNotFound) {
 			return cli.Errorf(cli.CodeNotFound, "at", "%s", err)
 		}
-		var un *edit.Unreadable
-		if errors.As(err, &un) {
+		if _, ok := errors.AsType[*edit.Unreadable](err); ok {
 			return err
 		}
 		return cli.Errorf(cli.CodeOperationFailed, "at", "%s", err)

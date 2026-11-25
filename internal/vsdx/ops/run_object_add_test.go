@@ -372,8 +372,8 @@ func master1DCell(t *testing.T, xml, name string) (string, string) {
 				needle := key + "=" + string(q)
 				if i := strings.Index(rest, needle); i >= 0 {
 					v := rest[i+len(needle):]
-					if j := strings.IndexByte(v, q); j >= 0 {
-						return v[:j]
+					if before, _, ok := strings.Cut(v, string(q)); ok {
+						return before
 					}
 				}
 			}

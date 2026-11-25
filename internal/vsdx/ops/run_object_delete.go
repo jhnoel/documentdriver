@@ -51,8 +51,7 @@ func (s *ObjectDeleteSpec) Run(ws *edit.Workspace, aliases map[string]string, _ 
 		if errors.Is(err, edit.ErrNotFound) {
 			return "", nil, nil, "", cli.Errorf(cli.CodeNotFound, "at", "%s", err)
 		}
-		var un *edit.Unreadable
-		if errors.As(err, &un) {
+		if _, ok := errors.AsType[*edit.Unreadable](err); ok {
 			return "", nil, nil, "", err
 		}
 		return "", nil, nil, "", cli.Errorf(cli.CodeInternal, "", "%v", err)

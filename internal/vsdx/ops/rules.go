@@ -1,6 +1,7 @@
 package ops
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
@@ -29,12 +30,7 @@ func addressOK(s string, allowed ...vsd.Kind) bool {
 	if err != nil {
 		return false
 	}
-	for _, k := range allowed {
-		if k == a.Kind {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(allowed, a.Kind)
 }
 
 // masterOK reports whether s names a master: a master address, or a

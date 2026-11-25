@@ -244,7 +244,7 @@ func TestTextReplacePageSingle(t *testing.T) {
 func TestTextReplaceAmbiguous(t *testing.T) {
 	path := vsdxtest.Fixture(t, "v2-master")
 	built := filepath.Join(t.TempDir(), "built.vsdx")
-	add := &ops.Plan{Ops: []ops.Spec{&ops.ObjectAddSpec{At: "page0", Master: "master2", Pin: []float64{144, 126}, HTML: ptr("<p>Process</p>")}}}
+	add := &ops.Plan{Ops: []ops.Spec{&ops.ObjectAddSpec{At: "page0", Master: "master2", Pin: []float64{144, 126}, HTML: new("<p>Process</p>")}}}
 	if _, err := apply.Run(path, add, apply.Options{Out: built}); err != nil {
 		t.Fatalf("object.add second Process: %v", err)
 	}
@@ -268,9 +268,6 @@ func TestTextReplaceAmbiguous(t *testing.T) {
 		t.Error("an ambiguous text.replace changed the input")
 	}
 }
-
-// ptr returns a pointer to v (the test only).
-func ptr(v string) *string { return &v }
 
 // TestTextReplaceOccurrence checks occurrence: the second "Ha" of a
 // shape whose text was set to "Ha Ha" in the same plan is replaced,

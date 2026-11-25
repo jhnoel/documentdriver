@@ -809,8 +809,8 @@ func textSetLengthPoints(value string) string {
 // textSetLineHeightPoints returns a line height as textSetLineHeight
 // spells it, or the value itself when it is not a number.
 func textSetLineHeightPoints(value string) string {
-	if strings.HasSuffix(value, "%") {
-		n, err := strconv.ParseFloat(strings.TrimSuffix(value, "%"), 64)
+	if before, ok := strings.CutSuffix(value, "%"); ok {
+		n, err := strconv.ParseFloat(before, 64)
 		if err != nil {
 			return value
 		}

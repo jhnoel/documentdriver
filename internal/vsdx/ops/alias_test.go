@@ -130,7 +130,7 @@ func TestAliasSubAddress(t *testing.T) {
 		if err := w.Verify(); err != nil {
 			t.Fatalf("Verify: %v", err)
 		}
-		_, _, _, _, err = (&ops.ObjectSetSpec{At: "$p/s11", Name: strPtr("Renamed")}).Run(w, aliases, "pt", nil)
+		_, _, _, _, err = (&ops.ObjectSetSpec{At: "$p/s11", Name: new("Renamed")}).Run(w, aliases, "pt", nil)
 		if err != nil {
 			t.Errorf("object.set at $p/s11: %v", err)
 		}
@@ -185,6 +185,3 @@ func TestAliasSubAddress(t *testing.T) {
 		}
 	})
 }
-
-// strPtr returns s.
-func strPtr(s string) *string { return &s }

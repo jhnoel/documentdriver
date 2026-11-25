@@ -170,16 +170,16 @@ func TestConnectorRow2(t *testing.T) {
 func connectorCellClose(t *testing.T, xml, name string, want float64) bool {
 	t.Helper()
 	key := "N='" + name + "' V='"
-	idx := strings.Index(xml, key)
-	if idx < 0 {
+	_, after, ok := strings.Cut(xml, key)
+	if !ok {
 		return false
 	}
-	rest := xml[idx+len(key):]
-	end := strings.Index(rest, "'")
-	if end < 0 {
+	rest := after
+	before0, _, ok0 := strings.Cut(rest, "'")
+	if !ok0 {
 		return false
 	}
-	got, err := strconv.ParseFloat(rest[:end], 64)
+	got, err := strconv.ParseFloat(before0, 64)
 	if err != nil {
 		return false
 	}

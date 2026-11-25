@@ -277,8 +277,7 @@ func setEnds(ws *edit.Workspace, s *ObjectSetSpec, aliases map[string]string, un
 		if errors.Is(err, edit.ErrNotFound) {
 			return nil, "", cli.Errorf(cli.CodeNotFound, "at", "%s", err)
 		}
-		var un *edit.Unreadable
-		if errors.As(err, &un) {
+		if _, ok := errors.AsType[*edit.Unreadable](err); ok {
 			return nil, "", err
 		}
 		return nil, "", cli.Errorf(cli.CodeInternal, "", "%v", err)
